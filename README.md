@@ -48,8 +48,20 @@ La aplicación está configurada para desplegarse automáticamente en GitHub Pag
 3. En **Source**, selecciona **GitHub Actions**
 4. Guarda los cambios
 
+### Dominio Personalizado
+
+La aplicación está configurada para usar el dominio personalizado **chorroybuenas.com.mx**.
+
+**Configuración del dominio:**
+- El archivo `public/CNAME` contiene el dominio personalizado
+- El base path está configurado como `/` (raíz) para el dominio personalizado
+- Asegúrate de configurar los registros DNS en GoDaddy según las instrucciones de GitHub Pages
+
+**Nota:** Puede tardar hasta 24 horas para que los cambios de DNS se propaguen completamente.
+
 La aplicación estará disponible en:
-`https://cvegam02.github.io/chorroybuenas/`
+- **Dominio personalizado:** `https://chorroybuenas.com.mx`
+- **GitHub Pages (alternativo):** `https://cvegam02.github.io/chorroybuenas/`
 
 ### Despliegue manual
 
