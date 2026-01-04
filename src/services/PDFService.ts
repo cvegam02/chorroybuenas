@@ -308,7 +308,7 @@ export const generatePDF = async (boards: Board[]): Promise<Blob> => {
   }
   
   const pdfBytes = await pdfDoc.save();
-  return new Blob([pdfBytes], { type: 'application/pdf' });
+  return new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });
 };
 
 export const downloadPDF = (blob: Blob, filename: string = 'loteria-tableros.pdf') => {
@@ -362,6 +362,6 @@ export const generateCardPDF = async (card: Card): Promise<Blob> => {
   );
   
   const pdfBytes = await pdfDoc.save();
-  return new Blob([pdfBytes], { type: 'application/pdf' });
+  return new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });
 };
 

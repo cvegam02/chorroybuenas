@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Card, Board } from '../types';
+import { useState } from 'react';
+import { Board } from '../types';
 import { loadCards } from '../utils/storage';
 
 // Fisher-Yates shuffle algorithm

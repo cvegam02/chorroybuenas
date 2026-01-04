@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { compressImage } from '../../utils/imageUtils';
 import './ImageEditor.css';
 
 interface ImageEditorProps {

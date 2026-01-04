@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Board, Card } from '../../types';
-import { BoardCell } from './BoardCell';
 import { generateCardPDF, downloadPDF } from '../../services/PDFService';
 import './BoardThumbnail.css';
 

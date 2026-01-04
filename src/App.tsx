@@ -15,7 +15,7 @@ type AppStep = 'landing' | 'cards' | 'board-count' | 'preview' | 'confirmation';
 function App() {
   const [currentStep, setCurrentStep] = useState<AppStep>('landing');
   const [boards, setBoards] = useState<Board[]>([]);
-  const [boardCount, setBoardCount] = useState<number>(8);
+  const [, setBoardCount] = useState<number>(8);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const { generateBoards, isGenerating } = useBoard();
