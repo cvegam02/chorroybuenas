@@ -58,7 +58,7 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
       <div className="card-editor__header">
         <img 
           src={logoImage} 
-          alt="chorroybuenas.mx" 
+          alt="chorroybuenas.com.mx" 
           className="card-editor__logo"
         />
         <h1 className="card-editor__title">Carga de Cartas</h1>

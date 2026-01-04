@@ -18,12 +18,12 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
           <div className="landing-page__logo">
             <img 
               src={logoImage} 
-              alt="chorroybuenas.mx - Lotería Personalizada" 
+              alt="chorroybuenas.com.mx - Lotería Personalizada" 
               className="landing-page__logo-image"
             />
           </div>
           <div className="landing-page__header-text">
-            <h1 className="landing-page__title">chorroybuenas.mx</h1>
+            <h1 className="landing-page__title">chorroybuenas.com.mx</h1>
             <p className="landing-page__tagline">Crea tu propia Lotería Mexicana única</p>
           </div>
         </div>
@@ -233,7 +233,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
       </main>
 
       <footer className="landing-page__footer">
-        <p>chorroybuenas.mx - Hecho con ❤️ para mantener viva la tradición mexicana</p>
+        <p>chorroybuenas.com.mx - Hecho con ❤️ para mantener viva la tradición mexicana</p>
       </footer>
     </div>
   );
