@@ -63,6 +63,21 @@ La aplicación estará disponible en:
 - **Dominio personalizado:** `https://chorroybuenas.com.mx`
 - **GitHub Pages (alternativo):** `https://cvegam02.github.io/chorroybuenas/`
 
+### Optimización SEO
+
+La aplicación está optimizada para motores de búsqueda con:
+- Meta tags optimizados con palabras clave relevantes
+- Open Graph tags para redes sociales
+- Structured Data (JSON-LD) para mejor indexación
+- Sitemap.xml para ayudar a los buscadores a encontrar el contenido
+- Robots.txt configurado correctamente
+
+**Para mejorar la visibilidad en Google:**
+1. Registra tu sitio en [Google Search Console](https://search.google.com/search-console)
+2. Verifica la propiedad del dominio
+3. Envía el sitemap: `https://chorroybuenas.com.mx/sitemap.xml`
+4. Espera a que Google indexe tu sitio (puede tardar varios días)
+
 ### Despliegue manual
 
 Si prefieres desplegar manualmente:
