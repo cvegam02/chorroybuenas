@@ -37,6 +37,29 @@ npm run dev
 npm run build
 ```
 
+## Despliegue en GitHub Pages
+
+La aplicación está configurada para desplegarse automáticamente en GitHub Pages. Cada vez que hagas push a la rama `main`, GitHub Actions construirá y desplegará la aplicación automáticamente.
+
+### Configuración inicial de GitHub Pages
+
+1. Ve a la configuración de tu repositorio en GitHub
+2. Navega a **Settings** > **Pages**
+3. En **Source**, selecciona **GitHub Actions**
+4. Guarda los cambios
+
+La aplicación estará disponible en:
+`https://cvegam02.github.io/chorroybuenas/`
+
+### Despliegue manual
+
+Si prefieres desplegar manualmente:
+
+```bash
+npm run build
+# Luego sube la carpeta dist/ a la rama gh-pages o usa GitHub Desktop
+```
+
 ## Estructura del Proyecto
 
 ```
