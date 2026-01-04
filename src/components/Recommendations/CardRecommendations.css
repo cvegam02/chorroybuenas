@@ -1,0 +1,85 @@
+.card-recommendations {
+  border-radius: 8px;
+  margin: 20px 0 0 0;
+  border: 1px solid;
+  font-size: 0.875rem;
+  overflow: hidden;
+}
+
+.card-recommendations__header {
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: background-color 0.2s;
+}
+
+.card-recommendations__header:hover {
+  opacity: 0.9;
+}
+
+.card-recommendations__header-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-recommendations__icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.card-recommendations__header-text {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.card-recommendations__chevron {
+  font-size: 0.75rem;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.card-recommendations__chevron--collapsed {
+  transform: rotate(-90deg);
+}
+
+.card-recommendations__content {
+  padding: 0 14px 12px 14px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.card-recommendations__message {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.card-recommendations--error {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+.card-recommendations--warning {
+  background: #fefbf7;
+  border-color: #fbd38d;
+  color: #b45309;
+}
+
+.card-recommendations--success {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.card-recommendations--info {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+  color: #6b7280;
+}

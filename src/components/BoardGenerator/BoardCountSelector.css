@@ -1,0 +1,114 @@
+.board-count-selector {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 48px 32px;
+  background: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.board-count-selector__title {
+  font-size: 2.25rem;
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 32px;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.board-count-selector__info {
+  background: #fef3e7;
+  border: 2px solid #fed7aa;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 32px;
+  color: #ea580c;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.board-count-selector__form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.board-count-selector__input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.board-count-selector__label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.board-count-selector__input {
+  padding: 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1.125rem;
+  color: #111827;
+  background: white;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.board-count-selector__input:focus {
+  outline: none;
+  border-color: #ea580c;
+}
+
+.board-count-selector__error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+.board-count-selector__button {
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  color: white;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+}
+
+.board-count-selector__button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(234, 88, 12, 0.4);
+}
+
+.board-count-selector__button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .board-count-selector {
+    padding: 32px 24px;
+  }
+
+  .board-count-selector__title {
+    font-size: 1.75rem;
+  }
+
+  .board-count-selector__button {
+    width: 100%;
+  }
+}

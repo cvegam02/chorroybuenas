@@ -1,0 +1,190 @@
+.card-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.card-upload__edit-button {
+  padding: 10px 20px;
+  border: 2px solid #fed7aa;
+  border-radius: 8px;
+  background: #fef3e7;
+  color: #ea580c;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.card-upload__edit-button:hover {
+  background: #fed7aa;
+  border-color: #fb923c;
+  transform: translateY(-1px);
+}
+
+.card-upload__help-text {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-top: -8px;
+}
+
+.card-upload__input {
+  display: none;
+}
+
+.card-upload__dropzone {
+  width: 100%;
+  aspect-ratio: 5 / 7.5;
+  border: 2px dashed #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+  transition: border-color 0.2s, background 0.2s;
+  overflow: hidden;
+}
+
+.card-upload__dropzone:hover {
+  border-color: #ea580c;
+  background: #fef3e7;
+}
+
+.card-upload__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  padding: 20px;
+}
+
+.card-upload__placeholder span {
+  font-size: 48px;
+}
+
+.card-upload__placeholder-main {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: #111827;
+}
+
+.card-upload__placeholder-sub {
+  font-size: 0.875rem;
+  margin: 0;
+  color: #6b7280;
+}
+
+.card-upload__preview-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.card-upload__preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-upload__edit-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: white;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.card-upload__dropzone:hover .card-upload__edit-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.card-upload__edit-overlay span {
+  font-size: 32px;
+}
+
+.card-upload__edit-overlay p {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.card-upload__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-upload__title-input {
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #111827;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.card-upload__title-input:focus {
+  outline: none;
+  border-color: #ea580c;
+}
+
+.card-upload__help-text {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.card-upload__submit {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.2);
+}
+
+.card-upload__submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+}
+
+.card-upload__submit:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .card-upload {
+    max-width: 100%;
+  }
+}
+

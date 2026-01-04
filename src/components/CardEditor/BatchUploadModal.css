@@ -1,0 +1,245 @@
+.batch-upload-modal__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.batch-upload-modal__content {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  border: 2px solid #fed7aa;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.batch-upload-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.batch-upload-modal__title {
+  font-size: 1.5rem;
+  color: #ea580c;
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.batch-upload-modal__close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.batch-upload-modal__close:hover {
+  background: #e5e7eb;
+  color: #111827;
+  transform: scale(1.1);
+}
+
+.batch-upload-modal__progress {
+  margin-bottom: 24px;
+}
+
+.batch-upload-modal__progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.batch-upload-modal__progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ea580c, #f97316);
+  transition: width 0.3s ease;
+}
+
+.batch-upload-modal__progress-text {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.batch-upload-modal__current-file {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.batch-upload-modal__file-name {
+  font-size: 0.9375rem;
+  color: #4b5563;
+  margin: 0;
+  font-weight: 500;
+}
+
+.batch-upload-modal__editor-container {
+  margin-bottom: 20px;
+}
+
+.batch-upload-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.batch-upload-modal__preview {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  aspect-ratio: 5 / 7.5;
+  border: 2px solid #fed7aa;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f9fafb;
+}
+
+.batch-upload-modal__preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.batch-upload-modal__title-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.batch-upload-modal__label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.batch-upload-modal__title-input {
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #111827;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.batch-upload-modal__title-input:focus {
+  outline: none;
+  border-color: #ea580c;
+}
+
+.batch-upload-modal__help-text {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.batch-upload-modal__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.batch-upload-modal__skip-button,
+.batch-upload-modal__edit-button,
+.batch-upload-modal__next-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.batch-upload-modal__skip-button {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.batch-upload-modal__skip-button:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.batch-upload-modal__edit-button {
+  background: #f9fafb;
+  color: #ea580c;
+  border: 2px solid #fed7aa;
+}
+
+.batch-upload-modal__edit-button:hover {
+  background: #fef3e7;
+  border-color: #fb923c;
+}
+
+.batch-upload-modal__next-button {
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.2);
+}
+
+.batch-upload-modal__next-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+}
+
+.batch-upload-modal__next-button:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+@media (max-width: 640px) {
+  .batch-upload-modal__content {
+    padding: 24px;
+    max-width: 100%;
+  }
+
+  .batch-upload-modal__title {
+    font-size: 1.25rem;
+  }
+
+  .batch-upload-modal__actions {
+    flex-direction: column;
+  }
+
+  .batch-upload-modal__skip-button,
+  .batch-upload-modal__edit-button,
+  .batch-upload-modal__next-button {
+    width: 100%;
+  }
+}
+
