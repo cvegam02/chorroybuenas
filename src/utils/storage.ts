@@ -1,5 +1,5 @@
 import { Card, Board, BoardStorage, BoardsCollection } from '../types';
-import { saveImage as saveImageToIndexedDB, migrateImagesToIndexedDB } from './indexedDB';
+import { saveImage as saveImageToIndexedDB } from './indexedDB';
 
 const CARDS_KEY = 'loteria_cards';
 const BOARDS_KEY = 'loteria_boards';
