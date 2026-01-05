@@ -6,7 +6,6 @@ import { CardUploadModal } from './CardUploadModal';
 import { BatchUploadModal } from './BatchUploadModal';
 import { CardRecommendations } from '../Recommendations/CardRecommendations';
 import { Card } from '../../types';
-import logoImage from '../../img/logo.png';
 import './CardEditor.css';
 
 interface CardEditorProps {
@@ -56,11 +55,6 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
   return (
     <div className="card-editor">
       <div className="card-editor__header">
-        <img 
-          src={logoImage} 
-          alt="chorroybuenas.com.mx" 
-          className="card-editor__logo"
-        />
         <h1 className="card-editor__title">Carga de Cartas</h1>
       </div>
 

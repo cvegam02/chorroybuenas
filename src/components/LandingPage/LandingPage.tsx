@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './LandingPage.css';
 import heroImage from '../../img/Gemini_Generated_Image_35qv4s35qv4s35qv.png';
 import logoImage from '../../img/logo.png';
@@ -9,28 +10,32 @@ interface LandingPageProps {
 export const LandingPage = ({ onStart }: LandingPageProps) => {
   return (
     <div className="landing-page">
-      <header className="landing-page__header">
-        <div 
-          className="landing-page__header-background"
-          style={{ backgroundImage: `url(${logoImage})` }}
-        ></div>
-        <div className="landing-page__header-content">
-          <div className="landing-page__logo">
-            <img 
-              src={logoImage} 
-              alt="chorroybuenas.com.mx - Lotería Personalizada" 
-              className="landing-page__logo-image"
-            />
-          </div>
-          <div className="landing-page__header-text">
-            <h1 className="landing-page__title">chorroybuenas.com.mx</h1>
-            <p className="landing-page__tagline">Crea tu propia Lotería Mexicana única</p>
-          </div>
-        </div>
-      </header>
-
+      {/* Decoraciones flotantes */}
+      <div className="landing-page__decorations">
+        <div className="landing-page__decoration landing-page__decoration--1">🎴</div>
+        <div className="landing-page__decoration landing-page__decoration--2">🎲</div>
+        <div className="landing-page__decoration landing-page__decoration--3">🎯</div>
+        <div className="landing-page__decoration landing-page__decoration--4">🎨</div>
+        <div className="landing-page__decoration landing-page__decoration--5">🎉</div>
+        <div className="landing-page__decoration landing-page__decoration--6">🌟</div>
+        <div className="landing-page__decoration landing-page__decoration--7">🃏</div>
+        <div className="landing-page__decoration landing-page__decoration--8">🀄</div>
+        <div className="landing-page__decoration landing-page__decoration--9">🎰</div>
+        <div className="landing-page__decoration landing-page__decoration--10">🎴</div>
+        <div className="landing-page__decoration landing-page__decoration--11">🃏</div>
+        <div className="landing-page__decoration landing-page__decoration--12">🎴</div>
+      </div>
       <main className="landing-page__main">
-        <section className="landing-page__hero">
+        {/* Logo destacado al inicio */}
+        <div className="landing-page__logo-showcase landing-page__section-animate">
+          <img 
+            src={logoImage} 
+            alt="chorroybuenas.com.mx" 
+            className="landing-page__logo-showcase-image"
+          />
+        </div>
+
+        <section className="landing-page__hero landing-page__section-animate">
           <div className="landing-page__hero-content">
             <h2 className="landing-page__hero-title">
               ¡Diversión tradicional con un toque personal!
@@ -42,26 +47,31 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             </p>
             <button 
               onClick={onStart}
-              className="landing-page__cta-button"
+              className="landing-page__cta-button landing-page__cta-button--animated"
             >
               Crear mi Lotería
             </button>
           </div>
           <div className="landing-page__hero-image">
+            <div className="landing-page__hero-image-decoration">🎴</div>
             <img 
               src={heroImage} 
               alt="Juego de Lotería Mexicana personalizada" 
               className="landing-page__hero-image-img"
             />
+            <div className="landing-page__hero-image-decoration landing-page__hero-image-decoration--right">🎲</div>
           </div>
         </section>
 
-        <section className="landing-page__how-it-works">
-          <h2 className="landing-page__section-title">¿Cómo funciona nuestra app?</h2>
-          <div className="landing-page__steps">
-            <div className="landing-page__step">
-              <div className="landing-page__step-number">1</div>
-              <div className="landing-page__step-content">
+        <section className="landing-page__how-it-works landing-page__section-animate">
+          <h2 className="landing-page__section-title landing-page__title-animate">¿Cómo funciona nuestra app?</h2>
+          <div className="landing-page__steps-v2">
+            <div className="landing-page__step-v2 landing-page__step-animate" style={{ animationDelay: '0.1s' }}>
+              <div className="landing-page__step-v2-icon-wrapper">
+                <div className="landing-page__step-v2-number">1</div>
+                <div className="landing-page__step-v2-icon">📸</div>
+              </div>
+              <div className="landing-page__step-v2-content">
                 <h3>Prepara tus cartas</h3>
                 <p>
                   Sube tus propias imágenes y asígnales un título. Puedes usar fotos familiares, 
@@ -69,20 +79,28 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                   (recomendamos 54 para una experiencia completa).
                 </p>
               </div>
+              <div className="landing-page__step-v2-arrow">→</div>
             </div>
-            <div className="landing-page__step">
-              <div className="landing-page__step-number">2</div>
-              <div className="landing-page__step-content">
+            <div className="landing-page__step-v2 landing-page__step-animate" style={{ animationDelay: '0.2s' }}>
+              <div className="landing-page__step-v2-icon-wrapper">
+                <div className="landing-page__step-v2-number">2</div>
+                <div className="landing-page__step-v2-icon">🎲</div>
+              </div>
+              <div className="landing-page__step-v2-content">
                 <h3>Genera los tableros</h3>
                 <p>
                   Elige cuántos tableros necesitas (mínimo 8). Cada tablero tendrá 16 cartas 
                   únicas seleccionadas aleatoriamente de tu baraja personalizada.
                 </p>
               </div>
+              <div className="landing-page__step-v2-arrow">→</div>
             </div>
-            <div className="landing-page__step">
-              <div className="landing-page__step-number">3</div>
-              <div className="landing-page__step-content">
+            <div className="landing-page__step-v2 landing-page__step-animate" style={{ animationDelay: '0.3s' }}>
+              <div className="landing-page__step-v2-icon-wrapper">
+                <div className="landing-page__step-v2-number">3</div>
+                <div className="landing-page__step-v2-icon">🎉</div>
+              </div>
+              <div className="landing-page__step-v2-content">
                 <h3>Descarga y juega</h3>
                 <p>
                   Descarga el PDF con todos los tableros y la baraja completa. Imprime los 
@@ -93,38 +111,38 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
           </div>
         </section>
 
-        <section className="landing-page__events">
-          <h2 className="landing-page__section-title">Perfecta para cualquier ocasión</h2>
+        <section className="landing-page__events landing-page__section-animate">
+          <h2 className="landing-page__section-title landing-page__title-animate">Perfecta para cualquier ocasión</h2>
           <p className="landing-page__events-intro">
             Personaliza tu Lotería Mexicana para hacer cualquier evento más memorable y divertido
           </p>
           <div className="landing-page__events-grid">
-            <div className="landing-page__event">
+            <div className="landing-page__event landing-page__event-animate" style={{ animationDelay: '0.1s' }}>
               <span className="landing-page__event-icon">👶</span>
               <h3>Baby Showers</h3>
               <p>Crea una lotería temática con fotos del futuro bebé, ecografías o elementos relacionados con la llegada del nuevo miembro de la familia</p>
             </div>
-            <div className="landing-page__event">
+            <div className="landing-page__event landing-page__event-animate" style={{ animationDelay: '0.2s' }}>
               <span className="landing-page__event-icon">👨‍👩‍👧‍👦</span>
               <h3>Eventos Familiares</h3>
               <p>Úsala en reuniones familiares, cumpleaños, aniversarios o cualquier celebración especial con fotos de la familia</p>
             </div>
-            <div className="landing-page__event">
+            <div className="landing-page__event landing-page__event-animate" style={{ animationDelay: '0.3s' }}>
               <span className="landing-page__event-icon">💼</span>
               <h3>Eventos del Trabajo</h3>
               <p>Ideal para team building, fiestas de oficina o eventos corporativos. Incluye memes del trabajo, fotos del equipo o eventos de la empresa</p>
             </div>
-            <div className="landing-page__event">
+            <div className="landing-page__event landing-page__event-animate" style={{ animationDelay: '0.4s' }}>
               <span className="landing-page__event-icon">🎉</span>
               <h3>Convivencias con Amigos</h3>
               <p>Haz más divertidas tus fiestas y reuniones con amigos usando fotos divertidas, memes compartidos o momentos especiales juntos</p>
             </div>
-            <div className="landing-page__event">
+            <div className="landing-page__event landing-page__event-animate" style={{ animationDelay: '0.5s' }}>
               <span className="landing-page__event-icon">🧒</span>
               <h3>Para Niños</h3>
               <p>Versión especial para los más pequeños con sus personajes favoritos, animales, juguetes o cualquier tema que les encante</p>
             </div>
-            <div className="landing-page__event">
+            <div className="landing-page__event landing-page__event-animate" style={{ animationDelay: '0.6s' }}>
               <span className="landing-page__event-icon">🎊</span>
               <h3>Otras Celebraciones</h3>
               <p>Bodas, graduaciones, despedidas de soltero/a, o cualquier otra celebración donde quieras agregar un toque único y divertido</p>
@@ -132,25 +150,25 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
           </div>
         </section>
 
-        <section className="landing-page__features">
-          <h2 className="landing-page__section-title">Características</h2>
+        <section className="landing-page__features landing-page__section-animate">
+          <h2 className="landing-page__section-title landing-page__title-animate">Características</h2>
           <div className="landing-page__features-grid">
-            <div className="landing-page__feature">
+            <div className="landing-page__feature landing-page__feature-animate" style={{ animationDelay: '0.1s' }}>
               <span className="landing-page__feature-icon">📸</span>
               <h3>Personaliza</h3>
               <p>Usa tus propias imágenes para crear cartas únicas</p>
             </div>
-            <div className="landing-page__feature">
+            <div className="landing-page__feature landing-page__feature-animate" style={{ animationDelay: '0.2s' }}>
               <span className="landing-page__feature-icon">🎨</span>
               <h3>Editor de Imágenes</h3>
               <p>Recorta y ajusta tus imágenes con zoom y pan</p>
             </div>
-            <div className="landing-page__feature">
+            <div className="landing-page__feature landing-page__feature-animate" style={{ animationDelay: '0.3s' }}>
               <span className="landing-page__feature-icon">🎯</span>
               <h3>Múltiples Tableros</h3>
               <p>Genera tantos tableros como necesites para tu evento</p>
             </div>
-            <div className="landing-page__feature">
+            <div className="landing-page__feature landing-page__feature-animate" style={{ animationDelay: '0.4s' }}>
               <span className="landing-page__feature-icon">📄</span>
               <h3>PDF Listo</h3>
               <p>Descarga todo en un PDF profesional para imprimir</p>
@@ -171,63 +189,18 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
           </button>
         </section>
 
-        <section className="landing-page__how-to-play">
-          <h2 className="landing-page__section-title">¿Cómo se juega la Lotería Mexicana?</h2>
-          <div className="landing-page__game-instructions">
-            <div className="landing-page__instruction-item">
-              <div className="landing-page__instruction-number">1</div>
-              <div className="landing-page__instruction-content">
-                <h3>Prepara el juego</h3>
-                <p>
-                  Cada jugador recibe un tablero con 16 imágenes únicas dispuestas en una cuadrícula de 4x4. 
-                  Designa a una persona como el "cantor" que se encargará de sacar y cantar las cartas.
-                </p>
-              </div>
-            </div>
-            <div className="landing-page__instruction-item">
-              <div className="landing-page__instruction-number">2</div>
-              <div className="landing-page__instruction-content">
-                <h3>Comienza el juego</h3>
-                <p>
-                  El cantor va sacando cartas de la baraja una por una y las canta de manera divertida y rítmica, 
-                  anunciando el nombre o descripción de la imagen. Los jugadores marcan las cartas que aparecen 
-                  en su tablero usando frijoles, monedas o cualquier marcador.
-                </p>
-              </div>
-            </div>
-            <div className="landing-page__instruction-item">
-              <div className="landing-page__instruction-number">3</div>
-              <div className="landing-page__instruction-content">
-                <h3>Gana el primero en completar</h3>
-                <p>
-                  El objetivo es completar una línea (horizontal, vertical o diagonal) o llenar todo el tablero. 
-                  Cuando un jugador completa una línea, grita "¡Lotería!" y gana. Si nadie gana con una línea, 
-                  el juego continúa hasta que alguien llene todo el tablero.
-                </p>
-              </div>
-            </div>
-            <div className="landing-page__instruction-item">
-              <div className="landing-page__instruction-number">4</div>
-              <div className="landing-page__instruction-content">
-                <h3>Verifica y celebra</h3>
-                <p>
-                  El ganador debe mostrar su tablero para verificar que las cartas marcadas corresponden con 
-                  las que fueron cantadas. Una vez verificado, ¡todos celebran y se puede empezar una nueva ronda!
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="landing-page__about landing-page__about--secondary">
-          <h2 className="landing-page__about-title-secondary">¿Qué es la Lotería Mexicana?</h2>
-          <div className="landing-page__about-content-secondary">
-            <p>
-              La Lotería es un juego de azar tradicional mexicano, similar al bingo, que forma parte de la 
-              cultura popular de México. Es un juego que ha unido a familias y comunidades por generaciones, 
-              especialmente durante fiestas y celebraciones. Con nuestra app, puedes mantener viva esta 
-              tradición creando loterías personalizadas para cualquier ocasión especial.
-            </p>
+        <section className="landing-page__info-links">
+          <div className="landing-page__info-links-container">
+            <Link to="/como-se-juega" className="landing-page__info-link">
+              <span className="landing-page__info-link-icon">🎮</span>
+              <h3>¿Cómo se juega?</h3>
+              <p>Aprende a jugar la Lotería Mexicana paso a paso</p>
+            </Link>
+            <Link to="/que-es-la-loteria" className="landing-page__info-link">
+              <span className="landing-page__info-link-icon">📚</span>
+              <h3>¿Qué es la Lotería?</h3>
+              <p>Conoce más sobre esta tradición mexicana</p>
+            </Link>
           </div>
         </section>
       </main>

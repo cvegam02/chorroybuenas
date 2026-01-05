@@ -1,0 +1,199 @@
+.how-to-play {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #ffffff 0%, #fef3e7 100%);
+  padding-bottom: 48px;
+  position: relative;
+}
+
+.how-to-play::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(234, 88, 12, 0.02) 20px, rgba(234, 88, 12, 0.02) 40px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.how-to-play > * {
+  position: relative;
+  z-index: 1;
+}
+
+.how-to-play__container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.how-to-play__header {
+  text-align: center;
+  margin-bottom: 48px;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.how-to-play__title {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 16px 0;
+  font-weight: 800;
+}
+
+.how-to-play__subtitle {
+  font-size: 1.25rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.how-to-play__instructions {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-bottom: 48px;
+}
+
+.how-to-play__instruction-item {
+  display: flex;
+  gap: 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #fef3e7 100%);
+  padding: 32px;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(234, 88, 12, 0.1);
+  border: 2px solid #fb923c;
+  transition: all 0.3s;
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+.how-to-play__instruction-item:nth-child(1) { animation-delay: 0.1s; }
+.how-to-play__instruction-item:nth-child(2) { animation-delay: 0.2s; }
+.how-to-play__instruction-item:nth-child(3) { animation-delay: 0.3s; }
+.how-to-play__instruction-item:nth-child(4) { animation-delay: 0.4s; }
+
+.how-to-play__instruction-item:hover {
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+  border-color: #fb923c;
+  transform: translateY(-2px);
+}
+
+.how-to-play__instruction-number {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 4px 8px rgba(234, 88, 12, 0.3);
+}
+
+.how-to-play__instruction-content {
+  flex: 1;
+}
+
+.how-to-play__instruction-content h3 {
+  font-size: 1.5rem;
+  color: #ea580c;
+  margin: 0 0 12px 0;
+  font-weight: 700;
+}
+
+.how-to-play__instruction-content p {
+  font-size: 1.125rem;
+  color: #374151;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.how-to-play__cta {
+  text-align: center;
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
+  padding: 48px 32px;
+  border-radius: 16px;
+  box-shadow: 0 8px 16px rgba(234, 88, 12, 0.2);
+}
+
+.how-to-play__cta-title {
+  font-size: 2rem;
+  color: white;
+  margin: 0 0 24px 0;
+  font-weight: 700;
+}
+
+.how-to-play__cta-button {
+  display: inline-block;
+  background: white;
+  color: #ea580c;
+  padding: 16px 48px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.125rem;
+  transition: all 0.3s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.how-to-play__cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  background: #fef3e7;
+}
+
+/* Responsive */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .how-to-play__title {
+    font-size: 2rem;
+  }
+
+  .how-to-play__subtitle {
+    font-size: 1.125rem;
+  }
+
+  .how-to-play__instruction-item {
+    flex-direction: column;
+    padding: 24px;
+    gap: 16px;
+  }
+
+  .how-to-play__instruction-number {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+
+  .how-to-play__instruction-content h3 {
+    font-size: 1.25rem;
+  }
+
+  .how-to-play__instruction-content p {
+    font-size: 1rem;
+  }
+
+  .how-to-play__cta {
+    padding: 32px 24px;
+  }
+
+  .how-to-play__cta-title {
+    font-size: 1.5rem;
+  }
+}

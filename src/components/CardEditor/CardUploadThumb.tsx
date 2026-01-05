@@ -36,23 +36,26 @@ export const CardUploadThumb = ({ onSingleClick, onBatchSelect }: CardUploadThum
         <div className="card-upload-thumb__image-container">
           <div className="card-upload-thumb__placeholder">
             <span className="card-upload-thumb__icon">➕</span>
+            <p className="card-upload-thumb__text">Agregar imagen</p>
           </div>
         </div>
-        <button 
-          className="card-upload-thumb__button" 
-          type="button"
-          onClick={handleSingleClick}
-        >
-          Agregar Carta
-        </button>
-        <button 
-          className="card-upload-thumb__batch-button" 
-          type="button"
-          onClick={handleBatchClick}
-          title="Subir múltiples imágenes a la vez"
-        >
-          📁 Subir varias
-        </button>
+        <div className="card-upload-thumb__buttons">
+          <button 
+            className="card-upload-thumb__button" 
+            type="button"
+            onClick={handleSingleClick}
+          >
+            Agregar Carta
+          </button>
+          <button 
+            className="card-upload-thumb__batch-button" 
+            type="button"
+            onClick={handleBatchClick}
+            title="Subir múltiples imágenes a la vez"
+          >
+            Subir varias
+          </button>
+        </div>
       </div>
       <input
         ref={batchInputRef}
