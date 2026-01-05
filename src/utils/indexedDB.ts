@@ -202,8 +202,15 @@ export const saveImage = async (cardId: string, imageData: string | Blob): Promi
       });
 
       request.onsuccess = () => {
+        // Revoke old blob URL if exists
+        const oldURL = blobURLsMap.get(cardId);
+        if (oldURL) {
+          URL.revokeObjectURL(oldURL);
+        }
+        
         // Retornar una URL de objeto para usar en los componentes
         const objectURL = URL.createObjectURL(blob);
+        blobURLsMap.set(cardId, objectURL);
         resolve(objectURL);
       };
 
@@ -216,6 +223,9 @@ export const saveImage = async (cardId: string, imageData: string | Blob): Promi
     throw error;
   }
 };
+
+// Map to store blob URLs and their corresponding card IDs for cleanup
+const blobURLsMap = new Map<string, string>(); // cardId -> blobURL
 
 /**
  * Obtiene una imagen de IndexedDB
@@ -232,7 +242,15 @@ export const getImage = async (cardId: string): Promise<string | null> => {
       request.onsuccess = () => {
         const result = request.result;
         if (result && result.image instanceof Blob) {
+          // Revoke old blob URL if exists
+          const oldURL = blobURLsMap.get(cardId);
+          if (oldURL) {
+            URL.revokeObjectURL(oldURL);
+          }
+          
+          // Create new blob URL and store it
           const objectURL = URL.createObjectURL(result.image);
+          blobURLsMap.set(cardId, objectURL);
           resolve(objectURL);
         } else {
           resolve(null);
@@ -254,6 +272,13 @@ export const getImage = async (cardId: string): Promise<string | null> => {
  */
 export const deleteImage = async (cardId: string): Promise<void> => {
   try {
+    // Revoke blob URL before deleting
+    const blobURL = blobURLsMap.get(cardId);
+    if (blobURL) {
+      URL.revokeObjectURL(blobURL);
+      blobURLsMap.delete(cardId);
+    }
+    
     const db = await initDB();
 
     return new Promise((resolve, reject) => {
@@ -280,6 +305,12 @@ export const deleteImage = async (cardId: string): Promise<void> => {
  */
 export const clearAllImages = async (): Promise<void> => {
   try {
+    // Revoke all blob URLs
+    blobURLsMap.forEach((blobURL) => {
+      URL.revokeObjectURL(blobURL);
+    });
+    blobURLsMap.clear();
+    
     const db = await initDB();
 
     return new Promise((resolve, reject) => {

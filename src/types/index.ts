@@ -1,7 +1,7 @@
 export interface Card {
   id: string;
   title: string;
-  image: string; // base64 or blob URL
+  image?: string; // blob URL when loaded from IndexedDB, base64 only during migration/legacy
 }
 
 // Board can have either full cards or just card IDs (for storage optimization)

@@ -10,7 +10,11 @@ export const CardPreview = ({ card, onRemove }: CardPreviewProps) => {
   return (
     <div className="card-preview">
       <div className="card-preview__image-container">
-        <img src={card.image} alt={card.title} className="card-preview__image" />
+        {card.image ? (
+          <img src={card.image} alt={card.title} className="card-preview__image" />
+        ) : (
+          <div className="card-preview__image-placeholder">Sin imagen</div>
+        )}
       </div>
       <div className="card-preview__title">{card.title}</div>
       <button

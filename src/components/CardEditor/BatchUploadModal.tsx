@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { ImageEditor } from './ImageEditor';
 import { convertFileToBase64, validateImageFile, compressImage } from '../../utils/imageUtils';
 import './BatchUploadModal.css';
@@ -176,7 +177,7 @@ export const BatchUploadModal = ({ isOpen, onClose, onCardsAdd, files }: BatchUp
   const progress = ((currentIndex + 1) / pendingImages.length) * 100;
   const remaining = pendingImages.length - currentIndex - 1;
 
-  return (
+  const modalContent = (
     <div 
       className="batch-upload-modal__overlay" 
       onClick={(e) => {
@@ -294,5 +295,7 @@ export const BatchUploadModal = ({ isOpen, onClose, onCardsAdd, files }: BatchUp
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 

@@ -1,21 +1,22 @@
+import { createPortal } from 'react-dom';
 import { CardUpload } from './CardUpload';
 import './CardUploadModal.css';
 
 interface CardUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCardAdd: (image: string, title: string) => void;
+  onCardAdd: (image: string, title: string) => Promise<void>;
 }
 
 export const CardUploadModal = ({ isOpen, onClose, onCardAdd }: CardUploadModalProps) => {
   if (!isOpen) return null;
 
-  const handleCardAdd = (image: string, title: string) => {
-    onCardAdd(image, title);
+  const handleCardAdd = async (image: string, title: string) => {
+    await onCardAdd(image, title);
     onClose();
   };
 
-  return (
+  const modalContent = (
     <div 
       className="card-upload-modal__overlay" 
       onClick={(e) => {
@@ -37,5 +38,7 @@ export const CardUploadModal = ({ isOpen, onClose, onCardAdd }: CardUploadModalP
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 

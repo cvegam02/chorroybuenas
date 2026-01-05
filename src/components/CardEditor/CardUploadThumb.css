@@ -94,3 +94,80 @@
   border-color: #ea580c;
 }
 
+/* Responsive styles for mobile */
+@media (max-width: 768px) {
+  .card-upload-thumb {
+    padding: 8px;
+    border-radius: 12px;
+  }
+
+  .card-upload-thumb__image-container {
+    aspect-ratio: 5 / 7;
+    border-radius: 8px;
+  }
+
+  .card-upload-thumb__placeholder {
+    gap: 8px;
+  }
+
+  .card-upload-thumb__icon {
+    font-size: 2rem;
+  }
+
+  .card-upload-thumb__text {
+    font-size: 0.75rem;
+  }
+
+  .card-upload-thumb__buttons {
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .card-upload-thumb__button {
+    padding: 10px 12px;
+    font-size: 0.875rem;
+    border-radius: 8px;
+  }
+
+  .card-upload-thumb__batch-button {
+    padding: 8px 12px;
+    font-size: 0.8125rem;
+    border-radius: 8px;
+    border-width: 1.5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-upload-thumb {
+    padding: 6px;
+  }
+
+  .card-upload-thumb__image-container {
+    aspect-ratio: 5 / 6.5;
+  }
+
+  .card-upload-thumb__icon {
+    font-size: 1.75rem;
+  }
+
+  .card-upload-thumb__text {
+    font-size: 0.6875rem;
+    line-height: 1.2;
+  }
+
+  .card-upload-thumb__buttons {
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  .card-upload-thumb__button {
+    padding: 8px 10px;
+    font-size: 0.8125rem;
+  }
+
+  .card-upload-thumb__batch-button {
+    padding: 7px 10px;
+    font-size: 0.75rem;
+  }
+}
+

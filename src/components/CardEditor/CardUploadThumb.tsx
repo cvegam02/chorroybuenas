@@ -9,7 +9,8 @@ interface CardUploadThumbProps {
 export const CardUploadThumb = ({ onSingleClick, onBatchSelect }: CardUploadThumbProps) => {
   const batchInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSingleClick = (e: React.MouseEvent) => {
+  const handleSingleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     e.stopPropagation();
     onSingleClick();
   };

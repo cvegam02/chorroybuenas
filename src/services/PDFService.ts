@@ -1,6 +1,7 @@
 import { PDFDocument, rgb } from 'pdf-lib';
 import { Board, Card } from '../types';
 import { loadCards } from '../utils/storage';
+import { blobToBase64 } from '../utils/indexedDB';
 
 // Convert cm to points (1 cm = 28.35 points)
 const cmToPoints = (cm: number) => cm * 28.35;
@@ -42,7 +43,30 @@ interface ImageData {
   height: number;
 }
 
-const loadImageAsUint8Array = async (base64Image: string): Promise<ImageData> => {
+/**
+ * Converts blob URL to base64 for PDF generation
+ */
+const blobURLToBase64 = async (blobURL: string): Promise<string> => {
+  try {
+    const response = await fetch(blobURL);
+    const blob = await response.blob();
+    return await blobToBase64(blob);
+  } catch (error) {
+    console.error('Error converting blob URL to base64:', error);
+    throw error;
+  }
+};
+
+const loadImageAsUint8Array = async (imageSrc: string): Promise<ImageData> => {
+  let base64Image: string;
+  
+  // If it's a blob URL, convert to base64 first
+  if (imageSrc.startsWith('blob:')) {
+    base64Image = await blobURLToBase64(imageSrc);
+  } else {
+    base64Image = imageSrc;
+  }
+  
   // Remove data URL prefix if present
   const base64Data = base64Image.includes(',') 
     ? base64Image.split(',')[1] 
@@ -71,8 +95,17 @@ const loadImageAsUint8Array = async (base64Image: string): Promise<ImageData> =>
 
 const embedImageInPDF = async (
   pdfDoc: PDFDocument,
-  base64Image: string
+  imageSrc: string
 ): Promise<{ image: any; width: number; height: number }> => {
+  let base64Image: string;
+  
+  // Convert blob URL to base64 if needed
+  if (imageSrc.startsWith('blob:')) {
+    base64Image = await blobURLToBase64(imageSrc);
+  } else {
+    base64Image = imageSrc;
+  }
+  
   const imageData = await loadImageAsUint8Array(base64Image);
   
   let image;
@@ -103,6 +136,11 @@ const drawCardOnPage = async (
   titleSize: number = 8
 ) => {
   try {
+    if (!card.image) {
+      console.warn(`Card ${card.id} has no image, skipping`);
+      return;
+    }
+    
     const { image, width: imgWidth, height: imgHeight } = await embedImageInPDF(pdfDoc, card.image);
     
     // Reserve space for title if showing
@@ -232,7 +270,7 @@ export const generatePDF = async (boards: Board[]): Promise<Blob> => {
   }
   
   // Optionally add pages with all cards (full deck)
-  const allCards = loadCards();
+  const allCards = await loadCards();
   if (allCards.length > 0) {
     // Use smaller cards for the full deck to fit more per page
     const DECK_CARD_GAP = cmToPoints(0.3); // ~8.5pt

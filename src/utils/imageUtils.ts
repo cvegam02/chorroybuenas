@@ -8,9 +8,9 @@
  */
 export const compressImage = (
   imageSrc: string,
-  maxWidth: number = 1200,
-  maxHeight: number = 1200,
-  quality: number = 0.75
+  maxWidth: number = 800,
+  maxHeight: number = 800,
+  quality: number = 0.65
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image();

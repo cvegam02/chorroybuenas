@@ -35,7 +35,7 @@ function AppContent() {
     try {
       const generatedBoards = await generateBoards(count);
       setBoards(generatedBoards);
-      saveBoards(generatedBoards, count);
+      await saveBoards(generatedBoards, count);
       saveBoardCount(count);
       setCurrentStep('preview');
       navigate('/preview');
@@ -70,8 +70,8 @@ function AppContent() {
     }
   };
 
-  const handleConfirmationComplete = () => {
-    clearAllData();
+  const handleConfirmationComplete = async () => {
+    await clearAllData();
     setCurrentStep(null);
     setBoards([]);
     setBoardCount(8);

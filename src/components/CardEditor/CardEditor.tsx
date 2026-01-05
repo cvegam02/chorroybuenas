@@ -20,17 +20,17 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const [batchFiles, setBatchFiles] = useState<File[]>([]);
 
-  const handleCardAdd = (image: string, title: string) => {
+  const handleCardAdd = async (image: string, title: string) => {
     const newCard: Card = {
       id: `card-${nextCardId}-${Date.now()}`,
       title,
       image,
     };
-    addCard(newCard);
+    await addCard(newCard);
     setNextCardId(prev => prev + 1);
   };
 
-  const handleBatchCardsAdd = (cardsToAdd: Array<{ image: string; title: string }>) => {
+  const handleBatchCardsAdd = async (cardsToAdd: Array<{ image: string; title: string }>) => {
     console.log('handleBatchCardsAdd called with', cardsToAdd.length, 'cards'); // Debug log
     
     // Create all new cards with unique IDs
@@ -41,7 +41,7 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
     }));
     
     // Add all cards at once using addCards function
-    addCards(newCards);
+    await addCards(newCards);
     
     // Update ID counter by the number of cards added
     setNextCardId(prev => prev + cardsToAdd.length);

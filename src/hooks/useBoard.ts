@@ -16,10 +16,15 @@ export const useBoard = () => {
   const [boards, setBoards] = useState<Board[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const generateBoards = (count: number): Board[] => {
-    const allCards = loadCards();
+  const generateBoardsAsync = async (count: number): Promise<Board[]> => {
+    setIsGenerating(true);
+    try {
+      // Small delay to allow UI to update
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const allCards = await loadCards();
     
-    console.log(`Generating boards with ${allCards.length} cards from localStorage`);
+      console.log(`Generating boards with ${allCards.length} cards from IndexedDB`);
     
     if (!Array.isArray(allCards)) {
       throw new Error('Error al cargar las cartas. Por favor, asegúrate de haber guardado las cartas correctamente.');
@@ -44,17 +49,8 @@ export const useBoard = () => {
       generatedBoards.push(board);
     }
 
+      setBoards(generatedBoards);
     return generatedBoards;
-  };
-
-  const generateBoardsAsync = async (count: number): Promise<Board[]> => {
-    setIsGenerating(true);
-    try {
-      // Small delay to allow UI to update
-      await new Promise(resolve => setTimeout(resolve, 100));
-      const newBoards = generateBoards(count);
-      setBoards(newBoards);
-      return newBoards;
     } finally {
       setIsGenerating(false);
     }
