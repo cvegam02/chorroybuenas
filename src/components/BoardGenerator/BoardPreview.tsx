@@ -42,22 +42,23 @@ export const BoardPreview = ({ boards, onModify, onConfirm, onRegenerate }: Boar
 
       {selectedBoardIndex !== null && (
         <BoardModal
-          board={boards[selectedBoardIndex]}
-          index={selectedBoardIndex}
+          boards={boards}
+          selectedIndex={selectedBoardIndex}
           isOpen={selectedBoardIndex !== null}
           onClose={handleCloseModal}
+          onChangeIndex={setSelectedBoardIndex}
         />
       )}
 
       <div className="board-preview__actions">
-        <button onClick={onRegenerate} className="board-preview__regenerate-button">
-          🔄 Generar Nuevos Tableros
-        </button>
-        <button onClick={onModify} className="board-preview__modify-button">
-          Modificar Cartas
-        </button>
         <button onClick={onConfirm} className="board-preview__confirm-button">
           📥 Descargar PDF de Todos los Tableros
+        </button>
+        <button onClick={onModify} className="board-preview__modify-button">
+          ✏️ Modificar Cartas
+        </button>
+        <button onClick={onRegenerate} className="board-preview__regenerate-button">
+          🔄 Generar Nuevos Tableros
         </button>
       </div>
     </div>

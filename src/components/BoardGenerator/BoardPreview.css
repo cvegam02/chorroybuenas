@@ -2,27 +2,54 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 32px 24px;
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #fef3e7 100%);
   min-height: 100vh;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+.board-preview::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(234, 88, 12, 0.02) 20px, rgba(234, 88, 12, 0.02) 40px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.board-preview > * {
+  position: relative;
+  z-index: 1;
 }
 
 .board-preview__title {
-  font-size: 2.25rem;
+  font-size: 2.5rem;
   background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   text-align: center;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: -0.5px;
 }
 
 .board-preview__info {
   text-align: center;
   font-size: 1.125rem;
-  color: #6b7280;
-  margin-bottom: 32px;
+  color: #4b5563;
+  margin: 0 auto 28px;
+  max-width: 900px;
+  line-height: 1.7;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #fef3e7 100%);
+  border-radius: 16px;
+  border: 2px solid #fed7aa;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.1);
 }
 
 .board-preview__boards-container {
@@ -38,6 +65,10 @@
     padding: 24px 16px;
   }
 
+  .board-preview__title {
+    font-size: 2rem;
+  }
+
   .board-preview__boards-container {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 16px;
@@ -49,42 +80,70 @@
   justify-content: center;
   gap: 16px;
   flex-wrap: wrap;
+  margin-top: 8px;
 }
 
 .board-preview__regenerate-button,
 .board-preview__modify-button,
 .board-preview__confirm-button {
-  padding: 16px 32px;
-  border: none;
-  border-radius: 8px;
+  padding: 16px 28px;
+  border: 2px solid transparent;
+  border-radius: 12px;
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s;
+  min-width: 260px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
+/* Focus styles (accessibility) */
+.board-preview__regenerate-button:focus,
+.board-preview__modify-button:focus,
+.board-preview__confirm-button:focus {
+  outline: none;
+}
+
+.board-preview__regenerate-button:focus-visible,
+.board-preview__modify-button:focus-visible,
+.board-preview__confirm-button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.18);
+}
+
+/* Primary */
 .board-preview__regenerate-button {
-  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  background: #ffffff;
+  color: #1f2937;
+  border-color: #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .board-preview__regenerate-button:hover {
-  background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%);
+  background: #f9fafb;
+  border-color: #d1d5db;
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.10);
 }
 
+/* Secondary */
 .board-preview__modify-button {
-  background: #6b7280;
-  color: white;
+  background: #ffffff;
+  color: #ea580c;
+  border-color: #fed7aa;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.10);
 }
 
 .board-preview__modify-button:hover {
-  background: #4b5563;
+  background: #fff7ed;
+  border-color: #fb923c;
   transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(234, 88, 12, 0.16);
 }
 
+/* Primary (main CTA) */
 .board-preview__confirm-button {
   background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
   color: white;
@@ -95,4 +154,19 @@
   background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(234, 88, 12, 0.4);
+}
+
+@media (max-width: 768px) {
+  .board-preview__actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .board-preview__regenerate-button,
+  .board-preview__modify-button,
+  .board-preview__confirm-button {
+    width: 100%;
+    min-width: 0;
+  }
 }

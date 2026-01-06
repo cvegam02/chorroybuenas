@@ -1,26 +1,100 @@
+import { useEffect, useMemo, useRef } from 'react';
 import { Board } from '../../types';
 import { BoardCell } from './BoardCell';
 import './BoardModal.css';
 
 interface BoardModalProps {
-  board: Board;
-  index: number;
+  boards: Board[];
+  selectedIndex: number;
   isOpen: boolean;
   onClose: () => void;
+  onChangeIndex: (nextIndex: number) => void;
 }
 
-export const BoardModal = ({ board, index, isOpen, onClose }: BoardModalProps) => {
+export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeIndex }: BoardModalProps) => {
   if (!isOpen) return null;
 
-  // Organize cards in 4x4 grid
-  const grid: (typeof board.cards[0] | null)[][] = [];
-  for (let i = 0; i < 4; i++) {
-    grid[i] = [];
-    for (let j = 0; j < 4; j++) {
-      const cardIndex = i * 4 + j;
-      grid[i][j] = board.cards[cardIndex] || null;
+  const total = boards.length;
+  const board = boards[selectedIndex];
+  const title = `Tablero ${selectedIndex + 1} de ${total}`;
+
+  const clampIndex = (idx: number) => {
+    if (total <= 0) return 0;
+    return (idx + total) % total; // wrap-around carousel
+  };
+
+  const goPrev = () => onChangeIndex(clampIndex(selectedIndex - 1));
+  const goNext = () => onChangeIndex(clampIndex(selectedIndex + 1));
+
+  const canNavigate = total > 1;
+
+  // Keyboard navigation (left/right/esc)
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+      if (e.key === 'Escape') onClose();
+      if (!canNavigate) return;
+      if (e.key === 'ArrowLeft') goPrev();
+      if (e.key === 'ArrowRight') goNext();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, canNavigate, selectedIndex, total, onClose]);
+
+  // Touch swipe navigation
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const touchMoved = useRef(false);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStartX.current = t.clientX;
+    touchStartY.current = t.clientY;
+    touchMoved.current = false;
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current == null || touchStartY.current == null) return;
+    const t = e.touches[0];
+    const dx = t.clientX - touchStartX.current;
+    const dy = t.clientY - touchStartY.current;
+    // If mostly horizontal swipe, mark as moved (but don't block vertical scrolling)
+    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+      touchMoved.current = true;
     }
-  }
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (!canNavigate) return;
+    if (touchStartX.current == null || touchStartY.current == null) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStartX.current;
+    const dy = t.clientY - touchStartY.current;
+
+    // Only treat as swipe if it's mostly horizontal and passes threshold
+    const SWIPE_THRESHOLD = 50;
+    if (Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) goNext();
+      else goPrev();
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+    touchMoved.current = false;
+  };
+
+  // Organize cards in 4x4 grid
+  const grid: (typeof board.cards[0] | null)[][] = useMemo(() => {
+    const next: (typeof board.cards[0] | null)[][] = [];
+    for (let i = 0; i < 4; i++) {
+      next[i] = [];
+      for (let j = 0; j < 4; j++) {
+        const cardIndex = i * 4 + j;
+        next[i][j] = board.cards[cardIndex] || null;
+      }
+    }
+    return next;
+  }, [board]);
 
   return (
     <div 
@@ -31,9 +105,37 @@ export const BoardModal = ({ board, index, isOpen, onClose }: BoardModalProps) =
         }
       }}
     >
-      <div className="board-modal__content">
+      <div
+        className="board-modal__content"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <div className="board-modal__header">
-          <h2 className="board-modal__title">Tablero {index + 1}</h2>
+          <div className="board-modal__header-left">
+            <h2 className="board-modal__title">{title}</h2>
+          </div>
+          <div className="board-modal__header-actions">
+            <button
+              type="button"
+              className="board-modal__nav board-modal__nav--prev"
+              onClick={goPrev}
+              disabled={!canNavigate}
+              aria-label="Ver tablero anterior"
+              title="Anterior"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              className="board-modal__nav board-modal__nav--next"
+              onClick={goNext}
+              disabled={!canNavigate}
+              aria-label="Ver tablero siguiente"
+              title="Siguiente"
+            >
+              ›
+            </button>
           <button 
             className="board-modal__close"
             onClick={onClose}
@@ -41,6 +143,7 @@ export const BoardModal = ({ board, index, isOpen, onClose }: BoardModalProps) =
           >
             ×
           </button>
+          </div>
         </div>
         
         <div className="board-modal__grid">
