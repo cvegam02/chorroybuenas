@@ -1,4 +1,4 @@
-import { PDFDocument, rgb } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, type PDFFont } from 'pdf-lib';
 import { Board, Card } from '../types';
 import { loadCards } from '../utils/storage';
 import { blobToBase64 } from '../utils/indexedDB';
@@ -42,6 +42,58 @@ interface ImageData {
   width: number;
   height: number;
 }
+
+const titleFontCache = new WeakMap<PDFDocument, PDFFont>();
+const getTitleFont = async (pdfDoc: PDFDocument): Promise<PDFFont> => {
+  const cached = titleFontCache.get(pdfDoc);
+  if (cached) return cached;
+  // Nota: pdf-lib no incluye una “fuente de lotería” por defecto; usamos una estándar consistente y medible.
+  const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  titleFontCache.set(pdfDoc, font);
+  return font;
+};
+
+const normalizeTitle = (title: string) =>
+  title.replace(/\s+/g, ' ').trim().toUpperCase();
+
+const fitTextToWidth = (
+  text: string,
+  font: PDFFont,
+  maxWidth: number,
+  preferredSize: number,
+  minSize: number
+): { text: string; size: number; width: number } => {
+  let size = preferredSize;
+  let width = font.widthOfTextAtSize(text, size);
+
+  // Reduce tamaño hasta que quepa (con decremento fino para ajustar mejor el centrado)
+  while (width > maxWidth && size > minSize) {
+    size = Math.max(minSize, size - 0.5);
+    width = font.widthOfTextAtSize(text, size);
+  }
+
+  if (width <= maxWidth) return { text, size, width };
+
+  // Si aún no cabe, truncar con ellipsis
+  const ellipsis = '…';
+  const ellipsisWidth = font.widthOfTextAtSize(ellipsis, size);
+  const target = Math.max(0, maxWidth - ellipsisWidth);
+
+  let lo = 0;
+  let hi = text.length;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    const candidate = text.slice(0, mid);
+    const w = font.widthOfTextAtSize(candidate, size);
+    if (w <= target) lo = mid;
+    else hi = mid - 1;
+  }
+
+  const truncated = text.slice(0, Math.max(0, lo)).trimEnd();
+  const finalText = truncated.length ? `${truncated}${ellipsis}` : ellipsis;
+  const finalWidth = font.widthOfTextAtSize(finalText, size);
+  return { text: finalText, size, width: finalWidth };
+};
 
 /**
  * Converts blob URL to base64 for PDF generation
@@ -143,8 +195,8 @@ const drawCardOnPage = async (
     
     const { image, width: imgWidth, height: imgHeight } = await embedImageInPDF(pdfDoc, card.image);
     
-    // Reserve space for title if showing
-    const titleSpace = showTitle ? titleSize + 4 : 0;
+    // Reserve space for title if showing (more space for larger fonts)
+    const titleSpace = showTitle ? titleSize + 8 : 0;
     const imageAreaHeight = height - titleSpace;
     
     // Calculate scaling to fit card dimensions while maintaining aspect ratio
@@ -166,28 +218,61 @@ const drawCardOnPage = async (
       width: scaledWidth,
       height: scaledHeight,
     });
-    
-    // Draw card border
+
+    // Draw title at bottom of card (centered, inside card area)
+    if (showTitle) {
+      const font = await getTitleFont(pdfDoc);
+      const rawTitle = normalizeTitle(card.title || '');
+      const titlePaddingX = 6;
+      const maxTextWidth = Math.max(0, width - titlePaddingX * 2);
+
+      // Si llega vacío, no dibujamos nada
+      if (rawTitle) {
+        // Ajustes: un poco más pequeño en general y con mínimo para legibilidad
+        const preferred = Math.max(6, titleSize - 1);
+        const minSize = 6;
+
+        const fitted = fitTextToWidth(
+          rawTitle,
+          font,
+          maxTextWidth,
+          preferred,
+          minSize
+        );
+
+        // Fondo del título (debajo del borde; el borde se dibuja al final)
+        const titleBoxHeight = Math.max(10, fitted.size + 7);
+        page.drawRectangle({
+          x,
+          y,
+          width,
+          height: titleBoxHeight,
+          color: rgb(1, 1, 1),
+          borderWidth: 0,
+        });
+
+        const titleY = y + 3;
+        const titleX = x + titlePaddingX + (maxTextWidth - fitted.width) / 2;
+
+        page.drawText(fitted.text, {
+          x: titleX,
+          y: titleY,
+          size: fitted.size,
+          font,
+          color: rgb(0, 0, 0),
+        });
+      }
+    }
+
+    // Draw card border LAST so the title background never covers it
     page.drawRectangle({
       x: x,
       y: y,
       width: width,
       height: height,
       borderColor: rgb(0, 0, 0),
-      borderWidth: 1,
+      borderWidth: 2,
     });
-    
-    // Draw title at bottom of card (inside card area)
-    if (showTitle) {
-      const titleY = y + 2; // Small margin from bottom
-      page.drawText(card.title, {
-        x: x + 2,
-        y: titleY,
-        size: titleSize,
-        color: rgb(0, 0, 0),
-        maxWidth: width - 4,
-      });
-    }
   } catch (error) {
     console.error('Error drawing card:', error);
     // Draw error rectangle
@@ -218,6 +303,19 @@ const drawBoardOnPage = async (
   // Calculate board position (centered horizontally, with top margin)
   const boardX = (PAGE_WIDTH_PT - BOARD_WIDTH_PT) / 2;
   const boardY = PAGE_HEIGHT_PT - PAGE_MARGIN_TOP_PT - BOARD_HEIGHT_PT;
+  
+  // Draw semi-transparent background for the board (app theme color - orange/coral)
+  // This creates a subtle, diffused background that doesn't overpower the white background
+  // Using very light orange/coral tint that matches the app's color scheme (#fef3e7, #fed7aa)
+  page.drawRectangle({
+    x: boardX - 20, // Extra padding around the board
+    y: boardY - 20,
+    width: BOARD_WIDTH_PT + 40,
+    height: BOARD_HEIGHT_PT + 40,
+    color: rgb(0.995, 0.953, 0.906), // Very light orange-tinted background (similar to #fef3e7)
+    borderColor: rgb(0.98, 0.92, 0.87), // Slightly darker border (similar to #fed7aa but lighter)
+    borderWidth: 1,
+  });
   
   // Draw board title (centered)
   const titleText = `Tablero ${boardNumber}`;
@@ -251,7 +349,7 @@ const drawBoardOnPage = async (
           CARD_HEIGHT_PT,
           pdfDoc,
           true, // showTitle
-          7 // titleSize (smaller to fit better)
+          11 // titleSize (larger, more traditional loteria style)
         );
       }
     }
@@ -272,76 +370,78 @@ export const generatePDF = async (boards: Board[]): Promise<Blob> => {
   // Optionally add pages with all cards (full deck)
   const allCards = await loadCards();
   if (allCards.length > 0) {
-    // Use smaller cards for the full deck to fit more per page
-    const DECK_CARD_GAP = cmToPoints(0.3); // ~8.5pt
-    const DECK_MARGIN = 30; // margin on sides
-    
-    // Calculate how many cards per row
-    const availableWidth = PAGE_WIDTH_PT - (DECK_MARGIN * 2);
-    const cardsPerRow = Math.floor((availableWidth + DECK_CARD_GAP) / (CARD_WIDTH_PT + DECK_CARD_GAP));
-    const cardSpacing = cardsPerRow > 1 
-      ? (availableWidth - cardsPerRow * CARD_WIDTH_PT) / (cardsPerRow - 1)
-      : 0;
-    
-    let cardsPage = pdfDoc.addPage([PAGE_WIDTH_PT, PAGE_HEIGHT_PT]);
+    // Full deck pages: use LANDSCAPE to reduce wasted whitespace while keeping safe gaps for cutting.
+    // We compute a fixed grid (cols/rows) and then center it on the page.
+    const DECK_PAGE_W = PAGE_HEIGHT_PT; // landscape width
+    const DECK_PAGE_H = PAGE_WIDTH_PT; // landscape height
+
+    // Cutting-friendly spacing (gap between cards) and margins
+    const DECK_GAP = cmToPoints(0.4); // ~11pt
+    const DECK_MARGIN_X = 30;
+    const DECK_MARGIN_TOP = 26;
+    const DECK_MARGIN_BOTTOM = 26;
+    const DECK_HEADER_H = 26; // smaller header to save space
+
+    // Traditional lotería aspect ratio
+    const DECK_ASPECT = 7 / 11; // width / height
+
+    // Grid configuration: 5x2 in landscape usually maximizes usage with safe cut gaps.
+    const DECK_COLS = 5;
+    const DECK_ROWS = 2;
+    const CARDS_PER_PAGE = DECK_COLS * DECK_ROWS;
+
+    const availableW = DECK_PAGE_W - (DECK_MARGIN_X * 2) - (DECK_COLS - 1) * DECK_GAP;
+    const availableH =
+      DECK_PAGE_H - DECK_MARGIN_TOP - DECK_HEADER_H - DECK_MARGIN_BOTTOM - (DECK_ROWS - 1) * DECK_GAP;
+
+    let deckCardW = availableW / DECK_COLS;
+    let deckCardH = deckCardW / DECK_ASPECT;
+    const maxCardH = availableH / DECK_ROWS;
+
+    // If height is the limiting factor, shrink width to match height
+    if (deckCardH > maxCardH) {
+      deckCardH = maxCardH;
+      deckCardW = deckCardH * DECK_ASPECT;
+    }
+
+    const gridW = DECK_COLS * deckCardW + (DECK_COLS - 1) * DECK_GAP;
+    const gridStartX = (DECK_PAGE_W - gridW) / 2;
+    const topY = DECK_PAGE_H - DECK_MARGIN_TOP - DECK_HEADER_H;
+
     let pageNumber = 1;
-    
-    // Draw title on first cards page
-    const titleText = pageNumber === 1 ? 'Baraja Completa' : `Baraja Completa (continuación - Página ${pageNumber})`;
-    const titleWidth = titleText.length * 8;
-    cardsPage.drawText(titleText, {
-      x: (PAGE_WIDTH_PT - titleWidth) / 2,
-      y: PAGE_HEIGHT_PT - 30,
-      size: 16,
-      color: rgb(0, 0, 0),
-    });
-    
-    let currentRow = 0;
-    let currentCol = 0;
-    const rowHeight = CARD_HEIGHT_PT + 15; // Space between rows
-    let yPosition = PAGE_HEIGHT_PT - 60; // Start below title
-    
-    for (const card of allCards) {
-      // Check if we need a new row
-      if (currentCol >= cardsPerRow) {
-        currentCol = 0;
-        currentRow++;
-        yPosition -= rowHeight;
-        
-        // Check if we need a new page
-        if (yPosition < (PAGE_MARGIN_BOTTOM_PT + CARD_HEIGHT_PT)) {
-          pageNumber++;
-          cardsPage = pdfDoc.addPage([PAGE_WIDTH_PT, PAGE_HEIGHT_PT]);
-          const newTitleText = `Baraja Completa (continuación - Página ${pageNumber})`;
-          const newTitleWidth = newTitleText.length * 8;
-          cardsPage.drawText(newTitleText, {
-            x: (PAGE_WIDTH_PT - newTitleWidth) / 2,
-            y: PAGE_HEIGHT_PT - 30,
-            size: 16,
-            color: rgb(0, 0, 0),
-          });
-          yPosition = PAGE_HEIGHT_PT - 60; // Reset Y position after title
-          currentRow = 0;
-        }
+    for (let start = 0; start < allCards.length; start += CARDS_PER_PAGE) {
+      const cardsPage = pdfDoc.addPage([DECK_PAGE_W, DECK_PAGE_H]);
+      const titleText =
+        pageNumber === 1 ? 'Baraja Completa' : `Baraja Completa (continuación - Página ${pageNumber})`;
+      cardsPage.drawText(titleText, {
+        x: 30,
+        y: DECK_PAGE_H - 18,
+        size: 12,
+        color: rgb(0, 0, 0),
+      });
+
+      const chunk = allCards.slice(start, start + CARDS_PER_PAGE);
+      for (let idx = 0; idx < chunk.length; idx++) {
+        const row = Math.floor(idx / DECK_COLS);
+        const col = idx % DECK_COLS;
+
+        const cardX = gridStartX + col * (deckCardW + DECK_GAP);
+        const cardY = topY - deckCardH - row * (deckCardH + DECK_GAP);
+
+        await drawCardOnPage(
+          cardsPage,
+          chunk[idx],
+          cardX,
+          cardY,
+          deckCardW,
+          deckCardH,
+          pdfDoc,
+          true,
+          12
+        );
       }
-      
-      // Calculate card position
-      const cardX = DECK_MARGIN + currentCol * (CARD_WIDTH_PT + cardSpacing);
-      const cardY = yPosition - CARD_HEIGHT_PT;
-      
-      await drawCardOnPage(
-        cardsPage,
-        card,
-        cardX,
-        cardY,
-        CARD_WIDTH_PT,
-        CARD_HEIGHT_PT,
-        pdfDoc,
-        true, // showTitle
-        6 // Smaller title size for deck
-      );
-      
-      currentCol++;
+
+      pageNumber++;
     }
   }
   
@@ -372,8 +472,8 @@ export const generateCardPDF = async (card: Card): Promise<Blob> => {
   const availableWidth = PAGE_WIDTH_PT - (margin * 2);
   const availableHeight = PAGE_HEIGHT_PT - (margin * 2);
   
-  // Use original card aspect ratio (5cm x 7.5cm = 2:3)
-  const cardAspectRatio = 2 / 3;
+  // Use traditional loteria card aspect ratio (7cm x 11cm = 7:11)
+  const cardAspectRatio = 7 / 11;
   let cardWidth = availableWidth;
   let cardHeight = cardWidth / cardAspectRatio;
   
