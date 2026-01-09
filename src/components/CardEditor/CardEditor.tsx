@@ -13,9 +13,10 @@ interface CardEditorProps {
 }
 
 export const CardEditor = ({ onNext }: CardEditorProps) => {
-  const { cards, addCard, addCards, removeCard, cardCount, hasMinimumCards } = useCards();
+  const { cards, addCard, addCards, removeCard, cardCount, hasMinimumCards, minCards } = useCards();
   const [nextCardId, setNextCardId] = useState(1);
   const [isRecommendationsCollapsed, setIsRecommendationsCollapsed] = useState(true);
+  const [isInstructionsCollapsed, setIsInstructionsCollapsed] = useState(true);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const [batchFiles, setBatchFiles] = useState<File[]>([]);
@@ -70,34 +71,45 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
       </div>
 
       <div className="card-editor__instructions">
-        <h2 className="card-editor__instructions-title">📝 Instrucciones</h2>
-        <div className="card-editor__instructions-steps">
-          <div className="card-editor__instruction-step">
-            <span className="card-editor__step-number-small">1</span>
-            <div>
-              <strong>Selecciona una imagen</strong>
-              <p>Haz clic en el área de carga o arrastra una imagen. Formatos aceptados: JPG, PNG o WEBP</p>
+        <button 
+          className="card-editor__instructions-header"
+          onClick={() => setIsInstructionsCollapsed(!isInstructionsCollapsed)}
+          type="button"
+        >
+          <h2 className="card-editor__instructions-title">📝 Instrucciones</h2>
+          <span className={`card-editor__instructions-chevron ${isInstructionsCollapsed ? 'card-editor__instructions-chevron--collapsed' : ''}`}>
+            ▼
+          </span>
+        </button>
+        <div className={`card-editor__instructions-content ${isInstructionsCollapsed ? 'card-editor__instructions-content--collapsed' : ''}`}>
+          <div className="card-editor__instructions-steps">
+            <div className="card-editor__instruction-step">
+              <span className="card-editor__step-number-small">1</span>
+              <div>
+                <strong>Selecciona una imagen</strong>
+                <p>Haz clic en el área de carga o arrastra una imagen. Formatos aceptados: JPG, PNG o WEBP</p>
+              </div>
             </div>
-          </div>
-          <div className="card-editor__instruction-step">
-            <span className="card-editor__step-number-small">2</span>
-            <div>
-              <strong>Ajusta la imagen</strong>
-              <p>Usa zoom (rueda del mouse o botones + / -) y arrastra para seleccionar el área que quieres mostrar</p>
+            <div className="card-editor__instruction-step">
+              <span className="card-editor__step-number-small">2</span>
+              <div>
+                <strong>Ajusta la imagen</strong>
+                <p>Usa zoom (rueda del mouse o botones + / -) y arrastra para seleccionar el área que quieres mostrar</p>
+              </div>
             </div>
-          </div>
-          <div className="card-editor__instruction-step">
-            <span className="card-editor__step-number-small">3</span>
-            <div>
-              <strong>Agrega un título</strong>
-              <p>Escribe un nombre descriptivo para tu carta. Este será el texto que se cantará durante el juego</p>
+            <div className="card-editor__instruction-step">
+              <span className="card-editor__step-number-small">3</span>
+              <div>
+                <strong>Agrega un título</strong>
+                <p>Escribe un nombre descriptivo para tu carta. Este será el texto que se cantará durante el juego</p>
+              </div>
             </div>
-          </div>
-          <div className="card-editor__instruction-step">
-            <span className="card-editor__step-number-small">4</span>
-            <div>
-              <strong>Agrega la carta</strong>
-              <p>Haz clic en "Agregar Carta" para añadirla a tu baraja. Puedes eliminarla haciendo clic en la X</p>
+            <div className="card-editor__instruction-step">
+              <span className="card-editor__step-number-small">4</span>
+              <div>
+                <strong>Agrega la carta</strong>
+                <p>Haz clic en "Agregar Carta" para añadirla a tu baraja. Puedes eliminarla haciendo clic en la X</p>
+              </div>
             </div>
           </div>
         </div>
@@ -168,7 +180,7 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
       <div className="card-editor__actions">
         {!hasMinimumCards && (
           <p className="card-editor__actions-note">
-            Necesitas al menos 30 cartas para continuar. Actualmente tienes {cardCount} cartas.
+            Necesitas al menos {minCards} cartas para continuar. Actualmente tienes {cardCount} cartas.
           </p>
         )}
         <button
@@ -178,7 +190,7 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
         >
           {hasMinimumCards 
             ? 'Siguiente: Seleccionar Cantidad de Tableros →' 
-            : `Agregar ${30 - cardCount} cartas más para continuar`
+            : `Agregar ${minCards - cardCount} cartas más para continuar`
           }
         </button>
       </div>

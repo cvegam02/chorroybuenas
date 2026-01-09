@@ -87,11 +87,11 @@
   background: linear-gradient(135deg, #ffffff 0%, #fef3e7 100%);
   border: 2px solid #fb923c;
   border-radius: 20px;
-  padding: 32px;
   margin-bottom: 32px;
   box-shadow: 0 8px 24px rgba(234, 88, 12, 0.1);
   animation: fadeInUp 0.6s ease-out 0.4s both;
   transition: transform 0.3s, box-shadow 0.3s;
+  overflow: hidden;
 }
 
 .card-editor__instructions:hover {
@@ -99,12 +99,55 @@
   box-shadow: 0 12px 32px rgba(234, 88, 12, 0.15);
 }
 
+.card-editor__instructions-header {
+  width: 100%;
+  padding: 20px 24px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  transition: background-color 0.2s;
+}
+
+.card-editor__instructions-header:hover {
+  background-color: rgba(234, 88, 12, 0.05);
+}
+
 .card-editor__instructions-title {
   font-size: 2rem;
   color: #ea580c;
-  margin: 0 0 20px 0;
+  margin: 0;
   font-weight: 700;
   letter-spacing: -0.5px;
+  text-align: left;
+}
+
+.card-editor__instructions-chevron {
+  font-size: 0.875rem;
+  color: #ea580c;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+  display: none;
+}
+
+.card-editor__instructions-chevron--collapsed {
+  transform: rotate(-90deg);
+}
+
+.card-editor__instructions-content {
+  padding: 0 32px 32px 32px;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s ease-out;
+  overflow: hidden;
+  max-height: 2000px;
+}
+
+.card-editor__instructions-content--collapsed {
+  max-height: 0;
+  padding: 0 32px;
+  opacity: 0;
 }
 
 .card-editor__instructions-steps {
@@ -328,7 +371,22 @@
   }
 
   .card-editor__instructions-title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
+  }
+
+  .card-editor__instructions-chevron {
+    display: block;
+  }
+
+  .card-editor__instructions-content {
+    padding: 0 24px 24px 24px;
+    max-height: 2000px;
+  }
+
+  .card-editor__instructions-content--collapsed {
+    max-height: 0;
+    padding: 0 24px;
+    opacity: 0;
   }
 
   .card-editor__cards-section-title {
@@ -344,5 +402,13 @@
     width: 100%;
     padding: 14px 24px;
     font-size: 1rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .card-editor__instructions-content {
+    max-height: none !important;
+    opacity: 1 !important;
+    padding: 0 32px 32px 32px;
   }
 }

@@ -9,12 +9,12 @@ export const CardRecommendations = ({ cardCount }: CardRecommendationsProps) => 
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   const getRecommendation = () => {
-    if (cardCount < 30) {
-      return null; // No mostrar mensaje cuando hay menos de 30 cartas
-    } else if (cardCount >= 30 && cardCount <= 40) {
+    if (cardCount < 20) {
+      return null; // No mostrar mensaje cuando hay menos de 20 cartas
+    } else if (cardCount >= 20 && cardCount <= 40) {
       return {
         type: 'warning',
-        message: '30-40 cartas: Buen término medio - Mantiene la variedad y duración del juego sin complicar demasiado la logística.',
+        message: '20-40 cartas: Buen término medio - Mantiene la variedad y duración del juego sin complicar demasiado la logística.',
       };
     } else if (cardCount === 54) {
       return {
@@ -36,7 +36,7 @@ export const CardRecommendations = ({ cardCount }: CardRecommendationsProps) => 
 
   const recommendation = getRecommendation();
 
-  // No mostrar nada si hay menos de 30 cartas
+  // No mostrar nada si hay menos de 20 cartas
   if (!recommendation) {
     return null;
   }

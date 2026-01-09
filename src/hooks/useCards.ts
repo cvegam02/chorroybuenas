@@ -3,7 +3,7 @@ import { Card } from '../types';
 import { saveCards, loadCards } from '../utils/storage';
 import { saveImage as saveImageToIndexedDB } from '../utils/indexedDB';
 
-const MIN_CARDS = 30;
+const MIN_CARDS = 20;
 
 export const useCards = () => {
   const [cards, setCards] = useState<Card[]>([]);

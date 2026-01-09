@@ -20,6 +20,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background: #f4f6fb;
+  scrollbar-gutter: stable;
 }
 
 #root {

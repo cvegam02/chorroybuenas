@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Board } from '../../types';
 import { BoardCell } from './BoardCell';
 import './BoardModal.css';
@@ -96,7 +97,7 @@ export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeInd
     return next;
   }, [board]);
 
-  return (
+  const modalContent = (
     <div 
       className="board-modal__overlay" 
       onClick={(e) => {
@@ -110,6 +111,7 @@ export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeInd
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="board-modal__header">
           <div className="board-modal__header-left">
@@ -158,5 +160,8 @@ export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeInd
       </div>
     </div>
   );
+
+  // Render modal using Portal to ensure it's on top of everything
+  return createPortal(modalContent, document.body);
 };
 

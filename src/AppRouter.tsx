@@ -1,5 +1,5 @@
-import { Routes, Route } from 'react-router-dom';
-import { useState } from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { LandingPage } from './components/LandingPage/LandingPage';
 import { CardEditor } from './components/CardEditor/CardEditor';
 import { BoardCountSelector } from './components/BoardGenerator/BoardCountSelector';
@@ -12,18 +12,25 @@ import { useBoard } from './hooks/useBoard';
 import { generatePDF, downloadPDF } from './services/PDFService';
 import { saveBoards, saveBoardCount, clearAllData } from './utils/storage';
 import { Board } from './types';
-import { useNavigate } from 'react-router-dom';
 
 type AppStep = 'cards' | 'board-count' | 'preview' | 'confirmation';
 
 function AppContent() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentStep, setCurrentStep] = useState<AppStep | null>(null);
   const [boards, setBoards] = useState<Board[]>([]);
   const [, setBoardCount] = useState<number>(8);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const { generateBoards, isGenerating } = useBoard();
+
+  // Initialize step based on current route
+  useEffect(() => {
+    if (location.pathname === '/cards' && currentStep !== 'cards') {
+      setCurrentStep('cards');
+    }
+  }, [location.pathname, currentStep]);
 
   const handleCardsNext = () => {
     setCurrentStep('board-count');
@@ -111,7 +118,7 @@ function AppContent() {
         <Route 
           path="/cards" 
           element={
-            currentStep === 'cards' ? (
+            currentStep === 'cards' || location.pathname === '/cards' ? (
               <CardEditor onNext={handleCardsNext} />
             ) : (
               <div style={{ padding: '48px', textAlign: 'center' }}>

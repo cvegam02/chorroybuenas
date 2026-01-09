@@ -11,6 +11,7 @@
   z-index: 9999;
   padding: 20px;
   overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 .card-upload-modal__content {
@@ -24,6 +25,10 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   border: 2px solid #fed7aa;
   position: relative;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .card-upload-modal__close {

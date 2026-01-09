@@ -75,7 +75,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                 <h3>Prepara tus cartas</h3>
                 <p>
                   Sube tus propias imágenes y asígnales un título. Puedes usar fotos familiares, 
-                  memes, mascotas, o cualquier imagen que quieras. Necesitas mínimo 30 cartas 
+                  memes, mascotas, o cualquier imagen que quieras. Necesitas mínimo 20 cartas 
                   (recomendamos 54 para una experiencia completa).
                 </p>
               </div>

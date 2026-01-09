@@ -21,6 +21,10 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const lastTouchRef = useRef<{ x: number; y: number } | null>(null);
+  const pinchStartRef = useRef<{ distance: number; center: { x: number; y: number } } | null>(null);
+  const initialZoomRef = useRef<number>(1);
 
   useEffect(() => {
     const img = new Image();
@@ -83,6 +87,168 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [zoom, position, containerSize]);
 
+  // Calculate distance between two touches
+  const getTouchDistance = (touch1: Touch, touch2: Touch): number => {
+    const dx = touch2.clientX - touch1.clientX;
+    const dy = touch2.clientY - touch1.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  // Get center point between two touches
+  const getTouchCenter = (touch1: Touch, touch2: Touch): { x: number; y: number } => {
+    return {
+      x: (touch1.clientX + touch2.clientX) / 2,
+      y: (touch1.clientY + touch2.clientY) / 2,
+    };
+  };
+
+  // Set up touch event listeners with passive: false to allow preventDefault
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        // Pinch gesture start
+        e.preventDefault();
+        const distance = getTouchDistance(e.touches[0], e.touches[1]);
+        const center = getTouchCenter(e.touches[0], e.touches[1]);
+        const rect = container.getBoundingClientRect();
+        
+        pinchStartRef.current = {
+          distance,
+          center: {
+            x: center.x - rect.left,
+            y: center.y - rect.top,
+          },
+        };
+        initialZoomRef.current = zoom;
+        setIsDragging(false);
+      } else if (e.touches.length === 1) {
+        // Single touch drag
+        const touch = e.touches[0];
+        const rect = container.getBoundingClientRect();
+        touchStartRef.current = {
+          x: touch.clientX - rect.left,
+          y: touch.clientY - rect.top,
+        };
+        lastTouchRef.current = {
+          x: touch.clientX,
+          y: touch.clientY,
+        };
+        setIsDragging(true);
+        pinchStartRef.current = null;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2 && pinchStartRef.current) {
+        // Pinch zoom
+        e.preventDefault();
+        
+        const distance = getTouchDistance(e.touches[0], e.touches[1]);
+        const scale = distance / pinchStartRef.current.distance;
+        const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, initialZoomRef.current * scale));
+        setZoom(newZoom);
+
+        // Adjust position to zoom towards the pinch center
+        if (containerRef.current && imageRef.current) {
+          const rect = containerRef.current.getBoundingClientRect();
+          const containerWidth = containerRef.current.clientWidth;
+          const containerHeight = containerRef.current.clientHeight;
+          
+          const centerX = pinchStartRef.current.center.x;
+          const centerY = pinchStartRef.current.center.y;
+          
+          // Calculate how the center point should move relative to the image
+          const zoomDelta = newZoom - initialZoomRef.current;
+          const img = imageRef.current;
+          const scaledWidth = img.width * newZoom;
+          const scaledHeight = img.height * newZoom;
+          
+          const relX = (centerX - containerWidth / 2 - position.x) / (img.width * initialZoomRef.current);
+          const relY = (centerY - containerHeight / 2 - position.y) / (img.height * initialZoomRef.current);
+          
+          const newX = position.x - (relX * img.width * zoomDelta);
+          const newY = position.y - (relY * img.height * zoomDelta);
+          
+          const maxX = (scaledWidth - containerWidth) / 2;
+          const maxY = (scaledHeight - containerHeight) / 2;
+          
+          setPosition({
+            x: Math.max(-maxX, Math.min(maxX, newX)),
+            y: Math.max(-maxY, Math.min(maxY, newY)),
+          });
+        }
+      } else if (e.touches.length === 1 && isDragging && touchStartRef.current && lastTouchRef.current) {
+        // Single touch drag
+        e.preventDefault();
+
+        const touch = e.touches[0];
+        const img = imageRef.current;
+        if (!img) return;
+
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+        const scaledWidth = img.width * zoom;
+        const scaledHeight = img.height * zoom;
+
+        const maxX = (scaledWidth - containerWidth) / 2;
+        const maxY = (scaledHeight - containerHeight) / 2;
+
+        const deltaX = touch.clientX - lastTouchRef.current.x;
+        const deltaY = touch.clientY - lastTouchRef.current.y;
+
+        setPosition(prev => ({
+          x: Math.max(-maxX, Math.min(maxX, prev.x + deltaX)),
+          y: Math.max(-maxY, Math.min(maxY, prev.y + deltaY)),
+        }));
+
+        lastTouchRef.current = {
+          x: touch.clientX,
+          y: touch.clientY,
+        };
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length === 0) {
+        // All touches ended
+        setIsDragging(false);
+        touchStartRef.current = null;
+        lastTouchRef.current = null;
+        pinchStartRef.current = null;
+      } else if (e.touches.length === 1) {
+        // Switched from pinch to single touch
+        pinchStartRef.current = null;
+        const touch = e.touches[0];
+        const rect = container.getBoundingClientRect();
+        touchStartRef.current = {
+          x: touch.clientX - rect.left,
+          y: touch.clientY - rect.top,
+        };
+        lastTouchRef.current = {
+          x: touch.clientX,
+          y: touch.clientY,
+        };
+        setIsDragging(true);
+      }
+    };
+
+    // Add event listeners with passive: false to allow preventDefault
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd, { passive: false });
+    container.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+      container.removeEventListener('touchcancel', handleTouchEnd);
+    };
+  }, [isDragging, zoom, position]);
+
   const drawImage = () => {
     const canvas = canvasRef.current;
     const img = imageRef.current;
@@ -136,23 +302,11 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
     setZoom(prev => Math.max(prev - ZOOM_STEP, MIN_ZOOM));
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setDragStart({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
-    });
-  };
+  const updatePosition = (clientX: number, clientY: number) => {
+    if (!containerRef.current) return;
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-
-    const newX = e.clientX - dragStart.x;
-    const newY = e.clientY - dragStart.y;
-
-    // Constrain movement to keep image covering the crop area
     const img = imageRef.current;
-    if (!img || !containerRef.current) return;
+    if (!img) return;
 
     const containerWidth = containerRef.current.clientWidth;
     const containerHeight = containerRef.current.clientHeight;
@@ -162,15 +316,73 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
     const maxX = (scaledWidth - containerWidth) / 2;
     const maxY = (scaledHeight - containerHeight) / 2;
 
+    const rect = containerRef.current.getBoundingClientRect();
+    const relativeX = clientX - rect.left;
+    const relativeY = clientY - rect.top;
+
+    // Calculate new position based on drag start
+    const newX = relativeX - (dragStart.x - (containerWidth / 2 - dragStart.x + position.x));
+    const newY = relativeY - (dragStart.y - (containerHeight / 2 - dragStart.y + position.y));
+
+    // Alternative simpler calculation
+    const deltaX = clientX - dragStart.x;
+    const deltaY = clientY - dragStart.y;
+
     setPosition({
-      x: Math.max(-maxX, Math.min(maxX, newX)),
-      y: Math.max(-maxY, Math.min(maxY, newY)),
+      x: Math.max(-maxX, Math.min(maxX, position.x + deltaX)),
+      y: Math.max(-maxY, Math.min(maxY, position.y + deltaY)),
+    });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      setDragStart({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const img = imageRef.current;
+    if (!img) return;
+
+    const containerWidth = containerRef.current?.clientWidth || 0;
+    const containerHeight = containerRef.current?.clientHeight || 0;
+    const scaledWidth = img.width * zoom;
+    const scaledHeight = img.height * zoom;
+
+    const maxX = (scaledWidth - containerWidth) / 2;
+    const maxY = (scaledHeight - containerHeight) / 2;
+
+    const deltaX = e.clientX - (dragStart.x + rect.left);
+    const deltaY = e.clientY - (dragStart.y + rect.top);
+
+    setPosition(prev => ({
+      x: Math.max(-maxX, Math.min(maxX, prev.x + deltaX)),
+      y: Math.max(-maxY, Math.min(maxY, prev.y + deltaY)),
+    }));
+
+    // Update drag start to prevent accumulation
+    setDragStart({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
     });
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
   };
+
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
@@ -180,30 +392,42 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
 
   const handleCrop = () => {
     const canvas = canvasRef.current;
-    if (!canvas || !containerRef.current) return;
+    const img = imageRef.current;
+    if (!canvas || !containerRef.current || !img) return;
 
     const containerWidth = containerRef.current.clientWidth;
     const containerHeight = containerRef.current.clientHeight;
 
     // Get the actual canvas size (accounting for device pixel ratio)
     const dpr = window.devicePixelRatio || 1;
-    const canvasLogicalWidth = canvas.width / dpr;
-    const canvasLogicalHeight = canvas.height / dpr;
-
-    // Create a new canvas with the crop dimensions (logical size, not device pixels)
+    
+    // Create a new canvas with the crop dimensions (high resolution)
     const cropCanvas = document.createElement('canvas');
     const ctx = cropCanvas.getContext('2d');
     if (!ctx) return;
 
-    cropCanvas.width = containerWidth;
-    cropCanvas.height = containerHeight;
+    // Set crop canvas to high resolution
+    cropCanvas.width = containerWidth * dpr;
+    cropCanvas.height = containerHeight * dpr;
+    
+    // Scale context to match device pixel ratio
+    ctx.scale(dpr, dpr);
 
-    // Draw the visible portion from the rendered canvas to the crop canvas
-    // We need to account for the device pixel ratio scaling
+    // Calculate scaled image dimensions
+    const scaledWidth = img.width * zoom;
+    const scaledHeight = img.height * zoom;
+
+    // Calculate position (center the image, then apply offset)
+    const offsetX = (containerWidth - scaledWidth) / 2 + position.x;
+    const offsetY = (containerHeight - scaledHeight) / 2 + position.y;
+
+    // Draw the visible portion of the image directly to the crop canvas
+    // Source: original image
+    // Destination: crop canvas at the visible position
     ctx.drawImage(
-      canvas,
-      0, 0, canvasLogicalWidth, canvasLogicalHeight,
-      0, 0, containerWidth, containerHeight
+      img,
+      0, 0, img.width, img.height,
+      offsetX, offsetY, scaledWidth, scaledHeight
     );
 
     // Get the cropped image data (use lower quality for initial crop, will be compressed further)
@@ -227,17 +451,10 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
           onWheel={handleWheel}
-          style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+          style={{ cursor: isDragging ? 'grabbing' : 'grab', touchAction: 'none' }}
         >
           <canvas ref={canvasRef} className="image-editor__canvas" />
         </div>
-      </div>
-
-      <div className="image-editor__help-text">
-        <p><strong>📏 Cómo ajustar tu imagen:</strong></p>
-        <p>🔍 <strong>Zoom:</strong> Usa la rueda del mouse o los botones + / - para acercar o alejar</p>
-        <p>👆 <strong>Mover:</strong> Haz clic y arrastra la imagen para reposicionarla dentro del recuadro</p>
-        <p>✅ <strong>Consejo:</strong> Asegúrate de que el sujeto principal esté bien centrado y visible antes de guardar</p>
       </div>
 
       <div className="image-editor__controls">

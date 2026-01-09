@@ -53,6 +53,15 @@ export const Navbar = () => {
           </li>
           <li>
             <Link 
+              to="/cards" 
+              className={`navbar__link ${isActive('/cards') ? 'navbar__link--active' : ''}`}
+              onClick={closeMenu}
+            >
+              Crear Loteria
+            </Link>
+          </li>
+          <li>
+            <Link 
               to="/como-se-juega" 
               className={`navbar__link ${isActive('/como-se-juega') ? 'navbar__link--active' : ''}`}
               onClick={closeMenu}
