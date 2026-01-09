@@ -29,6 +29,10 @@ function AppContent() {
   useEffect(() => {
     if (location.pathname === '/cards' && currentStep !== 'cards') {
       setCurrentStep('cards');
+    } else if (location.pathname === '/board-count' && currentStep !== 'board-count') {
+      setCurrentStep('board-count');
+    } else if (location.pathname === '/preview' && currentStep !== 'preview') {
+      setCurrentStep('preview');
     }
   }, [location.pathname, currentStep]);
 
