@@ -3,6 +3,76 @@ import { convertFileToBase64, validateImageFile, compressImage } from '../../uti
 import { ImageEditor } from './ImageEditor';
 import './CardUpload.css';
 
+/**
+ * Adjusts a base64 image to match card aspect ratio (5:7.5) using "cover" mode
+ * This ensures images fill the card area exactly as shown in preview
+ */
+const adjustImageToCardAspectRatio = (
+  imageSrc: string,
+  targetWidth: number = 800,
+  targetHeight: number = 1200,
+  quality: number = 0.85
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) {
+      reject(new Error('Could not get canvas context'));
+      return;
+    }
+    
+    img.onload = () => {
+      // Card aspect ratio is 5:7.5 = 2/3 = 0.666...
+      const cardAspectRatio = targetWidth / targetHeight;
+      const imgAspectRatio = img.width / img.height;
+      
+      let sourceX = 0;
+      let sourceY = 0;
+      let sourceWidth = img.width;
+      let sourceHeight = img.height;
+      
+      // Use "cover" mode: crop the image to match card aspect ratio
+      // This matches how object-fit: cover works in CSS
+      if (imgAspectRatio > cardAspectRatio) {
+        // Image is wider than card - crop sides (center crop)
+        sourceHeight = img.height;
+        sourceWidth = img.height * cardAspectRatio;
+        sourceX = (img.width - sourceWidth) / 2;
+      } else {
+        // Image is taller than card - crop top/bottom (center crop)
+        sourceWidth = img.width;
+        sourceHeight = img.width / cardAspectRatio;
+        sourceY = (img.height - sourceHeight) / 2;
+      }
+      
+      // Set canvas to target dimensions (high resolution)
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      
+      // Fill with white background first
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, targetWidth, targetHeight);
+      
+      // Draw the cropped portion scaled to fill the canvas
+      ctx.drawImage(
+        img,
+        sourceX, sourceY, sourceWidth, sourceHeight,
+        0, 0, targetWidth, targetHeight
+      );
+      
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    
+    img.onerror = () => {
+      reject(new Error('Error loading image'));
+    };
+    
+    img.src = imageSrc;
+  });
+};
+
 interface CardUploadProps {
   onCardAdd: (image: string, title: string) => void;
 }
@@ -13,6 +83,7 @@ export const CardUpload = ({ onCardAdd }: CardUploadProps) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showEditor, setShowEditor] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [wasEdited, setWasEdited] = useState(false); // Track if image was edited/cropped
   const fileInputRef = useRef<HTMLInputElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
 
@@ -29,6 +100,7 @@ export const CardUpload = ({ onCardAdd }: CardUploadProps) => {
     const base64 = await convertFileToBase64(file);
     setImagePreview(base64);
     setShowEditor(false); // Don't show editor by default
+    setWasEdited(false); // Reset edit flag when new image is loaded
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,16 +118,26 @@ export const CardUpload = ({ onCardAdd }: CardUploadProps) => {
 
     setIsUploading(true);
     try {
+      // First adjust image to card aspect ratio (5:7.5) if not edited
+      // This ensures the image looks the same in PDF as in preview
+      let processedImage = imagePreview;
+      if (!wasEdited) {
+        // Image was not edited, so it needs to be adjusted to match preview (object-fit: cover)
+        console.log('Adjusting image to card aspect ratio (5:7.5)...');
+        processedImage = await adjustImageToCardAspectRatio(imagePreview);
+      }
+      
       // Compress image before saving to reduce storage size
       console.log('Compressing image before save...');
-      const compressedImage = await compressImage(imagePreview);
-      console.log(`Image compressed: ${(imagePreview.length / 1024).toFixed(2)} KB -> ${(compressedImage.length / 1024).toFixed(2)} KB`);
+      const compressedImage = await compressImage(processedImage);
+      console.log(`Image compressed: ${(processedImage.length / 1024).toFixed(2)} KB -> ${(compressedImage.length / 1024).toFixed(2)} KB`);
       
       onCardAdd(compressedImage, title.trim());
       // Reset form
       setTitle('');
       setImageFile(null);
       setImagePreview(null);
+      setWasEdited(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -88,6 +170,7 @@ export const CardUpload = ({ onCardAdd }: CardUploadProps) => {
     const base64 = await convertFileToBase64(file);
     setImagePreview(base64);
     setShowEditor(false); // Don't show editor by default
+    setWasEdited(false); // Reset edit flag when new image is loaded
   };
 
   const handleImageCrop = async (croppedImage: string) => {
@@ -101,6 +184,7 @@ export const CardUpload = ({ onCardAdd }: CardUploadProps) => {
       setImagePreview(croppedImage);
     }
     setShowEditor(false);
+    setWasEdited(true); // Mark as edited when crop is done
   };
 
   // Auto-focus title input when image is loaded

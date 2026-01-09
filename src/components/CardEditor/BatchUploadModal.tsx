@@ -4,6 +4,76 @@ import { ImageEditor } from './ImageEditor';
 import { convertFileToBase64, validateImageFile, compressImage } from '../../utils/imageUtils';
 import './BatchUploadModal.css';
 
+/**
+ * Adjusts a base64 image to match card aspect ratio (5:7.5) using "cover" mode
+ * This ensures images fill the card area exactly as shown in preview
+ */
+const adjustImageToCardAspectRatio = (
+  imageSrc: string,
+  targetWidth: number = 800,
+  targetHeight: number = 1200,
+  quality: number = 0.85
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) {
+      reject(new Error('Could not get canvas context'));
+      return;
+    }
+    
+    img.onload = () => {
+      // Card aspect ratio is 5:7.5 = 2/3 = 0.666...
+      const cardAspectRatio = targetWidth / targetHeight;
+      const imgAspectRatio = img.width / img.height;
+      
+      let sourceX = 0;
+      let sourceY = 0;
+      let sourceWidth = img.width;
+      let sourceHeight = img.height;
+      
+      // Use "cover" mode: crop the image to match card aspect ratio
+      // This matches how object-fit: cover works in CSS
+      if (imgAspectRatio > cardAspectRatio) {
+        // Image is wider than card - crop sides (center crop)
+        sourceHeight = img.height;
+        sourceWidth = img.height * cardAspectRatio;
+        sourceX = (img.width - sourceWidth) / 2;
+      } else {
+        // Image is taller than card - crop top/bottom (center crop)
+        sourceWidth = img.width;
+        sourceHeight = img.width / cardAspectRatio;
+        sourceY = (img.height - sourceHeight) / 2;
+      }
+      
+      // Set canvas to target dimensions (high resolution)
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      
+      // Fill with white background first
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, targetWidth, targetHeight);
+      
+      // Draw the cropped portion scaled to fill the canvas
+      ctx.drawImage(
+        img,
+        sourceX, sourceY, sourceWidth, sourceHeight,
+        0, 0, targetWidth, targetHeight
+      );
+      
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    
+    img.onerror = () => {
+      reject(new Error('Error loading image'));
+    };
+    
+    img.src = imageSrc;
+  });
+};
+
 interface PendingImage {
   file: File;
   id: string;
@@ -23,6 +93,7 @@ export const BatchUploadModal = ({ isOpen, onClose, onCardsAdd, files }: BatchUp
   const [currentImage, setCurrentImage] = useState<string>('');
   const [currentTitle, setCurrentTitle] = useState('');
   const [showEditor, setShowEditor] = useState(false);
+  const [wasEdited, setWasEdited] = useState(false); // Track if current image was edited/cropped
   // Use ref to track completed cards to avoid state update issues
   const completedCardsRef = useRef<Array<{ image: string; title: string }>>([]);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -51,6 +122,7 @@ export const BatchUploadModal = ({ isOpen, onClose, onCardsAdd, files }: BatchUp
           setCurrentImage(firstPreview);
           setCurrentTitle('');
           setShowEditor(false); // Don't show editor by default
+          setWasEdited(false); // Reset edit flag for new image
         }
       };
       
@@ -77,6 +149,7 @@ export const BatchUploadModal = ({ isOpen, onClose, onCardsAdd, files }: BatchUp
       setCurrentImage(croppedImage);
     }
     setShowEditor(false);
+    setWasEdited(true); // Mark as edited when crop is done
   };
 
   // Auto-focus title input when image changes or editor closes
@@ -112,10 +185,23 @@ export const BatchUploadModal = ({ isOpen, onClose, onCardsAdd, files }: BatchUp
     let imageToSave = currentImage;
     const titleToSave = currentTitle.trim();
     
+    // First adjust image to card aspect ratio (5:7.5) if not edited
+    // This ensures the image looks the same in PDF as in preview
+    if (!wasEdited) {
+      // Image was not edited, so it needs to be adjusted to match preview (object-fit: cover)
+      try {
+        console.log(`Adjusting image ${currentIndex + 1} to card aspect ratio (5:7.5)...`);
+        imageToSave = await adjustImageToCardAspectRatio(currentImage);
+      } catch (error) {
+        console.error('Error adjusting image aspect ratio:', error);
+        // Continue with original if adjustment fails
+      }
+    }
+    
     // Compress image before saving
     try {
       console.log(`Compressing image ${currentIndex + 1} before save...`);
-      imageToSave = await compressImage(currentImage);
+      imageToSave = await compressImage(imageToSave);
       const originalSize = (currentImage.length / 1024).toFixed(2);
       const compressedSize = (imageToSave.length / 1024).toFixed(2);
       console.log(`Image ${currentIndex + 1} compressed: ${originalSize} KB -> ${compressedSize} KB`);
@@ -138,6 +224,7 @@ export const BatchUploadModal = ({ isOpen, onClose, onCardsAdd, files }: BatchUp
       setCurrentImage(pendingImages[nextIndex].preview);
       setCurrentTitle('');
       setShowEditor(false); // Don't show editor by default
+      setWasEdited(false); // Reset edit flag for new image
     } else {
       // All images processed, save all cards (including the one we just added)
       const allCards = [...completedCardsRef.current];
@@ -160,6 +247,7 @@ export const BatchUploadModal = ({ isOpen, onClose, onCardsAdd, files }: BatchUp
       setCurrentImage(pendingImages[nextIndex].preview);
       setCurrentTitle('');
       setShowEditor(false); // Don't show editor by default
+      setWasEdited(false); // Reset edit flag for new image
     } else {
       // If there are completed cards, save them
       const allCards = [...completedCardsRef.current];

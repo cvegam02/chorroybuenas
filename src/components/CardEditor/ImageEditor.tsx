@@ -369,6 +369,7 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
     const dpr = window.devicePixelRatio || 1;
     
     // Create a new canvas with the crop dimensions (high resolution)
+    // This will have the exact aspect ratio the user sees (5:7.5)
     const cropCanvas = document.createElement('canvas');
     const ctx = cropCanvas.getContext('2d');
     if (!ctx) return;
@@ -380,24 +381,65 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
     // Scale context to match device pixel ratio
     ctx.scale(dpr, dpr);
 
-    // Calculate scaled image dimensions
+    // Use the exact same calculation as drawImage to determine what's visible
     const scaledWidth = img.width * zoom;
     const scaledHeight = img.height * zoom;
-
-    // Calculate position (center the image, then apply offset)
     const offsetX = (containerWidth - scaledWidth) / 2 + position.x;
     const offsetY = (containerHeight - scaledHeight) / 2 + position.y;
 
-    // Draw the visible portion of the image directly to the crop canvas
-    // Source: original image
-    // Destination: crop canvas at the visible position
-    ctx.drawImage(
-      img,
-      0, 0, img.width, img.height,
-      offsetX, offsetY, scaledWidth, scaledHeight
-    );
+    // Calculate what portion of the original image is visible in the container
+    // Map the container rectangle to the original image coordinates
+    const sourceX = Math.max(0, -offsetX / zoom);
+    const sourceY = Math.max(0, -offsetY / zoom);
+    
+    // Calculate the width and height of the visible portion
+    // If the image extends beyond the container, we only want the visible part
+    const visibleScaledWidth = Math.min(scaledWidth, containerWidth - Math.max(0, offsetX));
+    const visibleScaledHeight = Math.min(scaledHeight, containerHeight - Math.max(0, offsetY));
+    
+    let sourceWidth = Math.min(img.width - sourceX, visibleScaledWidth / zoom);
+    let sourceHeight = Math.min(img.height - sourceY, visibleScaledHeight / zoom);
 
-    // Get the cropped image data (use lower quality for initial crop, will be compressed further)
+    // Calculate container aspect ratio (5:7.5 = 0.666...)
+    const containerAspectRatio = containerWidth / containerHeight;
+    
+    // Adjust source dimensions to match container aspect ratio exactly
+    // This ensures the cropped image fills the canvas without spaces or distortion
+    const sourceAspectRatio = sourceWidth / sourceHeight;
+    
+    if (sourceAspectRatio > containerAspectRatio) {
+      // Source is wider than container - crop the sides to match container aspect ratio
+      sourceHeight = sourceHeight;
+      sourceWidth = sourceHeight * containerAspectRatio;
+      sourceX = sourceX + (Math.min(img.width - sourceX, visibleScaledWidth / zoom) - sourceWidth) / 2;
+    } else if (sourceAspectRatio < containerAspectRatio) {
+      // Source is taller than container - crop top/bottom to match container aspect ratio
+      sourceWidth = sourceWidth;
+      sourceHeight = sourceWidth / containerAspectRatio;
+      sourceY = sourceY + (Math.min(img.height - sourceY, visibleScaledHeight / zoom) - sourceHeight) / 2;
+    }
+
+    // Ensure we don't go out of bounds
+    sourceX = Math.max(0, Math.min(sourceX, img.width));
+    sourceY = Math.max(0, Math.min(sourceY, img.height));
+    sourceWidth = Math.min(sourceWidth, img.width - sourceX);
+    sourceHeight = Math.min(sourceHeight, img.height - sourceY);
+
+    // Fill canvas with white background first (handles any transparent/empty areas)
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, containerWidth, containerHeight);
+
+    // Draw the visible portion of the image, ensuring it fills the entire canvas
+    // with the exact aspect ratio of the container (5:7.5)
+    if (sourceWidth > 0 && sourceHeight > 0) {
+      ctx.drawImage(
+        img,
+        sourceX, sourceY, sourceWidth, sourceHeight, // Source: visible part matching container aspect ratio
+        0, 0, containerWidth, containerHeight // Destination: fill entire canvas (exact aspect ratio 5:7.5)
+      );
+    }
+
+    // Get the cropped image data - this matches exactly what the user sees
     const croppedImage = cropCanvas.toDataURL('image/jpeg', 0.85);
     onCrop(croppedImage);
   };
