@@ -24,24 +24,25 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
     let isMounted = true;
     
     const refreshImages = async () => {
-      console.log(`Refreshing images for board ${board.id} (${board.cards.length} cards)...`);
+      console.log(`[BoardThumbnail] Refreshing images for board ${board.id} (${board.cards.length} cards)...`);
       
       const refreshedCards = await Promise.all(
         board.cards.map(async (card) => {
           if (!card.id) {
+            console.warn(`[BoardThumbnail] Card has no ID:`, card.title);
             return { ...card, freshImageUrl: null };
           }
           
           try {
             const freshImageURL = await getImage(card.id);
             if (freshImageURL) {
-              console.log(`✓ Refreshed image for card ${card.id}`);
+              console.log(`[BoardThumbnail] ✓ Got image URL for card ${card.id} (${card.title})`);
             } else {
-              console.warn(`⚠ No image found for card ${card.id}`);
+              console.warn(`[BoardThumbnail] ⚠ No image found in IndexedDB for card ${card.id} (${card.title})`);
             }
             return { ...card, freshImageUrl: freshImageURL || null };
           } catch (error) {
-            console.error(`❌ Error refreshing image for card ${card.id}:`, error);
+            console.error(`[BoardThumbnail] ❌ Error getting image for card ${card.id} (${card.title}):`, error);
             return { ...card, freshImageUrl: null };
           }
         })
@@ -49,8 +50,9 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
       
       // Only update state if component is still mounted
       if (isMounted) {
+        const loadedCount = refreshedCards.filter(c => c.freshImageUrl !== null).length;
+        console.log(`[BoardThumbnail] ✓ Finished refreshing images for board ${board.id}: ${loadedCount}/${refreshedCards.length} loaded`);
         setCardsWithImages(refreshedCards);
-        console.log(`✓ Finished refreshing images for board ${board.id}`);
       }
     };
 
@@ -97,27 +99,34 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
                       onDragStart={(e) => e.preventDefault()}
                       draggable={false}
                       onError={() => {
-                        console.warn(`Thumbnail image failed to load for card ${card.id}, attempting refresh...`);
-                        // Try to refresh the image if it fails
+                        console.warn(`[BoardThumbnail] Image failed to load for card ${card.id} (${card.title}), blob URL may be invalid: ${card.freshImageUrl?.substring(0, 50)}...`);
+                        // Try to refresh the image once if it fails
                         if (card.id) {
                           getImage(card.id).then(url => {
-                            if (url) {
+                            if (url && url !== card.freshImageUrl) {
+                              console.log(`[BoardThumbnail] ✓ Successfully refreshed image for card ${card.id}`);
                               setCardsWithImages(prev => 
                                 prev.map(c => c.id === card.id ? { ...c, freshImageUrl: url } : c)
                               );
                             } else {
+                              console.warn(`[BoardThumbnail] ⚠ Could not get new image for card ${card.id}, showing placeholder`);
                               // If no image found, set to null to show placeholder
                               setCardsWithImages(prev => 
                                 prev.map(c => c.id === card.id ? { ...c, freshImageUrl: null } : c)
                               );
                             }
                           }).catch(err => {
-                            console.error(`Failed to refresh image for card ${card.id}:`, err);
+                            console.error(`[BoardThumbnail] ❌ Error refreshing image for card ${card.id}:`, err);
                             // Set to null to show placeholder on error
                             setCardsWithImages(prev => 
                               prev.map(c => c.id === card.id ? { ...c, freshImageUrl: null } : c)
                             );
                           });
+                        } else {
+                          // No card ID, just show placeholder
+                          setCardsWithImages(prev => 
+                            prev.map(c => c.id === card.id ? { ...c, freshImageUrl: null } : c)
+                          );
                         }
                       }}
                     />

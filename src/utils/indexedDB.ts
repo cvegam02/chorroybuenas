@@ -273,13 +273,16 @@ export const getImage = async (cardId: string): Promise<string | null> => {
       request.onsuccess = () => {
         const result = request.result;
         if (result && result.image instanceof Blob) {
-          // Revoke old blob URL if exists
-          const oldURL = blobURLsMap.get(cardId);
-          if (oldURL) {
-            URL.revokeObjectURL(oldURL);
+          // Check if we already have a valid blob URL for this card
+          const existingURL = blobURLsMap.get(cardId);
+          if (existingURL) {
+            // Reuse existing blob URL instead of creating a new one
+            // This avoids revoking URLs that might still be in use
+            resolve(existingURL);
+            return;
           }
           
-          // Create new blob URL and store it
+          // Create new blob URL and store it (only if we don't have one already)
           const objectURL = URL.createObjectURL(result.image);
           blobURLsMap.set(cardId, objectURL);
           resolve(objectURL);
