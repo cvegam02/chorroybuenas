@@ -389,8 +389,8 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
 
     // Calculate what portion of the original image is visible in the container
     // Map the container rectangle to the original image coordinates
-    const sourceX = Math.max(0, -offsetX / zoom);
-    const sourceY = Math.max(0, -offsetY / zoom);
+    let sourceX = Math.max(0, -offsetX / zoom);
+    let sourceY = Math.max(0, -offsetY / zoom);
     
     // Calculate the width and height of the visible portion
     // If the image extends beyond the container, we only want the visible part

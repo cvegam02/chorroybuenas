@@ -96,7 +96,7 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
                       onContextMenu={(e) => e.preventDefault()}
                       onDragStart={(e) => e.preventDefault()}
                       draggable={false}
-                      onError={(e) => {
+                      onError={() => {
                         console.warn(`Thumbnail image failed to load for card ${card.id}, attempting refresh...`);
                         // Try to refresh the image if it fails
                         if (card.id) {
