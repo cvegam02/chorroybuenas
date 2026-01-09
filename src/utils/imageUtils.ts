@@ -150,3 +150,77 @@ export const resizeImageToAspectRatio = (
   });
 };
 
+/**
+ * Adjusts a base64 image to match card aspect ratio (5:7.5) using "cover" mode
+ * This ensures images fill the card area exactly as shown in preview
+ * @param imageSrc - Base64 image string
+ * @param targetWidth - Target width (default: 800px)
+ * @param targetHeight - Target height (default: 1200px for 5:7.5 ratio)
+ * @param quality - JPEG quality 0-1 (default: 0.85)
+ * @returns Adjusted base64 image string with exact aspect ratio
+ */
+export const adjustImageToCardAspectRatio = (
+  imageSrc: string,
+  targetWidth: number = 800,
+  targetHeight: number = 1200,
+  quality: number = 0.85
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) {
+      reject(new Error('Could not get canvas context'));
+      return;
+    }
+    
+    img.onload = () => {
+      // Card aspect ratio is 5:7.5 = 2/3 = 0.666...
+      const cardAspectRatio = targetWidth / targetHeight;
+      const imgAspectRatio = img.width / img.height;
+      
+      let sourceX = 0;
+      let sourceY = 0;
+      let sourceWidth = img.width;
+      let sourceHeight = img.height;
+      
+      // Use "cover" mode: crop the image to match card aspect ratio
+      // This matches how object-fit: cover works in CSS
+      if (imgAspectRatio > cardAspectRatio) {
+        // Image is wider than card - crop sides
+        sourceHeight = img.height;
+        sourceWidth = img.height * cardAspectRatio;
+        sourceX = (img.width - sourceWidth) / 2;
+      } else {
+        // Image is taller than card - crop top/bottom
+        sourceWidth = img.width;
+        sourceHeight = img.width / cardAspectRatio;
+        sourceY = (img.height - sourceHeight) / 2;
+      }
+      
+      // Set canvas to target dimensions (high resolution)
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      
+      // Fill with white background first
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, targetWidth, targetHeight);
+      
+      // Draw the cropped portion scaled to fill the canvas
+      ctx.drawImage(
+        img,
+        sourceX, sourceY, sourceWidth, sourceHeight,
+        0, 0, targetWidth, targetHeight
+      );
+      
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    
+    img.onerror = () => {
+      reject(new Error('Error loading image'));
+    };
+    
+    img.src = imageSrc;
+  });
+};
