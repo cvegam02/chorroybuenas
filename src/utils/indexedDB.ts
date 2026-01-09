@@ -228,6 +228,37 @@ export const saveImage = async (cardId: string, imageData: string | Blob): Promi
 const blobURLsMap = new Map<string, string>(); // cardId -> blobURL
 
 /**
+ * Obtiene una imagen de IndexedDB como Blob (for PDF generation, avoids blob URL revocation issues)
+ */
+export const getImageBlob = async (cardId: string): Promise<Blob | null> => {
+  try {
+    const db = await initDB();
+
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([STORE_NAME], 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.get(cardId);
+
+      request.onsuccess = () => {
+        const result = request.result;
+        if (result && result.image instanceof Blob) {
+          resolve(result.image);
+        } else {
+          resolve(null);
+        }
+      };
+
+      request.onerror = () => {
+        reject(new Error('Error al obtener imagen de IndexedDB'));
+      };
+    });
+  } catch (error) {
+    console.error('Error getting image blob:', error);
+    return null;
+  }
+};
+
+/**
  * Obtiene una imagen de IndexedDB
  */
 export const getImage = async (cardId: string): Promise<string | null> => {

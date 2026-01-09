@@ -114,7 +114,12 @@ const loadImageAsUint8Array = async (imageSrc: string): Promise<ImageData> => {
   
   // If it's a blob URL, convert to base64 first
   if (imageSrc.startsWith('blob:')) {
-    base64Image = await blobURLToBase64(imageSrc);
+    try {
+      base64Image = await blobURLToBase64(imageSrc);
+    } catch (error) {
+      console.error('Error converting blob URL to base64:', error);
+      throw new Error(`No se pudo convertir el blob URL a base64: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+    }
   } else {
     base64Image = imageSrc;
   }
@@ -124,7 +129,18 @@ const loadImageAsUint8Array = async (imageSrc: string): Promise<ImageData> => {
     ? base64Image.split(',')[1] 
     : base64Image;
   
-  const binaryString = atob(base64Data);
+  if (!base64Data || base64Data.length === 0) {
+    throw new Error('El base64 de la imagen está vacío');
+  }
+  
+  let binaryString: string;
+  try {
+    binaryString = atob(base64Data);
+  } catch (error) {
+    console.error('Error decoding base64:', error);
+    throw new Error(`Error al decodificar base64: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+  }
+  
   const bytes = new Uint8Array(binaryString.length);
   for (let i = 0; i < binaryString.length; i++) {
     bytes[i] = binaryString.charCodeAt(i);
@@ -134,8 +150,17 @@ const loadImageAsUint8Array = async (imageSrc: string): Promise<ImageData> => {
   const img = new Image();
   img.src = base64Image;
   await new Promise((resolve, reject) => {
-    img.onload = resolve;
-    img.onerror = reject;
+    img.onload = () => {
+      if (img.width === 0 || img.height === 0) {
+        reject(new Error('La imagen tiene dimensiones inválidas (0x0)'));
+      } else {
+        resolve(undefined);
+      }
+    };
+    img.onerror = (error) => {
+      console.error('Error loading image:', error);
+      reject(new Error('No se pudo cargar la imagen para obtener sus dimensiones'));
+    };
   });
   
   return {
@@ -149,31 +174,55 @@ const embedImageInPDF = async (
   pdfDoc: PDFDocument,
   imageSrc: string
 ): Promise<{ image: any; width: number; height: number }> => {
-  let base64Image: string;
-  
-  // Convert blob URL to base64 if needed
-  if (imageSrc.startsWith('blob:')) {
-    base64Image = await blobURLToBase64(imageSrc);
-  } else {
-    base64Image = imageSrc;
+  try {
+    let base64Image: string;
+    
+    // Convert blob URL to base64 if needed
+    if (imageSrc.startsWith('blob:')) {
+      console.log(`Converting blob URL to base64: ${imageSrc.substring(0, 50)}...`);
+      base64Image = await blobURLToBase64(imageSrc);
+      console.log(`Blob URL converted successfully, base64 prefix: ${base64Image.substring(0, 50)}...`);
+    } else {
+      base64Image = imageSrc;
+      console.log(`Using base64 directly, prefix: ${base64Image.substring(0, 50)}...`);
+    }
+    
+    console.log(`Loading image as Uint8Array...`);
+    const imageData = await loadImageAsUint8Array(base64Image);
+    console.log(`Image loaded: ${imageData.data.length} bytes, dimensions: ${imageData.width}x${imageData.height}`);
+    
+    let image;
+    // Determine image format from base64 header
+    if (base64Image.startsWith('data:image/png')) {
+      console.log(`Embedding as PNG...`);
+      image = await pdfDoc.embedPng(imageData.data);
+      console.log(`PNG embedded successfully`);
+    } else if (base64Image.startsWith('data:image/jpeg') || base64Image.startsWith('data:image/jpg')) {
+      console.log(`Embedding as JPEG...`);
+      image = await pdfDoc.embedJpg(imageData.data);
+      console.log(`JPEG embedded successfully`);
+    } else {
+      // Default to PNG
+      console.log(`Unknown format, defaulting to PNG...`);
+      try {
+        image = await pdfDoc.embedPng(imageData.data);
+        console.log(`PNG (default) embedded successfully`);
+      } catch (pngError) {
+        console.log(`PNG failed, trying JPEG as fallback...`);
+        image = await pdfDoc.embedJpg(imageData.data);
+        console.log(`JPEG (fallback) embedded successfully`);
+      }
+    }
+    
+    const { width, height } = image.scale(1);
+    console.log(`Image ready: ${width}x${height}`);
+    
+    return { image, width, height };
+  } catch (error) {
+    console.error('Error in embedImageInPDF:', error);
+    console.error('Image source:', imageSrc.substring(0, 100));
+    throw error;
   }
-  
-  const imageData = await loadImageAsUint8Array(base64Image);
-  
-  let image;
-  // Determine image format from base64 header
-  if (base64Image.startsWith('data:image/png')) {
-    image = await pdfDoc.embedPng(imageData.data);
-  } else if (base64Image.startsWith('data:image/jpeg') || base64Image.startsWith('data:image/jpg')) {
-    image = await pdfDoc.embedJpg(imageData.data);
-  } else {
-    // Default to PNG
-    image = await pdfDoc.embedPng(imageData.data);
-  }
-  
-  const { width, height } = image.scale(1);
-  
-  return { image, width, height };
 };
 
 const drawCardOnPage = async (
@@ -193,7 +242,9 @@ const drawCardOnPage = async (
       return;
     }
     
+    console.log(`Drawing card ${card.id} - Image type: ${card.image.substring(0, 50)}...`);
     const { image, width: imgWidth, height: imgHeight } = await embedImageInPDF(pdfDoc, card.image);
+    console.log(`Successfully embedded image for card ${card.id} - Dimensions: ${imgWidth}x${imgHeight}`);
     
     // Reserve space for title if showing (more space for larger fonts)
     const titleSpace = showTitle ? titleSize + 8 : 0;
@@ -274,7 +325,13 @@ const drawCardOnPage = async (
       borderWidth: 2,
     });
   } catch (error) {
-    console.error('Error drawing card:', error);
+    console.error(`Error drawing card ${card.id}:`, error);
+    console.error(`Card title: ${card.title}`);
+    console.error(`Card image: ${card.image ? card.image.substring(0, 100) : 'null'}...`);
+    if (error instanceof Error) {
+      console.error(`Error message: ${error.message}`);
+      console.error(`Error stack: ${error.stack}`);
+    }
     // Draw error rectangle
     page.drawRectangle({
       x: x,
@@ -359,9 +416,60 @@ const drawBoardOnPage = async (
 export const generatePDF = async (boards: Board[]): Promise<Blob> => {
   const pdfDoc = await PDFDocument.create();
   
+  // Refresh images for board cards from IndexedDB - get Blob directly and convert to base64
+  // This avoids using blob URLs that may have been revoked
+  const { getImageBlob } = await import('../utils/indexedDB');
+  
+  console.log(`Refreshing images for ${boards.length} boards...`);
+  
+  // Refresh images for all cards in boards - convert Blobs directly to base64
+  const refreshedBoards: Board[] = await Promise.all(
+    boards.map(async (board, boardIndex) => {
+      console.log(`Refreshing images for board ${boardIndex + 1} with ${board.cards.length} cards...`);
+      const refreshedCards = await Promise.all(
+        board.cards.map(async (card, cardIndex) => {
+          if (card.id) {
+            try {
+              console.log(`  Getting image blob for card ${card.id} (board ${boardIndex + 1}, card ${cardIndex + 1})...`);
+              // Get the Blob directly from IndexedDB and convert to base64
+              const imageBlob = await getImageBlob(card.id);
+              if (imageBlob) {
+                const base64Image = await blobToBase64(imageBlob);
+                console.log(`  ✓ Got image blob and converted to base64 for card ${card.id}`);
+                return {
+                  ...card,
+                  image: base64Image, // Use base64 directly instead of blob URL
+                };
+              } else {
+                console.warn(`  ⚠ No image blob found in IndexedDB for card ${card.id}`);
+              }
+            } catch (error) {
+              console.error(`  ❌ Error getting image blob for card ${card.id}:`, error);
+            }
+          } else {
+            console.warn(`  ⚠ Card at position ${cardIndex} in board ${boardIndex + 1} has no ID`);
+          }
+          // If refresh failed, return card as-is (will try to use original, but may fail)
+          if (!card.image) {
+            console.error(`  ❌ Card ${card.id || 'unknown'} has no image at all!`);
+          }
+          return card;
+        })
+      );
+      
+      console.log(`✓ Finished refreshing board ${boardIndex + 1}`);
+      return {
+        ...board,
+        cards: refreshedCards,
+      };
+    })
+  );
+  
+  console.log(`✓ Finished refreshing all boards`);
+  
   // Add a page for each board
-  for (let i = 0; i < boards.length; i++) {
-    const board = boards[i];
+  for (let i = 0; i < refreshedBoards.length; i++) {
+    const board = refreshedBoards[i];
     const page = pdfDoc.addPage([PAGE_WIDTH_PT, PAGE_HEIGHT_PT]);
     
     await drawBoardOnPage(page, board, i + 1, pdfDoc);
