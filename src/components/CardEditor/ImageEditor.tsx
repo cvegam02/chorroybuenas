@@ -153,7 +153,6 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
 
         // Adjust position to zoom towards the pinch center
         if (containerRef.current && imageRef.current) {
-          const rect = containerRef.current.getBoundingClientRect();
           const containerWidth = containerRef.current.clientWidth;
           const containerHeight = containerRef.current.clientHeight;
           
@@ -300,38 +299,6 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
 
   const handleZoomOut = () => {
     setZoom(prev => Math.max(prev - ZOOM_STEP, MIN_ZOOM));
-  };
-
-  const updatePosition = (clientX: number, clientY: number) => {
-    if (!containerRef.current) return;
-
-    const img = imageRef.current;
-    if (!img) return;
-
-    const containerWidth = containerRef.current.clientWidth;
-    const containerHeight = containerRef.current.clientHeight;
-    const scaledWidth = img.width * zoom;
-    const scaledHeight = img.height * zoom;
-
-    const maxX = (scaledWidth - containerWidth) / 2;
-    const maxY = (scaledHeight - containerHeight) / 2;
-
-    const rect = containerRef.current.getBoundingClientRect();
-    const relativeX = clientX - rect.left;
-    const relativeY = clientY - rect.top;
-
-    // Calculate new position based on drag start
-    const newX = relativeX - (dragStart.x - (containerWidth / 2 - dragStart.x + position.x));
-    const newY = relativeY - (dragStart.y - (containerHeight / 2 - dragStart.y + position.y));
-
-    // Alternative simpler calculation
-    const deltaX = clientX - dragStart.x;
-    const deltaY = clientY - dragStart.y;
-
-    setPosition({
-      x: Math.max(-maxX, Math.min(maxX, position.x + deltaX)),
-      y: Math.max(-maxY, Math.min(maxY, position.y + deltaY)),
-    });
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
