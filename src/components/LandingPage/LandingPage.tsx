@@ -37,9 +37,9 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
 
         <section className="landing-page__hero landing-page__section-animate">
           <div className="landing-page__hero-content">
-            <h2 className="landing-page__hero-title">
-              ¡Diversión tradicional con un toque personal!
-            </h2>
+            <h1 className="landing-page__hero-title">
+              Crea tu Lotería Mexicana Personalizada - Tableros y Cartas Gratis
+            </h1>
             <p className="landing-page__hero-description">
               Diseña tus propias cartas, crea tableros únicos y disfruta de la Lotería Mexicana 
               con tus imágenes y temas favoritos. Perfecta para baby showers, eventos familiares, 

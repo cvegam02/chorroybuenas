@@ -9,10 +9,16 @@ export default defineConfig({
     react(),
     {
       name: 'copy-404',
-      closeBundle() {
+      writeBundle() {
         // Copy index.html to 404.html for GitHub Pages SPA routing
+        // writeBundle runs after files are written to disk
         const distPath = join(__dirname, 'dist')
-        copyFileSync(join(distPath, 'index.html'), join(distPath, '404.html'))
+        try {
+          copyFileSync(join(distPath, 'index.html'), join(distPath, '404.html'))
+        } catch (error) {
+          // Silently fail if index.html doesn't exist yet (shouldn't happen)
+          console.warn('Could not copy index.html to 404.html:', error)
+        }
       },
     },
   ],
@@ -20,6 +26,24 @@ export default defineConfig({
   server: {
     host: true, // Permite conexiones desde la red local
     port: 5173, // Puerto por defecto de Vite
+  },
+  build: {
+    // Optimización para SEO y rendimiento
+    minify: 'esbuild', // Minificación rápida (esbuild viene incluido con Vite)
+    cssMinify: true, // Minificar CSS
+    sourcemap: false, // Desactivar sourcemaps en producción para mejor rendimiento
+    rollupOptions: {
+      output: {
+        // Separar chunks para mejor caché
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'pdf-vendor': ['pdf-lib'],
+        },
+      },
+    },
+    // Optimización de assets
+    assetsInlineLimit: 4096, // Inlinear assets pequeños (<4kb)
+    chunkSizeWarningLimit: 1000, // Aumentar límite de advertencia
   },
 })
 
