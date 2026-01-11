@@ -2,6 +2,7 @@ import { PDFDocument, rgb, StandardFonts, type PDFFont } from 'pdf-lib';
 import { Board, Card } from '../types';
 import { loadCards } from '../utils/storage';
 import { blobToBase64 } from '../utils/indexedDB';
+import logoImage from '../img/logo.png';
 
 // Convert cm to points (1 cm = 28.35 points)
 const cmToPoints = (cm: number) => cm * 28.35;
@@ -10,32 +11,40 @@ const cmToPoints = (cm: number) => cm * 28.35;
 const PAGE_WIDTH_PT = cmToPoints(21);  // 595.35pt
 const PAGE_HEIGHT_PT = cmToPoints(29.7); // 842.0pt
 
-// Margins
-const PAGE_MARGIN_TOP_PT = 60; // Space for title
-const PAGE_MARGIN_BOTTOM_PT = 40; // Space at bottom
-const PAGE_MARGIN_SIDES_PT = 40; // Space on sides
-
-// Available space for board
-const AVAILABLE_WIDTH_PT = PAGE_WIDTH_PT - (PAGE_MARGIN_SIDES_PT * 2);
-const AVAILABLE_HEIGHT_PT = PAGE_HEIGHT_PT - PAGE_MARGIN_TOP_PT - PAGE_MARGIN_BOTTOM_PT;
+// Traditional lotería board dimensions (mediano) - VERTICAL orientation
+const BOARD_WIDTH_CM = 14; // Traditional mediano board width (vertical)
+const BOARD_HEIGHT_CM = 21; // Traditional mediano board height (vertical)
+const BOARD_WIDTH_PT = cmToPoints(BOARD_WIDTH_CM);
+const BOARD_HEIGHT_PT = cmToPoints(BOARD_HEIGHT_CM);
 
 // Board has 4x4 cards
 const BOARD_COLS = 4;
 const BOARD_ROWS = 4;
 
-// Gap between cards (small gap)
-const CARD_GAP_PT = cmToPoints(0.15); // ~4.25pt
+// Gap between cards (small gap for traditional look)
+const CARD_GAP_PT = cmToPoints(0.15); // ~4.25pt (small gap between cards)
 
-// Calculate card dimensions to fit in available space
+// Calculate card dimensions to fit exactly in traditional board size
 // Total gap space = (BOARD_COLS - 1) * CARD_GAP_PT
 const TOTAL_GAP_WIDTH = (BOARD_COLS - 1) * CARD_GAP_PT;
 const TOTAL_GAP_HEIGHT = (BOARD_ROWS - 1) * CARD_GAP_PT;
-const CARD_WIDTH_PT = (AVAILABLE_WIDTH_PT - TOTAL_GAP_WIDTH) / BOARD_COLS;
-const CARD_HEIGHT_PT = (AVAILABLE_HEIGHT_PT - TOTAL_GAP_HEIGHT) / BOARD_ROWS;
+const CARD_WIDTH_PT = (BOARD_WIDTH_PT - TOTAL_GAP_WIDTH) / BOARD_COLS;
+const CARD_HEIGHT_PT = (BOARD_HEIGHT_PT - TOTAL_GAP_HEIGHT) / BOARD_ROWS;
 
-// Board dimensions
-const BOARD_WIDTH_PT = CARD_WIDTH_PT * BOARD_COLS + TOTAL_GAP_WIDTH;
-const BOARD_HEIGHT_PT = CARD_HEIGHT_PT * BOARD_ROWS + TOTAL_GAP_HEIGHT;
+// Cut area dimensions - contains logo, title, and board
+// Header maximum height: 3 cm (85.05 points)
+const MAX_HEADER_CM = 3;
+const MAX_HEADER_PT = cmToPoints(MAX_HEADER_CM);
+const HEADER_GAP_PT = 3; // Gap between title and board (minimal)
+const TITLE_HEIGHT_PT = 10; // Space reserved for title text
+const LOGO_HEIGHT_PT = MAX_HEADER_PT - HEADER_GAP_PT - TITLE_HEIGHT_PT; // Logo height to fit in max header (72pt ~2.54cm)
+const HEADER_TOTAL_PT = MAX_HEADER_PT; // Total header space (maximum 3 cm)
+const CUT_AREA_WIDTH_PT = BOARD_WIDTH_PT; // Same width as board
+const CUT_AREA_HEIGHT_PT = BOARD_HEIGHT_PT + HEADER_TOTAL_PT; // Board + header
+
+// Calculate cut area position (centered both vertically and horizontally)
+const CUT_AREA_X_PT = (PAGE_WIDTH_PT - CUT_AREA_WIDTH_PT) / 2; // Centered horizontally
+const CUT_AREA_Y_PT = (PAGE_HEIGHT_PT - CUT_AREA_HEIGHT_PT) / 2; // Centered vertically
 
 interface ImageData {
   data: Uint8Array;
@@ -351,38 +360,93 @@ const drawCardOnPage = async (
   }
 };
 
+// Cache for logo image to avoid loading it multiple times
+let logoImageCache: { image: any; width: number; height: number } | null = null;
+
+const getLogoImage = async (pdfDoc: PDFDocument): Promise<{ image: any; width: number; height: number }> => {
+  if (logoImageCache) {
+    return logoImageCache;
+  }
+
+  try {
+    // Fetch the logo image
+    const response = await fetch(logoImage);
+    const arrayBuffer = await response.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+    
+    // Embed PNG logo in PDF
+    const image = await pdfDoc.embedPng(uint8Array);
+    const { width, height } = image.scale(1);
+    
+    logoImageCache = { image, width, height };
+    return logoImageCache;
+  } catch (error) {
+    console.error('Error loading logo image:', error);
+    throw error;
+  }
+};
+
 const drawBoardOnPage = async (
   page: any,
   board: Board,
   boardNumber: number,
   pdfDoc: PDFDocument
 ) => {
-  // Calculate board position (centered horizontally, with top margin)
-  const boardX = (PAGE_WIDTH_PT - BOARD_WIDTH_PT) / 2;
-  const boardY = PAGE_HEIGHT_PT - PAGE_MARGIN_TOP_PT - BOARD_HEIGHT_PT;
+  // Calculate positions within the cut area (centered on page)
+  // Board position: bottom of cut area
+  const boardY = CUT_AREA_Y_PT;
+  const boardX = CUT_AREA_X_PT; // Same X as cut area
+  // Title and Logo position: same level Y, just above board
+  const titleSize = 12;
+  const titleY = boardY + BOARD_HEIGHT_PT + HEADER_GAP_PT + titleSize / 2;
+  // Logo at same Y level as title (centered vertically with title text)
+  const logoY = titleY - titleSize / 2; // Align logo center with title baseline
   
-  // Draw semi-transparent background for the board (app theme color - orange/coral)
+  // Draw semi-transparent background for the entire cut area (including header)
   // This creates a subtle, diffused background that doesn't overpower the white background
   // Using very light orange/coral tint that matches the app's color scheme (#fef3e7, #fed7aa)
   page.drawRectangle({
-    x: boardX - 20, // Extra padding around the board
+    x: boardX - 20, // Extra padding around the cut area
     y: boardY - 20,
-    width: BOARD_WIDTH_PT + 40,
-    height: BOARD_HEIGHT_PT + 40,
+    width: CUT_AREA_WIDTH_PT + 40,
+    height: CUT_AREA_HEIGHT_PT + 40,
     color: rgb(0.995, 0.953, 0.906), // Very light orange-tinted background (similar to #fef3e7)
     borderColor: rgb(0.98, 0.92, 0.87), // Slightly darker border (similar to #fed7aa but lighter)
     borderWidth: 1,
   });
   
-  // Draw board title (centered)
+  // Draw board title (left-aligned, just above board)
   const titleText = `Tablero ${boardNumber}`;
-  const titleWidth = titleText.length * 8; // Approximate width
+  const titleX = CUT_AREA_X_PT + 10; // Left padding within cut area
+  
   page.drawText(titleText, {
-    x: (PAGE_WIDTH_PT - titleWidth) / 2,
-    y: PAGE_HEIGHT_PT - 35,
-    size: 18,
+    x: titleX,
+    y: titleY,
+    size: titleSize,
     color: rgb(0, 0, 0),
   });
+  
+  // Draw logo at same level as title (right side of cut area)
+  try {
+    const logoSize = LOGO_HEIGHT_PT; // Logo height in points (calculated to fit in max header)
+    const { image: logoImageEmbed, width: logoWidth, height: logoHeight } = await getLogoImage(pdfDoc);
+    const logoAspectRatio = logoWidth / logoHeight;
+    const logoDisplayWidth = logoSize * logoAspectRatio;
+    const logoDisplayHeight = logoSize;
+    
+    // Position logo at right side of cut area, at same Y level as title
+    const logoX = CUT_AREA_X_PT + CUT_AREA_WIDTH_PT - logoDisplayWidth - 10; // Right padding
+    
+    page.drawImage(logoImageEmbed, {
+      x: logoX,
+      y: logoY,
+      width: logoDisplayWidth,
+      height: logoDisplayHeight,
+    });
+  } catch (error) {
+    console.warn('Could not draw logo on board:', error);
+    // Continue without logo if there's an error
+  }
   
   // Draw each card in the 4x4 grid (top to bottom, left to right)
   for (let row = 0; row < BOARD_ROWS; row++) {
@@ -476,7 +540,40 @@ export const generatePDF = async (boards: Board[]): Promise<Blob> => {
   }
   
   // Optionally add pages with all cards (full deck)
-  const allCards = await loadCards();
+  // Refresh images from IndexedDB to ensure they have the same aspect ratio as board cards
+  let allCards = await loadCards();
+  if (allCards.length > 0) {
+    console.log(`Refreshing images for all cards (${allCards.length} cards) from IndexedDB...`);
+    
+    // Refresh images for all cards - convert Blobs directly to base64
+    // This ensures they have the same aspect ratio (5:7.5) as the cards in boards
+    allCards = await Promise.all(
+      allCards.map(async (card) => {
+        if (card.id) {
+          try {
+            // Get the Blob directly from IndexedDB and convert to base64
+            const imageBlob = await getImageBlob(card.id);
+            if (imageBlob) {
+              const base64Image = await blobToBase64(imageBlob);
+              console.log(`  ✓ Refreshed image for card ${card.id} (${card.title})`);
+              return {
+                ...card,
+                image: base64Image, // Use base64 directly instead of blob URL
+              };
+            } else {
+              console.warn(`  ⚠ No image blob found in IndexedDB for card ${card.id} (${card.title})`);
+            }
+          } catch (error) {
+            console.error(`  ❌ Error getting image blob for card ${card.id} (${card.title}):`, error);
+          }
+        }
+        return card; // Return original card if no ID or refresh failed
+      })
+    );
+    
+    console.log(`✓ Finished refreshing images for all cards`);
+  }
+  
   if (allCards.length > 0) {
     // Full deck pages: use LANDSCAPE to reduce wasted whitespace while keeping safe gaps for cutting.
     // We compute a fixed grid (cols/rows) and then center it on the page.
@@ -490,8 +587,8 @@ export const generatePDF = async (boards: Board[]): Promise<Blob> => {
     const DECK_MARGIN_BOTTOM = 26;
     const DECK_HEADER_H = 26; // smaller header to save space
 
-    // Traditional lotería aspect ratio
-    const DECK_ASPECT = 7 / 11; // width / height
+    // Card aspect ratio (5:7.5 = 2/3 = 0.666...) - matches the actual card aspect ratio
+    const DECK_ASPECT = 5 / 7.5; // width / height (same as cards in boards)
 
     // Grid configuration: 5x2 in landscape usually maximizes usage with safe cut gaps.
     const DECK_COLS = 5;
@@ -545,7 +642,7 @@ export const generatePDF = async (boards: Board[]): Promise<Blob> => {
           deckCardH,
           pdfDoc,
           true,
-          12
+          11 // titleSize (same as boards for consistency)
         );
       }
 
