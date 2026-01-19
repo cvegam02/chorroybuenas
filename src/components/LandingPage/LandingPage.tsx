@@ -1,18 +1,5 @@
 import { Link } from 'react-router-dom';
 import { 
-  FaCamera, 
-  FaDice, 
-  FaDownload, 
-  FaBaby, 
-  FaUsers, 
-  FaBriefcase, 
-  FaLaugh, 
-  FaChild, 
-  FaBirthdayCake,
-  FaImage,
-  FaPaintBrush,
-  FaBullseye,
-  FaFilePdf,
   FaGamepad,
   FaBook,
   FaHeart,
@@ -69,7 +56,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
           <div className="landing-page__step">
             <div className="landing-page__step-number">1</div>
             <div className="landing-page__step-icon">
-              <FaCamera />
+              📷
             </div>
             <div className="landing-page__step-content">
               <h3>Sube Imágenes</h3>
@@ -80,7 +67,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
           <div className="landing-page__step">
             <div className="landing-page__step-number">2</div>
             <div className="landing-page__step-icon">
-              <FaDice />
+              🎲
             </div>
             <div className="landing-page__step-content">
               <h3>Genera Tableros</h3>
@@ -91,7 +78,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
           <div className="landing-page__step">
             <div className="landing-page__step-number">3</div>
             <div className="landing-page__step-icon">
-              <FaDownload />
+              📥
             </div>
             <div className="landing-page__step-content">
               <h3>Descarga PDF</h3>
@@ -112,7 +99,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             <div className="landing-page__feature">
               <div className="landing-page__feature-icon-wrapper">
                 <div className="landing-page__feature-icon">
-                  <FaImage />
+                  🖼️
                 </div>
               </div>
               <h3>100% Personalizable</h3>
@@ -121,7 +108,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             <div className="landing-page__feature">
               <div className="landing-page__feature-icon-wrapper">
                 <div className="landing-page__feature-icon">
-                  <FaPaintBrush />
+                  🎨
                 </div>
               </div>
               <h3>Editor Integrado</h3>
@@ -130,7 +117,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             <div className="landing-page__feature">
               <div className="landing-page__feature-icon-wrapper">
                 <div className="landing-page__feature-icon">
-                  <FaBullseye />
+                  🎯
                 </div>
               </div>
               <h3>Múltiples Tableros</h3>
@@ -139,7 +126,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             <div className="landing-page__feature">
               <div className="landing-page__feature-icon-wrapper">
                 <div className="landing-page__feature-icon">
-                  <FaFilePdf />
+                  📄
                 </div>
               </div>
               <h3>PDF Profesional</h3>
@@ -159,7 +146,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
           <div className="landing-page__events-grid">
             <div className="landing-page__event">
               <div className="landing-page__event-icon">
-                <FaBaby />
+                👶
               </div>
               <div className="landing-page__event-content">
                 <h3>Baby Showers</h3>
@@ -168,7 +155,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             </div>
             <div className="landing-page__event">
               <div className="landing-page__event-icon">
-                <FaUsers />
+                👨‍👩‍👧‍👦
               </div>
               <div className="landing-page__event-content">
                 <h3>Eventos Familiares</h3>
@@ -177,7 +164,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             </div>
             <div className="landing-page__event">
               <div className="landing-page__event-icon">
-                <FaBriefcase />
+                💼
               </div>
               <div className="landing-page__event-content">
                 <h3>Eventos Corporativos</h3>
@@ -186,7 +173,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             </div>
             <div className="landing-page__event">
               <div className="landing-page__event-icon">
-                <FaLaugh />
+                😄
               </div>
               <div className="landing-page__event-content">
                 <h3>Fiestas con Amigos</h3>
@@ -195,7 +182,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             </div>
             <div className="landing-page__event">
               <div className="landing-page__event-icon">
-                <FaChild />
+                🎈
               </div>
               <div className="landing-page__event-content">
                 <h3>Para Niños</h3>
@@ -204,7 +191,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             </div>
             <div className="landing-page__event">
               <div className="landing-page__event-icon">
-                <FaBirthdayCake />
+                🎂
               </div>
               <div className="landing-page__event-content">
                 <h3>Otras Celebraciones</h3>
