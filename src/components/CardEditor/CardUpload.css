@@ -3,17 +3,15 @@
   flex-direction: column;
   gap: 16px;
   max-width: 300px;
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
 }
 
 .card-upload__edit-button {
   padding: 10px 20px;
-  border: 2px solid #fed7aa;
+  border: 2px solid var(--color-primary-lightest);
   border-radius: 8px;
-  background: #fef3e7;
-  color: #ea580c;
+  background: var(--color-primary-lightest);
+  color: var(--color-primary);
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
@@ -22,15 +20,15 @@
 }
 
 .card-upload__edit-button:hover {
-  background: #fed7aa;
-  border-color: #fb923c;
+  background: var(--color-primary-lightest);
+  border-color: var(--color-primary-lighter);
   transform: translateY(-1px);
 }
 
 .card-upload__help-text {
   text-align: center;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   line-height: 1.6;
   margin-top: -8px;
 }
@@ -42,20 +40,20 @@
 .card-upload__dropzone {
   width: 100%;
   aspect-ratio: 5 / 7.5;
-  border: 2px dashed #e5e7eb;
+  border: 2px dashed var(--color-border);
   border-radius: 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f9fafb;
+  background: var(--color-bg-secondary);
   transition: border-color 0.2s, background 0.2s;
   overflow: hidden;
 }
 
 .card-upload__dropzone:hover {
-  border-color: #ea580c;
-  background: #fef3e7;
+  border-color: var(--color-primary);
+  background: var(--color-primary-lightest);
 }
 
 .card-upload__placeholder {
@@ -63,7 +61,7 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   padding: 20px;
 }
 
@@ -75,13 +73,13 @@
   font-size: 1rem;
   font-weight: 600;
   margin: 0;
-  color: #111827;
+  color: var(--color-text-primary);
 }
 
 .card-upload__placeholder-sub {
   font-size: 0.875rem;
   margin: 0;
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .card-upload__preview-container {
@@ -139,23 +137,23 @@
 
 .card-upload__title-input {
   padding: 12px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   font-size: 1rem;
-  color: #111827;
-  background: white;
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
   transition: border-color 0.2s;
 }
 
 .card-upload__title-input:focus {
   outline: none;
-  border-color: #ea580c;
+  border-color: var(--color-primary);
 }
 
 .card-upload__help-text {
   text-align: center;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   line-height: 1.6;
   margin: 0;
 }
@@ -164,23 +162,23 @@
   padding: 12px 24px;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  background: var(--color-primary);
   color: white;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .card-upload__submit:hover:not(:disabled) {
-  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  background: var(--color-primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .card-upload__submit:disabled {
-  background: #9ca3af;
+  background: var(--color-border-dark);
   cursor: not-allowed;
 }
 
@@ -189,4 +187,3 @@
     max-width: 100%;
   }
 }
-

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FaLightbulb, FaExclamationTriangle, FaCheckCircle, FaArrowRight } from 'react-icons/fa';
 import './BoardCountSelector.css';
 import { loadCards } from '../../utils/storage';
 
@@ -106,29 +107,38 @@ export const BoardCountSelector = ({ onGenerate }: BoardCountSelectorProps) => {
 
   return (
     <div className="board-count-selector">
-      <h2 className="board-count-selector__title">Cantidad de Tableros</h2>
-      
-      <div className="board-count-selector__info">
-        Cada tablero tendrá 16 cartas únicas. Las cartas pueden repetirse entre diferentes tableros.
+      <div className="board-count-selector__header">
+        <h1 className="board-count-selector__title">Cantidad de Tableros</h1>
+        <p className="board-count-selector__subtitle">
+          Cada tablero tendrá 16 cartas únicas. Las cartas pueden repetirse entre diferentes tableros.
+        </p>
       </div>
 
-      {/* Suggestions Section - Simplified */}
       {!isLoadingCards && cardCount >= 16 && (
-        <div className="board-count-selector__recommendations">
-          <h3 className="board-count-selector__recommendations-title">💡 Sugerencia</h3>
-          <p className="board-count-selector__recommendations-intro">
-            Con tus <strong>{cardCount} cartas</strong>, te sugerimos generar <strong>{suggestedBoards} tablero{suggestedBoards !== 1 ? 's' : ''}</strong> para una distribución balanceada.
-          </p>
+        <div className="board-count-selector__suggestion">
+          <div className="board-count-selector__suggestion-icon">
+            <FaLightbulb />
+          </div>
+          <div className="board-count-selector__suggestion-content">
+            <div className="board-count-selector__suggestion-title">Sugerencia</div>
+            <div className="board-count-selector__suggestion-text">
+              Con tus <strong>{cardCount} cartas</strong>, te sugerimos generar <strong>{suggestedBoards} tablero{suggestedBoards !== 1 ? 's' : ''}</strong> para una distribución balanceada.
+            </div>
+          </div>
         </div>
       )}
 
       {!isLoadingCards && cardCount < 16 && (
-        <div className="board-count-selector__recommendations">
-          <div className="board-count-selector__recommendations-status board-count-selector__recommendations-status--error">
-            <p>
-              ❌ Necesitas al menos <strong>16 cartas</strong> para generar un tablero. 
+        <div className="board-count-selector__error-message">
+          <div className="board-count-selector__error-icon">
+            <FaExclamationTriangle />
+          </div>
+          <div className="board-count-selector__error-content">
+            <div className="board-count-selector__error-title">Cartas insuficientes</div>
+            <div className="board-count-selector__error-text">
+              Necesitas al menos <strong>16 cartas</strong> para generar un tablero. 
               Actualmente tienes <strong>{cardCount} carta{cardCount !== 1 ? 's' : ''}</strong>.
-            </p>
+            </div>
           </div>
         </div>
       )}
@@ -139,9 +149,9 @@ export const BoardCountSelector = ({ onGenerate }: BoardCountSelectorProps) => {
             ¿Cuántos tableros quieres generar?
           </label>
           {!isLoadingCards && cardCount >= 16 && (
-            <p className="board-count-selector__input-hint">
+            <div className="board-count-selector__hint">
               Sugerido: <strong>{suggestedBoards} tableros</strong>
-            </p>
+            </div>
           )}
           <input
             id="board-count"
@@ -160,9 +170,10 @@ export const BoardCountSelector = ({ onGenerate }: BoardCountSelectorProps) => {
         <button
           type="submit"
           disabled={boardCount < 1 || cardCount < 16}
-          className="board-count-selector__button"
+          className={`board-count-selector__button ${boardCount >= 1 && cardCount >= 16 ? 'board-count-selector__button--enabled' : ''}`}
         >
-          Generar Tableros
+          <span>Generar Tableros</span>
+          <FaArrowRight />
         </button>
       </form>
     </div>

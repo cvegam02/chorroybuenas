@@ -1,4 +1,16 @@
 import { useState } from 'react';
+import { 
+  FaInfoCircle, 
+  FaChevronDown, 
+  FaLightbulb, 
+  FaCheckCircle,
+  FaUpload,
+  FaArrowRight,
+  FaImage,
+  FaEdit,
+  FaTag,
+  FaPlus
+} from 'react-icons/fa';
 import { useCards } from '../../hooks/useCards';
 import { CardPreview } from './CardPreview';
 import { CardUploadThumb } from './CardUploadThumb';
@@ -57,95 +69,126 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
     <div className="card-editor">
       <div className="card-editor__header">
         <h1 className="card-editor__title">Carga de Cartas</h1>
-      </div>
-
-      <div className="card-editor__intro">
-        <p className="card-editor__intro-text">
-          Crea tu baraja personalizada subiendo imágenes y asignándoles un título. 
-          Puedes ajustar cada imagen antes de agregarla a tu colección.
+        <p className="card-editor__subtitle">
+          Crea tu baraja personalizada subiendo imágenes y asignándoles un título
         </p>
       </div>
-      
-      <div className="card-editor__counter">
-        Cartas cargadas: <strong>{cardCount}</strong> {hasMinimumCards && <span className="card-editor__counter-check">✓</span>}
+
+      <div className="card-editor__stats">
+        <div className="card-editor__stat">
+          <div className="card-editor__stat-value">
+            {cardCount}
+            {hasMinimumCards && (
+              <FaCheckCircle className="card-editor__stat-check" />
+            )}
+          </div>
+          <div className="card-editor__stat-label">Cartas cargadas</div>
+          {!hasMinimumCards && (
+            <div className="card-editor__stat-minimum">
+              Mínimo: {minCards}
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="card-editor__instructions">
+      <div className="card-editor__info-section">
         <button 
-          className="card-editor__instructions-header"
+          className={`card-editor__info-toggle ${!isInstructionsCollapsed ? 'card-editor__info-toggle--open' : ''}`}
           onClick={() => setIsInstructionsCollapsed(!isInstructionsCollapsed)}
           type="button"
         >
-          <h2 className="card-editor__instructions-title">📝 Instrucciones</h2>
-          <span className={`card-editor__instructions-chevron ${isInstructionsCollapsed ? 'card-editor__instructions-chevron--collapsed' : ''}`}>
-            ▼
-          </span>
+          <div className="card-editor__info-toggle-content">
+            <FaInfoCircle className="card-editor__info-icon" />
+            <span className="card-editor__info-title">Instrucciones</span>
+          </div>
+          <FaChevronDown className={`card-editor__info-chevron ${isInstructionsCollapsed ? '' : 'card-editor__info-chevron--open'}`} />
         </button>
-        <div className={`card-editor__instructions-content ${isInstructionsCollapsed ? 'card-editor__instructions-content--collapsed' : ''}`}>
-          <div className="card-editor__instructions-steps">
-            <div className="card-editor__instruction-step">
-              <span className="card-editor__step-number-small">1</span>
-              <div>
-                <strong>Selecciona una imagen</strong>
-                <p>Haz clic en el área de carga o arrastra una imagen. Formatos aceptados: JPG, PNG o WEBP</p>
+        <div className={`card-editor__info-content ${isInstructionsCollapsed ? 'card-editor__info-content--collapsed' : ''}`}>
+          <div className="card-editor__steps">
+            <div className="card-editor__step">
+              <div className="card-editor__step-number">1</div>
+              <div className="card-editor__step-content">
+                <div className="card-editor__step-icon">
+                  <FaImage />
+                </div>
+                <div>
+                  <strong>Selecciona una imagen</strong>
+                  <p>Haz clic en el área de carga o arrastra una imagen. Formatos: JPG, PNG o WEBP</p>
+                </div>
               </div>
             </div>
-            <div className="card-editor__instruction-step">
-              <span className="card-editor__step-number-small">2</span>
-              <div>
-                <strong>Ajusta la imagen</strong>
-                <p>Usa zoom (rueda del mouse o botones + / -) y arrastra para seleccionar el área que quieres mostrar</p>
+            <div className="card-editor__step">
+              <div className="card-editor__step-number">2</div>
+              <div className="card-editor__step-content">
+                <div className="card-editor__step-icon">
+                  <FaEdit />
+                </div>
+                <div>
+                  <strong>Ajusta la imagen</strong>
+                  <p>Usa zoom (rueda del mouse o botones + / -) y arrastra para seleccionar el área que quieres mostrar</p>
+                </div>
               </div>
             </div>
-            <div className="card-editor__instruction-step">
-              <span className="card-editor__step-number-small">3</span>
-              <div>
-                <strong>Agrega un título</strong>
-                <p>Escribe un nombre descriptivo para tu carta. Este será el texto que se cantará durante el juego</p>
+            <div className="card-editor__step">
+              <div className="card-editor__step-number">3</div>
+              <div className="card-editor__step-content">
+                <div className="card-editor__step-icon">
+                  <FaTag />
+                </div>
+                <div>
+                  <strong>Agrega un título</strong>
+                  <p>Escribe un nombre descriptivo para tu carta. Este será el texto que se cantará durante el juego</p>
+                </div>
               </div>
             </div>
-            <div className="card-editor__instruction-step">
-              <span className="card-editor__step-number-small">4</span>
-              <div>
-                <strong>Agrega la carta</strong>
-                <p>Haz clic en "Agregar Carta" para añadirla a tu baraja. Puedes eliminarla haciendo clic en la X</p>
+            <div className="card-editor__step">
+              <div className="card-editor__step-number">4</div>
+              <div className="card-editor__step-content">
+                <div className="card-editor__step-icon">
+                  <FaPlus />
+                </div>
+                <div>
+                  <strong>Agrega la carta</strong>
+                  <p>Haz clic en "Agregar Carta" para añadirla a tu baraja. Puedes eliminarla haciendo clic en la X</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="card-editor__recommendations-box">
+      <div className="card-editor__info-section">
         <button 
-          className="card-editor__recommendations-header"
+          className={`card-editor__info-toggle ${!isRecommendationsCollapsed ? 'card-editor__info-toggle--open' : ''}`}
           onClick={() => setIsRecommendationsCollapsed(!isRecommendationsCollapsed)}
           type="button"
         >
-          <h3 className="card-editor__recommendations-title">✨ Recomendaciones para mejores resultados</h3>
-          <span className={`card-editor__recommendations-chevron ${isRecommendationsCollapsed ? 'card-editor__recommendations-chevron--collapsed' : ''}`}>
-            ▼
-          </span>
+          <div className="card-editor__info-toggle-content">
+            <FaLightbulb className="card-editor__info-icon" />
+            <span className="card-editor__info-title">Recomendaciones para mejores resultados</span>
+          </div>
+          <FaChevronDown className={`card-editor__info-chevron ${isRecommendationsCollapsed ? '' : 'card-editor__info-chevron--open'}`} />
         </button>
         {!isRecommendationsCollapsed && (
-          <ul className="card-editor__recommendations-list">
-            <li>📸 <strong>Usa imágenes de buena calidad:</strong> Evita imágenes borrosas o pixeladas para que se vean nítidas en los tableros</li>
-            <li>🎯 <strong>Enfócate en el sujeto principal:</strong> Las imágenes con un objeto o persona claramente visible funcionan mejor</li>
-            <li>💡 <strong>Buena iluminación:</strong> Elige fotos bien iluminadas para que los detalles se aprecien mejor</li>
-            <li>🎨 <strong>Colores vibrantes:</strong> Las imágenes con colores vivos y contrastes claros destacan más</li>
-            <li>📏 <strong>Composición centrada:</strong> El editor te permite recortar y ajustar, pero es mejor empezar con una imagen bien encuadrada</li>
-            <li>✏️ <strong>Títulos descriptivos:</strong> Usa nombres claros y cortos que sean fáciles de cantar durante el juego</li>
-          </ul>
+          <div className="card-editor__info-content">
+            <ul className="card-editor__recommendations-list">
+              <li><strong>Usa imágenes de buena calidad:</strong> Evita imágenes borrosas o pixeladas para que se vean nítidas en los tableros</li>
+              <li><strong>Enfócate en el sujeto principal:</strong> Las imágenes con un objeto o persona claramente visible funcionan mejor</li>
+              <li><strong>Buena iluminación:</strong> Elige fotos bien iluminadas para que los detalles se aprecien mejor</li>
+              <li><strong>Colores vibrantes:</strong> Las imágenes con colores vivos y contrastes claros destacan más</li>
+              <li><strong>Composición centrada:</strong> El editor te permite recortar y ajustar, pero es mejor empezar con una imagen bien encuadrada</li>
+              <li><strong>Títulos descriptivos:</strong> Usa nombres claros y cortos que sean fáciles de cantar durante el juego</li>
+            </ul>
+          </div>
         )}
       </div>
 
       <div className="card-editor__cards-section">
         {cards.length > 0 && (
-          <>
-            <h2 className="card-editor__cards-section-title">Tus Cartas ({cardCount})</h2>
-            <p className="card-editor__cards-section-subtitle">
-              Haz clic en la X para eliminar una carta si necesitas hacer cambios
-            </p>
-          </>
+          <div className="card-editor__cards-header">
+            <h2 className="card-editor__cards-title">Tus Cartas</h2>
+            <span className="card-editor__cards-count">({cardCount})</span>
+          </div>
         )}
         <div className="card-editor__cards-grid">
           {cards.map((card) => (
@@ -179,22 +222,25 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
 
       <div className="card-editor__actions">
         {!hasMinimumCards && (
-          <p className="card-editor__actions-note">
-            Necesitas al menos {minCards} cartas para continuar. Actualmente tienes {cardCount} cartas.
-          </p>
+          <div className="card-editor__actions-note">
+            Necesitas al menos <strong>{minCards} cartas</strong> para continuar. 
+            Actualmente tienes <strong>{cardCount}</strong>.
+          </div>
         )}
         <button
           onClick={onNext}
           disabled={!hasMinimumCards}
-          className="card-editor__next-button"
+          className={`card-editor__next-button ${hasMinimumCards ? 'card-editor__next-button--enabled' : ''}`}
         >
-          {hasMinimumCards 
-            ? 'Siguiente: Seleccionar Cantidad de Tableros →' 
-            : `Agregar ${minCards - cardCount} cartas más para continuar`
-          }
+          <span>
+            {hasMinimumCards 
+              ? 'Siguiente: Seleccionar Cantidad de Tableros' 
+              : `Agregar ${minCards - cardCount} cartas más`
+            }
+          </span>
+          {hasMinimumCards && <FaArrowRight />}
         </button>
       </div>
     </div>
   );
 };
-

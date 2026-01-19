@@ -11,23 +11,21 @@
   z-index: 9999;
   padding: 20px;
   overflow-y: auto;
-  scrollbar-gutter: stable;
 }
 
 .batch-upload-modal__content {
-  background: white;
+  background: var(--color-bg-primary);
   border-radius: 16px;
   padding: 32px;
   max-width: 700px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  border: 2px solid #fed7aa;
+  box-shadow: var(--shadow-xl);
+  border: 2px solid var(--color-primary-lightest);
   position: relative;
   display: flex;
   flex-direction: column;
-  margin: 0 auto;
 }
 
 .batch-upload-modal__header {
@@ -39,7 +37,7 @@
 
 .batch-upload-modal__title {
   font-size: 1.5rem;
-  color: #ea580c;
+  color: var(--color-primary);
   margin: 0;
   font-weight: 700;
   letter-spacing: -0.3px;
@@ -50,8 +48,8 @@
   height: 32px;
   border: none;
   border-radius: 50%;
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
   font-size: 24px;
   line-height: 1;
   cursor: pointer;
@@ -63,8 +61,8 @@
 }
 
 .batch-upload-modal__close:hover {
-  background: #e5e7eb;
-  color: #111827;
+  background: var(--color-border-dark);
+  color: var(--color-text-primary);
   transform: scale(1.1);
 }
 
@@ -75,7 +73,7 @@
 .batch-upload-modal__progress-bar {
   width: 100%;
   height: 8px;
-  background: #e5e7eb;
+  background: var(--color-bg-tertiary);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -83,14 +81,14 @@
 
 .batch-upload-modal__progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #ea580c, #f97316);
+  background: var(--color-primary);
   transition: width 0.3s ease;
 }
 
 .batch-upload-modal__progress-text {
   text-align: center;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -101,7 +99,7 @@
 
 .batch-upload-modal__file-name {
   font-size: 0.9375rem;
-  color: #4b5563;
+  color: var(--color-text-secondary);
   margin: 0;
   font-weight: 500;
 }
@@ -114,20 +112,17 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  align-items: center;
-  width: 100%;
 }
 
 .batch-upload-modal__preview {
   width: 100%;
   max-width: 300px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
   aspect-ratio: 5 / 7.5;
-  border: 2px solid #fed7aa;
+  border: 2px solid var(--color-primary-lightest);
   border-radius: 12px;
   overflow: hidden;
-  background: #f9fafb;
+  background: var(--color-bg-secondary);
 }
 
 .batch-upload-modal__preview-img {
@@ -140,41 +135,39 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 100%;
-  max-width: 400px;
 }
 
 .batch-upload-modal__label {
   font-size: 1rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--color-text-primary);
 }
 
 .batch-upload-modal__title-input {
   padding: 12px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   font-size: 1rem;
-  color: #111827;
-  background: white;
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
   transition: border-color 0.2s;
 }
 
 .batch-upload-modal__title-input:focus {
   outline: none;
-  border-color: #ea580c;
+  border-color: var(--color-primary);
 }
 
 .batch-upload-modal__help-text {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 .batch-upload-modal__actions {
   display: flex;
   gap: 12px;
-  justify-content: center;
+  justify-content: flex-end;
   flex-wrap: wrap;
   margin-top: 8px;
 }
@@ -192,42 +185,41 @@
 }
 
 .batch-upload-modal__skip-button {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
 }
 
 .batch-upload-modal__skip-button:hover {
-  background: #e5e7eb;
-  color: #111827;
+  background: var(--color-border-dark);
+  color: var(--color-text-primary);
 }
 
 .batch-upload-modal__edit-button {
-  background: #f9fafb;
-  color: #ea580c;
-  border: 2px solid #fed7aa;
+  background: var(--color-bg-primary);
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary-lightest);
 }
 
 .batch-upload-modal__edit-button:hover {
-  background: #fef3e7;
-  border-color: #fb923c;
+  background: var(--color-primary-lightest);
+  border-color: var(--color-primary-lighter);
 }
 
 .batch-upload-modal__next-button {
-  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  background: var(--color-primary);
   color: white;
-  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .batch-upload-modal__next-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  background: var(--color-primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .batch-upload-modal__next-button:disabled {
-  background: #d1d5db;
+  background: var(--color-border-dark);
   cursor: not-allowed;
-  box-shadow: none;
 }
 
 @media (max-width: 640px) {
@@ -242,7 +234,6 @@
 
   .batch-upload-modal__actions {
     flex-direction: column;
-    justify-content: center;
   }
 
   .batch-upload-modal__skip-button,
@@ -251,4 +242,3 @@
     width: 100%;
   }
 }
-
