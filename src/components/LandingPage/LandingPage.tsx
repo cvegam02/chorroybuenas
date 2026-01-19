@@ -32,9 +32,6 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
       {/* Hero Section - Full Width con Imagen de Fondo */}
       <section className="landing-page__hero">
         <div className="landing-page__hero-overlay"></div>
-        <div className="landing-page__hero-logo">
-          <img src={logoImage} alt="chorroybuenas.com.mx" />
-        </div>
         <div className="landing-page__hero-content">
           <div className="landing-page__hero-badge">
             <FaStar />
@@ -55,6 +52,9 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             <FaArrowRight />
           </button>
         </div>
+        <div className="landing-page__hero-logo">
+          <img src={logoImage} alt="chorroybuenas.com.mx" />
+        </div>
         <div className="landing-page__hero-visual">
           <div className="landing-page__hero-card landing-page__hero-card--1"></div>
           <div className="landing-page__hero-card landing-page__hero-card--2"></div>
@@ -65,124 +65,165 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
       <main className="landing-page__main">
         {/* Quick Steps - Horizontal Bar */}
         <section className="landing-page__steps">
+          <div className="landing-page__steps-decorative"></div>
           <div className="landing-page__step">
+            <div className="landing-page__step-number">1</div>
             <div className="landing-page__step-icon">
               <FaCamera />
             </div>
             <div className="landing-page__step-content">
               <h3>Sube Imágenes</h3>
-              <p>Mínimo 20 cartas</p>
+              <p>Mínimo 20 cartas para empezar</p>
             </div>
+            <div className="landing-page__step-arrow">→</div>
           </div>
           <div className="landing-page__step">
+            <div className="landing-page__step-number">2</div>
             <div className="landing-page__step-icon">
               <FaDice />
             </div>
             <div className="landing-page__step-content">
               <h3>Genera Tableros</h3>
-              <p>Mínimo 8 tableros</p>
+              <p>Mínimo 8 tableros únicos</p>
             </div>
+            <div className="landing-page__step-arrow">→</div>
           </div>
           <div className="landing-page__step">
+            <div className="landing-page__step-number">3</div>
             <div className="landing-page__step-icon">
               <FaDownload />
             </div>
             <div className="landing-page__step-content">
               <h3>Descarga PDF</h3>
-              <p>Listo para imprimir</p>
+              <p>Listo para imprimir y jugar</p>
             </div>
           </div>
         </section>
 
         {/* Features Section */}
         <section className="landing-page__features">
-          <h2 className="landing-page__section-title">¿Por qué elegirnos?</h2>
+          <div className="landing-page__section-header">
+            <h2 className="landing-page__section-title">¿Por qué elegirnos?</h2>
+            <p className="landing-page__section-subtitle">
+              Todo lo que necesitas para crear tu lotería personalizada en un solo lugar
+            </p>
+          </div>
           <div className="landing-page__features-grid">
             <div className="landing-page__feature">
-              <div className="landing-page__feature-icon">
-                <FaImage />
+              <div className="landing-page__feature-icon-wrapper">
+                <div className="landing-page__feature-icon">
+                  <FaImage />
+                </div>
               </div>
               <h3>100% Personalizable</h3>
-              <p>Usa tus propias imágenes para crear cartas únicas y originales</p>
+              <p>Usa tus propias imágenes para crear cartas únicas y originales que reflejen tu estilo</p>
             </div>
             <div className="landing-page__feature">
-              <div className="landing-page__feature-icon">
-                <FaPaintBrush />
+              <div className="landing-page__feature-icon-wrapper">
+                <div className="landing-page__feature-icon">
+                  <FaPaintBrush />
+                </div>
               </div>
               <h3>Editor Integrado</h3>
-              <p>Recorta y ajusta tus imágenes fácilmente</p>
+              <p>Recorta y ajusta tus imágenes fácilmente con nuestra herramienta intuitiva</p>
             </div>
             <div className="landing-page__feature">
-              <div className="landing-page__feature-icon">
-                <FaBullseye />
+              <div className="landing-page__feature-icon-wrapper">
+                <div className="landing-page__feature-icon">
+                  <FaBullseye />
+                </div>
               </div>
               <h3>Múltiples Tableros</h3>
-              <p>Genera todos los que necesites</p>
+              <p>Genera todos los tableros que necesites para tu evento o celebración</p>
             </div>
             <div className="landing-page__feature">
-              <div className="landing-page__feature-icon">
-                <FaFilePdf />
+              <div className="landing-page__feature-icon-wrapper">
+                <div className="landing-page__feature-icon">
+                  <FaFilePdf />
+                </div>
               </div>
               <h3>PDF Profesional</h3>
-              <p>Descarga listo para imprimir</p>
+              <p>Descarga tus tableros en formato PDF listo para imprimir en cualquier tamaño</p>
             </div>
           </div>
         </section>
 
         {/* Events Section */}
         <section className="landing-page__events">
-          <h2 className="landing-page__section-title">Perfecta para cualquier ocasión</h2>
+          <div className="landing-page__section-header">
+            <h2 className="landing-page__section-title">Perfecta para cualquier ocasión</h2>
+            <p className="landing-page__section-subtitle">
+              Celebra tus momentos especiales con un toque de tradición mexicana
+            </p>
+          </div>
           <div className="landing-page__events-grid">
             <div className="landing-page__event">
               <div className="landing-page__event-icon">
                 <FaBaby />
               </div>
-              <h3>Baby Showers</h3>
-              <p>Crea una lotería temática con fotos del futuro bebé</p>
+              <div className="landing-page__event-content">
+                <h3>Baby Showers</h3>
+                <p>Crea una lotería temática con fotos del futuro bebé</p>
+              </div>
             </div>
             <div className="landing-page__event">
               <div className="landing-page__event-icon">
                 <FaUsers />
               </div>
-              <h3>Eventos Familiares</h3>
-              <p>Reuniones, cumpleaños y aniversarios</p>
+              <div className="landing-page__event-content">
+                <h3>Eventos Familiares</h3>
+                <p>Reuniones, cumpleaños y aniversarios</p>
+              </div>
             </div>
             <div className="landing-page__event">
               <div className="landing-page__event-icon">
                 <FaBriefcase />
               </div>
-              <h3>Eventos Corporativos</h3>
-              <p>Team building y fiestas de oficina</p>
+              <div className="landing-page__event-content">
+                <h3>Eventos Corporativos</h3>
+                <p>Team building y fiestas de oficina</p>
+              </div>
             </div>
             <div className="landing-page__event">
               <div className="landing-page__event-icon">
                 <FaLaugh />
               </div>
-              <h3>Fiestas con Amigos</h3>
-              <p>Haz más divertidas tus reuniones</p>
+              <div className="landing-page__event-content">
+                <h3>Fiestas con Amigos</h3>
+                <p>Haz más divertidas tus reuniones</p>
+              </div>
             </div>
             <div className="landing-page__event">
               <div className="landing-page__event-icon">
                 <FaChild />
               </div>
-              <h3>Para Niños</h3>
-              <p>Con sus personajes favoritos</p>
+              <div className="landing-page__event-content">
+                <h3>Para Niños</h3>
+                <p>Con sus personajes favoritos</p>
+              </div>
             </div>
             <div className="landing-page__event">
               <div className="landing-page__event-icon">
                 <FaBirthdayCake />
               </div>
-              <h3>Otras Celebraciones</h3>
-              <p>Bodas, graduaciones y más</p>
+              <div className="landing-page__event-content">
+                <h3>Otras Celebraciones</h3>
+                <p>Bodas, graduaciones y más</p>
+              </div>
             </div>
           </div>
         </section>
 
         {/* CTA Section */}
         <section className="landing-page__cta">
+          <div className="landing-page__cta-decorative"></div>
           <div className="landing-page__cta-content">
+            <div className="landing-page__cta-badge">
+              <FaStar />
+              <span>Sin costo, sin registro</span>
+            </div>
             <h2>¿Listo para comenzar?</h2>
-            <p>Crea recuerdos inolvidables en minutos</p>
+            <p>Crea recuerdos inolvidables en minutos. ¡Empieza ahora y diviértete con tu lotería personalizada!</p>
             <button 
               onClick={onStart}
               className="landing-page__cta-button landing-page__cta-button--primary"

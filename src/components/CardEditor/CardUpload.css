@@ -4,6 +4,7 @@
   gap: 16px;
   max-width: 300px;
   margin: 0 auto;
+  font-family: 'Inter', sans-serif;
 }
 
 .card-upload__edit-button {

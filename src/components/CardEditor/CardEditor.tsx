@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { 
   FaInfoCircle, 
   FaChevronDown, 
@@ -32,6 +32,7 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const [batchFiles, setBatchFiles] = useState<File[]>([]);
+  const batchInputRef = useRef<HTMLInputElement>(null);
 
   const handleCardAdd = async (image: string, title: string) => {
     const newCard: Card = {
@@ -60,9 +61,20 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
     setNextCardId(prev => prev + cardsToAdd.length);
   };
 
-  const handleBatchSelect = (files: File[]) => {
-    setBatchFiles(files);
-    setIsBatchModalOpen(true);
+  const handleBatchClick = () => {
+    batchInputRef.current?.click();
+  };
+
+  const handleBatchFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length > 0) {
+      setBatchFiles(files);
+      setIsBatchModalOpen(true);
+    }
+    // Reset input so same files can be selected again
+    if (batchInputRef.current) {
+      batchInputRef.current.value = '';
+    }
   };
 
   return (
@@ -184,19 +196,32 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
       </div>
 
       <div className="card-editor__cards-section">
-        {cards.length > 0 && (
-          <div className="card-editor__cards-header">
-            <h2 className="card-editor__cards-title">Tus Cartas</h2>
-            <span className="card-editor__cards-count">({cardCount})</span>
+        <div className="card-editor__cards-header">
+          <div className="card-editor__cards-header-left">
+            {cards.length > 0 && (
+              <>
+                <h2 className="card-editor__cards-title">Tus Cartas</h2>
+                <span className="card-editor__cards-count">({cardCount})</span>
+              </>
+            )}
           </div>
-        )}
+          <div className="card-editor__cards-header-right">
+            <button
+              type="button"
+              onClick={handleBatchClick}
+              className="card-editor__batch-button"
+            >
+              <FaUpload />
+              <span>Subir Varias</span>
+            </button>
+          </div>
+        </div>
         <div className="card-editor__cards-grid">
           {cards.map((card) => (
             <CardPreview key={card.id} card={card} onRemove={removeCard} />
           ))}
           <CardUploadThumb 
             onSingleClick={() => setIsUploadModalOpen(true)}
-            onBatchSelect={handleBatchSelect}
           />
         </div>
         {cards.length > 0 && (
@@ -218,6 +243,15 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
         }}
         onCardsAdd={handleBatchCardsAdd}
         files={batchFiles}
+      />
+
+      <input
+        ref={batchInputRef}
+        type="file"
+        accept="image/jpeg,image/jpg,image/png,image/webp"
+        multiple
+        onChange={handleBatchFileSelect}
+        style={{ display: 'none' }}
       />
 
       <div className="card-editor__actions">

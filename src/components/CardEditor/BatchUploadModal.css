@@ -15,7 +15,7 @@
 
 .batch-upload-modal__content {
   background: var(--color-bg-primary);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   padding: 32px;
   max-width: 700px;
   width: 100%;
@@ -26,6 +26,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  font-family: 'Inter', sans-serif;
 }
 
 .batch-upload-modal__header {
@@ -40,7 +41,8 @@
   color: var(--color-primary);
   margin: 0;
   font-weight: 700;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.02em;
+  font-family: 'Inter', sans-serif;
 }
 
 .batch-upload-modal__close {
