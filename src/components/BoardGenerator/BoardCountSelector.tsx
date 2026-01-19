@@ -7,6 +7,55 @@ interface BoardCountSelectorProps {
   onGenerate: (count: number) => void;
 }
 
+// Calculate binomial coefficient C(n, k) = n! / (k! * (n-k)!)
+const binomialCoefficient = (n: number, k: number): number => {
+  if (k > n || k < 0) return 0;
+  if (k === 0 || k === n) return 1;
+  
+  // Use iterative approach to avoid overflow
+  let result = 1;
+  const minK = Math.min(k, n - k);
+  
+  for (let i = 0; i < minK; i++) {
+    result = result * (n - i) / (i + 1);
+  }
+  
+  return Math.round(result);
+};
+
+// Calculate maximum unique boards possible (no duplicates)
+const calculateMaxUniqueBoards = (availableCards: number): number => {
+  if (availableCards < 16) return 0;
+  
+  // Maximum unique boards = C(availableCards, 16)
+  // But we use 50% of theoretical max as safe limit for generation efficiency
+  const theoreticalMax = binomialCoefficient(availableCards, 16);
+  const safeMax = Math.floor(theoreticalMax * 0.5); // 50% safety margin
+  
+  return safeMax;
+};
+
+// Calculate suggested board count based on available cards
+const calculateSuggestedBoards = (availableCards: number): number => {
+  if (availableCards < 16) {
+    return 8; // Default if not enough cards (won't be used anyway)
+  }
+  
+  // Ideal: 8 appearances per card (balanced distribution)
+  // Formula: (availableCards * 8) / 16
+  const idealBoards = Math.round((availableCards * 8) / 16);
+  
+  // Maximum unique boards considering duplicates are not allowed
+  const maxUniqueBoards = calculateMaxUniqueBoards(availableCards);
+  
+  // Take the minimum to ensure we can generate unique boards
+  // For very few cards, maxUniqueBoards might be small
+  const suggested = Math.min(idealBoards, maxUniqueBoards);
+  
+  // Never less than 1, but also never more than max unique
+  return Math.max(1, Math.min(suggested, maxUniqueBoards));
+};
+
 export const BoardCountSelector = ({ onGenerate }: BoardCountSelectorProps) => {
   const [boardCount, setBoardCount] = useState<number>(8);
   const [inputValue, setInputValue] = useState<string>('8');
@@ -14,20 +63,6 @@ export const BoardCountSelector = ({ onGenerate }: BoardCountSelectorProps) => {
   const [cardCount, setCardCount] = useState<number>(0);
   const [isLoadingCards, setIsLoadingCards] = useState(true);
   const [suggestedBoards, setSuggestedBoards] = useState<number>(8);
-
-  // Calculate suggested board count based on available cards
-  const calculateSuggestedBoards = (availableCards: number): number => {
-    if (availableCards < 16) {
-      return 8; // Default if not enough cards
-    }
-    
-    // Ideal: 8 appearances per card (balanced)
-    // Formula: (availableCards * 8) / 16
-    const idealBoards = Math.round((availableCards * 8) / 16);
-    
-    // Never less than 1
-    return Math.max(idealBoards, 1);
-  };
 
   useEffect(() => {
     // Load card count on mount
@@ -102,6 +137,15 @@ export const BoardCountSelector = ({ onGenerate }: BoardCountSelectorProps) => {
       return;
     }
 
+    // Check if requested count exceeds maximum unique boards possible
+    if (cardCount >= 16) {
+      const maxUniqueBoards = calculateMaxUniqueBoards(cardCount);
+      if (boardCount > maxUniqueBoards) {
+        setError(`Con ${cardCount} cartas, el máximo de tableros únicos posibles es ${maxUniqueBoards}. Por favor, reduce el número de tableros.`);
+        return;
+      }
+    }
+
     onGenerate(boardCount);
   };
 
@@ -110,7 +154,7 @@ export const BoardCountSelector = ({ onGenerate }: BoardCountSelectorProps) => {
       <div className="board-count-selector__header">
         <h1 className="board-count-selector__title">Cantidad de Tableros</h1>
         <p className="board-count-selector__subtitle">
-          Cada tablero tendrá 16 cartas únicas. Las cartas pueden repetirse entre diferentes tableros.
+          Cada tablero tendrá 16 cartas únicas. Los tableros generados serán únicos (sin duplicados). Las cartas pueden repetirse entre diferentes tableros.
         </p>
       </div>
 
@@ -123,6 +167,13 @@ export const BoardCountSelector = ({ onGenerate }: BoardCountSelectorProps) => {
             <div className="board-count-selector__suggestion-title">Sugerencia</div>
             <div className="board-count-selector__suggestion-text">
               Con tus <strong>{cardCount} cartas</strong>, te sugerimos generar <strong>{suggestedBoards} tablero{suggestedBoards !== 1 ? 's' : ''}</strong> para una distribución balanceada.
+              {(() => {
+                const maxUnique = calculateMaxUniqueBoards(cardCount);
+                if (maxUnique < 100 && maxUnique !== suggestedBoards) {
+                  return ` Máximo teórico de tableros únicos: ${maxUnique}.`;
+                }
+                return '';
+              })()}
             </div>
           </div>
         </div>

@@ -12,6 +12,28 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return shuffled;
 };
 
+// Get a sorted array of card IDs from a board (for comparison)
+const getCardIds = (cards: Array<{ id: string }>): string[] => {
+  return cards.map(card => card.id).sort();
+};
+
+// Check if two boards have the same cards (regardless of order)
+const areBoardsDuplicate = (board1: Board, board2: Board): boolean => {
+  const ids1 = getCardIds(board1.cards);
+  const ids2 = getCardIds(board2.cards);
+  
+  if (ids1.length !== ids2.length) {
+    return false;
+  }
+  
+  return ids1.every((id, index) => id === ids2[index]);
+};
+
+// Check if a board is duplicate of any board in the array
+const isDuplicateBoard = (board: Board, existingBoards: Board[]): boolean => {
+  return existingBoards.some(existingBoard => areBoardsDuplicate(board, existingBoard));
+};
+
 export const useBoard = () => {
   const [boards, setBoards] = useState<Board[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -35,18 +57,48 @@ export const useBoard = () => {
     }
 
     const generatedBoards: Board[] = [];
+    const MAX_ATTEMPTS = 1000; // Maximum attempts to find a unique board
+    let totalAttempts = 0;
 
     for (let i = 0; i < count; i++) {
-      // Shuffle all cards and take first 16 (no duplicates within board)
-      const shuffled = shuffleArray(allCards);
-      const selectedCards = shuffled.slice(0, 16);
+      let board: Board;
+      let attempts = 0;
+      let isUnique = false;
 
-      const board: Board = {
-        id: `board-${i + 1}-${Date.now()}-${Math.random()}`,
-        cards: selectedCards,
-      };
+      // Keep generating boards until we find a unique one
+      while (!isUnique && attempts < MAX_ATTEMPTS) {
+        // Shuffle all cards and take first 16 (no duplicates within board)
+        const shuffled = shuffleArray(allCards);
+        const selectedCards = shuffled.slice(0, 16);
 
-      generatedBoards.push(board);
+        board = {
+          id: `board-${i + 1}-${Date.now()}-${Math.random()}`,
+          cards: selectedCards,
+        };
+
+        // Check if this board is unique
+        if (!isDuplicateBoard(board, generatedBoards)) {
+          isUnique = true;
+        } else {
+          attempts++;
+          totalAttempts++;
+        }
+      }
+
+      if (!isUnique) {
+        console.warn(`Could not generate unique board ${i + 1} after ${MAX_ATTEMPTS} attempts. Using last generated board.`);
+      }
+
+      // Add the board even if not unique (to avoid infinite loop)
+      generatedBoards.push(board!);
+
+      if (attempts > 0) {
+        console.log(`Board ${i + 1} generated after ${attempts} attempts to avoid duplicates`);
+      }
+    }
+
+    if (totalAttempts > 0) {
+      console.log(`Total attempts to avoid duplicates: ${totalAttempts}`);
     }
 
       setBoards(generatedBoards);
