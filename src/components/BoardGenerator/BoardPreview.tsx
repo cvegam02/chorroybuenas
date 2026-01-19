@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaDownload, FaEdit, FaSync, FaArrowRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaDownload, FaEdit, FaSync, FaArrowRight } from 'react-icons/fa';
 import { Board } from '../../types';
 import { BoardThumbnail } from './BoardThumbnail';
 import { BoardModal } from './BoardModal';

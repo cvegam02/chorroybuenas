@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaLightbulb, FaExclamationTriangle, FaCheckCircle, FaArrowRight } from 'react-icons/fa';
+import { FaLightbulb, FaExclamationTriangle, FaArrowRight } from 'react-icons/fa';
 import './BoardCountSelector.css';
 import { loadCards } from '../../utils/storage';
 
