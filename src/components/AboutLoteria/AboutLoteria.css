@@ -230,16 +230,15 @@
   .about-loteria__cta-buttons {
     flex-direction: column;
   }
+
+  .about-loteria__cta-button {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
   .about-loteria__header-image img {
     max-height: 250px;
     border-radius: 16px;
-  }
-}
-
-  .about-loteria__cta-button {
-    width: 100%;
   }
 }

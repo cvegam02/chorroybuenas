@@ -217,14 +217,6 @@
   .how-to-play__instruction-content p {
     font-size: 1rem;
   }
-}
-
-@media (max-width: 480px) {
-  .how-to-play__header-image img {
-    max-height: 250px;
-    border-radius: 16px;
-  }
-}
 
   .how-to-play__cta {
     padding: 32px 24px;
@@ -232,5 +224,12 @@
 
   .how-to-play__cta-title {
     font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .how-to-play__header-image img {
+    max-height: 250px;
+    border-radius: 16px;
   }
 }
