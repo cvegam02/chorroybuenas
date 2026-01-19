@@ -1,4 +1,14 @@
-import { PDFDocument, rgb, StandardFonts, type PDFFont } from 'pdf-lib';
+import {
+  PDFDocument,
+  rgb,
+  StandardFonts,
+  type PDFFont,
+  pushGraphicsState,
+  popGraphicsState,
+  rectangle,
+  clip,
+  endPath,
+} from 'pdf-lib';
 import { Board, Card } from '../types';
 import { loadCards } from '../utils/storage';
 import { blobToBase64 } from '../utils/indexedDB';
@@ -259,10 +269,11 @@ const drawCardOnPage = async (
     const titleSpace = showTitle ? titleSize + 8 : 0;
     const imageAreaHeight = height - titleSpace;
     
-    // Calculate scaling to fit card dimensions while maintaining aspect ratio
+    // Scale to cover the card area while maintaining aspect ratio
+    // This avoids empty margins by allowing cropping.
     const scaleX = width / imgWidth;
     const scaleY = imageAreaHeight / imgHeight;
-    const scale = Math.min(scaleX, scaleY);
+    const scale = Math.max(scaleX, scaleY);
     
     const scaledWidth = imgWidth * scale;
     const scaledHeight = imgHeight * scale;
@@ -271,13 +282,20 @@ const drawCardOnPage = async (
     const offsetX = (width - scaledWidth) / 2;
     const offsetY = titleSpace + (imageAreaHeight - scaledHeight) / 2;
     
-    // Draw image
+    // Clip image to the image area so it never overflows the card bounds
+    page.pushOperators(
+      pushGraphicsState(),
+      rectangle(x, y + titleSpace, width, imageAreaHeight),
+      clip(),
+      endPath(),
+    );
     page.drawImage(image, {
       x: x + offsetX,
       y: y + offsetY,
       width: scaledWidth,
       height: scaledHeight,
     });
+    page.pushOperators(popGraphicsState());
 
     // Draw title at bottom of card (centered, inside card area)
     if (showTitle) {

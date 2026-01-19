@@ -6,6 +6,9 @@ export const AboutLoteria = () => {
     <div className="about-loteria">
       <div className="about-loteria__container">
         <header className="about-loteria__header">
+          <div className="about-loteria__header-image">
+            <img src="/quees.jpg" alt="Lotería Mexicana" />
+          </div>
           <h1 className="about-loteria__title">¿Qué es la Lotería Mexicana?</h1>
           <p className="about-loteria__subtitle">
             Conoce más sobre este juego tradicional que forma parte de la cultura mexicana

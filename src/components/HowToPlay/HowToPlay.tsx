@@ -6,6 +6,9 @@ export const HowToPlay = () => {
     <div className="how-to-play">
       <div className="how-to-play__container">
         <header className="how-to-play__header">
+          <div className="how-to-play__header-image">
+            <img src="/comosejuega.png" alt="Cómo se juega la Lotería" />
+          </div>
           <h1 className="how-to-play__title">¿Cómo se juega la Lotería Mexicana?</h1>
           <p className="how-to-play__subtitle">
             Aprende a jugar este divertido juego tradicional mexicano paso a paso

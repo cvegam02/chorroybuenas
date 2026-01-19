@@ -68,8 +68,8 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
   const handleBatchFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     if (files.length > 0) {
-      setBatchFiles(files);
-      setIsBatchModalOpen(true);
+    setBatchFiles(files);
+    setIsBatchModalOpen(true);
     }
     // Reset input so same files can be selected again
     if (batchInputRef.current) {
@@ -198,10 +198,10 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
       <div className="card-editor__cards-section">
         <div className="card-editor__cards-header">
           <div className="card-editor__cards-header-left">
-            {cards.length > 0 && (
+        {cards.length > 0 && (
               <>
-                <h2 className="card-editor__cards-title">Tus Cartas</h2>
-                <span className="card-editor__cards-count">({cardCount})</span>
+            <h2 className="card-editor__cards-title">Tus Cartas</h2>
+            <span className="card-editor__cards-count">({cardCount})</span>
               </>
             )}
           </div>

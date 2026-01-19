@@ -50,87 +50,102 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
       </section>
 
       <main className="landing-page__main">
-        {/* Quick Steps - Horizontal Bar */}
-        <section className="landing-page__steps">
-          <div className="landing-page__steps-decorative"></div>
-          <div className="landing-page__step">
-            <div className="landing-page__step-number">1</div>
-            <div className="landing-page__step-icon">
-              📷
+        {/* Features Section */}
+        <section className="landing-page__features">
+          <div className="landing-page__features-container">
+            <div className="landing-page__features-image">
+              <img src="/amigos.png" alt="Celebra con tus amigos" />
             </div>
-            <div className="landing-page__step-content">
-              <h3>Sube Imágenes</h3>
-              <p>Mínimo 20 cartas para empezar</p>
-            </div>
-            <div className="landing-page__step-arrow">→</div>
-          </div>
-          <div className="landing-page__step">
-            <div className="landing-page__step-number">2</div>
-            <div className="landing-page__step-icon">
-              🎲
-            </div>
-            <div className="landing-page__step-content">
-              <h3>Genera Tableros</h3>
-              <p>Mínimo 8 tableros únicos</p>
-            </div>
-            <div className="landing-page__step-arrow">→</div>
-          </div>
-          <div className="landing-page__step">
-            <div className="landing-page__step-number">3</div>
-            <div className="landing-page__step-icon">
-              📥
-            </div>
-            <div className="landing-page__step-content">
-              <h3>Descarga PDF</h3>
-              <p>Listo para imprimir y jugar</p>
+            <div className="landing-page__features-content">
+              <div className="landing-page__section-header">
+                <h2 className="landing-page__section-title">¿Por qué elegirnos?</h2>
+                <p className="landing-page__section-subtitle">
+                  Todo lo que necesitas para crear tu lotería personalizada en un solo lugar
+                </p>
+              </div>
+              <div className="landing-page__features-list">
+                <div className="landing-page__feature-item">
+                  <div className="landing-page__feature-icon">
+                    🖼️
+                  </div>
+                  <div className="landing-page__feature-text">
+                    <h3>100% Personalizable</h3>
+                    <p>Usa tus propias imágenes para crear cartas únicas y originales que reflejen tu estilo</p>
+                  </div>
+                </div>
+                <div className="landing-page__feature-item">
+                  <div className="landing-page__feature-icon">
+                    🎨
+                  </div>
+                  <div className="landing-page__feature-text">
+                    <h3>Editor Integrado</h3>
+                    <p>Recorta y ajusta tus imágenes fácilmente con nuestra herramienta intuitiva</p>
+                  </div>
+                </div>
+                <div className="landing-page__feature-item">
+                  <div className="landing-page__feature-icon">
+                    🎯
+                  </div>
+                  <div className="landing-page__feature-text">
+                    <h3>Múltiples Tableros</h3>
+                    <p>Genera todos los tableros que necesites para tu evento o celebración</p>
+                  </div>
+                </div>
+                <div className="landing-page__feature-item">
+                  <div className="landing-page__feature-icon">
+                    📄
+                  </div>
+                  <div className="landing-page__feature-text">
+                    <h3>PDF Profesional</h3>
+                    <p>Descarga tus tableros en formato PDF listo para imprimir</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="landing-page__features">
-          <div className="landing-page__section-header">
-            <h2 className="landing-page__section-title">¿Por qué elegirnos?</h2>
-            <p className="landing-page__section-subtitle">
-              Todo lo que necesitas para crear tu lotería personalizada en un solo lugar
+        {/* Quick Steps - Horizontal Bar */}
+        <section className="landing-page__steps">
+          <div className="landing-page__steps-header">
+            <h2 className="landing-page__steps-title">Crea y Juega Fácilmente</h2>
+            <p className="landing-page__steps-subtitle">
+              En solo 3 simples pasos tendrás tu lotería personalizada lista para imprimir
             </p>
           </div>
-          <div className="landing-page__features-grid">
-            <div className="landing-page__feature">
-              <div className="landing-page__feature-icon-wrapper">
-                <div className="landing-page__feature-icon">
-                  🖼️
-                </div>
+          <div className="landing-page__steps-decorative"></div>
+          <div className="landing-page__steps-container">
+            <div className="landing-page__step">
+              <div className="landing-page__step-number">1</div>
+              <div className="landing-page__step-icon">
+                📷
               </div>
-              <h3>100% Personalizable</h3>
-              <p>Usa tus propias imágenes para crear cartas únicas y originales que reflejen tu estilo</p>
+              <div className="landing-page__step-content">
+                <h3>Sube Imágenes</h3>
+                <p>Mínimo 20 cartas para empezar</p>
+              </div>
+              <div className="landing-page__step-arrow">→</div>
             </div>
-            <div className="landing-page__feature">
-              <div className="landing-page__feature-icon-wrapper">
-                <div className="landing-page__feature-icon">
-                  🎨
-                </div>
+            <div className="landing-page__step">
+              <div className="landing-page__step-number">2</div>
+              <div className="landing-page__step-icon">
+                🎲
               </div>
-              <h3>Editor Integrado</h3>
-              <p>Recorta y ajusta tus imágenes fácilmente con nuestra herramienta intuitiva</p>
+              <div className="landing-page__step-content">
+                <h3>Genera Tableros</h3>
+                <p>Mínimo 8 tableros únicos</p>
+              </div>
+              <div className="landing-page__step-arrow">→</div>
             </div>
-            <div className="landing-page__feature">
-              <div className="landing-page__feature-icon-wrapper">
-                <div className="landing-page__feature-icon">
-                  🎯
-                </div>
+            <div className="landing-page__step">
+              <div className="landing-page__step-number">3</div>
+              <div className="landing-page__step-icon">
+                📥
               </div>
-              <h3>Múltiples Tableros</h3>
-              <p>Genera todos los tableros que necesites para tu evento o celebración</p>
-            </div>
-            <div className="landing-page__feature">
-              <div className="landing-page__feature-icon-wrapper">
-                <div className="landing-page__feature-icon">
-                  📄
-                </div>
+              <div className="landing-page__step-content">
+                <h3>Descarga PDF</h3>
+                <p>Listo para imprimir y jugar</p>
               </div>
-              <h3>PDF Profesional</h3>
-              <p>Descarga tus tableros en formato PDF listo para imprimir en cualquier tamaño</p>
             </div>
           </div>
         </section>

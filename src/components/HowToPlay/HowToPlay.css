@@ -36,6 +36,22 @@
   animation: fadeInUp 0.6s ease-out;
 }
 
+.how-to-play__header-image {
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.how-to-play__header-image img {
+  max-width: 100%;
+  height: auto;
+  max-height: 400px;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  object-fit: contain;
+}
+
 .how-to-play__title {
   font-size: clamp(2rem, 4vw, 2.5rem);
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
@@ -65,12 +81,12 @@
 .how-to-play__instruction-item {
   display: flex;
   gap: 24px;
-  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-tertiary) 100%);
-  padding: 32px;
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
-  border: 2px solid var(--color-primary-lighter);
-  transition: all 0.3s;
+  background: var(--color-bg-primary);
+  padding: 36px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--color-border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   animation: fadeInUp 0.6s ease-out both;
 }
 
@@ -80,9 +96,9 @@
 .how-to-play__instruction-item:nth-child(4) { animation-delay: 0.4s; }
 
 .how-to-play__instruction-item:hover {
-  box-shadow: var(--shadow-lg);
-  border-color: var(--color-primary);
-  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-color: var(--color-primary-lighter);
+  transform: translateY(-4px);
 }
 
 .how-to-play__instruction-number {
@@ -97,7 +113,7 @@
   font-size: 1.75rem;
   font-weight: 700;
   color: white;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 12px rgba(194, 65, 12, 0.3);
   font-family: 'Inter', sans-serif;
 }
 
@@ -125,8 +141,8 @@
   text-align: center;
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   padding: 48px 32px;
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .how-to-play__cta-title {
@@ -142,18 +158,18 @@
   background: white;
   color: var(--color-primary);
   padding: 16px 48px;
-  border-radius: var(--radius-lg);
+  border-radius: 12px;
   text-decoration: none;
   font-weight: 700;
   font-size: 1.125rem;
-  transition: all 0.3s;
-  box-shadow: var(--shadow-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   font-family: 'Inter', sans-serif;
 }
 
 .how-to-play__cta-button:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   background: var(--color-bg-tertiary);
 }
 
@@ -170,6 +186,10 @@
 }
 
 @media (max-width: 768px) {
+  .how-to-play__header-image img {
+    max-height: 300px;
+  }
+
   .how-to-play__title {
     font-size: 2rem;
   }
@@ -197,6 +217,14 @@
   .how-to-play__instruction-content p {
     font-size: 1rem;
   }
+}
+
+@media (max-width: 480px) {
+  .how-to-play__header-image img {
+    max-height: 250px;
+    border-radius: 16px;
+  }
+}
 
   .how-to-play__cta {
     padding: 32px 24px;

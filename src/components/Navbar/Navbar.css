@@ -1,13 +1,12 @@
 .navbar {
-  background: var(--color-bg-primary);
+  background: rgba(255, 255, 255, 0.95);
   border-bottom: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   position: sticky;
   top: 0;
   z-index: 1000;
   width: 100%;
-  backdrop-filter: blur(8px);
-  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
 }
 
 .navbar__overlay {
@@ -67,8 +66,8 @@
   font-weight: 500;
   font-size: 0.9375rem;
   padding: 10px 18px;
-  border-radius: var(--radius-md);
-  transition: all 0.2s ease;
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   font-family: 'Inter', sans-serif;
 }
