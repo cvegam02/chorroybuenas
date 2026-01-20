@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { 
   FaInfoCircle, 
   FaChevronDown, 
@@ -25,16 +25,29 @@ interface CardEditorProps {
 }
 
 export const CardEditor = ({ onNext }: CardEditorProps) => {
-  const { cards, addCard, addCards, removeCard, cardCount, hasMinimumCards, minCards } = useCards();
+  const { cards, addCard, addCards, removeCard, clearCards, cardCount, hasMinimumCards, minCards } = useCards();
   const [nextCardId, setNextCardId] = useState(1);
   const [isRecommendationsCollapsed, setIsRecommendationsCollapsed] = useState(true);
   const [isInstructionsCollapsed, setIsInstructionsCollapsed] = useState(true);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const [batchFiles, setBatchFiles] = useState<File[]>([]);
   const batchInputRef = useRef<HTMLInputElement>(null);
 
+  const normalizeTitle = (value: string) => value.replace(/\s+/g, ' ').trim().toLowerCase();
+
+  const existingTitleSet = useMemo(
+    () => new Set(cards.map(card => normalizeTitle(card.title))),
+    [cards]
+  );
+
   const handleCardAdd = async (image: string, title: string) => {
+    const normalizedTitle = normalizeTitle(title);
+    if (existingTitleSet.has(normalizedTitle)) {
+      alert('Ya existe una carta con ese nombre. Por favor usa un título diferente.');
+      return false;
+    }
     const newCard: Card = {
       id: `card-${nextCardId}-${Date.now()}`,
       title,
@@ -42,10 +55,27 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
     };
     await addCard(newCard);
     setNextCardId(prev => prev + 1);
+    return true;
   };
 
   const handleBatchCardsAdd = async (cardsToAdd: Array<{ image: string; title: string }>) => {
     console.log('handleBatchCardsAdd called with', cardsToAdd.length, 'cards'); // Debug log
+
+    const seenTitles = new Set(existingTitleSet);
+    const duplicateTitles: string[] = [];
+    for (const card of cardsToAdd) {
+      const normalizedTitle = normalizeTitle(card.title);
+      if (seenTitles.has(normalizedTitle)) {
+        duplicateTitles.push(card.title);
+      } else {
+        seenTitles.add(normalizedTitle);
+      }
+    }
+
+    if (duplicateTitles.length > 0) {
+      alert(`Se encontraron títulos repetidos: ${duplicateTitles.join(', ')}. Por favor cámbialos.`);
+      return;
+    }
     
     // Create all new cards with unique IDs
     const newCards: Card[] = cardsToAdd.map(({ image, title }, index) => ({
@@ -75,6 +105,15 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
     if (batchInputRef.current) {
       batchInputRef.current.value = '';
     }
+  };
+
+  const handleClearCards = async () => {
+    await clearCards();
+    setNextCardId(1);
+    setIsUploadModalOpen(false);
+    setIsBatchModalOpen(false);
+    setBatchFiles([]);
+    setIsClearModalOpen(false);
   };
 
   return (
@@ -214,6 +253,14 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
               <FaUpload />
               <span>Subir Varias</span>
             </button>
+            <button
+              type="button"
+              onClick={() => setIsClearModalOpen(true)}
+              className="card-editor__clear-button"
+              disabled={cardCount === 0}
+            >
+              Limpiar Cartas
+            </button>
           </div>
         </div>
         <div className="card-editor__cards-grid">
@@ -233,6 +280,7 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         onCardAdd={handleCardAdd}
+        existingTitles={cards.map(card => card.title)}
       />
 
       <BatchUploadModal
@@ -243,6 +291,7 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
         }}
         onCardsAdd={handleBatchCardsAdd}
         files={batchFiles}
+        existingTitles={cards.map(card => card.title)}
       />
 
       <input
@@ -253,6 +302,33 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
         onChange={handleBatchFileSelect}
         style={{ display: 'none' }}
       />
+
+      {isClearModalOpen && (
+        <div className="card-editor__clear-modal-overlay">
+          <div className="card-editor__clear-modal">
+            <h2 className="card-editor__clear-modal-title">¿Limpiar todas las cartas?</h2>
+            <p className="card-editor__clear-modal-message">
+              Se eliminarán todas las cartas que has subido y empezarás desde cero.
+            </p>
+            <div className="card-editor__clear-modal-actions">
+              <button
+                type="button"
+                onClick={() => setIsClearModalOpen(false)}
+                className="card-editor__clear-cancel"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleClearCards}
+                className="card-editor__clear-confirm"
+              >
+                Sí, limpiar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="card-editor__actions">
         {!hasMinimumCards && (

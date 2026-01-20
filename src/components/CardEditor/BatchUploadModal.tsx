@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, type FC } from 'react';
 import { createPortal } from 'react-dom';
 import { ImageEditor } from './ImageEditor';
 import { convertFileToBase64, validateImageFile, compressImage } from '../../utils/imageUtils';
@@ -85,9 +85,15 @@ interface BatchUploadModalProps {
   onClose: () => void;
   onCardsAdd: (cards: Array<{ image: string; title: string }>) => void;
   files: File[];
+  existingTitles: string[];
 }
 
-export const BatchUploadModal = ({ isOpen, onClose, onCardsAdd, files }: BatchUploadModalProps) => {
+export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, onCardsAdd, files, existingTitles }) => {
+  const normalizeTitle = (value: string) => value.replace(/\s+/g, ' ').trim().toLowerCase();
+  const existingTitleSet = useMemo(
+    () => new Set(existingTitles.map(normalizeTitle)),
+    [existingTitles]
+  );
   const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentImage, setCurrentImage] = useState<string>('');
@@ -173,6 +179,16 @@ export const BatchUploadModal = ({ isOpen, onClose, onCardsAdd, files }: BatchUp
   const handleNext = async () => {
     if (!currentTitle.trim()) {
       alert('Por favor, ingresa un título para esta carta');
+      return;
+    }
+
+    const normalizedTitle = normalizeTitle(currentTitle);
+    const isDuplicate =
+      existingTitleSet.has(normalizedTitle) ||
+      completedCardsRef.current.some(card => normalizeTitle(card.title) === normalizedTitle);
+
+    if (isDuplicate) {
+      alert('Ya existe una carta con ese nombre. Por favor usa un título diferente.');
       return;
     }
 
@@ -264,6 +280,10 @@ export const BatchUploadModal = ({ isOpen, onClose, onCardsAdd, files }: BatchUp
   const currentFile = pendingImages[currentIndex];
   const progress = ((currentIndex + 1) / pendingImages.length) * 100;
   const remaining = pendingImages.length - currentIndex - 1;
+  const isDuplicateTitle =
+    Boolean(currentTitle.trim()) &&
+    (existingTitleSet.has(normalizeTitle(currentTitle)) ||
+      completedCardsRef.current.some(card => normalizeTitle(card.title) === normalizeTitle(currentTitle)));
 
   const modalContent = (
     <div 
@@ -349,6 +369,11 @@ export const BatchUploadModal = ({ isOpen, onClose, onCardsAdd, files }: BatchUp
                 className="batch-upload-modal__title-input"
                 maxLength={100}
               />
+              {isDuplicateTitle && (
+                <p className="batch-upload-modal__error-text">
+                  Ya existe una carta con ese nombre. Usa un título diferente.
+                </p>
+              )}
               <p className="batch-upload-modal__help-text">
                 💡 Elige un título claro y corto que sea fácil de cantar durante el juego
               </p>

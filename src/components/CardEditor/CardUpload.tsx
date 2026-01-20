@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { convertFileToBase64, validateImageFile, compressImage } from '../../utils/imageUtils';
 import { ImageEditor } from './ImageEditor';
 import './CardUpload.css';
@@ -74,10 +74,16 @@ const adjustImageToCardAspectRatio = (
 };
 
 interface CardUploadProps {
-  onCardAdd: (image: string, title: string) => void;
+  onCardAdd: (image: string, title: string) => Promise<boolean>;
+  existingTitles: string[];
 }
 
-export const CardUpload = ({ onCardAdd }: CardUploadProps) => {
+export const CardUpload = ({ onCardAdd, existingTitles }: CardUploadProps) => {
+  const normalizeTitle = (value: string) => value.replace(/\s+/g, ' ').trim().toLowerCase();
+  const existingTitleSet = useMemo(
+    () => new Set(existingTitles.map(normalizeTitle)),
+    [existingTitles]
+  );
   const [title, setTitle] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -106,8 +112,14 @@ export const CardUpload = ({ onCardAdd }: CardUploadProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title.trim()) {
+    const normalizedTitle = normalizeTitle(title);
+    if (!normalizedTitle) {
       alert('Por favor, ingresa un título para la carta');
+      return;
+    }
+
+    if (existingTitleSet.has(normalizedTitle)) {
+      alert('Ya existe una carta con ese nombre. Por favor usa un título diferente.');
       return;
     }
 
@@ -132,7 +144,10 @@ export const CardUpload = ({ onCardAdd }: CardUploadProps) => {
       const compressedImage = await compressImage(processedImage);
       console.log(`Image compressed: ${(processedImage.length / 1024).toFixed(2)} KB -> ${(compressedImage.length / 1024).toFixed(2)} KB`);
       
-      onCardAdd(compressedImage, title.trim());
+      const wasAdded = await onCardAdd(compressedImage, title.trim());
+      if (!wasAdded) {
+        return;
+      }
       // Reset form
       setTitle('');
       setImageFile(null);
@@ -205,6 +220,20 @@ export const CardUpload = ({ onCardAdd }: CardUploadProps) => {
     }
   };
 
+  const isDuplicateTitle = Boolean(title.trim()) && existingTitleSet.has(normalizeTitle(title));
+
+  const handleCancel = () => {
+    if (isUploading) return;
+    setTitle('');
+    setImageFile(null);
+    setImagePreview(null);
+    setShowEditor(false);
+    setWasEdited(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   if (showEditor && imagePreview) {
     return (
       <div className="card-upload">
@@ -269,6 +298,11 @@ export const CardUpload = ({ onCardAdd }: CardUploadProps) => {
           maxLength={100}
           disabled={!imagePreview}
         />
+        {isDuplicateTitle && (
+          <p className="card-upload__error-text">
+            Ya existe una carta con ese nombre. Usa un título diferente.
+          </p>
+        )}
         <p className="card-upload__help-text">
           💡 Elige un título claro y corto que sea fácil de cantar durante el juego
         </p>
@@ -280,6 +314,16 @@ export const CardUpload = ({ onCardAdd }: CardUploadProps) => {
       >
         {isUploading ? 'Agregando...' : 'Agregar Carta'}
       </button>
+      {(title.trim() || imagePreview) && (
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="card-upload__cancel"
+          disabled={isUploading}
+        >
+          Cancelar
+        </button>
+      )}
     </form>
   );
 };

@@ -159,6 +159,13 @@
   margin: 0;
 }
 
+.card-upload__error-text {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #b91c1c;
+  margin: 0;
+}
+
 .card-upload__submit {
   padding: 12px 24px;
   border: none;
@@ -179,6 +186,30 @@
 }
 
 .card-upload__submit:disabled {
+  background: var(--color-border-dark);
+  cursor: not-allowed;
+}
+
+.card-upload__cancel {
+  padding: 10px 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-secondary);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.card-upload__cancel:hover:not(:disabled) {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-dark);
+  transform: translateY(-1px);
+}
+
+.card-upload__cancel:disabled {
   background: var(--color-border-dark);
   cursor: not-allowed;
 }

@@ -5,15 +5,18 @@ import './CardUploadModal.css';
 interface CardUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCardAdd: (image: string, title: string) => Promise<void>;
+  onCardAdd: (image: string, title: string) => Promise<boolean>;
+  existingTitles: string[];
 }
 
-export const CardUploadModal = ({ isOpen, onClose, onCardAdd }: CardUploadModalProps) => {
+export const CardUploadModal = ({ isOpen, onClose, onCardAdd, existingTitles }: CardUploadModalProps) => {
   if (!isOpen) return null;
 
   const handleCardAdd = async (image: string, title: string) => {
-    await onCardAdd(image, title);
-    onClose();
+    const wasAdded = await onCardAdd(image, title);
+    if (wasAdded) {
+      onClose();
+    }
   };
 
   const modalContent = (
@@ -34,7 +37,7 @@ export const CardUploadModal = ({ isOpen, onClose, onCardAdd }: CardUploadModalP
           ×
         </button>
         <h2 className="card-upload-modal__title">Agregar Nueva Carta</h2>
-        <CardUpload onCardAdd={handleCardAdd} />
+        <CardUpload onCardAdd={handleCardAdd} existingTitles={existingTitles} />
       </div>
     </div>
   );

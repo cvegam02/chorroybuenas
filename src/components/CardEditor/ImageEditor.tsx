@@ -52,10 +52,9 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
               initialZoom = containerWidth / img.width;
             }
             
-            // Start with image covering the container (zoom in slightly to ensure coverage)
+            // Start with the full image visible (contain)
             // Ensure initial zoom is within allowed bounds
-            const calculatedZoom = initialZoom * 1.1;
-            const boundedZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, calculatedZoom));
+            const boundedZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, initialZoom));
             setZoom(boundedZoom);
             setPosition({ x: 0, y: 0 });
           }
@@ -171,8 +170,8 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
           const newX = position.x - (relX * img.width * zoomDelta);
           const newY = position.y - (relY * img.height * zoomDelta);
           
-          const maxX = (scaledWidth - containerWidth) / 2;
-          const maxY = (scaledHeight - containerHeight) / 2;
+          const maxX = Math.max(0, (scaledWidth - containerWidth) / 2);
+          const maxY = Math.max(0, (scaledHeight - containerHeight) / 2);
           
           setPosition({
             x: Math.max(-maxX, Math.min(maxX, newX)),
@@ -192,8 +191,8 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
         const scaledWidth = img.width * zoom;
         const scaledHeight = img.height * zoom;
 
-        const maxX = (scaledWidth - containerWidth) / 2;
-        const maxY = (scaledHeight - containerHeight) / 2;
+        const maxX = Math.max(0, (scaledWidth - containerWidth) / 2);
+        const maxY = Math.max(0, (scaledHeight - containerHeight) / 2);
 
         const deltaX = touch.clientX - lastTouchRef.current.x;
         const deltaY = touch.clientY - lastTouchRef.current.y;
@@ -328,8 +327,8 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
     const scaledWidth = img.width * zoom;
     const scaledHeight = img.height * zoom;
 
-    const maxX = (scaledWidth - containerWidth) / 2;
-    const maxY = (scaledHeight - containerHeight) / 2;
+    const maxX = Math.max(0, (scaledWidth - containerWidth) / 2);
+    const maxY = Math.max(0, (scaledHeight - containerHeight) / 2);
 
     const deltaX = e.clientX - (dragStart.x + rect.left);
     const deltaY = e.clientY - (dragStart.y + rect.top);
@@ -387,57 +386,16 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
     const offsetX = (containerWidth - scaledWidth) / 2 + position.x;
     const offsetY = (containerHeight - scaledHeight) / 2 + position.y;
 
-    // Calculate what portion of the original image is visible in the container
-    // Map the container rectangle to the original image coordinates
-    let sourceX = Math.max(0, -offsetX / zoom);
-    let sourceY = Math.max(0, -offsetY / zoom);
-    
-    // Calculate the width and height of the visible portion
-    // If the image extends beyond the container, we only want the visible part
-    const visibleScaledWidth = Math.min(scaledWidth, containerWidth - Math.max(0, offsetX));
-    const visibleScaledHeight = Math.min(scaledHeight, containerHeight - Math.max(0, offsetY));
-    
-    let sourceWidth = Math.min(img.width - sourceX, visibleScaledWidth / zoom);
-    let sourceHeight = Math.min(img.height - sourceY, visibleScaledHeight / zoom);
-
-    // Calculate container aspect ratio (5:7.5 = 0.666...)
-    const containerAspectRatio = containerWidth / containerHeight;
-    
-    // Adjust source dimensions to match container aspect ratio exactly
-    // This ensures the cropped image fills the canvas without spaces or distortion
-    const sourceAspectRatio = sourceWidth / sourceHeight;
-    
-    if (sourceAspectRatio > containerAspectRatio) {
-      // Source is wider than container - crop the sides to match container aspect ratio
-      sourceHeight = sourceHeight;
-      sourceWidth = sourceHeight * containerAspectRatio;
-      sourceX = sourceX + (Math.min(img.width - sourceX, visibleScaledWidth / zoom) - sourceWidth) / 2;
-    } else if (sourceAspectRatio < containerAspectRatio) {
-      // Source is taller than container - crop top/bottom to match container aspect ratio
-      sourceWidth = sourceWidth;
-      sourceHeight = sourceWidth / containerAspectRatio;
-      sourceY = sourceY + (Math.min(img.height - sourceY, visibleScaledHeight / zoom) - sourceHeight) / 2;
-    }
-
-    // Ensure we don't go out of bounds
-    sourceX = Math.max(0, Math.min(sourceX, img.width));
-    sourceY = Math.max(0, Math.min(sourceY, img.height));
-    sourceWidth = Math.min(sourceWidth, img.width - sourceX);
-    sourceHeight = Math.min(sourceHeight, img.height - sourceY);
-
     // Fill canvas with white background first (handles any transparent/empty areas)
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, containerWidth, containerHeight);
 
-    // Draw the visible portion of the image, ensuring it fills the entire canvas
-    // with the exact aspect ratio of the container (5:7.5)
-    if (sourceWidth > 0 && sourceHeight > 0) {
-      ctx.drawImage(
-        img,
-        sourceX, sourceY, sourceWidth, sourceHeight, // Source: visible part matching container aspect ratio
-        0, 0, containerWidth, containerHeight // Destination: fill entire canvas (exact aspect ratio 5:7.5)
-      );
-    }
+    // Draw the image exactly as the user sees it (may include empty borders)
+    ctx.drawImage(
+      img,
+      0, 0, img.width, img.height,
+      offsetX, offsetY, scaledWidth, scaledHeight
+    );
 
     // Get the cropped image data - this matches exactly what the user sees
     const croppedImage = cropCanvas.toDataURL('image/jpeg', 0.85);
