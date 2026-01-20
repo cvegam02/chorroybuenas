@@ -378,26 +378,29 @@ const drawCardOnPage = async (
   }
 };
 
-// Cache for logo image to avoid loading it multiple times
-let logoImageCache: { image: any; width: number; height: number } | null = null;
+// Cache logo bytes globally and embed per PDF document
+const logoBytesCache: { data: Uint8Array } = { data: new Uint8Array() };
+const logoImageCache = new WeakMap<PDFDocument, { image: any; width: number; height: number }>();
 
 const getLogoImage = async (pdfDoc: PDFDocument): Promise<{ image: any; width: number; height: number }> => {
-  if (logoImageCache) {
-    return logoImageCache;
+  const cached = logoImageCache.get(pdfDoc);
+  if (cached) {
+    return cached;
   }
 
   try {
-    // Fetch the logo image
-    const response = await fetch(logoImage);
-    const arrayBuffer = await response.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
-    
-    // Embed PNG logo in PDF
-    const image = await pdfDoc.embedPng(uint8Array);
+    if (logoBytesCache.data.length === 0) {
+      const response = await fetch(logoImage);
+      const arrayBuffer = await response.arrayBuffer();
+      logoBytesCache.data = new Uint8Array(arrayBuffer);
+    }
+
+    // Embed logo per PDF document to avoid cross-document reuse
+    const image = await pdfDoc.embedPng(logoBytesCache.data);
     const { width, height } = image.scale(1);
-    
-    logoImageCache = { image, width, height };
-    return logoImageCache;
+    const entry = { image, width, height };
+    logoImageCache.set(pdfDoc, entry);
+    return entry;
   } catch (error) {
     console.error('Error loading logo image:', error);
     throw error;
