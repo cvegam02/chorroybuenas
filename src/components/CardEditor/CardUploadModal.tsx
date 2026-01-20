@@ -17,6 +17,7 @@ export const CardUploadModal = ({ isOpen, onClose, onCardAdd, existingTitles }: 
     if (wasAdded) {
       onClose();
     }
+    return wasAdded;
   };
 
   const modalContent = (
