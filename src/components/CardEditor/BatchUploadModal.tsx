@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo, type FC } from 'react';
 import { createPortal } from 'react-dom';
+import { FaEdit } from 'react-icons/fa';
 import { ImageEditor } from './ImageEditor';
 import { convertFileToBase64, validateImageFile, compressImage } from '../../utils/imageUtils';
 import './BatchUploadModal.css';
@@ -375,7 +376,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
                 </p>
               )}
               <p className="batch-upload-modal__help-text">
-                💡 Elige un título claro y corto que sea fácil de cantar durante el juego
+                Elige un título claro y corto que sea fácil de cantar durante el juego
               </p>
             </div>
 
@@ -392,7 +393,8 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
                 onClick={() => setShowEditor(true)}
                 className="batch-upload-modal__edit-button"
               >
-                ✏️ Ajustar imagen
+                <FaEdit />
+                <span>Ajustar imagen</span>
               </button>
               <button
                 type="button"

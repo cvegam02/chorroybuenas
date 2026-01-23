@@ -136,4 +136,8 @@
   .board-thumbnail__number {
     font-size: 1rem;
   }
+
+  .board-thumbnail__card-title {
+    display: none;
+  }
 }

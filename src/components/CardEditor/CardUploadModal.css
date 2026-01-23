@@ -4,7 +4,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,17 +13,27 @@
   padding: 20px;
   overflow-y: auto;
   scrollbar-gutter: stable;
+  animation: overlayFadeIn 0.2s ease;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .card-upload-modal__content {
-  background: var(--color-bg-primary);
+  background: #ffffff;
   border-radius: 24px;
   padding: 40px;
   max-width: 500px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
   border: 1px solid var(--color-border);
   position: relative;
   margin: 0 auto;
@@ -30,19 +41,33 @@
   flex-direction: column;
   align-items: center;
   font-family: var(--font-body);
+  animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .card-upload-modal__close {
   position: absolute;
   top: 16px;
   right: 16px;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border: none;
   border-radius: 50%;
-  background: var(--color-bg-tertiary);
+  background: var(--color-bg-subtle);
   color: var(--color-text-secondary);
-  font-size: 20px;
+  font-size: 24px;
   line-height: 1;
   cursor: pointer;
   display: flex;
@@ -51,6 +76,11 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card-upload-modal__close:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .card-upload-modal__close:hover {
@@ -71,9 +101,24 @@
 }
 
 @media (max-width: 640px) {
+  .card-upload-modal__overlay {
+    padding: 16px;
+  }
+
   .card-upload-modal__content {
-    padding: 24px;
+    padding: 24px 20px;
     max-width: 100%;
+    border-radius: 20px;
+  }
+
+  .card-upload-modal__close {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 22px;
+    top: 12px;
+    right: 12px;
   }
 
   .card-upload-modal__title {

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { FaCut } from 'react-icons/fa';
 import './ImageEditor.css';
 
 interface ImageEditorProps {
@@ -405,7 +406,10 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
   return (
     <div className="image-editor">
       <div className="image-editor__header">
-        <h3>✂️ Ajusta tu imagen</h3>
+        <h3>
+          <FaCut className="image-editor__header-icon" />
+          Ajusta tu imagen
+        </h3>
         <p>Selecciona la parte de la imagen que quieres usar en tu carta. El área dentro del recuadro será la que aparezca en tu lotería.</p>
       </div>
 
