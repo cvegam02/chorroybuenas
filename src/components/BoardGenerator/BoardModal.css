@@ -37,7 +37,7 @@
   border: 1px solid var(--color-border);
   animation: slideUp 0.3s ease-out;
   margin: 0 auto;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 @keyframes slideUp {

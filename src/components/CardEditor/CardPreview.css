@@ -39,7 +39,7 @@
   text-align: center;
   word-break: break-word;
   color: var(--color-text-primary);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .card-preview__remove {

@@ -36,7 +36,7 @@
   margin-bottom: 16px;
   font-weight: 700;
   letter-spacing: -0.3px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .confirmation-modal__message {
@@ -44,7 +44,7 @@
   color: var(--color-text-secondary);
   margin-bottom: 32px;
   line-height: 1.7;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .confirmation-modal__actions {
@@ -62,7 +62,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .confirmation-modal__modify-button {

@@ -32,6 +32,14 @@
 .card-recommendations__icon {
   font-size: 1rem;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-recommendations__icon svg {
+  width: 1rem;
+  height: 1rem;
 }
 
 .card-recommendations__header-text {

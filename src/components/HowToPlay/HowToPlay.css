@@ -3,7 +3,7 @@
   background: linear-gradient(180deg, var(--color-bg-primary) 0%, var(--color-bg-tertiary) 100%);
   padding-bottom: 48px;
   position: relative;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .how-to-play::before {
@@ -60,7 +60,7 @@
   background-clip: text;
   margin: 0 0 16px 0;
   font-weight: 800;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   letter-spacing: -0.02em;
 }
 
@@ -68,7 +68,7 @@
   font-size: 1.25rem;
   color: var(--color-text-secondary);
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .how-to-play__instructions {
@@ -114,7 +114,7 @@
   font-weight: 700;
   color: white;
   box-shadow: 0 4px 12px rgba(194, 65, 12, 0.3);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .how-to-play__instruction-content {
@@ -126,7 +126,7 @@
   color: var(--color-primary);
   margin: 0 0 12px 0;
   font-weight: 700;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .how-to-play__instruction-content p {
@@ -134,7 +134,7 @@
   color: var(--color-text-primary);
   line-height: 1.7;
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .how-to-play__cta {
@@ -150,7 +150,7 @@
   color: white;
   margin: 0 0 24px 0;
   font-weight: 700;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .how-to-play__cta-button {
@@ -164,7 +164,7 @@
   font-size: 1.125rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .how-to-play__cta-button:hover {

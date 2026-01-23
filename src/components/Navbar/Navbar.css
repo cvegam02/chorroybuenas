@@ -47,7 +47,7 @@
   font-size: 1.125rem;
   font-weight: 700;
   color: var(--color-primary);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   letter-spacing: -0.02em;
 }
 
@@ -69,7 +69,7 @@
   border-radius: 10px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .navbar__link:hover {

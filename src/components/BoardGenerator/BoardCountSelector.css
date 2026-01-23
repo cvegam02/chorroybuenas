@@ -8,7 +8,7 @@
   padding: 40px 24px;
   background: var(--color-bg-secondary);
   min-height: 100vh;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 /* ============================================
@@ -26,7 +26,7 @@
   color: var(--color-text-primary);
   margin: 0 0 12px 0;
   letter-spacing: -0.02em;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .board-count-selector__subtitle {
@@ -102,7 +102,7 @@
   font-weight: 600;
   color: var(--color-text-primary);
   margin-bottom: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .board-count-selector__suggestion-text,
@@ -110,7 +110,7 @@
   font-size: 0.9375rem;
   color: var(--color-text-secondary);
   line-height: 1.6;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .board-count-selector__suggestion-text strong,
@@ -140,14 +140,14 @@
   font-weight: 600;
   color: var(--color-text-primary);
   margin-bottom: 4px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .board-count-selector__hint {
   font-size: 0.9375rem;
   color: var(--color-text-secondary);
   margin-bottom: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .board-count-selector__hint strong {
@@ -165,7 +165,7 @@
   background: var(--color-bg-primary);
   text-align: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
@@ -184,7 +184,7 @@
   font-size: 0.875rem;
   margin-top: 4px;
   font-weight: 500;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 /* ============================================
@@ -203,7 +203,7 @@
   border: 1px solid var(--color-border);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   background: var(--color-bg-primary);
   color: var(--color-text-secondary);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);

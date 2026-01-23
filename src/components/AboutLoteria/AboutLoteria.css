@@ -3,7 +3,7 @@
   background: linear-gradient(180deg, var(--color-bg-primary) 0%, var(--color-bg-tertiary) 100%);
   padding-bottom: 48px;
   position: relative;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .about-loteria::before {
@@ -60,7 +60,7 @@
   background-clip: text;
   margin: 0 0 16px 0;
   font-weight: 800;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   letter-spacing: -0.02em;
 }
 
@@ -68,7 +68,7 @@
   font-size: 1.25rem;
   color: var(--color-text-secondary);
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .about-loteria__content {
@@ -105,7 +105,7 @@
   font-weight: 700;
   border-bottom: 2px solid var(--color-border);
   padding-bottom: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .about-loteria__text {
@@ -113,7 +113,7 @@
   color: var(--color-text-primary);
   line-height: 1.8;
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .about-loteria__cta {
@@ -130,14 +130,14 @@
   color: white;
   margin: 0 0 12px 0;
   font-weight: 700;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .about-loteria__cta-text {
   font-size: 1.125rem;
   color: rgba(255, 255, 255, 0.95);
   margin: 0 0 32px 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .about-loteria__cta-buttons {
@@ -156,7 +156,7 @@
   font-size: 1.125rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .about-loteria__cta-button--primary {

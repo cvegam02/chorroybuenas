@@ -1,4 +1,10 @@
 import { useState } from 'react';
+import { 
+  FaExclamationTriangle,
+  FaLightbulb,
+  FaCheckCircle,
+  FaInfoCircle
+} from 'react-icons/fa';
 import './CardRecommendations.css';
 
 interface CardRecommendationsProps {
@@ -50,10 +56,10 @@ export const CardRecommendations = ({ cardCount }: CardRecommendationsProps) => 
       >
         <div className="card-recommendations__header-content">
           <span className="card-recommendations__icon">
-            {recommendation.type === 'error' && '⚠️'}
-            {recommendation.type === 'warning' && '💡'}
-            {recommendation.type === 'success' && '✅'}
-            {recommendation.type === 'info' && 'ℹ️'}
+            {recommendation.type === 'error' && <FaExclamationTriangle />}
+            {recommendation.type === 'warning' && <FaLightbulb />}
+            {recommendation.type === 'success' && <FaCheckCircle />}
+            {recommendation.type === 'info' && <FaInfoCircle />}
           </span>
           <span className="card-recommendations__header-text">Recomendaciones</span>
         </div>
