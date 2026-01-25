@@ -85,7 +85,7 @@ export const CardUpload = ({
   onCardAdd,
   existingTitles,
   initialTitle = '',
-  initialImage = null,
+  initialImage,
   submitLabel = 'Agregar Carta'
 }: CardUploadProps) => {
   const normalizeTitle = (value: string) => value.replace(/\s+/g, ' ').trim().toLowerCase();
@@ -95,7 +95,7 @@ export const CardUpload = ({
   );
   const [title, setTitle] = useState(initialTitle);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(initialImage);
+  const [imagePreview, setImagePreview] = useState<string | null>(initialImage ?? null);
   const [showEditor, setShowEditor] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [wasEdited, setWasEdited] = useState(false); // Track if image was edited/cropped
