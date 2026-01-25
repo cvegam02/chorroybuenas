@@ -22,13 +22,13 @@ export const saveCards = async (cards: Card[]): Promise<void> => {
       id: card.id,
       title: card.title,
     }));
-    
+
     const serialized = JSON.stringify(cardsMetadata);
     const sizeKB = serialized.length / 1024;
     console.log(`Saving ${cards.length} cards metadata to localStorage (size: ${sizeKB.toFixed(2)} KB)`);
-    
+
     localStorage.setItem(CARDS_KEY, serialized);
-    
+
     // Save images to IndexedDB
     const imagePromises = cards
       .filter(card => card.image && card.image.startsWith('data:'))
@@ -44,9 +44,9 @@ export const saveCards = async (cards: Card[]): Promise<void> => {
           return null;
         }
       });
-    
+
     await Promise.all(imagePromises);
-    
+
     // Verify the metadata save worked
     const verifyStored = localStorage.getItem(CARDS_KEY);
     if (!verifyStored) {
@@ -56,7 +56,7 @@ export const saveCards = async (cards: Card[]): Promise<void> => {
     if (verifyParsed.length !== cards.length) {
       throw new Error(`Data corruption: tried to save ${cards.length} cards but only ${verifyParsed.length} were saved`);
     }
-    
+
     console.log(`✓ Successfully saved ${cards.length} cards (metadata + images)`);
   } catch (error) {
     console.error('Error saving cards:', error);
@@ -80,31 +80,44 @@ export const loadCards = async (): Promise<Card[]> => {
       // Check for legacy format and migrate
       return await migrateLegacyCards();
     }
-    
+
     const cardsMetadata: CardMetadata[] = JSON.parse(stored);
     console.log(`Loaded ${cardsMetadata.length} cards metadata from localStorage`);
-    
+
     if (!Array.isArray(cardsMetadata)) {
       return [];
     }
-    
+
     // Load images from IndexedDB
     const { getImage } = await import('./indexedDB');
-    const cardsWithImages: Card[] = await Promise.all(
+
+    // Use Promise.all with internal error handling to properly return partial results
+    const cardsWithImages = await Promise.all(
       cardsMetadata.map(async (metadata) => {
-        const imageURL = await getImage(metadata.id);
-        return {
-          id: metadata.id,
-          title: metadata.title,
-          image: imageURL || undefined,
-        };
+        try {
+          const imageURL = await getImage(metadata.id);
+          return {
+            id: metadata.id,
+            title: metadata.title,
+            image: imageURL || undefined,
+          };
+        } catch (imgError) {
+          console.error(`Error loading image for card ${metadata.id}:`, imgError);
+          // Return card without image rather than failing
+          return {
+            id: metadata.id,
+            title: metadata.title,
+            image: undefined
+          };
+        }
       })
     );
-    
-    console.log(`✓ Loaded ${cardsWithImages.length} cards with images from IndexedDB`);
+
+    console.log(`✓ Loaded ${cardsWithImages.length} cards from storage`);
     return cardsWithImages;
   } catch (error) {
     console.error('Error loading cards:', error);
+    // If we fail completely (e.g. localStorage issue), return empty
     return [];
   }
 };
@@ -119,7 +132,7 @@ const migrateLegacyCards = async (): Promise<Card[]> => {
     if (migrated === 'true') {
       return [];
     }
-    
+
     // Try to find cards with base64 images in localStorage (old format)
     console.log('Checking for legacy cards format...');
     const stored = localStorage.getItem(CARDS_KEY);
@@ -127,7 +140,7 @@ const migrateLegacyCards = async (): Promise<Card[]> => {
       localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
       return [];
     }
-    
+
     // Try to parse as old format (with images embedded)
     try {
       const oldCards: Array<{ id: string; title: string; image?: string }> = JSON.parse(stored);
@@ -136,25 +149,25 @@ const migrateLegacyCards = async (): Promise<Card[]> => {
         const hasBase64Images = oldCards.some(card => card.image && card.image.startsWith('data:'));
         if (hasBase64Images) {
           console.log(`Found ${oldCards.length} legacy cards with base64 images. Migrating to IndexedDB...`);
-          
+
           // Migrate images to IndexedDB
           const { migrateImagesToIndexedDB } = await import('./indexedDB');
           const cardsToMigrate = oldCards
             .filter(card => card.image && card.image.startsWith('data:'))
             .map(card => ({ id: card.id, image: card.image! }));
-          
+
           if (cardsToMigrate.length > 0) {
             await migrateImagesToIndexedDB(cardsToMigrate);
             console.log(`✓ Migrated ${cardsToMigrate.length} images to IndexedDB`);
           }
-          
+
           // Save only metadata (without images) to localStorage
           const cardsMetadata: CardMetadata[] = oldCards.map(card => ({
             id: card.id,
             title: card.title,
           }));
           localStorage.setItem(CARDS_KEY, JSON.stringify(cardsMetadata));
-          
+
           // Load cards with blob URLs from IndexedDB
           const { getImage } = await import('./indexedDB');
           const migratedCards: Card[] = await Promise.all(
@@ -167,7 +180,7 @@ const migrateLegacyCards = async (): Promise<Card[]> => {
               };
             })
           );
-          
+
           console.log(`✓ Migration complete. Loaded ${migratedCards.length} cards with images from IndexedDB`);
           localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
           return migratedCards;
@@ -177,7 +190,7 @@ const migrateLegacyCards = async (): Promise<Card[]> => {
       // If parse fails, might be new format already
       console.log('Could not parse as legacy format, assuming new format');
     }
-    
+
     // Set migration flag
     localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
     return [];
@@ -194,24 +207,24 @@ export const saveBoards = async (boards: Board[], count: number): Promise<void> 
       id: board.id,
       cardIds: board.cards.map(card => card.id),
     }));
-    
+
     const collection: BoardsCollection = {
       count,
       boards: boardsStorage,
     };
-    
+
     const serialized = JSON.stringify(collection);
     const sizeKB = serialized.length / 1024;
     console.log(`Saving ${boards.length} boards (${sizeKB.toFixed(2)} KB - optimized with IDs only)`);
-    
+
     localStorage.setItem(BOARDS_KEY, serialized);
-    
+
     // Verify the save worked
     const verifyStored = localStorage.getItem(BOARDS_KEY);
     if (!verifyStored) {
       throw new Error('Failed to verify saved boards');
     }
-    
+
     console.log(`✓ Successfully saved ${boards.length} boards to localStorage`);
   } catch (error) {
     console.error('Error saving boards to localStorage:', error);
@@ -233,28 +246,28 @@ export const loadBoards = async (): Promise<Board[] | null> => {
     if (!stored) {
       return null;
     }
-    
+
     const collection: BoardsCollection = JSON.parse(stored);
     const allCards = await loadCards();
-    
+
     // Create a map of card IDs to card objects for fast lookup
     const cardsMap = new Map<string, Card>();
     allCards.forEach(card => {
       cardsMap.set(card.id, card);
     });
-    
+
     // Reconstruct boards with full card objects
     const boards: Board[] = collection.boards.map(boardStorage => {
       const cards: Card[] = boardStorage.cardIds
         .map(cardId => cardsMap.get(cardId))
         .filter((card): card is Card => card !== undefined);
-      
+
       return {
         id: boardStorage.id,
         cards,
       };
     });
-    
+
     console.log(`Loaded ${boards.length} boards (reconstructed from ${collection.boards.length} stored)`);
     return boards;
   } catch (error) {
@@ -300,7 +313,7 @@ export const clearAllData = async (): Promise<void> => {
     localStorage.removeItem(BOARDS_KEY);
     localStorage.removeItem(BOARD_COUNT_KEY);
     localStorage.removeItem(MIGRATION_FLAG_KEY);
-    
+
     // Clear IndexedDB images
     const { clearAllImages } = await import('./indexedDB');
     await clearAllImages();

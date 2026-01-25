@@ -21,8 +21,8 @@ export const CardUploadModal = ({ isOpen, onClose, onCardAdd, existingTitles }: 
   };
 
   const modalContent = (
-    <div 
-      className="card-upload-modal__overlay" 
+    <div
+      className="card-upload-modal__overlay"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -30,14 +30,16 @@ export const CardUploadModal = ({ isOpen, onClose, onCardAdd, existingTitles }: 
       }}
     >
       <div className="card-upload-modal__content">
-        <button 
-          className="card-upload-modal__close"
-          onClick={onClose}
-          aria-label="Cerrar"
-        >
-          ×
-        </button>
-        <h2 className="card-upload-modal__title">Agregar Nueva Carta</h2>
+        <div className="card-upload-modal__header">
+          <h2 className="card-upload-modal__title">Agregar Nueva Carta</h2>
+          <button
+            className="card-upload-modal__close"
+            onClick={onClose}
+            aria-label="Cerrar"
+          >
+            ×
+          </button>
+        </div>
         <CardUpload onCardAdd={handleCardAdd} existingTitles={existingTitles} />
       </div>
     </div>

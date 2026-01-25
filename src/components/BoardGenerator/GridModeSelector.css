@@ -1,0 +1,99 @@
+.grid-mode-selector {
+    margin-bottom: 2rem;
+    width: 100%;
+}
+
+.grid-mode-selector__label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.75rem;
+    font-family: var(--font-display);
+    text-align: left;
+}
+
+.grid-mode-selector__options {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.grid-mode-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: white;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    width: 130px;
+    height: 130px;
+    aspect-ratio: 1;
+}
+
+.grid-mode-option:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-primary-light);
+    box-shadow: var(--shadow-sm);
+}
+
+.grid-mode-option--active {
+    background: var(--color-bg-subtle);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.grid-mode-option__icon {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-sm);
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+    transition: all 0.2s ease;
+}
+
+.grid-mode-option--active .grid-mode-option__icon {
+    background: var(--color-primary);
+    color: white;
+}
+
+.grid-mode-option__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.grid-mode-option__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--color-text-main);
+}
+
+.grid-mode-option__desc {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    font-family: var(--font-body);
+}
+
+@media (max-width: 480px) {
+    .grid-mode-selector__options {
+        justify-content: space-between;
+    }
+
+    .grid-mode-option {
+        width: calc(50% - 0.5rem);
+        height: auto;
+        aspect-ratio: 1;
+    }
+}

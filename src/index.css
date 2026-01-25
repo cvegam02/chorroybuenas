@@ -37,6 +37,15 @@
   --color-bg-subtle: #fff7ed;
   /* Very light orange tint */
 
+  /* Missing variables mappings */
+  --color-bg-primary: var(--color-bg-surface);
+  --color-bg-secondary: var(--color-bg-base);
+  --color-bg-tertiary: #f3f4f6;
+
+  /* Primary variations */
+  --color-primary-lighter: #fdba74;
+  --color-primary-lightest: #ffedd5;
+
   /* Text Colors - High Contrast */
   --color-text-main: #431407;
   /* Dark Brown/Rust */
@@ -50,6 +59,9 @@
   --shadow-lg: 0 12px 24px -6px rgba(234, 88, 12, 0.15);
 
   /* Borders & Radius */
+  --color-border: #e5e7eb;
+  --color-border-dark: #d1d5db;
+
   --radius-sm: 8px;
   --radius-md: 16px;
   --radius-lg: 24px;
@@ -102,7 +114,9 @@ button {
   font-family: var(--font-display);
   border: none;
   cursor: pointer;
-}/* Global Container */
+}
+
+/* Global Container */
 .container {
   max-width: 1200px;
   margin: 0 auto;

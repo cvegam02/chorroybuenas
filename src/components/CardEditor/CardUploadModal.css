@@ -20,6 +20,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -39,7 +40,6 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
   font-family: var(--font-body);
   animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -49,16 +49,32 @@
     opacity: 0;
     transform: scale(0.95) translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
 }
 
+.card-upload-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.card-upload-modal__title {
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-family: var(--font-body);
+  text-align: left;
+}
+
 .card-upload-modal__close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
   width: 44px;
   height: 44px;
   min-width: 44px;
@@ -74,7 +90,7 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 1;
+  flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
@@ -90,16 +106,6 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-.card-upload-modal__title {
-  font-size: 1.75rem;
-  color: var(--color-primary);
-  margin: 0 0 24px 0;
-  font-weight: 700;
-  text-align: center;
-  letter-spacing: -0.3px;
-  font-family: var(--font-body);
-}
-
 @media (max-width: 640px) {
   .card-upload-modal__overlay {
     padding: 16px;
@@ -111,18 +117,19 @@
     border-radius: 20px;
   }
 
+  .card-upload-modal__header {
+    margin-bottom: 20px;
+  }
+
   .card-upload-modal__close {
     width: 40px;
     height: 40px;
     min-width: 40px;
     min-height: 40px;
     font-size: 22px;
-    top: 12px;
-    right: 12px;
   }
 
   .card-upload-modal__title {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
+    font-size: 1.25rem;
   }
 }

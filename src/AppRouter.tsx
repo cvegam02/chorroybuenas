@@ -11,7 +11,7 @@ import { Navbar } from './components/Navbar/Navbar';
 import { useBoard } from './hooks/useBoard';
 import { generatePDF, downloadPDF } from './services/PDFService';
 import { saveBoards, saveBoardCount, clearAllData } from './utils/storage';
-import { Board } from './types';
+import { Board, GridSize } from './types';
 
 type AppStep = 'cards' | 'board-count' | 'preview' | 'confirmation';
 
@@ -21,6 +21,7 @@ function AppContent() {
   const [currentStep, setCurrentStep] = useState<AppStep | null>(null);
   const [boards, setBoards] = useState<Board[]>([]);
   const [, setBoardCount] = useState<number>(8);
+  const [gridSize, setGridSize] = useState<GridSize>(16); // Default to 4x4 (Classic)
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const { generateBoards, isGenerating } = useBoard();
@@ -44,7 +45,15 @@ function AppContent() {
   const handleBoardCountGenerate = async (count: number) => {
     setBoardCount(count);
     try {
-      const generatedBoards = await generateBoards(count);
+      // Pass gridSize to generateBoards if supported, otherwise it defaults to what logic?
+      // actually generateBoards hook needs to be updated or we need to pass gridSize to it.
+      // useBoard hook likely needs update too if it doesn't handle gridSize yet.
+      // Checking useBoard hook usage... it's just `generateBoards(count)`.
+      // We need to pass gridSize to generateBoards inside the hook, or pass it here.
+      // Let's assume for now keeping existing signature and we'll fix useBoard in next steps if needed,
+      // but waaaait, the previous task updated useBoard/PDFService.
+      // Let's check useBoard usage again.
+      const generatedBoards = await generateBoards(count, gridSize);
       setBoards(generatedBoards);
       await saveBoards(generatedBoards, count);
       saveBoardCount(count);
@@ -86,6 +95,7 @@ function AppContent() {
     setCurrentStep(null);
     setBoards([]);
     setBoardCount(8);
+    setGridSize(16); // Reset to default
     setShowConfirmation(false);
     navigate('/');
     // Force reload to clear any component state
@@ -107,44 +117,51 @@ function AppContent() {
     <>
       <Navbar />
       <Routes>
-        <Route 
-          path="/" 
-          element={<LandingPage onStart={handleLandingStart} />} 
+        <Route
+          path="/"
+          element={<LandingPage onStart={handleLandingStart} />}
         />
-        <Route 
-          path="/como-se-juega" 
-          element={<HowToPlay />} 
+        <Route
+          path="/como-se-juega"
+          element={<HowToPlay />}
         />
-        <Route 
-          path="/que-es-la-loteria" 
-          element={<AboutLoteria />} 
+        <Route
+          path="/que-es-la-loteria"
+          element={<AboutLoteria />}
         />
-        <Route 
-          path="/cards" 
+        <Route
+          path="/cards"
           element={
             currentStep === 'cards' || location.pathname === '/cards' ? (
-              <CardEditor onNext={handleCardsNext} />
+              <CardEditor
+                onNext={handleCardsNext}
+                gridSize={gridSize}
+                onGridSizeChange={setGridSize}
+              />
             ) : (
               <div style={{ padding: '48px', textAlign: 'center' }}>
                 <h2>Redirigiendo...</h2>
               </div>
             )
-          } 
+          }
         />
-        <Route 
-          path="/board-count" 
+        <Route
+          path="/board-count"
           element={
             currentStep === 'board-count' ? (
-              <BoardCountSelector onGenerate={handleBoardCountGenerate} />
+              <BoardCountSelector
+                onGenerate={handleBoardCountGenerate}
+                gridSize={gridSize}
+              />
             ) : (
               <div style={{ padding: '48px', textAlign: 'center' }}>
                 <h2>Redirigiendo...</h2>
               </div>
             )
-          } 
+          }
         />
-        <Route 
-          path="/preview" 
+        <Route
+          path="/preview"
           element={
             currentStep === 'preview' ? (
               <BoardPreview
@@ -158,7 +175,7 @@ function AppContent() {
                 <h2>Redirigiendo...</h2>
               </div>
             )
-          } 
+          }
         />
       </Routes>
 

@@ -22,7 +22,7 @@ export const useCards = () => {
         setIsLoading(false);
       }
     };
-    
+
     loadCardsData();
   }, []);
 
@@ -33,7 +33,7 @@ export const useCards = () => {
         const blobURL = await saveImageToIndexedDB(card.id, card.image);
         card = { ...card, image: blobURL };
       }
-      
+
       setCards(prevCards => {
         const newCards = [...prevCards, card];
         saveCards(newCards); // Async but don't wait
@@ -62,18 +62,18 @@ export const useCards = () => {
           return card;
         })
       );
-      
+
       setCards(prevCards => {
         const updatedCards = [...prevCards, ...cardsWithImages];
         console.log(`Adding ${newCards.length} cards. Total will be: ${updatedCards.length}`);
-        
+
         // Save async (don't wait)
         saveCards(updatedCards).catch(error => {
           console.error('Error saving cards:', error);
           const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
           alert(`Error al guardar las cartas: ${errorMessage}`);
         });
-        
+
         return updatedCards;
       });
     } catch (error) {
@@ -87,7 +87,7 @@ export const useCards = () => {
       // Delete image from IndexedDB
       const { deleteImage } = await import('../utils/indexedDB');
       await deleteImage(cardId);
-      
+
       const newCards = cards.filter(card => card.id !== cardId);
       setCards(newCards);
       await saveCards(newCards);
@@ -101,11 +101,36 @@ export const useCards = () => {
       // Clear all images from IndexedDB
       const { clearAllImages } = await import('../utils/indexedDB');
       await clearAllImages();
-      
+
       setCards([]);
       await saveCards([]);
     } catch (error) {
       console.error('Error clearing cards:', error);
+    }
+  };
+
+  const updateCard = async (id: string, updates: Partial<Card>) => {
+    try {
+      // If image is being updated and it's base64, save to IndexedDB
+      let updatedImage = updates.image;
+      if (updatedImage && updatedImage.startsWith('data:')) {
+        const { saveImage } = await import('../utils/indexedDB');
+        const blobURL = await saveImage(id, updatedImage);
+        updatedImage = blobURL;
+      }
+
+      setCards(prevCards => {
+        const newCards = prevCards.map(card =>
+          card.id === id ? { ...card, ...updates, ...(updatedImage ? { image: updatedImage } : {}) } : card
+        );
+        saveCards(newCards);
+        return newCards;
+      });
+      return true;
+    } catch (error) {
+      console.error('Error updating card:', error);
+      alert('Error al actualizar la carta. Por favor, intenta nuevamente.');
+      return false;
     }
   };
 
@@ -117,6 +142,7 @@ export const useCards = () => {
     addCard,
     addCards,
     removeCard,
+    updateCard,
     clearCards,
     hasMinimumCards,
     cardCount: cards.length,

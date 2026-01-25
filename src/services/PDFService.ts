@@ -28,18 +28,12 @@ const BOARD_WIDTH_PT = cmToPoints(BOARD_WIDTH_CM);
 const BOARD_HEIGHT_PT = cmToPoints(BOARD_HEIGHT_CM);
 
 // Board has 4x4 cards
-const BOARD_COLS = 4;
-const BOARD_ROWS = 4;
+// Removed hardcoded constants: BOARD_COLS, BOARD_ROWS
 
 // Gap between cards (small gap for traditional look)
 const CARD_GAP_PT = cmToPoints(0.15); // ~4.25pt (small gap between cards)
 
-// Calculate card dimensions to fit exactly in traditional board size
-// Total gap space = (BOARD_COLS - 1) * CARD_GAP_PT
-const TOTAL_GAP_WIDTH = (BOARD_COLS - 1) * CARD_GAP_PT;
-const TOTAL_GAP_HEIGHT = (BOARD_ROWS - 1) * CARD_GAP_PT;
-const CARD_WIDTH_PT = (BOARD_WIDTH_PT - TOTAL_GAP_WIDTH) / BOARD_COLS;
-const CARD_HEIGHT_PT = (BOARD_HEIGHT_PT - TOTAL_GAP_HEIGHT) / BOARD_ROWS;
+// Removed hardcoded card dimensions (CARD_WIDTH_PT, CARD_HEIGHT_PT) - these are now calculated dynamically per board
 
 // Cut area dimensions - contains logo, title, and board
 // Header maximum height: 3 cm (85.05 points)
@@ -130,7 +124,7 @@ const blobURLToBase64 = async (blobURL: string): Promise<string> => {
 
 const loadImageAsUint8Array = async (imageSrc: string): Promise<ImageData> => {
   let base64Image: string;
-  
+
   // If it's a blob URL, convert to base64 first
   if (imageSrc.startsWith('blob:')) {
     try {
@@ -142,16 +136,16 @@ const loadImageAsUint8Array = async (imageSrc: string): Promise<ImageData> => {
   } else {
     base64Image = imageSrc;
   }
-  
+
   // Remove data URL prefix if present
-  const base64Data = base64Image.includes(',') 
-    ? base64Image.split(',')[1] 
+  const base64Data = base64Image.includes(',')
+    ? base64Image.split(',')[1]
     : base64Image;
-  
+
   if (!base64Data || base64Data.length === 0) {
     throw new Error('El base64 de la imagen está vacío');
   }
-  
+
   let binaryString: string;
   try {
     binaryString = atob(base64Data);
@@ -159,12 +153,12 @@ const loadImageAsUint8Array = async (imageSrc: string): Promise<ImageData> => {
     console.error('Error decoding base64:', error);
     throw new Error(`Error al decodificar base64: ${error instanceof Error ? error.message : 'Error desconocido'}`);
   }
-  
+
   const bytes = new Uint8Array(binaryString.length);
   for (let i = 0; i < binaryString.length; i++) {
     bytes[i] = binaryString.charCodeAt(i);
   }
-  
+
   // Create image to get dimensions
   const img = new Image();
   img.src = base64Image;
@@ -181,7 +175,7 @@ const loadImageAsUint8Array = async (imageSrc: string): Promise<ImageData> => {
       reject(new Error('No se pudo cargar la imagen para obtener sus dimensiones'));
     };
   });
-  
+
   return {
     data: bytes,
     width: img.width,
@@ -195,7 +189,7 @@ const embedImageInPDF = async (
 ): Promise<{ image: any; width: number; height: number }> => {
   try {
     let base64Image: string;
-    
+
     // Convert blob URL to base64 if needed
     if (imageSrc.startsWith('blob:')) {
       console.log(`Converting blob URL to base64: ${imageSrc.substring(0, 50)}...`);
@@ -205,11 +199,11 @@ const embedImageInPDF = async (
       base64Image = imageSrc;
       console.log(`Using base64 directly, prefix: ${base64Image.substring(0, 50)}...`);
     }
-    
+
     console.log(`Loading image as Uint8Array...`);
     const imageData = await loadImageAsUint8Array(base64Image);
     console.log(`Image loaded: ${imageData.data.length} bytes, dimensions: ${imageData.width}x${imageData.height}`);
-    
+
     let image;
     // Determine image format from base64 header
     if (base64Image.startsWith('data:image/png')) {
@@ -232,10 +226,10 @@ const embedImageInPDF = async (
         console.log(`JPEG (fallback) embedded successfully`);
       }
     }
-    
+
     const { width, height } = image.scale(1);
     console.log(`Image ready: ${width}x${height}`);
-    
+
     return { image, width, height };
   } catch (error) {
     console.error('Error in embedImageInPDF:', error);
@@ -260,28 +254,28 @@ const drawCardOnPage = async (
       console.warn(`Card ${card.id} has no image, skipping`);
       return;
     }
-    
+
     console.log(`Drawing card ${card.id} - Image type: ${card.image.substring(0, 50)}...`);
     const { image, width: imgWidth, height: imgHeight } = await embedImageInPDF(pdfDoc, card.image);
     console.log(`Successfully embedded image for card ${card.id} - Dimensions: ${imgWidth}x${imgHeight}`);
-    
+
     // Reserve space for title if showing (more space for larger fonts)
     const titleSpace = showTitle ? titleSize + 8 : 0;
     const imageAreaHeight = height - titleSpace;
-    
+
     // Scale to cover the card area while maintaining aspect ratio
     // This avoids empty margins by allowing cropping.
     const scaleX = width / imgWidth;
     const scaleY = imageAreaHeight / imgHeight;
     const scale = Math.max(scaleX, scaleY);
-    
+
     const scaledWidth = imgWidth * scale;
     const scaledHeight = imgHeight * scale;
-    
+
     // Center the image in the card area (above title space)
     const offsetX = (width - scaledWidth) / 2;
     const offsetY = titleSpace + (imageAreaHeight - scaledHeight) / 2;
-    
+
     // Clip image to the image area so it never overflows the card bounds
     page.pushOperators(
       pushGraphicsState(),
@@ -413,6 +407,18 @@ const drawBoardOnPage = async (
   boardNumber: number,
   pdfDoc: PDFDocument
 ) => {
+  // Determine grid size (default to 4x4 if undefined)
+  const gridSize = board.gridSize || 16;
+  const rows = gridSize === 9 ? 3 : 4;
+  const cols = gridSize === 9 ? 3 : 4;
+
+  // Calculate card dimensions based on grid
+  // Total gap space = (cols - 1) * CARD_GAP_PT
+  const totalGapWidth = (cols - 1) * CARD_GAP_PT;
+  const totalGapHeight = (rows - 1) * CARD_GAP_PT;
+  const cardWidthPt = (BOARD_WIDTH_PT - totalGapWidth) / cols;
+  const cardHeightPt = (BOARD_HEIGHT_PT - totalGapHeight) / rows;
+
   // Calculate positions within the cut area (centered on page)
   // Board position: bottom of cut area
   const boardY = CUT_AREA_Y_PT;
@@ -422,7 +428,7 @@ const drawBoardOnPage = async (
   const titleY = boardY + BOARD_HEIGHT_PT + HEADER_GAP_PT + titleSize / 2;
   // Logo at same Y level as title (centered vertically with title text)
   const logoY = titleY - titleSize / 2; // Align logo center with title baseline
-  
+
   // Draw semi-transparent background for the entire cut area (including header)
   // This creates a subtle, diffused background that doesn't overpower the white background
   // Using very light orange/coral tint that matches the app's color scheme (#fef3e7, #fed7aa)
@@ -435,18 +441,18 @@ const drawBoardOnPage = async (
     borderColor: rgb(0.98, 0.92, 0.87), // Slightly darker border (similar to #fed7aa but lighter)
     borderWidth: 1,
   });
-  
+
   // Draw board title (left-aligned, just above board)
   const titleText = `Tablero ${boardNumber}`;
   const titleX = CUT_AREA_X_PT + 10; // Left padding within cut area
-  
+
   page.drawText(titleText, {
     x: titleX,
     y: titleY,
     size: titleSize,
     color: rgb(0, 0, 0),
   });
-  
+
   // Draw logo at same level as title (right side of cut area)
   try {
     const logoSize = LOGO_HEIGHT_PT; // Logo height in points (calculated to fit in max header)
@@ -454,10 +460,10 @@ const drawBoardOnPage = async (
     const logoAspectRatio = logoWidth / logoHeight;
     const logoDisplayWidth = logoSize * logoAspectRatio;
     const logoDisplayHeight = logoSize;
-    
+
     // Position logo at right side of cut area, at same Y level as title
     const logoX = CUT_AREA_X_PT + CUT_AREA_WIDTH_PT - logoDisplayWidth - 10; // Right padding
-    
+
     page.drawImage(logoImageEmbed, {
       x: logoX,
       y: logoY,
@@ -468,30 +474,30 @@ const drawBoardOnPage = async (
     console.warn('Could not draw logo on board:', error);
     // Continue without logo if there's an error
   }
-  
-  // Draw each card in the 4x4 grid (top to bottom, left to right)
-  for (let row = 0; row < BOARD_ROWS; row++) {
-    for (let col = 0; col < BOARD_COLS; col++) {
-      const cardIndex = row * BOARD_COLS + col;
+
+  // Draw each card in the grid (top to bottom, left to right)
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const cardIndex = row * cols + col;
       const card = board.cards[cardIndex];
-      
+
       if (card) {
         // Calculate card position
         // Start from top-left (PDF coordinates: bottom-left is origin)
-        const cardX = boardX + col * (CARD_WIDTH_PT + CARD_GAP_PT);
-        // Invert row: row 0 is at top, so we use (BOARD_ROWS - 1 - row)
-        const cardY = boardY + (BOARD_ROWS - 1 - row) * (CARD_HEIGHT_PT + CARD_GAP_PT);
-        
+        const cardX = boardX + col * (cardWidthPt + CARD_GAP_PT);
+        // Invert row: row 0 is at top, so we use (rows - 1 - row)
+        const cardY = boardY + (rows - 1 - row) * (cardHeightPt + CARD_GAP_PT);
+
         await drawCardOnPage(
           page,
           card,
           cardX,
           cardY,
-          CARD_WIDTH_PT,
-          CARD_HEIGHT_PT,
+          cardWidthPt,
+          cardHeightPt,
           pdfDoc,
           true, // showTitle
-          11 // titleSize (larger, more traditional loteria style)
+          gridSize === 9 ? 14 : 11 // Larger title title for 3x3 cards
         );
       }
     }
@@ -500,13 +506,13 @@ const drawBoardOnPage = async (
 
 export const generatePDF = async (boards: Board[]): Promise<Blob> => {
   const pdfDoc = await PDFDocument.create();
-  
+
   // Refresh images for board cards from IndexedDB - get Blob directly and convert to base64
   // This avoids using blob URLs that may have been revoked
   const { getImageBlob } = await import('../utils/indexedDB');
-  
+
   console.log(`Refreshing images for ${boards.length} boards...`);
-  
+
   // Refresh images for all cards in boards - convert Blobs directly to base64
   const refreshedBoards: Board[] = await Promise.all(
     boards.map(async (board, boardIndex) => {
@@ -541,7 +547,7 @@ export const generatePDF = async (boards: Board[]): Promise<Blob> => {
           return card;
         })
       );
-      
+
       console.log(`✓ Finished refreshing board ${boardIndex + 1}`);
       return {
         ...board,
@@ -549,23 +555,23 @@ export const generatePDF = async (boards: Board[]): Promise<Blob> => {
       };
     })
   );
-  
+
   console.log(`✓ Finished refreshing all boards`);
-  
+
   // Add a page for each board
   for (let i = 0; i < refreshedBoards.length; i++) {
     const board = refreshedBoards[i];
     const page = pdfDoc.addPage([PAGE_WIDTH_PT, PAGE_HEIGHT_PT]);
-    
+
     await drawBoardOnPage(page, board, i + 1, pdfDoc);
   }
-  
+
   // Optionally add pages with all cards (full deck)
   // Refresh images from IndexedDB to ensure they have the same aspect ratio as board cards
   let allCards = await loadCards();
   if (allCards.length > 0) {
     console.log(`Refreshing images for all cards (${allCards.length} cards) from IndexedDB...`);
-    
+
     // Refresh images for all cards - convert Blobs directly to base64
     // This ensures they have the same aspect ratio (5:7.5) as the cards in boards
     allCards = await Promise.all(
@@ -591,10 +597,10 @@ export const generatePDF = async (boards: Board[]): Promise<Blob> => {
         return card; // Return original card if no ID or refresh failed
       })
     );
-    
+
     console.log(`✓ Finished refreshing images for all cards`);
   }
-  
+
   if (allCards.length > 0) {
     // Full deck pages: use LANDSCAPE to reduce wasted whitespace while keeping safe gaps for cutting.
     // We compute a fixed grid (cols/rows) and then center it on the page.
@@ -670,7 +676,7 @@ export const generatePDF = async (boards: Board[]): Promise<Blob> => {
       pageNumber++;
     }
   }
-  
+
   const pdfBytes = await pdfDoc.save();
   return new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });
 };
@@ -692,26 +698,26 @@ export const downloadPDF = (blob: Blob, filename: string = 'loteria-tableros.pdf
 export const generateCardPDF = async (card: Card): Promise<Blob> => {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([PAGE_WIDTH_PT, PAGE_HEIGHT_PT]);
-  
+
   // Calculate card size to fit nicely on page (centered, with margins)
   const margin = 60;
   const availableWidth = PAGE_WIDTH_PT - (margin * 2);
   const availableHeight = PAGE_HEIGHT_PT - (margin * 2);
-  
+
   // Use traditional loteria card aspect ratio (7cm x 11cm = 7:11)
   const cardAspectRatio = 7 / 11;
   let cardWidth = availableWidth;
   let cardHeight = cardWidth / cardAspectRatio;
-  
+
   if (cardHeight > availableHeight) {
     cardHeight = availableHeight;
     cardWidth = cardHeight * cardAspectRatio;
   }
-  
+
   // Center the card on the page
   const cardX = (PAGE_WIDTH_PT - cardWidth) / 2;
   const cardY = (PAGE_HEIGHT_PT - cardHeight) / 2;
-  
+
   // Draw the card
   await drawCardOnPage(
     page,
@@ -724,7 +730,7 @@ export const generateCardPDF = async (card: Card): Promise<Blob> => {
     true, // showTitle
     12 // titleSize
   );
-  
+
   const pdfBytes = await pdfDoc.save();
   return new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });
 };

@@ -66,15 +66,17 @@
 }
 
 .confirmation-modal__modify-button {
-  background: var(--color-text-tertiary);
-  color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: white;
+  color: var(--color-text-main);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .confirmation-modal__modify-button:hover {
-  background: var(--color-text-secondary);
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-primary-light);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .confirmation-modal__complete-button {

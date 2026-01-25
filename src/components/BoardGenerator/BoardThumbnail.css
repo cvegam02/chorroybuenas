@@ -48,7 +48,7 @@
 
 .board-thumbnail__grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(var(--cols, 4), 1fr);
   gap: 4px;
   aspect-ratio: 1;
   width: 100%;

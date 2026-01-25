@@ -1,8 +1,8 @@
 import { useState, useRef, useMemo } from 'react';
-import { 
-  FaInfoCircle, 
-  FaChevronDown, 
-  FaLightbulb, 
+import {
+  FaInfoCircle,
+  FaChevronDown,
+  FaLightbulb,
   FaCheckCircle,
   FaUpload,
   FaArrowRight,
@@ -15,17 +15,21 @@ import { useCards } from '../../hooks/useCards';
 import { CardPreview } from './CardPreview';
 import { CardUploadThumb } from './CardUploadThumb';
 import { CardUploadModal } from './CardUploadModal';
+import { CardEditModal } from './CardEditModal';
 import { BatchUploadModal } from './BatchUploadModal';
 import { CardRecommendations } from '../Recommendations/CardRecommendations';
-import { Card } from '../../types';
+import { GridModeSelector } from '../BoardGenerator/GridModeSelector';
+import { Card, GridSize } from '../../types';
 import './CardEditor.css';
 
 interface CardEditorProps {
   onNext: () => void;
+  gridSize: GridSize;
+  onGridSizeChange: (size: GridSize) => void;
 }
 
-export const CardEditor = ({ onNext }: CardEditorProps) => {
-  const { cards, addCard, addCards, removeCard, clearCards, cardCount, hasMinimumCards, minCards } = useCards();
+export const CardEditor = ({ onNext, gridSize, onGridSizeChange }: CardEditorProps) => {
+  const { cards, addCard, addCards, removeCard, updateCard, clearCards, cardCount } = useCards();
   const [nextCardId, setNextCardId] = useState(1);
   const [isRecommendationsCollapsed, setIsRecommendationsCollapsed] = useState(true);
   const [isInstructionsCollapsed, setIsInstructionsCollapsed] = useState(true);
@@ -34,6 +38,13 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const [batchFiles, setBatchFiles] = useState<File[]>([]);
   const batchInputRef = useRef<HTMLInputElement>(null);
+  const [editingCard, setEditingCard] = useState<Card | null>(null);
+
+  // Dynamic minimum cards based on grid size
+  // Kids (3x3) -> Min 15
+  // Classic (4x4) -> Min 20
+  const minCards = gridSize === 9 ? 15 : 20;
+  const hasMinimumCards = cardCount >= minCards;
 
   const normalizeTitle = (value: string) => value.replace(/\s+/g, ' ').trim().toLowerCase();
 
@@ -76,17 +87,17 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
       alert(`Se encontraron títulos repetidos: ${duplicateTitles.join(', ')}. Por favor cámbialos.`);
       return;
     }
-    
+
     // Create all new cards with unique IDs
     const newCards: Card[] = cardsToAdd.map(({ image, title }, index) => ({
       id: `card-${nextCardId + index}-${Date.now()}-${Math.random()}`,
       title,
       image,
     }));
-    
+
     // Add all cards at once using addCards function
     await addCards(newCards);
-    
+
     // Update ID counter by the number of cards added
     setNextCardId(prev => prev + cardsToAdd.length);
   };
@@ -98,8 +109,8 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
   const handleBatchFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     if (files.length > 0) {
-    setBatchFiles(files);
-    setIsBatchModalOpen(true);
+      setBatchFiles(files);
+      setIsBatchModalOpen(true);
     }
     // Reset input so same files can be selected again
     if (batchInputRef.current) {
@@ -116,6 +127,31 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
     setIsClearModalOpen(false);
   };
 
+  const handleEditCard = (card: Card) => {
+    setEditingCard(card);
+  };
+
+  const handleUpdateCard = async (image: string, title: string) => {
+    if (!editingCard) return false;
+
+    // Check for duplicates (excluding current card)
+    const normalizedTitle = normalizeTitle(title);
+    const isDuplicate = cards.some(c =>
+      c.id !== editingCard.id && normalizeTitle(c.title) === normalizedTitle
+    );
+
+    if (isDuplicate) {
+      alert('Ya existe una carta con ese nombre. Por favor usa un título diferente.');
+      return false;
+    }
+
+    const success = await updateCard(editingCard.id, { image, title });
+    if (success) {
+      setEditingCard(null);
+    }
+    return success;
+  };
+
   return (
     <div className="card-editor">
       <div className="card-editor__header">
@@ -123,6 +159,10 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
         <p className="card-editor__subtitle">
           Crea tu baraja personalizada subiendo imágenes y asignándoles un título
         </p>
+      </div>
+
+      <div className="card-editor__mode-selector-container">
+        <GridModeSelector selectedSize={gridSize} onChange={onGridSizeChange} />
       </div>
 
       <div className="card-editor__stats">
@@ -136,14 +176,14 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
           <div className="card-editor__stat-label">Cartas cargadas</div>
           {!hasMinimumCards && (
             <div className="card-editor__stat-minimum">
-              Mínimo: {minCards}
+              Mínimo para modo {gridSize === 9 ? 'Kids' : 'Clásico'}: {minCards}
             </div>
           )}
         </div>
       </div>
 
       <div className="card-editor__info-section">
-        <button 
+        <button
           className={`card-editor__info-toggle ${!isInstructionsCollapsed ? 'card-editor__info-toggle--open' : ''}`}
           onClick={() => setIsInstructionsCollapsed(!isInstructionsCollapsed)}
           type="button"
@@ -209,7 +249,7 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
       </div>
 
       <div className="card-editor__info-section">
-        <button 
+        <button
           className={`card-editor__info-toggle ${!isRecommendationsCollapsed ? 'card-editor__info-toggle--open' : ''}`}
           onClick={() => setIsRecommendationsCollapsed(!isRecommendationsCollapsed)}
           type="button"
@@ -228,7 +268,7 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
               <li><strong>Buena iluminación:</strong> Elige fotos bien iluminadas para que los detalles se aprecien mejor</li>
               <li><strong>Colores vibrantes:</strong> Las imágenes con colores vivos y contrastes claros destacan más</li>
               <li><strong>Composición centrada:</strong> El editor te permite recortar y ajustar, pero es mejor empezar con una imagen bien encuadrada</li>
-              <li><strong>Títulos descriptivos:</strong> Usa nombres claros y cortos que sean fáciles de cantar durante el juego</li>
+              <li><strong>Títulos descriptivos:</strong> Elige títulos que sean fáciles de identificar y divertidos de "cantar"</li>
             </ul>
           </div>
         )}
@@ -237,10 +277,10 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
       <div className="card-editor__cards-section">
         <div className="card-editor__cards-header">
           <div className="card-editor__cards-header-left">
-        {cards.length > 0 && (
+            {cards.length > 0 && (
               <>
-            <h2 className="card-editor__cards-title">Tus Cartas</h2>
-            <span className="card-editor__cards-count">({cardCount})</span>
+                <h2 className="card-editor__cards-title">Tus Cartas</h2>
+                <span className="card-editor__cards-count">({cardCount})</span>
               </>
             )}
           </div>
@@ -265,9 +305,14 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
         </div>
         <div className="card-editor__cards-grid">
           {cards.map((card) => (
-            <CardPreview key={card.id} card={card} onRemove={removeCard} />
+            <CardPreview
+              key={card.id}
+              card={card}
+              onRemove={removeCard}
+              onClick={handleEditCard}
+            />
           ))}
-          <CardUploadThumb 
+          <CardUploadThumb
             onSingleClick={() => setIsUploadModalOpen(true)}
           />
         </div>
@@ -282,6 +327,17 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
         onCardAdd={handleCardAdd}
         existingTitles={cards.map(card => card.title)}
       />
+
+      {editingCard && (
+        <CardEditModal
+          isOpen={!!editingCard}
+          onClose={() => setEditingCard(null)}
+          onCardUpdate={handleUpdateCard}
+          existingTitles={cards.map(card => card.title)}
+          initialTitle={editingCard.title}
+          initialImage={editingCard.image || ''}
+        />
+      )}
 
       <BatchUploadModal
         isOpen={isBatchModalOpen}
@@ -333,7 +389,7 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
       <div className="card-editor__actions">
         {!hasMinimumCards && (
           <div className="card-editor__actions-note">
-            Necesitas al menos <strong>{minCards} cartas</strong> para continuar. 
+            Necesitas al menos <strong>{minCards} cartas</strong> para continuar en modo <strong>{gridSize === 9 ? 'Kids' : 'Clásico'}</strong>.
             Actualmente tienes <strong>{cardCount}</strong>.
           </div>
         )}
@@ -343,8 +399,8 @@ export const CardEditor = ({ onNext }: CardEditorProps) => {
           className={`card-editor__next-button ${hasMinimumCards ? 'card-editor__next-button--enabled' : ''}`}
         >
           <span>
-            {hasMinimumCards 
-              ? 'Siguiente: Seleccionar Cantidad de Tableros' 
+            {hasMinimumCards
+              ? 'Siguiente: Generar Tableros'
               : `Agregar ${minCards - cardCount} cartas más`
             }
           </span>

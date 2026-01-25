@@ -22,17 +22,17 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
   // Refresh all card images from IndexedDB to ensure blob URLs are valid
   useEffect(() => {
     let isMounted = true;
-    
+
     const refreshImages = async () => {
       console.log(`[BoardThumbnail] Refreshing images for board ${board.id} (${board.cards.length} cards)...`);
-      
+
       const refreshedCards = await Promise.all(
         board.cards.map(async (card) => {
           if (!card.id) {
             console.warn(`[BoardThumbnail] Card has no ID:`, card.title);
             return { ...card, freshImageUrl: null };
           }
-          
+
           try {
             const freshImageURL = await getImage(card.id);
             if (freshImageURL) {
@@ -47,7 +47,7 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
           }
         })
       );
-      
+
       // Only update state if component is still mounted
       if (isMounted) {
         const loadedCount = refreshedCards.filter(c => c.freshImageUrl !== null).length;
@@ -57,7 +57,7 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
     };
 
     refreshImages();
-    
+
     return () => {
       isMounted = false;
     };
@@ -65,12 +65,17 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board.id]);
 
-  // Create a small preview grid (4x4, but smaller)
+  // Determine grid size
+  const gridSize = board.gridSize || 16;
+  const cols = gridSize === 9 ? 3 : 4;
+  const rows = gridSize === 9 ? 3 : 4;
+
+  // Create preview grid
   const grid: (CardWithImage | null)[][] = [];
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < rows; i++) {
     grid[i] = [];
-    for (let j = 0; j < 4; j++) {
-      const cardIndex = i * 4 + j;
+    for (let j = 0; j < cols; j++) {
+      const cardIndex = i * cols + j;
       grid[i][j] = cardsWithImages[cardIndex] || null;
     }
   }
@@ -81,19 +86,23 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
         <h3 className="board-thumbnail__title">Tablero {index + 1}</h3>
         <span className="board-thumbnail__click-hint">👆 Click para ver completo</span>
       </div>
-      <div className="board-thumbnail__grid" onClick={onClick}>
+      <div
+        className="board-thumbnail__grid"
+        onClick={onClick}
+        style={{ '--cols': cols } as React.CSSProperties}
+      >
         {grid.map((row, rowIndex) =>
           row.map((card, colIndex) => (
-            <div 
-              key={`${rowIndex}-${colIndex}`} 
+            <div
+              key={`${rowIndex}-${colIndex}`}
               className="board-thumbnail__cell"
             >
               {card ? (
                 <div className="board-thumbnail__card">
                   {card.freshImageUrl ? (
-                    <img 
-                      src={card.freshImageUrl} 
-                      alt={card.title} 
+                    <img
+                      src={card.freshImageUrl}
+                      alt={card.title}
                       className="board-thumbnail__card-image"
                       onContextMenu={(e) => e.preventDefault()}
                       onDragStart={(e) => e.preventDefault()}
@@ -105,26 +114,26 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
                           getImage(card.id).then(url => {
                             if (url && url !== card.freshImageUrl) {
                               console.log(`[BoardThumbnail] ✓ Successfully refreshed image for card ${card.id}`);
-                              setCardsWithImages(prev => 
+                              setCardsWithImages(prev =>
                                 prev.map(c => c.id === card.id ? { ...c, freshImageUrl: url } : c)
                               );
                             } else {
                               console.warn(`[BoardThumbnail] ⚠ Could not get new image for card ${card.id}, showing placeholder`);
                               // If no image found, set to null to show placeholder
-                              setCardsWithImages(prev => 
+                              setCardsWithImages(prev =>
                                 prev.map(c => c.id === card.id ? { ...c, freshImageUrl: null } : c)
                               );
                             }
                           }).catch(err => {
                             console.error(`[BoardThumbnail] ❌ Error refreshing image for card ${card.id}:`, err);
                             // Set to null to show placeholder on error
-                            setCardsWithImages(prev => 
+                            setCardsWithImages(prev =>
                               prev.map(c => c.id === card.id ? { ...c, freshImageUrl: null } : c)
                             );
                           });
                         } else {
                           // No card ID, just show placeholder
-                          setCardsWithImages(prev => 
+                          setCardsWithImages(prev =>
                             prev.map(c => c.id === card.id ? { ...c, freshImageUrl: null } : c)
                           );
                         }

@@ -84,22 +84,26 @@ export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeInd
     touchMoved.current = false;
   };
 
-  // Organize cards in 4x4 grid
+  // Organize cards in grid
+  const gridSize = board.gridSize || 16;
+  const cols = gridSize === 9 ? 3 : 4;
+  const rows = gridSize === 9 ? 3 : 4;
+
   const grid: (typeof board.cards[0] | null)[][] = useMemo(() => {
     const next: (typeof board.cards[0] | null)[][] = [];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < rows; i++) {
       next[i] = [];
-      for (let j = 0; j < 4; j++) {
-        const cardIndex = i * 4 + j;
+      for (let j = 0; j < cols; j++) {
+        const cardIndex = i * cols + j;
         next[i][j] = board.cards[cardIndex] || null;
       }
     }
     return next;
-  }, [board]);
+  }, [board, rows, cols]);
 
   const modalContent = (
-    <div 
-      className="board-modal__overlay" 
+    <div
+      className="board-modal__overlay"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -138,17 +142,23 @@ export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeInd
             >
               ›
             </button>
-          <button 
-            className="board-modal__close"
-            onClick={onClose}
-            aria-label="Cerrar"
-          >
-            ×
-          </button>
+            <button
+              className="board-modal__close"
+              onClick={onClose}
+              aria-label="Cerrar"
+            >
+              ×
+            </button>
           </div>
         </div>
-        
-        <div className="board-modal__grid">
+
+        <div
+          className="board-modal__grid"
+          style={{
+            '--cols': cols,
+            '--rows': rows
+          } as React.CSSProperties}
+        >
           {grid.map((row, rowIndex) =>
             row.map((card, colIndex) => (
               <div key={`${rowIndex}-${colIndex}`} className="board-modal__cell">

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { 
+import {
   FaGamepad,
   FaBook,
   FaHeart,
@@ -16,7 +16,8 @@ import {
   FaUsers,
   FaBriefcase,
   FaSmile,
-  FaBirthdayCake
+  FaBirthdayCake,
+  FaChild
 } from 'react-icons/fa';
 import './LandingPage.css';
 import logoImage from '../../img/logo.png';
@@ -43,7 +44,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
           <p className="landing-page__hero-description">
             Crea tableros únicos con tus propias imágenes para cualquier celebración
           </p>
-          <button 
+          <button
             onClick={onStart}
             className="landing-page__cta-button landing-page__cta-button--hero"
           >
@@ -110,6 +111,15 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                   <div className="landing-page__feature-text">
                     <h3>PDF Profesional</h3>
                     <p>Descarga tus tableros en formato PDF listo para imprimir</p>
+                  </div>
+                </div>
+                <div className="landing-page__feature-item">
+                  <div className="landing-page__feature-icon">
+                    <FaChild />
+                  </div>
+                  <div className="landing-page__feature-text">
+                    <h3>Nuevo: Modo Kids</h3>
+                    <p>Tableros de 3x3 con cartas grandes, ideales para niños pequeños y preescolar</p>
                   </div>
                 </div>
               </div>
@@ -213,7 +223,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
               </div>
               <div className="landing-page__event-content">
                 <h3>Para Niños</h3>
-                <p>Con sus personajes favoritos</p>
+                <p>Con sus personajes favoritos y cartas grandes (3x3)</p>
               </div>
             </div>
             <div className="landing-page__event">
@@ -238,7 +248,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             </div>
             <h2>¿Listo para comenzar?</h2>
             <p>Crea recuerdos inolvidables en minutos. ¡Empieza ahora y diviértete con tu lotería personalizada!</p>
-            <button 
+            <button
               onClick={onStart}
               className="landing-page__cta-button landing-page__cta-button--primary"
             >
