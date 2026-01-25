@@ -127,7 +127,9 @@ export const CardUpload = ({
       return;
     }
 
-    if (normalizedTitle !== normalizeTitle(initialTitle) && existingTitleSet.has(normalizedTitle)) {
+    const isTitleChanged = normalizedTitle !== normalizeTitle(initialTitle);
+
+    if (isTitleChanged && existingTitleSet.has(normalizedTitle)) {
       alert('Ya existe una carta con ese nombre. Por favor usa un título diferente.');
       return;
     }
