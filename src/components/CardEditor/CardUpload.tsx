@@ -94,7 +94,7 @@ export const CardUpload = ({
     [existingTitles]
   );
   const [title, setTitle] = useState(initialTitle);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  /* imageFile removed */
   const [imagePreview, setImagePreview] = useState<string | null>(initialImage ?? null);
   const [showEditor, setShowEditor] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -111,7 +111,7 @@ export const CardUpload = ({
       return;
     }
 
-    setImageFile(file);
+    // setImageFile(file); removed
     const base64 = await convertFileToBase64(file);
     setImagePreview(base64);
     setShowEditor(false); // Don't show editor by default
@@ -132,7 +132,7 @@ export const CardUpload = ({
       return;
     }
 
-    if (!imageFile || !imagePreview) {
+    if (!imagePreview) {
       alert('Por favor, selecciona una imagen');
       return;
     }
@@ -159,7 +159,7 @@ export const CardUpload = ({
       }
       // Reset form
       setTitle('');
-      setImageFile(null);
+      // setImageFile(null); removed
       setImagePreview(null);
       setWasEdited(false);
       if (fileInputRef.current) {
@@ -190,7 +190,7 @@ export const CardUpload = ({
       return;
     }
 
-    setImageFile(file);
+    // setImageFile(file); removed
     const base64 = await convertFileToBase64(file);
     setImagePreview(base64);
     setShowEditor(false); // Don't show editor by default
