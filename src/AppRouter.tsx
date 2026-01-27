@@ -9,6 +9,7 @@ import { WarningModal } from './components/ConfirmationModal/WarningModal';
 import { HowToPlay } from './components/HowToPlay/HowToPlay';
 import { AboutLoteria } from './components/AboutLoteria/AboutLoteria';
 import { Navbar } from './components/Navbar/Navbar';
+import { Footer } from './components/Footer/Footer';
 import { useBoard } from './hooks/useBoard';
 import { generatePDF, downloadPDF } from './services/PDFService';
 import { saveBoards, saveBoardCount, clearAllData } from './utils/storage';
@@ -197,6 +198,8 @@ function AppContent() {
           }
         />
       </Routes>
+
+      <Footer />
 
       {isGenerating && (
         <div className="app__loading">

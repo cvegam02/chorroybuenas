@@ -1,0 +1,127 @@
+.footer--compact {
+    background: var(--color-bg-subtle);
+    border-top: 1px solid var(--color-border);
+    padding: 32px 0;
+    margin-top: auto;
+    font-family: var(--font-body);
+}
+
+.footer__container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.footer__main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+}
+
+.footer__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.footer__logo {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--color-primary);
+    margin: 0;
+}
+
+.footer__creator {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.footer__creator strong {
+    color: var(--color-text-main);
+}
+
+.footer__dev-offer {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.footer__dev-offer p {
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+.footer__email-link {
+    color: var(--color-primary);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.footer__email-link:hover {
+    text-decoration: underline;
+}
+
+.footer__contact-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.footer__icon {
+    color: var(--color-primary);
+    font-size: 1rem;
+}
+
+.footer__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.footer__copyright {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+.footer__slogan {
+    font-size: 0.8rem;
+    font-style: italic;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .footer--compact {
+        padding: 24px 0;
+    }
+
+    .footer__main {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .footer__dev-offer {
+        text-align: center;
+        align-items: center;
+    }
+
+    .footer__contact-item {
+        justify-content: center;
+    }
+
+    .footer__bottom {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+}
