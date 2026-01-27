@@ -1365,13 +1365,13 @@
 
   .landing-page__hero-logo {
     order: 1;
-    max-height: 370px;
+    max-height: 425px;
     padding: 0;
   }
 
   .landing-page__hero-logo img {
-    max-width: 460px;
-    max-height: 370px;
+    max-width: 530px;
+    max-height: 425px;
     opacity: 0.9;
   }
 
@@ -1580,13 +1580,13 @@
 
   .landing-page__hero-logo {
     order: 1;
-    max-height: 335px;
+    max-height: 385px;
     padding: 0;
   }
 
   .landing-page__hero-logo img {
-    max-width: 400px;
-    max-height: 335px;
+    max-width: 460px;
+    max-height: 385px;
     opacity: 0.95;
   }
 
