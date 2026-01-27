@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { FaPaypal } from 'react-icons/fa';
 import logoImage from '../../img/logo.png';
 import './Navbar.css';
 
@@ -20,31 +21,44 @@ export const Navbar = () => {
     <nav className="navbar">
       <div className="navbar__container">
         <Link to="/" className="navbar__logo" onClick={closeMenu}>
-          <img 
-            src={logoImage} 
-            alt="chorroybuenas.com.mx" 
+          <img
+            src={logoImage}
+            alt="chorroybuenas.com.mx"
             className="navbar__logo-image"
           />
           <span className="navbar__logo-text">chorroybuenas.com.mx</span>
         </Link>
-        
-        <button 
-          className="navbar__toggle"
-          onClick={toggleMenu}
-          aria-label="Toggle menu"
-          aria-expanded={isMenuOpen}
-        >
-          <span className={`navbar__toggle-icon ${isMenuOpen ? 'navbar__toggle-icon--open' : ''}`}>
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
-        </button>
-        
+
+        <div className="navbar__actions">
+          <a
+            href="https://paypal.me/cavegam"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="navbar__paypal-pill"
+            title="Apoyar proyecto"
+          >
+            <FaPaypal className="navbar__paypal-icon" />
+            <span className="navbar__paypal-text">Apoyar</span>
+          </a>
+
+          <button
+            className="navbar__toggle"
+            onClick={toggleMenu}
+            aria-label="Toggle menu"
+            aria-expanded={isMenuOpen}
+          >
+            <span className={`navbar__toggle-icon ${isMenuOpen ? 'navbar__toggle-icon--open' : ''}`}>
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+          </button>
+        </div>
+
         <ul className={`navbar__menu ${isMenuOpen ? 'navbar__menu--open' : ''}`}>
           <li>
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className={`navbar__link ${isActive('/') ? 'navbar__link--active' : ''}`}
               onClick={closeMenu}
             >
@@ -52,8 +66,8 @@ export const Navbar = () => {
             </Link>
           </li>
           <li>
-            <Link 
-              to="/cards" 
+            <Link
+              to="/cards"
               className={`navbar__link ${isActive('/cards') ? 'navbar__link--active' : ''}`}
               onClick={closeMenu}
             >
@@ -61,8 +75,8 @@ export const Navbar = () => {
             </Link>
           </li>
           <li>
-            <Link 
-              to="/como-se-juega" 
+            <Link
+              to="/como-se-juega"
               className={`navbar__link ${isActive('/como-se-juega') ? 'navbar__link--active' : ''}`}
               onClick={closeMenu}
             >
@@ -70,8 +84,8 @@ export const Navbar = () => {
             </Link>
           </li>
           <li>
-            <Link 
-              to="/que-es-la-loteria" 
+            <Link
+              to="/que-es-la-loteria"
               className={`navbar__link ${isActive('/que-es-la-loteria') ? 'navbar__link--active' : ''}`}
               onClick={closeMenu}
             >

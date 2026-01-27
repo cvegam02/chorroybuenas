@@ -60,6 +60,39 @@
   align-items: center;
 }
 
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  order: 2;
+}
+
+.navbar__paypal-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #0070ba;
+  color: white;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 112, 186, 0.2);
+  white-space: nowrap;
+}
+
+.navbar__paypal-pill:hover {
+  background: #005ea6;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 112, 186, 0.3);
+}
+
+.navbar__paypal-icon {
+  font-size: 1rem;
+}
+
 .navbar__link {
   color: var(--color-text-secondary);
   text-decoration: none;
@@ -150,6 +183,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -172,6 +206,27 @@
 
   .navbar__logo-image {
     height: 36px;
+  }
+
+  .navbar__actions {
+    gap: 8px;
+    margin-right: -4px;
+    order: 3;
+  }
+
+  .navbar__paypal-pill {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    gap: 6px;
+  }
+
+  .navbar__paypal-text {
+    display: none;
+  }
+
+  .navbar__paypal-pill::after {
+    content: 'Apoyar';
+    display: block;
   }
 
   .navbar__toggle {
