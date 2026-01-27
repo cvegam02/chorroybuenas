@@ -5,6 +5,7 @@ import { CardEditor } from './components/CardEditor/CardEditor';
 import { BoardCountSelector } from './components/BoardGenerator/BoardCountSelector';
 import { BoardPreview } from './components/BoardGenerator/BoardPreview';
 import { ConfirmationModal } from './components/ConfirmationModal/ConfirmationModal';
+import { WarningModal } from './components/ConfirmationModal/WarningModal';
 import { HowToPlay } from './components/HowToPlay/HowToPlay';
 import { AboutLoteria } from './components/AboutLoteria/AboutLoteria';
 import { Navbar } from './components/Navbar/Navbar';
@@ -23,6 +24,7 @@ function AppContent() {
   const [, setBoardCount] = useState<number>(8);
   const [gridSize, setGridSize] = useState<GridSize>(16); // Default to 4x4 (Classic)
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const { generateBoards, isGenerating } = useBoard();
 
@@ -113,6 +115,21 @@ function AppContent() {
     navigate('/cards');
   };
 
+  const handleCancelProcess = () => {
+    setShowCancelModal(true);
+  };
+
+  const confirmCancel = async () => {
+    await clearAllData();
+    setCurrentStep(null);
+    setBoards([]);
+    setBoardCount(8);
+    setGridSize(16);
+    setShowCancelModal(false);
+    navigate('/');
+    window.location.reload();
+  };
+
   return (
     <>
       <Navbar />
@@ -135,6 +152,7 @@ function AppContent() {
             currentStep === 'cards' || location.pathname === '/cards' ? (
               <CardEditor
                 onNext={handleCardsNext}
+                onCancel={handleCancelProcess}
                 gridSize={gridSize}
                 onGridSizeChange={setGridSize}
               />
@@ -151,6 +169,7 @@ function AppContent() {
             currentStep === 'board-count' ? (
               <BoardCountSelector
                 onGenerate={handleBoardCountGenerate}
+                onCancel={handleCancelProcess}
                 gridSize={gridSize}
               />
             ) : (
@@ -199,6 +218,17 @@ function AppContent() {
           onModify={handleConfirmationModify}
         />
       )}
+
+      <WarningModal
+        isOpen={showCancelModal}
+        title="¿Cancelar proceso?"
+        message="Se perderá todo el progreso que hayas hecho hasta ahora, incluyendo las cartas subidas y los tableros generados."
+        confirmText="Sí, cancelar todo"
+        cancelText="No, continuar"
+        onConfirm={confirmCancel}
+        onCancel={() => setShowCancelModal(false)}
+        type="danger"
+      />
     </>
   );
 }

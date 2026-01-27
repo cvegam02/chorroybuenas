@@ -6,6 +6,7 @@ import { GridSize } from '../../types';
 
 interface BoardCountSelectorProps {
   onGenerate: (count: number, gridSize: GridSize) => void;
+  onCancel: () => void;
   gridSize: GridSize;
 }
 
@@ -66,7 +67,7 @@ const calculateSuggestedBoards = (availableCards: number, gridSize: GridSize): n
   return Math.max(1, Math.min(suggested, maxUniqueBoards));
 };
 
-export const BoardCountSelector = ({ onGenerate, gridSize }: BoardCountSelectorProps) => {
+export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCountSelectorProps) => {
   const [boardCount, setBoardCount] = useState<number>(8);
   const [inputValue, setInputValue] = useState<string>('8');
   const [error, setError] = useState<string>('');
@@ -238,14 +239,23 @@ export const BoardCountSelector = ({ onGenerate, gridSize }: BoardCountSelectorP
           {error && <div className="board-count-selector__error">{error}</div>}
         </div>
 
-        <button
-          type="submit"
-          disabled={boardCount < 1 || cardCount < gridSize}
-          className={`board-count-selector__button ${boardCount >= 1 && cardCount >= gridSize ? 'board-count-selector__button--enabled' : ''}`}
-        >
-          <span>Generar Tableros</span>
-          <FaArrowRight />
-        </button>
+        <div className="board-count-selector__actions">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="board-count-selector__cancel-button"
+          >
+            Cancelar Proceso
+          </button>
+          <button
+            type="submit"
+            disabled={boardCount < 1 || cardCount < gridSize}
+            className={`board-count-selector__button ${boardCount >= 1 && cardCount >= gridSize ? 'board-count-selector__button--enabled' : ''}`}
+          >
+            <span>Generar Tableros</span>
+            <FaArrowRight />
+          </button>
+        </div>
       </form>
     </div>
   );

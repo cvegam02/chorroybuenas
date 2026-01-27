@@ -19,16 +19,18 @@ import { CardEditModal } from './CardEditModal';
 import { BatchUploadModal } from './BatchUploadModal';
 import { CardRecommendations } from '../Recommendations/CardRecommendations';
 import { GridModeSelector } from '../BoardGenerator/GridModeSelector';
+import { WarningModal } from '../ConfirmationModal/WarningModal';
 import { Card, GridSize } from '../../types';
 import './CardEditor.css';
 
 interface CardEditorProps {
   onNext: () => void;
+  onCancel: () => void;
   gridSize: GridSize;
   onGridSizeChange: (size: GridSize) => void;
 }
 
-export const CardEditor = ({ onNext, gridSize, onGridSizeChange }: CardEditorProps) => {
+export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: CardEditorProps) => {
   const { cards, addCard, addCards, removeCard, updateCard, clearCards, cardCount } = useCards();
   const [nextCardId, setNextCardId] = useState(1);
   const [isRecommendationsCollapsed, setIsRecommendationsCollapsed] = useState(true);
@@ -359,32 +361,15 @@ export const CardEditor = ({ onNext, gridSize, onGridSizeChange }: CardEditorPro
         style={{ display: 'none' }}
       />
 
-      {isClearModalOpen && (
-        <div className="card-editor__clear-modal-overlay">
-          <div className="card-editor__clear-modal">
-            <h2 className="card-editor__clear-modal-title">¿Limpiar todas las cartas?</h2>
-            <p className="card-editor__clear-modal-message">
-              Se eliminarán todas las cartas que has subido y empezarás desde cero.
-            </p>
-            <div className="card-editor__clear-modal-actions">
-              <button
-                type="button"
-                onClick={() => setIsClearModalOpen(false)}
-                className="card-editor__clear-cancel"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleClearCards}
-                className="card-editor__clear-confirm"
-              >
-                Sí, limpiar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <WarningModal
+        isOpen={isClearModalOpen}
+        title="¿Limpiar todas las cartas?"
+        message="Se eliminarán todas las cartas que has subido y empezarás desde cero."
+        confirmText="Sí, limpiar todo"
+        onConfirm={handleClearCards}
+        onCancel={() => setIsClearModalOpen(false)}
+        type="danger"
+      />
 
       <div className="card-editor__actions">
         {!hasMinimumCards && (
@@ -393,6 +378,13 @@ export const CardEditor = ({ onNext, gridSize, onGridSizeChange }: CardEditorPro
             Actualmente tienes <strong>{cardCount}</strong>.
           </div>
         )}
+        <button
+          type="button"
+          onClick={onCancel}
+          className="card-editor__cancel-process-button"
+        >
+          Cancelar Proceso
+        </button>
         <button
           onClick={onNext}
           disabled={!hasMinimumCards}
