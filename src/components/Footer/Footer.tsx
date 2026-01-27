@@ -1,4 +1,4 @@
-import { FaEnvelope } from 'react-icons/fa';
+import { FaEnvelope, FaPaypal } from 'react-icons/fa';
 import './Footer.css';
 
 export const Footer = () => {
@@ -17,9 +17,15 @@ export const Footer = () => {
 
                     <div className="footer__dev-offer">
                         <p>¿Necesitas una aplicación web? <a href="mailto:carlos.tests01@gmail.com" className="footer__email-link">¡Hablemos!</a></p>
-                        <div className="footer__contact-item">
-                            <FaEnvelope className="footer__icon" />
-                            <span>carlos.tests01@gmail.com</span>
+                        <div className="footer__actions">
+                            <div className="footer__contact-item">
+                                <FaEnvelope className="footer__icon" />
+                                <span>carlos.tests01@gmail.com</span>
+                            </div>
+                            <a href="https://paypal.me/cavegam" target="_blank" rel="noopener noreferrer" className="footer__paypal-link">
+                                <FaPaypal />
+                                <span>Apoyar proyecto</span>
+                            </a>
                         </div>
                     </div>
                 </div>

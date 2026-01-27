@@ -45,7 +45,14 @@
     text-align: right;
     display: flex;
     flex-direction: column;
+    gap: 12px;
+}
+
+.footer__actions {
+    display: flex;
+    flex-direction: column;
     gap: 8px;
+    align-items: flex-end;
 }
 
 .footer__dev-offer p {
@@ -62,6 +69,27 @@
 
 .footer__email-link:hover {
     text-decoration: underline;
+}
+
+.footer__paypal-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #0070ba;
+    color: white;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 112, 186, 0.2);
+}
+
+.footer__paypal-link:hover {
+    background: #005ea6;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 112, 186, 0.3);
 }
 
 .footer__contact-item {
@@ -112,6 +140,10 @@
 
     .footer__dev-offer {
         text-align: center;
+        align-items: center;
+    }
+
+    .footer__actions {
         align-items: center;
     }
 
