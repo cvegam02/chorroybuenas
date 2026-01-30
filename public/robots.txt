@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /cards
+Disallow: /board-count
+Disallow: /preview
 
 Sitemap: https://chorroybuenas.com.mx/sitemap.xml
