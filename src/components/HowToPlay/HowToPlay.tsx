@@ -1,7 +1,16 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './HowToPlay.css';
 
 export const HowToPlay = () => {
+  useEffect(() => {
+    document.title = '¿Cómo se juega la Lotería Mexicana? - Instrucciones Paso a Paso | chorroybuenas.com.mx';
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', 'Aprende a jugar Lotería Mexicana paso a paso. Instrucciones claras para preparar el juego, cantar las cartas y ganar. ¡Diviértete con tradición!');
+    }
+  }, []);
+
   return (
     <div className="how-to-play">
       <div className="how-to-play__container">
@@ -22,42 +31,42 @@ export const HowToPlay = () => {
               <div className="how-to-play__instruction-content">
                 <h3>Prepara el juego</h3>
                 <p>
-                  Cada jugador recibe un tablero con 16 imágenes únicas dispuestas en una cuadrícula de 4x4. 
+                  Cada jugador recibe un tablero con 16 imágenes únicas dispuestas en una cuadrícula de 4x4.
                   Designa a una persona como el "cantor" que se encargará de sacar y cantar las cartas.
                 </p>
               </div>
             </div>
-            
+
             <div className="how-to-play__instruction-item">
               <div className="how-to-play__instruction-number">2</div>
               <div className="how-to-play__instruction-content">
                 <h3>Comienza el juego</h3>
                 <p>
-                  El cantor va sacando cartas de la baraja una por una y las canta de manera divertida y rítmica, 
-                  anunciando el nombre o descripción de la imagen. Los jugadores marcan las cartas que aparecen 
+                  El cantor va sacando cartas de la baraja una por una y las canta de manera divertida y rítmica,
+                  anunciando el nombre o descripción de la imagen. Los jugadores marcan las cartas que aparecen
                   en su tablero usando frijoles, monedas o cualquier marcador.
                 </p>
               </div>
             </div>
-            
+
             <div className="how-to-play__instruction-item">
               <div className="how-to-play__instruction-number">3</div>
               <div className="how-to-play__instruction-content">
                 <h3>Gana el primero en completar</h3>
                 <p>
-                  El objetivo es completar una línea (horizontal, vertical o diagonal) o llenar todo el tablero. 
-                  Cuando un jugador completa una línea, grita "¡Lotería!" y gana. Si nadie gana con una línea, 
+                  El objetivo es completar una línea (horizontal, vertical o diagonal) o llenar todo el tablero.
+                  Cuando un jugador completa una línea, grita "¡Lotería!" y gana. Si nadie gana con una línea,
                   el juego continúa hasta que alguien llene todo el tablero.
                 </p>
               </div>
             </div>
-            
+
             <div className="how-to-play__instruction-item">
               <div className="how-to-play__instruction-number">4</div>
               <div className="how-to-play__instruction-content">
                 <h3>Verifica y celebra</h3>
                 <p>
-                  El ganador debe mostrar su tablero para verificar que las cartas marcadas corresponden con 
+                  El ganador debe mostrar su tablero para verificar que las cartas marcadas corresponden con
                   las que fueron cantadas. Una vez verificado, ¡todos celebran y se puede empezar una nueva ronda!
                 </p>
               </div>

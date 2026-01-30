@@ -1,7 +1,16 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './AboutLoteria.css';
 
 export const AboutLoteria = () => {
+  useEffect(() => {
+    document.title = '¿Qué es la Lotería Mexicana? Historia y Tradición | chorroybuenas.com.mx';
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', 'Descubre la historia, cultura y tradición detrás de la Lotería Mexicana. Conoce sus orígenes y cómo ha unido comunidades por generaciones.');
+    }
+  }, []);
+
   return (
     <div className="about-loteria">
       <div className="about-loteria__container">
@@ -19,10 +28,10 @@ export const AboutLoteria = () => {
           <div className="about-loteria__section">
             <h2 className="about-loteria__section-title">Historia y Origen</h2>
             <p className="about-loteria__text">
-              La Lotería es un juego de azar tradicional mexicano, similar al bingo, que forma parte de la 
-              cultura popular de México. Este juego tiene sus raíces en Europa, donde se conocía como "Lotto", 
-              y llegó a México durante la época colonial. Con el tiempo, se adaptó a la cultura mexicana, 
-              incorporando elementos locales y convirtiéndose en un juego característico de las fiestas y 
+              La Lotería es un juego de azar tradicional mexicano, similar al bingo, que forma parte de la
+              cultura popular de México. Este juego tiene sus raíces en Europa, donde se conocía como "Lotto",
+              y llegó a México durante la época colonial. Con el tiempo, se adaptó a la cultura mexicana,
+              incorporando elementos locales y convirtiéndose en un juego característico de las fiestas y
               celebraciones mexicanas.
             </p>
           </div>
@@ -30,9 +39,9 @@ export const AboutLoteria = () => {
           <div className="about-loteria__section">
             <h2 className="about-loteria__section-title">Cultura y Tradición</h2>
             <p className="about-loteria__text">
-              Es un juego que ha unido a familias y comunidades por generaciones, especialmente durante fiestas 
-              y celebraciones. La Lotería Mexicana no es solo un juego, es una tradición que se transmite de 
-              padres a hijos, creando momentos de convivencia y diversión que quedan en la memoria de quienes 
+              Es un juego que ha unido a familias y comunidades por generaciones, especialmente durante fiestas
+              y celebraciones. La Lotería Mexicana no es solo un juego, es una tradición que se transmite de
+              padres a hijos, creando momentos de convivencia y diversión que quedan en la memoria de quienes
               participan.
             </p>
           </div>
@@ -40,9 +49,9 @@ export const AboutLoteria = () => {
           <div className="about-loteria__section">
             <h2 className="about-loteria__section-title">El Juego Tradicional</h2>
             <p className="about-loteria__text">
-              Tradicionalmente, la Lotería Mexicana utiliza una baraja con 54 cartas, cada una con imágenes 
-              características como "El Gallo", "El Diablito", "La Dama", entre otras. Los tableros tienen 
-              16 imágenes distribuidas en una cuadrícula de 4x4, y el objetivo es completar líneas o llenar 
+              Tradicionalmente, la Lotería Mexicana utiliza una baraja con 54 cartas, cada una con imágenes
+              características como "El Gallo", "El Diablito", "La Dama", entre otras. Los tableros tienen
+              16 imágenes distribuidas en una cuadrícula de 4x4, y el objetivo es completar líneas o llenar
               todo el tablero mientras el "cantor" va sacando y anunciando las cartas de manera rítmica y divertida.
             </p>
           </div>
@@ -50,9 +59,9 @@ export const AboutLoteria = () => {
           <div className="about-loteria__section">
             <h2 className="about-loteria__section-title">Lotería Personalizada</h2>
             <p className="about-loteria__text">
-              Con nuestra app, puedes mantener viva esta tradición creando loterías personalizadas para cualquier 
-              ocasión especial. Ya sea para un baby shower, una fiesta de cumpleaños, un evento familiar o cualquier 
-              celebración, puedes crear una lotería única con tus propias imágenes y temas, haciendo que cada juego 
+              Con nuestra app, puedes mantener viva esta tradición creando loterías personalizadas para cualquier
+              ocasión especial. Ya sea para un baby shower, una fiesta de cumpleaños, un evento familiar o cualquier
+              celebración, puedes crear una lotería única con tus propias imágenes y temas, haciendo que cada juego
               sea especial y memorable.
             </p>
           </div>

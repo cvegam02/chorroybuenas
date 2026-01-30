@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FaGamepad,
@@ -27,6 +28,14 @@ interface LandingPageProps {
 }
 
 export const LandingPage = ({ onStart }: LandingPageProps) => {
+  useEffect(() => {
+    document.title = 'chorroybuenas.com.mx - Crea tu Lotería Mexicana Personalizada | Tableros y Cartas';
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', 'Crea tableros personalizados de Lotería Mexicana con tus propias cartas e imágenes. Nuevo Modo Kids (3x3) para niños. Perfecto para baby showers y eventos familiares.');
+    }
+  }, []);
+
   return (
     <div className="landing-page">
       {/* Hero Section - Full Width con Imagen de Fondo */}
