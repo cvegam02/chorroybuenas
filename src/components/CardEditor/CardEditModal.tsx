@@ -1,4 +1,5 @@
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { CardUpload } from './CardUpload';
 import './CardUploadModal.css'; // Reuse same styles
 
@@ -19,6 +20,7 @@ export const CardEditModal = ({
     initialTitle,
     initialImage
 }: CardEditModalProps) => {
+    const { t } = useTranslation();
     if (!isOpen) return null;
 
     const handleCardUpdate = async (image: string, title: string) => {
@@ -40,11 +42,11 @@ export const CardEditModal = ({
         >
             <div className="card-upload-modal__content">
                 <div className="card-upload-modal__header">
-                    <h2 className="card-upload-modal__title">Editar Carta</h2>
+                    <h2 className="card-upload-modal__title">{t('modals.cardEdit.title')}</h2>
                     <button
                         className="card-upload-modal__close"
                         onClick={onClose}
-                        aria-label="Cerrar"
+                        aria-label={t('common.close')}
                     >
                         ×
                     </button>
@@ -54,7 +56,7 @@ export const CardEditModal = ({
                     existingTitles={existingTitles}
                     initialTitle={initialTitle}
                     initialImage={initialImage}
-                    submitLabel="Guardar Cambios"
+                    submitLabel={t('cardUpload.actions.saveChanges')}
                 />
             </div>
         </div>

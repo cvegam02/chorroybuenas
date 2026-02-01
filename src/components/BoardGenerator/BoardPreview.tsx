@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FaDownload, FaEdit, FaSync, FaArrowRight } from 'react-icons/fa';
 import { Board } from '../../types';
 import { BoardThumbnail } from './BoardThumbnail';
@@ -13,6 +14,7 @@ interface BoardPreviewProps {
 }
 
 export const BoardPreview = ({ boards, onModify, onConfirm, onRegenerate }: BoardPreviewProps) => {
+  const { t } = useTranslation();
   const [selectedBoardIndex, setSelectedBoardIndex] = useState<number | null>(null);
 
   const handleThumbnailClick = (index: number) => {
@@ -26,13 +28,14 @@ export const BoardPreview = ({ boards, onModify, onConfirm, onRegenerate }: Boar
   return (
     <div className="board-preview">
       <div className="board-preview__header">
-        <h1 className="board-preview__title">Vista Previa de Tableros</h1>
+        <h1 className="board-preview__title">{t('boardGenerator.preview.title')}</h1>
         <p className="board-preview__subtitle">
-          Se generaron <strong>{boards.length} tablero{boards.length !== 1 ? 's' : ''}</strong>. 
-          Haz clic en cualquier tablero para verlo completo.
+          {t('boardGenerator.preview.subtitleCount', { count: boards.length })}
+          {' '}
+          {t('boardGenerator.preview.subtitleInstructions')}
         </p>
       </div>
-      
+
       <div className="board-preview__boards-container">
         {boards.map((board, index) => (
           <BoardThumbnail
@@ -57,16 +60,16 @@ export const BoardPreview = ({ boards, onModify, onConfirm, onRegenerate }: Boar
       <div className="board-preview__actions">
         <button onClick={onConfirm} className="board-preview__button board-preview__button--primary">
           <FaDownload />
-          <span>Descargar PDF de Todos los Tableros</span>
+          <span>{t('boardGenerator.preview.actions.downloadPDF')}</span>
           <FaArrowRight />
         </button>
         <button onClick={onModify} className="board-preview__button board-preview__button--secondary">
           <FaEdit />
-          <span>Modificar Cartas</span>
+          <span>{t('boardGenerator.preview.actions.modifyCards')}</span>
         </button>
         <button onClick={onRegenerate} className="board-preview__button board-preview__button--tertiary">
           <FaSync />
-          <span>Generar Nuevos Tableros</span>
+          <span>{t('boardGenerator.preview.actions.regenerateBoards')}</span>
         </button>
       </div>
     </div>

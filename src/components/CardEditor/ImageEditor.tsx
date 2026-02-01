@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { FaCut } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import './ImageEditor.css';
 
 interface ImageEditorProps {
@@ -13,10 +14,11 @@ const MAX_ZOOM = 3;
 const ZOOM_STEP = 0.1;
 
 export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) => {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
-  
+
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -30,7 +32,7 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
   useEffect(() => {
     const img = new Image();
     let resizeHandler: (() => void) | null = null;
-    
+
     img.onload = () => {
       imageRef.current = img;
       // Calculate initial position to center the image
@@ -40,10 +42,10 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
           const containerHeight = containerRef.current.clientHeight;
           if (containerWidth > 0 && containerHeight > 0) {
             setContainerSize({ width: containerWidth, height: containerHeight });
-            
+
             const imgAspectRatio = img.width / img.height;
             const containerAspectRatio = containerWidth / containerHeight;
-            
+
             let initialZoom = 1;
             if (imgAspectRatio > containerAspectRatio) {
               // Image is wider, fit to height
@@ -52,7 +54,7 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
               // Image is taller, fit to width
               initialZoom = containerWidth / img.width;
             }
-            
+
             // Start with the full image visible (contain)
             // Ensure initial zoom is within allowed bounds
             const boundedZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, initialZoom));
@@ -61,20 +63,20 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
           }
         }
       };
-      
+
       // Initial update
       setTimeout(updateSize, 0);
-      
+
       // Handle window resize
       resizeHandler = () => {
         updateSize();
         setTimeout(() => drawImage(), 100);
       };
-      
+
       window.addEventListener('resize', resizeHandler);
     };
     img.src = imageSrc;
-    
+
     return () => {
       if (resizeHandler) {
         window.removeEventListener('resize', resizeHandler);
@@ -114,7 +116,7 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
         const distance = getTouchDistance(e.touches[0], e.touches[1]);
         const center = getTouchCenter(e.touches[0], e.touches[1]);
         const rect = container.getBoundingClientRect();
-        
+
         pinchStartRef.current = {
           distance,
           center: {
@@ -145,7 +147,7 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
       if (e.touches.length === 2 && pinchStartRef.current) {
         // Pinch zoom
         e.preventDefault();
-        
+
         const distance = getTouchDistance(e.touches[0], e.touches[1]);
         const scale = distance / pinchStartRef.current.distance;
         const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, initialZoomRef.current * scale));
@@ -155,25 +157,25 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
         if (containerRef.current && imageRef.current) {
           const containerWidth = containerRef.current.clientWidth;
           const containerHeight = containerRef.current.clientHeight;
-          
+
           const centerX = pinchStartRef.current.center.x;
           const centerY = pinchStartRef.current.center.y;
-          
+
           // Calculate how the center point should move relative to the image
           const zoomDelta = newZoom - initialZoomRef.current;
           const img = imageRef.current;
           const scaledWidth = img.width * newZoom;
           const scaledHeight = img.height * newZoom;
-          
+
           const relX = (centerX - containerWidth / 2 - position.x) / (img.width * initialZoomRef.current);
           const relY = (centerY - containerHeight / 2 - position.y) / (img.height * initialZoomRef.current);
-          
+
           const newX = position.x - (relX * img.width * zoomDelta);
           const newY = position.y - (relY * img.height * zoomDelta);
-          
+
           const maxX = Math.max(0, (scaledWidth - containerWidth) / 2);
           const maxY = Math.max(0, (scaledHeight - containerHeight) / 2);
-          
+
           setPosition({
             x: Math.max(-maxX, Math.min(maxX, newX)),
             y: Math.max(-maxY, Math.min(maxY, newY)),
@@ -367,7 +369,7 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
 
     // Get the actual canvas size (accounting for device pixel ratio)
     const dpr = window.devicePixelRatio || 1;
-    
+
     // Create a new canvas with the crop dimensions (high resolution)
     // This will have the exact aspect ratio the user sees (5:7.5)
     const cropCanvas = document.createElement('canvas');
@@ -377,7 +379,7 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
     // Set crop canvas to high resolution
     cropCanvas.width = containerWidth * dpr;
     cropCanvas.height = containerHeight * dpr;
-    
+
     // Scale context to match device pixel ratio
     ctx.scale(dpr, dpr);
 
@@ -408,9 +410,9 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
       <div className="image-editor__header">
         <h3>
           <FaCut className="image-editor__header-icon" />
-          Ajusta tu imagen
+          {t('imageEditor.title')}
         </h3>
-        <p>Selecciona la parte de la imagen que quieres usar en tu carta. El área dentro del recuadro será la que aparezca en tu lotería.</p>
+        <p>{t('imageEditor.description')}</p>
       </div>
 
       <div className="image-editor__viewport-container">
@@ -435,7 +437,7 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
             onClick={handleZoomOut}
             disabled={zoom <= MIN_ZOOM}
             className="image-editor__zoom-button"
-            aria-label="Alejar"
+            aria-label={t('imageEditor.zoomOut')}
           >
             −
           </button>
@@ -447,7 +449,7 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
             onClick={handleZoomIn}
             disabled={zoom >= MAX_ZOOM}
             className="image-editor__zoom-button"
-            aria-label="Acercar"
+            aria-label={t('imageEditor.zoomIn')}
           >
             +
           </button>
@@ -459,14 +461,14 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
             onClick={onCancel}
             className="image-editor__cancel-button"
           >
-            Cancelar
+            {t('imageEditor.actions.cancel')}
           </button>
           <button
             type="button"
             onClick={handleCrop}
             className="image-editor__crop-button"
           >
-            Usar esta área
+            {t('imageEditor.actions.crop')}
           </button>
         </div>
       </div>

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FaPaypal } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import logoImage from '../../img/logo.png';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import './Navbar.css';
 
 export const Navbar = () => {
@@ -17,6 +19,8 @@ export const Navbar = () => {
     setIsMenuOpen(false);
   };
 
+  const { t } = useTranslation();
+
   return (
     <nav className="navbar">
       <div className="navbar__container">
@@ -30,15 +34,16 @@ export const Navbar = () => {
         </Link>
 
         <div className="navbar__actions">
+          <LanguageSwitcher />
           <a
             href="https://paypal.me/cavegam"
             target="_blank"
             rel="noopener noreferrer"
             className="navbar__paypal-pill"
-            title="Apoyar proyecto"
+            title={t('navbar.support')}
           >
             <FaPaypal className="navbar__paypal-icon" />
-            <span className="navbar__paypal-text">Apoyar</span>
+            <span className="navbar__paypal-text">{t('navbar.support')}</span>
           </a>
 
           <button
@@ -62,7 +67,7 @@ export const Navbar = () => {
               className={`navbar__link ${isActive('/') ? 'navbar__link--active' : ''}`}
               onClick={closeMenu}
             >
-              Inicio
+              {t('navbar.home')}
             </Link>
           </li>
           <li>
@@ -71,7 +76,7 @@ export const Navbar = () => {
               className={`navbar__link ${isActive('/cards') ? 'navbar__link--active' : ''}`}
               onClick={closeMenu}
             >
-              Crear Loteria
+              {t('navbar.create')}
             </Link>
           </li>
           <li>
@@ -80,7 +85,7 @@ export const Navbar = () => {
               className={`navbar__link ${isActive('/como-se-juega') ? 'navbar__link--active' : ''}`}
               onClick={closeMenu}
             >
-              ¿Cómo se juega?
+              {t('navbar.howToPlay')}
             </Link>
           </li>
           <li>
@@ -89,7 +94,7 @@ export const Navbar = () => {
               className={`navbar__link ${isActive('/que-es-la-loteria') ? 'navbar__link--active' : ''}`}
               onClick={closeMenu}
             >
-              ¿Qué es la Lotería?
+              {t('navbar.whatIs')}
             </Link>
           </li>
         </ul>

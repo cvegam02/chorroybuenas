@@ -1,4 +1,5 @@
 import { FaExclamationTriangle } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import './WarningModal.css';
 
 interface WarningModalProps {
@@ -18,10 +19,12 @@ export const WarningModal = ({
     message,
     onConfirm,
     onCancel,
-    confirmText = 'Aceptar',
-    cancelText = 'Cancelar',
+    confirmText,
+    cancelText,
     type = 'warning'
 }: WarningModalProps) => {
+    const { t } = useTranslation();
+
     if (!isOpen) return null;
 
     return (
@@ -40,14 +43,14 @@ export const WarningModal = ({
                         onClick={onCancel}
                         className="warning-modal__cancel-button"
                     >
-                        {cancelText}
+                        {cancelText || t('modals.warning.cancel')}
                     </button>
                     <button
                         type="button"
                         onClick={onConfirm}
                         className="warning-modal__confirm-button"
                     >
-                        {confirmText}
+                        {confirmText || t('modals.warning.confirm')}
                     </button>
                 </div>
             </div>

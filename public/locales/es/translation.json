@@ -1,0 +1,397 @@
+{
+    "common": {
+        "cancel": "Cancelar",
+        "confirm": "Aceptar",
+        "back": "Volver",
+        "next": "Siguiente",
+        "finish": "Finalizar",
+        "save": "Guardar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "close": "Cerrar",
+        "loading": "Cargando...",
+        "error": "Error",
+        "warning": "Advertencia",
+        "success": "Éxito",
+        "yes": "Sí",
+        "no": "No"
+    },
+    "landing": {
+        "title": "Crea tu Lotería Mexicana Personalizada | chorroybuenas.com.mx",
+        "metaDescription": "Crea tableros personalizados de Lotería Mexicana con tus propias cartas e imágenes. Nuevo Modo Kids (3x3) para niños. Perfecto para baby showers y eventos familiares.",
+        "hero": {
+            "badge": "Gratis y Sin Registro",
+            "title": "Lotería Mexicana",
+            "titleHighlight": "Personalizada",
+            "description": "Crea tableros únicos con tus propias imágenes para cualquier celebración",
+            "cta": "Crear Ahora"
+        },
+        "features": {
+            "title": "¿Por qué elegirnos?",
+            "subtitle": "Todo lo que necesitas para crear tu lotería personalizada en un solo lugar",
+            "customizable": {
+                "title": "100% Personalizable",
+                "description": "Usa tus propias imágenes para crear cartas únicas y originales que reflejen tu estilo"
+            },
+            "editor": {
+                "title": "Editor Integrado",
+                "description": "Recorta y ajusta tus imágenes fácilmente con nuestra herramienta intuitiva"
+            },
+            "boards": {
+                "title": "Múltiples Tableros",
+                "description": "Genera todos los tableros que necesites para tu evento o celebración"
+            },
+            "pdf": {
+                "title": "PDF Profesional",
+                "description": "Descarga tus tableros en formato PDF listo para imprimir"
+            },
+            "kids": {
+                "title": "Nuevo: Modo Kids",
+                "description": "Tableros de 3x3 con cartas grandes, ideales para niños pequeños y preescolar"
+            }
+        },
+        "steps": {
+            "title": "Crea y Juega Fácilmente",
+            "subtitle": "En solo 3 simples pasos tendrás tu lotería personalizada lista para imprimir",
+            "step1": {
+                "title": "Sube Imágenes",
+                "description": "Mínimo 20 cartas para empezar"
+            },
+            "step2": {
+                "title": "Genera Tableros",
+                "description": "Mínimo 8 tableros únicos"
+            },
+            "step3": {
+                "title": "Descarga PDF",
+                "description": "Listo para imprimir y jugar"
+            }
+        },
+        "events": {
+            "title": "Perfecta para cualquier ocasión",
+            "subtitle": "Celebra tus momentos especiales con un toque de tradición mexicana",
+            "babyShower": {
+                "title": "Baby Showers",
+                "description": "Crea una lotería temática con fotos del futuro bebé"
+            },
+            "family": {
+                "title": "Eventos Familiares",
+                "description": "Reuniones, cumpleaños y aniversarios"
+            },
+            "corporate": {
+                "title": "Eventos Corporativos",
+                "description": "Team building y fiestas de oficina"
+            },
+            "friends": {
+                "title": "Fiestas con Amigos",
+                "description": "Haz más divertidas tus reuniones"
+            },
+            "kids": {
+                "title": "Para Niños",
+                "description": "Con sus personajes favoritos y cartas grandes (3x3)"
+            },
+            "others": {
+                "title": "Otras Celebraciones",
+                "description": "Bodas, graduaciones y más"
+            }
+        },
+        "ctaSection": {
+            "badge": "Sin costo, sin registro",
+            "title": "¿Listo para comenzar?",
+            "description": "Crea recuerdos inolvidables en minutos. ¡Empieza ahora y diviértete con tu lotería personalizada!",
+            "button": "Crear mi Lotería"
+        },
+        "info": {
+            "howToPlay": "¿Cómo se juega?",
+            "whatIs": "¿Qué es la Lotería?"
+        },
+        "footer": {
+            "tradition": "Hecho con para mantener viva la tradición mexicana"
+        }
+    },
+    "navbar": {
+        "support": "Apoyar",
+        "home": "Inicio",
+        "create": "Crear Lotería",
+        "howToPlay": "¿Cómo se juega?",
+        "whatIs": "¿Qué es la Lotería?"
+    },
+    "footer": {
+        "creator": "Creado por",
+        "devOffer": "¿Necesitas una aplicación web?",
+        "letTalk": "¡Hablemos!",
+        "support": "Apoyar proyecto",
+        "slogan": "Haciendo el juego más personal"
+    },
+    "about": {
+        "title": "¿Qué es la Lotería Mexicana? Historia y Tradición | chorroybuenas.com.mx",
+        "metaDescription": "Descubre la historia, cultura y tradición detrás de la Lotería Mexicana. Conoce sus orígenes y cómo ha unido comunidades por generaciones.",
+        "header": {
+            "title": "¿Qué es la Lotería Mexicana?",
+            "subtitle": "Conoce más sobre este juego tradicional que forma parte de la cultura mexicana"
+        },
+        "history": {
+            "title": "Historia y Origen",
+            "text": "La Lotería es un juego de azar tradicional mexicano, similar al bingo, que forma parte de la cultura popular de México. Este juego tiene sus raíces en Europa, donde se conocía como \"Lotto\", y llegó a México durante la época colonial. Con el tiempo, se adaptó a la cultura mexicana, incorporando elementos locales y convirtiéndose en un juego característico de las fiestas y celebraciones mexicanas."
+        },
+        "culture": {
+            "title": "Cultura y Tradición",
+            "text": "Es un juego que ha unido a familias y comunidades por generaciones, especialmente durante fiestas y celebraciones. La Lotería Mexicana no es solo un juego, es una tradición que se transmite de padres a hijos, creando momentos de convivencia y diversión que quedan en la memoria de quienes participan."
+        },
+        "traditionalGame": {
+            "title": "El Juego Tradicional",
+            "text": "Tradicionalmente, la Lotería Mexicana utiliza una baraja con 54 cartas, cada una con imágenes características como \"El Gallo\", \"El Diablito\", \"La Dama\", entre otras. Los tableros tienen 16 imágenes distribuidas en una cuadrícula de 4x4, y el objetivo es completar líneas o llenar todo el tablero mientras el \"cantor\" va sacando y anunciando las cartas de manera rítmica y divertida."
+        },
+        "customLoteria": {
+            "title": "Lotería Personalizada",
+            "text": "Con nuestra app, puedes mantener viva esta tradición creando loterías personalizadas para cualquier ocasión especial. Ya sea para un baby shower, una fiesta de cumpleaños, un evento familiar o cualquier celebración, puedes crear una lotería única con tus propias imágenes y temas, haciendo que cada juego sea especial y memorable."
+        },
+        "cta": {
+            "title": "¿Listo para crear tu propia Lotería?",
+            "text": "Personaliza tu juego con tus propias imágenes y disfruta de esta tradición mexicana",
+            "create": "Crear mi Lotería",
+            "learn": "Aprende a jugar"
+        }
+    },
+    "howToPlay": {
+        "title": "¿Cómo se juega la Lotería Mexicana? - Instrucciones Paso a Paso | chorroybuenas.com.mx",
+        "metaDescription": "Aprende a jugar Lotería Mexicana paso a paso. Instrucciones claras para preparar el juego, cantar las cartas y ganar. ¡Diviértete con tradición!",
+        "header": {
+            "title": "¿Cómo se juega la Lotería Mexicana?",
+            "subtitle": "Aprende a jugar este divertido juego tradicional mexicano paso a paso"
+        },
+        "steps": {
+            "step1": {
+                "title": "Prepara el juego",
+                "text": "Cada jugador recibe un tablero con 16 imágenes únicas dispuestas en una cuadrícula de 4x4. Designa a una persona como el \"cantor\" que se encargará de sacar y cantar las cartas."
+            },
+            "step2": {
+                "title": "Comienza el juego",
+                "text": "El cantor va sacando cartas de la baraja una por una y las canta de manera divertida y rítmica, anunciando el nombre o descripción de la imagen. Los jugadores marcan las cartas que aparecen en su tablero usando frijoles, monedas o cualquier marcador."
+            },
+            "step3": {
+                "title": "Gana con las distintas jugadas",
+                "text": "El objetivo es completar uno de los patrones acordados (Chorro, Centro, Esquinas o Tablero Lleno). Solo la primera persona en completar una jugada específica puede reclamar el premio; una vez ganada, esa jugada queda cerrada para los demás. Al completar la jugada, grita \"¡Chorro!\", \"¡Centro!\" o el nombre de la jugada correspondiente para ganar."
+            },
+            "step4": {
+                "title": "Grito de Lotería y Fin de Ronda",
+                "text": "Cuando un jugador llena su tablero completo, grita \"¡Lotería!\". En ese momento se detiene el juego para verificar las cartas. Si es correcto, la ronda termina, se reparte el premio mayor y todo se prepara para iniciar de nuevo."
+            },
+            "betting": {
+                "title": "Apuestas y Tableros",
+                "text": "Cada participante pone una cantidad de dinero por cada tablero con el que desee jugar (puede jugar con uno o más). El dinero recaudado (pozo) se divide entre las jugadas permitidas."
+            },
+            "patterns": {
+                "title": "Jugadas y Premios",
+                "fullBoard": "Tablero Lleno: Es el premio mayor y se gana al completar todo el tablero.",
+                "line": "El Chorro: Se gana al completar una línea horizontal, vertical o diagonal.",
+                "center": "El Centro: Se gana al marcar las 4 cartas del centro del tablero.",
+                "corners": "Las 4 Esquinas: Se gana al marcar las cartas de las cuatro esquinas."
+            }
+        },
+        "cta": {
+            "title": "¿Listo para crear tu propia Lotería?",
+            "button": "Crear mi Lotería"
+        }
+    },
+    "modals": {
+        "confirmation": {
+            "title": "¡Tu archivo PDF ha sido descargado exitosamente!",
+            "message": "¿Estás listo para salir? Una vez que salgas, todos los datos generados se eliminarán.",
+            "modify": "Modificar",
+            "complete": "Completo"
+        },
+        "warning": {
+            "defaultTitle": "Advertencia",
+            "confirm": "Aceptar",
+            "cancel": "Cancelar"
+        },
+        "clearCards": {
+            "title": "¿Limpiar todas las cartas?",
+            "message": "Se eliminarán todas las cartas que has subido y empezarás desde cero.",
+            "confirm": "Sí, limpiar todo"
+        },
+        "cardUpload": {
+            "title": "Agregar Nueva Carta"
+        },
+        "cardEdit": {
+            "title": "Editar Carta"
+        },
+        "batchCancel": {
+            "title": "¿Cancelar proceso?",
+            "message": "Se perderá todo el progreso que hayas hecho hasta ahora, incluyendo las cartas subidas y los tableros generados.",
+            "confirm": "Sí, cancelar todo",
+            "cancel": "No, continuar"
+        }
+    },
+    "cardEditor": {
+        "title": "Carga de Cartas",
+        "subtitle": "Crea tu baraja personalizada subiendo imágenes y asignándoles un título",
+        "stats": {
+            "loaded": "Cartas cargadas",
+            "minimum": "Mínimo para modo {{mode}}: {{min}}"
+        },
+        "instructions": {
+            "title": "Instrucciones",
+            "step1": {
+                "title": "Selecciona una imagen",
+                "text": "Haz clic en el área de carga o arrastra una imagen. Formatos: JPG, PNG o WEBP"
+            },
+            "step2": {
+                "title": "Ajusta la imagen",
+                "text": "Usa zoom (rueda del mouse o botones + / -) y arrastra para seleccionar el área que quieres mostrar"
+            },
+            "step3": {
+                "title": "Agrega un título",
+                "text": "Escribe un nombre descriptivo para tu carta. Este será el texto que se cantará durante el juego"
+            },
+            "step4": {
+                "title": "Agrega la carta",
+                "text": "Haz clic en \"Agregar Carta\" para añadirla a tu baraja. Puedes eliminarla haciendo clic en la X"
+            }
+        },
+        "recommendations": {
+            "title": "Recomendaciones para mejores resultados",
+            "quality": "Usa imágenes de buena calidad: Evita imágenes borrosas o pixeladas para que se vean nítidas en los tableros",
+            "subject": "Enfócate en el sujeto principal: Las imágenes con un objeto o persona claramente visible funcionan mejor",
+            "lighting": "Buena iluminación: Elige fotos bien iluminadas para que los detalles se aprecien mejor",
+            "vibrant": "Colores vibrantes: Las imágenes con colores vivos y contrastes claros destacan más",
+            "composition": "Composición centrada: El editor te permite recortar y ajustar, pero es mejor empezar con una imagen bien encuadrada",
+            "descriptive": "Títulos descriptivos: Elige títulos que sean fáciles de identificar y divertidos de \"cantar\""
+        },
+        "cardsList": {
+            "title": "Tus Cartas",
+            "missing": "(Faltan {{count}} más)",
+            "empty": "No hay cartas. ¡Agrega una para empezar!"
+        },
+        "actions": {
+            "uploadBatch": "Subir Varias",
+            "clearAll": "Limpiar Cartas",
+            "nextStep": "Siguiente: Generar Tableros",
+            "cancelProcess": "Cancelar Proceso",
+            "addCard": "Agregar Carta",
+            "editCard": "Editar Carta",
+            "adjustImage": "Ajustar Imagen"
+        },
+        "errors": {
+            "duplicateTitle": "Ya existe una carta con ese nombre. Por favor usa un título diferente.",
+            "batchDuplicates": "Se encontraron títulos repetidos: {{titles}}. Por favor cámbialos.",
+            "generalAddError": "Error al agregar la carta. Por favor, intenta nuevamente."
+        }
+    },
+    "imageEditor": {
+        "title": "Ajusta tu imagen",
+        "description": "Selecciona la parte de la imagen que quieres usar en tu carta. El área dentro del recuadro será la que aparezca en tu lotería.",
+        "zoomIn": "Acercar",
+        "zoomOut": "Alejar",
+        "actions": {
+            "cancel": "Cancelar",
+            "crop": "Usar esta área"
+        }
+    },
+    "cardUpload": {
+        "addImage": "Agregar imagen",
+        "placeholder": {
+            "main": "Haz clic o arrastra una imagen aquí",
+            "sub": "Formatos: JPG, PNG o WEBP"
+        },
+        "label": "Título de la carta",
+        "inputPlaceholder": "Ej: El gato, La playa, Mi familia...",
+        "helpText": "Elige un título claro y corto que sea fácil de cantar durante el juego",
+        "errorDuplicate": "Ya existe una carta con ese nombre. Usa un título diferente.",
+        "errorNoTitle": "Por favor, ingresa un título para la carta",
+        "errorNoImage": "Por favor, selecciona una imagen",
+        "errorInvalidFormat": "Por favor, selecciona una imagen válida (JPG, PNG o WEBP)",
+        "status": {
+            "processing": "Procesando...",
+            "adjusting": "Ajustando imagen...",
+            "clickToAdjust": "Haz clic en \"Ajustar imagen\""
+        },
+        "actions": {
+            "changePhoto": "Cambiar foto",
+            "adjustImage": "Ajustar imagen",
+            "addCard": "Agregar Carta",
+            "saveChanges": "Guardar Cambios"
+        }
+    },
+    "batchUpload": {
+        "title": "Procesando Imágenes ({{current}} de {{total}})",
+        "remaining": {
+            "one": "1 imagen restante",
+            "other": "{{count}} imágenes restantes",
+            "last": "Última imagen"
+        },
+        "actions": {
+            "skip": "Omitir esta imagen",
+            "adjust": "Ajustar imagen",
+            "next": "Siguiente ({{count}} restantes) →",
+            "finish": "Finalizar"
+        }
+    },
+    "boardGenerator": {
+        "gridMode": {
+            "label": "Elige tu estilo",
+            "classic": "Clásica",
+            "classicDesc": "4x4 (16 cartas)",
+            "kids": "Kids",
+            "kidsDesc": "3x3 (9 cartas)"
+        },
+        "title": "Generar Tableros",
+        "boardTitle": "Tablero {{current}} de {{total}}",
+        "noImage": "Sin imagen",
+        "modeSelection": "Has elegido el modo {{mode}}. ¿Cuántos tableros necesitas?",
+        "modes": {
+            "classic": "Clásico (16 cartas)",
+            "kids": "Kids (9 cartas)"
+        },
+        "suggestion": {
+            "title": "Sugerencia",
+            "text": "Con tus {{count}} cartas, te sugerimos generar {{suggested}} tableros para una distribución balanceada.",
+            "maxTheoretical": " Máximo teórico de tableros únicos: {{max}}."
+        },
+        "insufficientCards": {
+            "title": "Cartas insuficientes",
+            "text": "Necesitas al menos {{needed}} cartas para generar un tablero {{mode}}. Actualmente tienes {{count}} cartas."
+        },
+        "form": {
+            "label": "¿Cuántos tableros quieres generar?",
+            "hint": "Sugerido: {{count}} tableros",
+            "errorNumbers": "Por favor ingresa solo números",
+            "errorMin": "Por favor ingresa un número válido (mínimo 1)",
+            "errorAtLeastOne": "Debes generar al menos 1 tablero",
+            "errorMaxUnique": "Con {{count}} cartas, el máximo de tableros únicos posibles es {{max}}. Por favor, reduce el número de tableros.",
+            "placeholder": "8"
+        },
+        "actions": {
+            "cancel": "Cancelar Proceso",
+            "generate": "Generar Tableros",
+            "prevBoard": "Ver tablero anterior",
+            "nextBoard": "Ver tablero siguiente"
+        },
+        "errors": {
+            "generateError": "Error al generar los tableros",
+            "pdfError": "Error al generar el PDF. Por favor, intenta de nuevo.",
+            "tryAgain": "Por favor, intenta de nuevo."
+        },
+        "status": {
+            "generatingBoards": "Generando tableros...",
+            "generatingPDF": "Generando PDF..."
+        },
+        "preview": {
+            "title": "Vista Previa de Tableros",
+            "subtitleCount": "Se generaron {{count}} tableros.",
+            "subtitleInstructions": "Haz clic en cualquier tablero para verlo completo.",
+            "actions": {
+                "downloadPDF": "Descargar PDF de Todos los Tableros",
+                "modifyCards": "Modificar Cartas",
+                "regenerateBoards": "Generar Nuevos Tableros"
+            }
+        }
+    },
+    "recommendations": {
+        "header": "Recomendaciones",
+        "warningRange": "20-40 cartas: Buen término medio - Mantiene la variedad y duración del juego sin complicar demasiado la logística.",
+        "successClassical": "54 cartas: Opción clásica y completa - Ideal para una experiencia tradicional y bien balanceada (recomendado).",
+        "infoMessage": "Tienes {{count}} cartas. La opción clásica es 54 cartas, pero puedes usar todas las que tengas.",
+        "infoMessageAddMore": "Tienes {{count}} cartas. Considera agregar más cartas para una mejor experiencia (54 es la opción clásica)."
+    }
+}

@@ -201,7 +201,7 @@
   }
 
   .navbar__logo-text {
-    font-size: 0.9375rem;
+    display: none;
   }
 
   .navbar__logo-image {
@@ -209,9 +209,10 @@
   }
 
   .navbar__actions {
-    gap: 8px;
+    gap: 12px;
     margin-right: -4px;
     order: 3;
+    flex-shrink: 0;
   }
 
   .navbar__paypal-pill {
@@ -315,7 +316,7 @@
 
 @media (max-width: 480px) {
   .navbar__logo-text {
-    font-size: 0.875rem;
+    display: none;
   }
 
   .navbar__logo-image {

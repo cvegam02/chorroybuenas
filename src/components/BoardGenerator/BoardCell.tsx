@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../../types';
 import { getImage } from '../../utils/indexedDB';
 import './BoardCell.css';
@@ -8,13 +9,14 @@ interface BoardCellProps {
 }
 
 export const BoardCell = ({ card }: BoardCellProps) => {
+  const { t } = useTranslation();
   const [imageUrl, setImageUrl] = useState<string | null>(card.image || null);
 
   // Refresh image from IndexedDB to ensure blob URL is valid
   useEffect(() => {
     const refreshImage = async () => {
       if (!card.id) return;
-      
+
       try {
         const freshImageURL = await getImage(card.id);
         if (freshImageURL) {
@@ -41,9 +43,9 @@ export const BoardCell = ({ card }: BoardCellProps) => {
     <div className="board-cell">
       <div className="board-cell__image-container">
         {imageUrl ? (
-          <img 
-            src={imageUrl} 
-            alt={card.title} 
+          <img
+            src={imageUrl}
+            alt={card.title}
             className="board-cell__image"
             onContextMenu={handleImageContextMenu}
             onDragStart={handleImageDragStart}
@@ -55,7 +57,7 @@ export const BoardCell = ({ card }: BoardCellProps) => {
             }}
           />
         ) : (
-          <div className="board-cell__image-placeholder">Sin imagen</div>
+          <div className="board-cell__image-placeholder">{t('boardGenerator.noImage')}</div>
         )}
       </div>
       <div className="board-cell__title">{card.title}</div>

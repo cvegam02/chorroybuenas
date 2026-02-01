@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { Board } from '../../types';
 import { BoardCell } from './BoardCell';
 import './BoardModal.css';
@@ -13,11 +14,12 @@ interface BoardModalProps {
 }
 
 export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeIndex }: BoardModalProps) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   const total = boards.length;
   const board = boards[selectedIndex];
-  const title = `Tablero ${selectedIndex + 1} de ${total}`;
+  const title = t('boardGenerator.boardTitle', { current: selectedIndex + 1, total });
 
   const clampIndex = (idx: number) => {
     if (total <= 0) return 0;
@@ -127,8 +129,8 @@ export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeInd
               className="board-modal__nav board-modal__nav--prev"
               onClick={goPrev}
               disabled={!canNavigate}
-              aria-label="Ver tablero anterior"
-              title="Anterior"
+              aria-label={t('boardGenerator.actions.prevBoard')}
+              title={t('common.back')}
             >
               ‹
             </button>
@@ -137,15 +139,15 @@ export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeInd
               className="board-modal__nav board-modal__nav--next"
               onClick={goNext}
               disabled={!canNavigate}
-              aria-label="Ver tablero siguiente"
-              title="Siguiente"
+              aria-label={t('boardGenerator.actions.nextBoard')}
+              title={t('common.next')}
             >
               ›
             </button>
             <button
               className="board-modal__close"
               onClick={onClose}
-              aria-label="Cerrar"
+              aria-label={t('common.close')}
             >
               ×
             </button>

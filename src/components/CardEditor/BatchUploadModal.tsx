@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, type FC } from 'react';
 import { createPortal } from 'react-dom';
 import { FaEdit } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import { ImageEditor } from './ImageEditor';
 import { convertFileToBase64, validateImageFile, compressImage } from '../../utils/imageUtils';
 import './BatchUploadModal.css';
@@ -19,22 +20,22 @@ const adjustImageToCardAspectRatio = (
     const img = new Image();
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    
+
     if (!ctx) {
       reject(new Error('Could not get canvas context'));
       return;
     }
-    
+
     img.onload = () => {
       // Card aspect ratio is 5:7.5 = 2/3 = 0.666...
       const cardAspectRatio = targetWidth / targetHeight;
       const imgAspectRatio = img.width / img.height;
-      
+
       let sourceX = 0;
       let sourceY = 0;
       let sourceWidth = img.width;
       let sourceHeight = img.height;
-      
+
       // Use "cover" mode: crop the image to match card aspect ratio
       // This matches how object-fit: cover works in CSS
       if (imgAspectRatio > cardAspectRatio) {
@@ -48,29 +49,29 @@ const adjustImageToCardAspectRatio = (
         sourceHeight = img.width / cardAspectRatio;
         sourceY = (img.height - sourceHeight) / 2;
       }
-      
+
       // Set canvas to target dimensions (high resolution)
       canvas.width = targetWidth;
       canvas.height = targetHeight;
-      
+
       // Fill with white background first
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, targetWidth, targetHeight);
-      
+
       // Draw the cropped portion scaled to fill the canvas
       ctx.drawImage(
         img,
         sourceX, sourceY, sourceWidth, sourceHeight,
         0, 0, targetWidth, targetHeight
       );
-      
+
       resolve(canvas.toDataURL('image/jpeg', quality));
     };
-    
+
     img.onerror = () => {
       reject(new Error('Error loading image'));
     };
-    
+
     img.src = imageSrc;
   });
 };
@@ -90,6 +91,7 @@ interface BatchUploadModalProps {
 }
 
 export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, onCardsAdd, files, existingTitles }) => {
+  const { t } = useTranslation();
   const normalizeTitle = (value: string) => value.replace(/\s+/g, ' ').trim().toLowerCase();
   const existingTitleSet = useMemo(
     () => new Set(existingTitles.map(normalizeTitle)),
@@ -111,7 +113,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
       const loadImages = async () => {
         const validFiles = files.filter(validateImageFile);
         const loadedImages: PendingImage[] = [];
-        
+
         for (const file of validFiles) {
           const preview = await convertFileToBase64(file);
           loadedImages.push({
@@ -120,7 +122,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
             preview,
           });
         }
-        
+
         setPendingImages(loadedImages);
         setCurrentIndex(0);
         completedCardsRef.current = [];
@@ -132,7 +134,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
           setWasEdited(false); // Reset edit flag for new image
         }
       };
-      
+
       loadImages();
     } else if (!isOpen) {
       // Reset when modal closes
@@ -179,7 +181,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
 
   const handleNext = async () => {
     if (!currentTitle.trim()) {
-      alert('Por favor, ingresa un título para esta carta');
+      alert(t('cardUpload.errorNoTitle'));
       return;
     }
 
@@ -189,19 +191,19 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
       completedCardsRef.current.some(card => normalizeTitle(card.title) === normalizedTitle);
 
     if (isDuplicate) {
-      alert('Ya existe una carta con ese nombre. Por favor usa un título diferente.');
+      alert(t('cardUpload.errorDuplicate'));
       return;
     }
 
     if (!currentImage) {
-      alert('Por favor, ajusta la imagen antes de continuar');
+      alert(t('cardUpload.errorNoImage'));
       return;
     }
 
     // Capture current values before state updates
     let imageToSave = currentImage;
     const titleToSave = currentTitle.trim();
-    
+
     // First adjust image to card aspect ratio (5:7.5) if not edited
     // This ensures the image looks the same in PDF as in preview
     if (!wasEdited) {
@@ -214,7 +216,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
         // Continue with original if adjustment fails
       }
     }
-    
+
     // Compress image before saving
     try {
       console.log(`Compressing image ${currentIndex + 1} before save...`);
@@ -226,10 +228,10 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
       console.error('Error compressing image:', error);
       // Continue with uncompressed if compression fails
     }
-    
+
     // Add current card to completed list using ref
     completedCardsRef.current = [
-      ...completedCardsRef.current, 
+      ...completedCardsRef.current,
       { image: imageToSave, title: titleToSave }
     ];
 
@@ -287,12 +289,12 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
       completedCardsRef.current.some(card => normalizeTitle(card.title) === normalizeTitle(currentTitle)));
 
   const modalContent = (
-    <div 
-      className="batch-upload-modal__overlay" 
+    <div
+      className="batch-upload-modal__overlay"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           // Allow closing only if user wants to cancel
-          if (confirm('¿Estás seguro de que quieres cancelar? Se perderán las imágenes no procesadas.')) {
+          if (confirm(t('modals.batchCancel.message'))) {
             const allCards = [...completedCardsRef.current];
             if (allCards.length > 0) {
               onCardsAdd(allCards);
@@ -306,12 +308,12 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
       <div className="batch-upload-modal__content">
         <div className="batch-upload-modal__header">
           <h2 className="batch-upload-modal__title">
-            Procesando Imágenes ({currentIndex + 1} de {pendingImages.length})
+            {t('batchUpload.title', { current: currentIndex + 1, total: pendingImages.length })}
           </h2>
-          <button 
+          <button
             className="batch-upload-modal__close"
             onClick={() => {
-              if (confirm('¿Estás seguro de que quieres cancelar? Se perderán las imágenes no procesadas.')) {
+              if (confirm(t('modals.batchCancel.message'))) {
                 const allCards = [...completedCardsRef.current];
                 if (allCards.length > 0) {
                   onCardsAdd(allCards);
@@ -320,7 +322,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
                 onClose();
               }
             }}
-            aria-label="Cerrar"
+            aria-label={t('common.close')}
           >
             ×
           </button>
@@ -328,13 +330,13 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
 
         <div className="batch-upload-modal__progress">
           <div className="batch-upload-modal__progress-bar">
-            <div 
-              className="batch-upload-modal__progress-fill" 
+            <div
+              className="batch-upload-modal__progress-fill"
               style={{ width: `${progress}%` }}
             />
           </div>
           <p className="batch-upload-modal__progress-text">
-            {remaining > 0 ? `${remaining} imagen${remaining > 1 ? 'es' : ''} restante${remaining > 1 ? 's' : ''}` : 'Última imagen'}
+            {remaining > 0 ? t('batchUpload.remaining.other', { count: remaining }) : t('batchUpload.remaining.last')}
           </p>
         </div>
 
@@ -355,15 +357,15 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
             <div className="batch-upload-modal__preview">
               <img src={currentImage} alt="Preview" className="batch-upload-modal__preview-img" />
             </div>
-            
+
             <div className="batch-upload-modal__title-input-group">
               <label className="batch-upload-modal__label">
-                Título de la carta
+                {t('cardUpload.label')}
               </label>
               <input
                 ref={titleInputRef}
                 type="text"
-                placeholder="Ej: El gato, La playa, Mi familia..."
+                placeholder={t('cardUpload.inputPlaceholder')}
                 value={currentTitle}
                 onChange={(e) => setCurrentTitle(e.target.value)}
                 onKeyDown={handleTitleKeyDown}
@@ -372,11 +374,11 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
               />
               {isDuplicateTitle && (
                 <p className="batch-upload-modal__error-text">
-                  Ya existe una carta con ese nombre. Usa un título diferente.
+                  {t('cardUpload.errorDuplicate')}
                 </p>
               )}
               <p className="batch-upload-modal__help-text">
-                Elige un título claro y corto que sea fácil de cantar durante el juego
+                {t('cardUpload.helpText')}
               </p>
             </div>
 
@@ -386,7 +388,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
                 onClick={handleSkip}
                 className="batch-upload-modal__skip-button"
               >
-                Omitir esta imagen
+                {t('batchUpload.actions.skip')}
               </button>
               <button
                 type="button"
@@ -394,7 +396,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
                 className="batch-upload-modal__edit-button"
               >
                 <FaEdit />
-                <span>Ajustar imagen</span>
+                <span>{t('batchUpload.actions.adjust')}</span>
               </button>
               <button
                 type="button"
@@ -402,7 +404,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
                 disabled={!currentTitle.trim()}
                 className="batch-upload-modal__next-button"
               >
-                {remaining > 0 ? `Siguiente (${remaining} restantes) →` : 'Finalizar'}
+                {remaining > 0 ? t('batchUpload.actions.next', { count: remaining }) : t('batchUpload.actions.finish')}
               </button>
             </div>
           </div>

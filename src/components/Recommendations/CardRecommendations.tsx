@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { 
+import {
   FaExclamationTriangle,
   FaLightbulb,
   FaCheckCircle,
   FaInfoCircle
 } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import './CardRecommendations.css';
 
 interface CardRecommendationsProps {
@@ -12,6 +13,7 @@ interface CardRecommendationsProps {
 }
 
 export const CardRecommendations = ({ cardCount }: CardRecommendationsProps) => {
+  const { t } = useTranslation();
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   const getRecommendation = () => {
@@ -20,22 +22,22 @@ export const CardRecommendations = ({ cardCount }: CardRecommendationsProps) => 
     } else if (cardCount >= 20 && cardCount <= 40) {
       return {
         type: 'warning',
-        message: '20-40 cartas: Buen término medio - Mantiene la variedad y duración del juego sin complicar demasiado la logística.',
+        message: t('recommendations.warningRange'),
       };
     } else if (cardCount === 54) {
       return {
         type: 'success',
-        message: '54 cartas: Opción clásica y completa - Ideal para una experiencia tradicional y bien balanceada (recomendado).',
+        message: t('recommendations.successClassical'),
       };
     } else if (cardCount > 54) {
       return {
         type: 'info',
-        message: `Tienes ${cardCount} cartas. La opción clásica es 54 cartas, pero puedes usar todas las que tengas.`,
+        message: t('recommendations.infoMessage', { count: cardCount }),
       };
     } else {
       return {
         type: 'info',
-        message: `Tienes ${cardCount} cartas. Considera agregar más cartas para una mejor experiencia (54 es la opción clásica).`,
+        message: t('recommendations.infoMessageAddMore', { count: cardCount }),
       };
     }
   };
@@ -49,7 +51,7 @@ export const CardRecommendations = ({ cardCount }: CardRecommendationsProps) => 
 
   return (
     <div className={`card-recommendations card-recommendations--${recommendation.type}`}>
-      <button 
+      <button
         className="card-recommendations__header"
         onClick={() => setIsCollapsed(!isCollapsed)}
         type="button"
@@ -61,7 +63,7 @@ export const CardRecommendations = ({ cardCount }: CardRecommendationsProps) => 
             {recommendation.type === 'success' && <FaCheckCircle />}
             {recommendation.type === 'info' && <FaInfoCircle />}
           </span>
-          <span className="card-recommendations__header-text">Recomendaciones</span>
+          <span className="card-recommendations__header-text">{t('recommendations.header')}</span>
         </div>
         <span className={`card-recommendations__chevron ${isCollapsed ? 'card-recommendations__chevron--collapsed' : ''}`}>
           ▼

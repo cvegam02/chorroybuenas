@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   FaGamepad,
   FaBook,
@@ -28,13 +29,15 @@ interface LandingPageProps {
 }
 
 export const LandingPage = ({ onStart }: LandingPageProps) => {
+  const { t } = useTranslation();
+
   useEffect(() => {
-    document.title = 'Crea tu Lotería Mexicana Personalizada | chorroybuenas.com.mx';
+    document.title = t('landing.title');
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) {
-      metaDesc.setAttribute('content', 'Crea tableros personalizados de Lotería Mexicana con tus propias cartas e imágenes. Nuevo Modo Kids (3x3) para niños. Perfecto para baby showers y eventos familiares.');
+      metaDesc.setAttribute('content', t('landing.metaDescription'));
     }
-  }, []);
+  }, [t]);
 
   return (
     <div className="landing-page">
@@ -44,20 +47,20 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
         <div className="landing-page__hero-content">
           <div className="landing-page__hero-badge">
             <FaStar />
-            <span>Gratis y Sin Registro</span>
+            <span>{t('landing.hero.badge')}</span>
           </div>
           <h1 className="landing-page__hero-title">
-            Lotería Mexicana<br />
-            <span className="landing-page__hero-title--highlight">Personalizada</span>
+            {t('landing.hero.title')}<br />
+            <span className="landing-page__hero-title--highlight">{t('landing.hero.titleHighlight')}</span>
           </h1>
           <p className="landing-page__hero-description">
-            Crea tableros únicos con tus propias imágenes para cualquier celebración
+            {t('landing.hero.description')}
           </p>
           <button
             onClick={onStart}
             className="landing-page__cta-button landing-page__cta-button--hero"
           >
-            Crear Ahora
+            {t('landing.hero.cta')}
             <FaArrowRight />
           </button>
         </div>
@@ -76,13 +79,13 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
         <section className="landing-page__features">
           <div className="landing-page__features-container">
             <div className="landing-page__features-image">
-              <img src="/amigos.png" alt="Celebra con tus amigos" />
+              <img src="/amigos.png" alt={t('landing.features.title')} />
             </div>
             <div className="landing-page__features-content">
               <div className="landing-page__section-header">
-                <h2 className="landing-page__section-title">¿Por qué elegirnos?</h2>
+                <h2 className="landing-page__section-title">{t('landing.features.title')}</h2>
                 <p className="landing-page__section-subtitle">
-                  Todo lo que necesitas para crear tu lotería personalizada en un solo lugar
+                  {t('landing.features.subtitle')}
                 </p>
               </div>
               <div className="landing-page__features-list">
@@ -91,8 +94,8 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                     <FaImage />
                   </div>
                   <div className="landing-page__feature-text">
-                    <h3>100% Personalizable</h3>
-                    <p>Usa tus propias imágenes para crear cartas únicas y originales que reflejen tu estilo</p>
+                    <h3>{t('landing.features.customizable.title')}</h3>
+                    <p>{t('landing.features.customizable.description')}</p>
                   </div>
                 </div>
                 <div className="landing-page__feature-item">
@@ -100,8 +103,8 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                     <FaPalette />
                   </div>
                   <div className="landing-page__feature-text">
-                    <h3>Editor Integrado</h3>
-                    <p>Recorta y ajusta tus imágenes fácilmente con nuestra herramienta intuitiva</p>
+                    <h3>{t('landing.features.editor.title')}</h3>
+                    <p>{t('landing.features.editor.description')}</p>
                   </div>
                 </div>
                 <div className="landing-page__feature-item">
@@ -109,8 +112,8 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                     <FaBullseye />
                   </div>
                   <div className="landing-page__feature-text">
-                    <h3>Múltiples Tableros</h3>
-                    <p>Genera todos los tableros que necesites para tu evento o celebración</p>
+                    <h3>{t('landing.features.boards.title')}</h3>
+                    <p>{t('landing.features.boards.description')}</p>
                   </div>
                 </div>
                 <div className="landing-page__feature-item">
@@ -118,8 +121,8 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                     <FaFilePdf />
                   </div>
                   <div className="landing-page__feature-text">
-                    <h3>PDF Profesional</h3>
-                    <p>Descarga tus tableros en formato PDF listo para imprimir</p>
+                    <h3>{t('landing.features.pdf.title')}</h3>
+                    <p>{t('landing.features.pdf.description')}</p>
                   </div>
                 </div>
                 <div className="landing-page__feature-item">
@@ -127,8 +130,8 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                     <FaChild />
                   </div>
                   <div className="landing-page__feature-text">
-                    <h3>Nuevo: Modo Kids</h3>
-                    <p>Tableros de 3x3 con cartas grandes, ideales para niños pequeños y preescolar</p>
+                    <h3>{t('landing.features.kids.title')}</h3>
+                    <p>{t('landing.features.kids.description')}</p>
                   </div>
                 </div>
               </div>
@@ -139,9 +142,9 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
         {/* Quick Steps - Horizontal Bar */}
         <section className="landing-page__steps">
           <div className="landing-page__steps-header">
-            <h2 className="landing-page__steps-title">Crea y Juega Fácilmente</h2>
+            <h2 className="landing-page__steps-title">{t('landing.steps.title')}</h2>
             <p className="landing-page__steps-subtitle">
-              En solo 3 simples pasos tendrás tu lotería personalizada lista para imprimir
+              {t('landing.steps.subtitle')}
             </p>
           </div>
           <div className="landing-page__steps-decorative"></div>
@@ -152,8 +155,8 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                 <FaCamera />
               </div>
               <div className="landing-page__step-content">
-                <h3>Sube Imágenes</h3>
-                <p>Mínimo 20 cartas para empezar</p>
+                <h3>{t('landing.steps.step1.title')}</h3>
+                <p>{t('landing.steps.step1.description')}</p>
               </div>
               <div className="landing-page__step-arrow">→</div>
             </div>
@@ -163,8 +166,8 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                 <FaDice />
               </div>
               <div className="landing-page__step-content">
-                <h3>Genera Tableros</h3>
-                <p>Mínimo 8 tableros únicos</p>
+                <h3>{t('landing.steps.step2.title')}</h3>
+                <p>{t('landing.steps.step2.description')}</p>
               </div>
               <div className="landing-page__step-arrow">→</div>
             </div>
@@ -174,8 +177,8 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                 <FaDownload />
               </div>
               <div className="landing-page__step-content">
-                <h3>Descarga PDF</h3>
-                <p>Listo para imprimir y jugar</p>
+                <h3>{t('landing.steps.step3.title')}</h3>
+                <p>{t('landing.steps.step3.description')}</p>
               </div>
             </div>
           </div>
@@ -184,9 +187,9 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
         {/* Events Section */}
         <section className="landing-page__events">
           <div className="landing-page__section-header">
-            <h2 className="landing-page__section-title">Perfecta para cualquier ocasión</h2>
+            <h2 className="landing-page__section-title">{t('landing.events.title')}</h2>
             <p className="landing-page__section-subtitle">
-              Celebra tus momentos especiales con un toque de tradición mexicana
+              {t('landing.events.subtitle')}
             </p>
           </div>
           <div className="landing-page__events-grid">
@@ -195,8 +198,8 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                 <FaBaby />
               </div>
               <div className="landing-page__event-content">
-                <h3>Baby Showers</h3>
-                <p>Crea una lotería temática con fotos del futuro bebé</p>
+                <h3>{t('landing.events.babyShower.title')}</h3>
+                <p>{t('landing.events.babyShower.description')}</p>
               </div>
             </div>
             <div className="landing-page__event">
@@ -204,8 +207,8 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                 <FaUsers />
               </div>
               <div className="landing-page__event-content">
-                <h3>Eventos Familiares</h3>
-                <p>Reuniones, cumpleaños y aniversarios</p>
+                <h3>{t('landing.events.family.title')}</h3>
+                <p>{t('landing.events.family.description')}</p>
               </div>
             </div>
             <div className="landing-page__event">
@@ -213,8 +216,8 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                 <FaBriefcase />
               </div>
               <div className="landing-page__event-content">
-                <h3>Eventos Corporativos</h3>
-                <p>Team building y fiestas de oficina</p>
+                <h3>{t('landing.events.corporate.title')}</h3>
+                <p>{t('landing.events.corporate.description')}</p>
               </div>
             </div>
             <div className="landing-page__event">
@@ -222,8 +225,8 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                 <FaSmile />
               </div>
               <div className="landing-page__event-content">
-                <h3>Fiestas con Amigos</h3>
-                <p>Haz más divertidas tus reuniones</p>
+                <h3>{t('landing.events.friends.title')}</h3>
+                <p>{t('landing.events.friends.description')}</p>
               </div>
             </div>
             <div className="landing-page__event">
@@ -231,8 +234,8 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                 <FaBirthdayCake />
               </div>
               <div className="landing-page__event-content">
-                <h3>Para Niños</h3>
-                <p>Con sus personajes favoritos y cartas grandes (3x3)</p>
+                <h3>{t('landing.events.kids.title')}</h3>
+                <p>{t('landing.events.kids.description')}</p>
               </div>
             </div>
             <div className="landing-page__event">
@@ -240,8 +243,8 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
                 <FaBirthdayCake />
               </div>
               <div className="landing-page__event-content">
-                <h3>Otras Celebraciones</h3>
-                <p>Bodas, graduaciones y más</p>
+                <h3>{t('landing.events.others.title')}</h3>
+                <p>{t('landing.events.others.description')}</p>
               </div>
             </div>
           </div>
@@ -253,15 +256,15 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
           <div className="landing-page__cta-content">
             <div className="landing-page__cta-badge">
               <FaStar />
-              <span>Sin costo, sin registro</span>
+              <span>{t('landing.ctaSection.badge')}</span>
             </div>
-            <h2>¿Listo para comenzar?</h2>
-            <p>Crea recuerdos inolvidables en minutos. ¡Empieza ahora y diviértete con tu lotería personalizada!</p>
+            <h2>{t('landing.ctaSection.title')}</h2>
+            <p>{t('landing.ctaSection.description')}</p>
             <button
               onClick={onStart}
               className="landing-page__cta-button landing-page__cta-button--primary"
             >
-              Crear mi Lotería
+              {t('landing.ctaSection.button')}
               <FaArrowRight />
             </button>
           </div>
@@ -271,18 +274,20 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
         <section className="landing-page__info">
           <Link to="/como-se-juega" className="landing-page__info-link">
             <FaGamepad />
-            <span>¿Cómo se juega?</span>
+            <span>{t('landing.info.howToPlay')}</span>
           </Link>
           <Link to="/que-es-la-loteria" className="landing-page__info-link">
             <FaBook />
-            <span>¿Qué es la Lotería?</span>
+            <span>{t('landing.info.whatIs')}</span>
           </Link>
         </section>
       </main>
 
       <footer className="landing-page__footer">
         <p>chorroybuenas.com.mx</p>
-        <p>Hecho con <FaHeart /> para mantener viva la tradición mexicana</p>
+        <p>
+          {t('landing.footer.tradition')} <FaHeart />
+        </p>
       </footer>
     </div>
   );

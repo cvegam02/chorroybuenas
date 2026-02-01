@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import './CardUploadThumb.css';
 
 interface CardUploadThumbProps {
@@ -5,6 +6,7 @@ interface CardUploadThumbProps {
 }
 
 export const CardUploadThumb = ({ onSingleClick }: CardUploadThumbProps) => {
+  const { t } = useTranslation();
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -16,7 +18,7 @@ export const CardUploadThumb = ({ onSingleClick }: CardUploadThumbProps) => {
       <div className="card-upload-thumb__image-container">
         <div className="card-upload-thumb__placeholder">
           <span className="card-upload-thumb__icon">➕</span>
-          <p className="card-upload-thumb__text">Agregar imagen</p>
+          <p className="card-upload-thumb__text">{t('cardUpload.addImage')}</p>
         </div>
       </div>
     </div>

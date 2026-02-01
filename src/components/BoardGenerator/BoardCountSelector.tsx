@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FaLightbulb, FaExclamationTriangle, FaArrowRight } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import './BoardCountSelector.css';
 import { loadCards } from '../../utils/storage';
 import { GridSize } from '../../types';
@@ -68,6 +69,7 @@ const calculateSuggestedBoards = (availableCards: number, gridSize: GridSize): n
 };
 
 export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCountSelectorProps) => {
+  const { t } = useTranslation();
   const [boardCount, setBoardCount] = useState<number>(8);
   const [inputValue, setInputValue] = useState<string>('8');
   const [error, setError] = useState<string>('');
@@ -121,14 +123,14 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
 
     // Only allow numeric characters
     if (!/^\d+$/.test(value)) {
-      setError('Por favor ingresa solo números');
+      setError(t('boardGenerator.form.errorNumbers'));
       return;
     }
 
     const numValue = parseInt(value, 10);
 
     if (isNaN(numValue) || numValue < 1) {
-      setError('Por favor ingresa un número válido (mínimo 1)');
+      setError(t('boardGenerator.form.errorMin'));
       setBoardCount(numValue);
       return;
     }
@@ -153,7 +155,7 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
     e.preventDefault();
 
     if (boardCount < 1) {
-      setError('Debes generar al menos 1 tablero');
+      setError(t('boardGenerator.form.errorAtLeastOne'));
       return;
     }
 
@@ -161,7 +163,7 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
     if (cardCount >= gridSize) {
       const maxUniqueBoards = calculateMaxUniqueBoards(cardCount, gridSize);
       if (boardCount > maxUniqueBoards) {
-        setError(`Con ${cardCount} cartas, el máximo de tableros únicos posibles es ${maxUniqueBoards}. Por favor, reduce el número de tableros.`);
+        setError(t('boardGenerator.form.errorMaxUnique', { count: cardCount, max: maxUniqueBoards }));
         return;
       }
     }
@@ -172,10 +174,11 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
   return (
     <div className="board-count-selector">
       <div className="board-count-selector__header">
-        <h1 className="board-count-selector__title">Generar Tableros</h1>
+        <h1 className="board-count-selector__title">{t('boardGenerator.title')}</h1>
         <p className="board-count-selector__subtitle">
-          Has elegido el modo {gridSize === 16 ? 'Clásico (16 cartas)' : 'Kids (9 cartas)'}.
-          ¿Cuántos tableros necesitas?
+          {t('boardGenerator.modeSelection', {
+            mode: gridSize === 16 ? t('boardGenerator.modes.classic') : t('boardGenerator.modes.kids')
+          })}
         </p>
       </div>
 
@@ -185,13 +188,13 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
             <FaLightbulb />
           </div>
           <div className="board-count-selector__suggestion-content">
-            <div className="board-count-selector__suggestion-title">Sugerencia</div>
+            <div className="board-count-selector__suggestion-title">{t('boardGenerator.suggestion.title')}</div>
             <div className="board-count-selector__suggestion-text">
-              Con tus <strong>{cardCount} cartas</strong>, te sugerimos generar <strong>{suggestedBoards} tablero{suggestedBoards !== 1 ? 's' : ''}</strong> para una distribución balanceada.
+              {t('boardGenerator.suggestion.text', { count: cardCount, suggested: suggestedBoards })}
               {(() => {
                 const maxUnique = calculateMaxUniqueBoards(cardCount, gridSize);
                 if (maxUnique < 100 && maxUnique !== suggestedBoards) {
-                  return ` Máximo teórico de tableros únicos: ${maxUnique}.`;
+                  return t('boardGenerator.suggestion.maxTheoretical', { max: maxUnique });
                 }
                 return '';
               })()}
@@ -206,10 +209,13 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
             <FaExclamationTriangle />
           </div>
           <div className="board-count-selector__error-content">
-            <div className="board-count-selector__error-title">Cartas insuficientes</div>
+            <div className="board-count-selector__error-title">{t('boardGenerator.insufficientCards.title')}</div>
             <div className="board-count-selector__error-text">
-              Necesitas al menos <strong>{gridSize} cartas</strong> para generar un tablero {gridSize === 16 ? 'Clásico' : 'Kids'}.
-              Actualmente tienes <strong>{cardCount} carta{cardCount !== 1 ? 's' : ''}</strong>.
+              {t('boardGenerator.insufficientCards.text', {
+                needed: gridSize,
+                mode: gridSize === 16 ? t('boardGenerator.modes.classic') : t('boardGenerator.modes.kids'),
+                count: cardCount
+              })}
             </div>
           </div>
         </div>
@@ -218,11 +224,11 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
       <form onSubmit={handleSubmit} className="board-count-selector__form">
         <div className="board-count-selector__input-group">
           <label htmlFor="board-count" className="board-count-selector__label">
-            ¿Cuántos tableros quieres generar?
+            {t('boardGenerator.form.label')}
           </label>
           {!isLoadingCards && cardCount >= gridSize && (
             <div className="board-count-selector__hint">
-              Sugerido: <strong>{suggestedBoards} tableros</strong>
+              {t('boardGenerator.form.hint', { count: suggestedBoards })}
             </div>
           )}
           <input
@@ -234,7 +240,7 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
             onChange={handleCountChange}
             onBlur={handleInputBlur}
             className="board-count-selector__input"
-            placeholder={!isLoadingCards && cardCount >= gridSize ? suggestedBoards.toString() : '8'}
+            placeholder={!isLoadingCards && cardCount >= gridSize ? suggestedBoards.toString() : t('boardGenerator.form.placeholder')}
           />
           {error && <div className="board-count-selector__error">{error}</div>}
         </div>
@@ -245,14 +251,14 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
             onClick={onCancel}
             className="board-count-selector__cancel-button"
           >
-            Cancelar Proceso
+            {t('boardGenerator.actions.cancel')}
           </button>
           <button
             type="submit"
             disabled={boardCount < 1 || cardCount < gridSize}
             className={`board-count-selector__button ${boardCount >= 1 && cardCount >= gridSize ? 'board-count-selector__button--enabled' : ''}`}
           >
-            <span>Generar Tableros</span>
+            <span>{t('boardGenerator.actions.generate')}</span>
             <FaArrowRight />
           </button>
         </div>

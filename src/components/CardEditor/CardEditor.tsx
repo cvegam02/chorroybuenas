@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FaInfoCircle,
   FaChevronDown,
@@ -31,6 +32,7 @@ interface CardEditorProps {
 }
 
 export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: CardEditorProps) => {
+  const { t } = useTranslation();
   const { cards, addCard, addCards, removeCard, updateCard, clearCards, cardCount } = useCards();
   const [nextCardId, setNextCardId] = useState(1);
   const [isRecommendationsCollapsed, setIsRecommendationsCollapsed] = useState(true);
@@ -58,7 +60,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
   const handleCardAdd = async (image: string, title: string) => {
     const normalizedTitle = normalizeTitle(title);
     if (existingTitleSet.has(normalizedTitle)) {
-      alert('Ya existe una carta con ese nombre. Por favor usa un título diferente.');
+      alert(t('cardEditor.errors.duplicateTitle'));
       return false;
     }
     const newCard: Card = {
@@ -86,7 +88,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
     }
 
     if (duplicateTitles.length > 0) {
-      alert(`Se encontraron títulos repetidos: ${duplicateTitles.join(', ')}. Por favor cámbialos.`);
+      alert(t('cardEditor.errors.batchDuplicates', { titles: duplicateTitles.join(', ') }));
       return;
     }
 
@@ -143,7 +145,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
     );
 
     if (isDuplicate) {
-      alert('Ya existe una carta con ese nombre. Por favor usa un título diferente.');
+      alert(t('cardEditor.errors.duplicateTitle'));
       return false;
     }
 
@@ -157,14 +159,14 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
   return (
     <div className="card-editor">
       <div className="card-editor__header">
-        <h1 className="card-editor__title">Carga de Cartas</h1>
+        <h1 className="card-editor__title">{t('cardEditor.title')}</h1>
         <p className="card-editor__subtitle">
-          Crea tu baraja personalizada subiendo imágenes y asignándoles un título
+          {t('cardEditor.subtitle')}
         </p>
       </div>
 
       <div className="card-editor__mode-selector-container">
-        <GridModeSelector selectedSize={gridSize} onChange={onGridSizeChange} />
+        <GridModeSelector selectedSize={gridSize} onChange={onGridSizeChange} t={t} />
       </div>
 
       <div className="card-editor__stats">
@@ -175,10 +177,10 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
               <FaCheckCircle className="card-editor__stat-check" />
             )}
           </div>
-          <div className="card-editor__stat-label">Cartas cargadas</div>
+          <div className="card-editor__stat-label">{t('cardEditor.stats.loaded')}</div>
           {!hasMinimumCards && (
             <div className="card-editor__stat-minimum">
-              Mínimo para modo {gridSize === 9 ? 'Kids' : 'Clásico'}: {minCards}
+              {t('cardEditor.stats.minimum', { mode: gridSize === 9 ? 'Kids' : 'Clásico', min: minCards })}
             </div>
           )}
         </div>
@@ -193,7 +195,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
           >
             <div className="card-editor__info-toggle-content">
               <FaInfoCircle className="card-editor__info-icon" />
-              <span className="card-editor__info-title">Instrucciones</span>
+              <span className="card-editor__info-title">{t('cardEditor.instructions.title')}</span>
             </div>
             <FaChevronDown className={`card-editor__info-chevron ${isInstructionsCollapsed ? '' : 'card-editor__info-chevron--open'}`} />
           </button>
@@ -206,8 +208,8 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
                     <FaImage />
                   </div>
                   <div>
-                    <strong>Selecciona una imagen</strong>
-                    <p>Haz clic en el área de carga o arrastra una imagen. Formatos: JPG, PNG o WEBP</p>
+                    <strong>{t('cardEditor.instructions.step1.title')}</strong>
+                    <p>{t('cardEditor.instructions.step1.text')}</p>
                   </div>
                 </div>
               </div>
@@ -218,8 +220,8 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
                     <FaEdit />
                   </div>
                   <div>
-                    <strong>Ajusta la imagen</strong>
-                    <p>Usa zoom (rueda del mouse o botones + / -) y arrastra para seleccionar el área que quieres mostrar</p>
+                    <strong>{t('cardEditor.instructions.step2.title')}</strong>
+                    <p>{t('cardEditor.instructions.step2.text')}</p>
                   </div>
                 </div>
               </div>
@@ -230,8 +232,8 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
                     <FaTag />
                   </div>
                   <div>
-                    <strong>Agrega un título</strong>
-                    <p>Escribe un nombre descriptivo para tu carta. Este será el texto que se cantará durante el juego</p>
+                    <strong>{t('cardEditor.instructions.step3.title')}</strong>
+                    <p>{t('cardEditor.instructions.step3.text')}</p>
                   </div>
                 </div>
               </div>
@@ -242,8 +244,8 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
                     <FaPlus />
                   </div>
                   <div>
-                    <strong>Agrega la carta</strong>
-                    <p>Haz clic en "Agregar Carta" para añadirla a tu baraja. Puedes eliminarla haciendo clic en la X</p>
+                    <strong>{t('cardEditor.instructions.step4.title')}</strong>
+                    <p>{t('cardEditor.instructions.step4.text')}</p>
                   </div>
                 </div>
               </div>
@@ -261,19 +263,19 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
           >
             <div className="card-editor__info-toggle-content">
               <FaLightbulb className="card-editor__info-icon" />
-              <span className="card-editor__info-title">Recomendaciones para mejores resultados</span>
+              <span className="card-editor__info-title">{t('cardEditor.recommendations.title')}</span>
             </div>
             <FaChevronDown className={`card-editor__info-chevron ${isRecommendationsCollapsed ? '' : 'card-editor__info-chevron--open'}`} />
           </button>
           {!isRecommendationsCollapsed && (
             <div className="card-editor__info-content">
               <ul className="card-editor__recommendations-list">
-                <li><strong>Usa imágenes de buena calidad:</strong> Evita imágenes borrosas o pixeladas para que se vean nítidas en los tableros</li>
-                <li><strong>Enfócate en el sujeto principal:</strong> Las imágenes con un objeto o persona claramente visible funcionan mejor</li>
-                <li><strong>Buena iluminación:</strong> Elige fotos bien iluminadas para que los detalles se aprecien mejor</li>
-                <li><strong>Colores vibrantes:</strong> Las imágenes con colores vivos y contrastes claros destacan más</li>
-                <li><strong>Composición centrada:</strong> El editor te permite recortar y ajustar, pero es mejor empezar con una imagen bien encuadrada</li>
-                <li><strong>Títulos descriptivos:</strong> Elige títulos que sean fáciles de identificar y divertidos de "cantar"</li>
+                <li><strong>{t('cardEditor.recommendations.quality').split(':')[0]}:</strong>{t('cardEditor.recommendations.quality').split(':')[1]}</li>
+                <li><strong>{t('cardEditor.recommendations.subject').split(':')[0]}:</strong>{t('cardEditor.recommendations.subject').split(':')[1]}</li>
+                <li><strong>{t('cardEditor.recommendations.lighting').split(':')[0]}:</strong>{t('cardEditor.recommendations.lighting').split(':')[1]}</li>
+                <li><strong>{t('cardEditor.recommendations.vibrant').split(':')[0]}:</strong>{t('cardEditor.recommendations.vibrant').split(':')[1]}</li>
+                <li><strong>{t('cardEditor.recommendations.composition').split(':')[0]}:</strong>{t('cardEditor.recommendations.composition').split(':')[1]}</li>
+                <li><strong>{t('cardEditor.recommendations.descriptive').split(':')[0]}:</strong>{t('cardEditor.recommendations.descriptive').split(':')[1]}</li>
               </ul>
             </div>
           )}
@@ -285,11 +287,11 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
           <div className="card-editor__cards-header-left">
             {cards.length > 0 && (
               <>
-                <h2 className="card-editor__cards-title">Tus Cartas</h2>
+                <h2 className="card-editor__cards-title">{t('cardEditor.cardsList.title')}</h2>
                 <span className="card-editor__cards-count">({cardCount})</span>
                 {!hasMinimumCards && (
                   <span className="card-editor__cards-missing">
-                    (Faltan {minCards - cardCount} más)
+                    {t('cardEditor.cardsList.missing', { count: minCards - cardCount })}
                   </span>
                 )}
               </>
@@ -302,7 +304,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
               className="card-editor__batch-button"
             >
               <FaUpload />
-              <span>Subir Varias</span>
+              <span>{t('cardEditor.actions.uploadBatch')}</span>
             </button>
             {cardCount > 0 && (
               <button
@@ -310,7 +312,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
                 onClick={() => setIsClearModalOpen(true)}
                 className="card-editor__clear-button"
               >
-                Limpiar Cartas
+                {t('cardEditor.actions.clearAll')}
               </button>
             )}
           </div>
@@ -373,9 +375,9 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
 
       <WarningModal
         isOpen={isClearModalOpen}
-        title="¿Limpiar todas las cartas?"
-        message="Se eliminarán todas las cartas que has subido y empezarás desde cero."
-        confirmText="Sí, limpiar todo"
+        title={t('modals.clearCards.title')}
+        message={t('modals.clearCards.message')}
+        confirmText={t('modals.clearCards.confirm')}
         onConfirm={handleClearCards}
         onCancel={() => setIsClearModalOpen(false)}
         type="danger"
@@ -387,7 +389,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
             onClick={onNext}
             className="card-editor__next-button card-editor__next-button--enabled"
           >
-            <span>Siguiente: Generar Tableros</span>
+            <span>{t('cardEditor.actions.nextStep')}</span>
             <FaArrowRight />
           </button>
         )}
@@ -396,7 +398,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
           onClick={onCancel}
           className="card-editor__cancel-process-button"
         >
-          Cancelar Proceso
+          {t('cardEditor.actions.cancelProcess')}
         </button>
       </div>
     </div>

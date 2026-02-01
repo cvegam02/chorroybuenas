@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { convertFileToBase64, validateImageFile, compressImage } from '../../utils/imageUtils';
 import { ImageEditor } from './ImageEditor';
 import './CardUpload.css';
@@ -86,8 +87,9 @@ export const CardUpload = ({
   existingTitles,
   initialTitle = '',
   initialImage,
-  submitLabel = 'Agregar Carta'
+  submitLabel
 }: CardUploadProps) => {
+  const { t } = useTranslation();
   const normalizeTitle = (value: string) => value.replace(/\s+/g, ' ').trim().toLowerCase();
   const existingTitleSet = useMemo(
     () => new Set(existingTitles.map(normalizeTitle)),
@@ -107,7 +109,7 @@ export const CardUpload = ({
     if (!file) return;
 
     if (!validateImageFile(file)) {
-      alert('Por favor, selecciona una imagen válida (JPG, PNG o WEBP)');
+      alert(t('cardUpload.errorInvalidFormat'));
       return;
     }
 
@@ -123,19 +125,19 @@ export const CardUpload = ({
 
     const normalizedTitle = normalizeTitle(title);
     if (!normalizedTitle) {
-      alert('Por favor, ingresa un título para la carta');
+      alert(t('cardUpload.errorNoTitle'));
       return;
     }
 
     const isTitleChanged = normalizedTitle !== normalizeTitle(initialTitle);
 
     if (isTitleChanged && existingTitleSet.has(normalizedTitle)) {
-      alert('Ya existe una carta con ese nombre. Por favor usa un título diferente.');
+      alert(t('cardUpload.errorDuplicate'));
       return;
     }
 
     if (!imagePreview) {
-      alert('Por favor, selecciona una imagen');
+      alert(t('cardUpload.errorNoImage'));
       return;
     }
 
@@ -169,7 +171,7 @@ export const CardUpload = ({
       }
     } catch (error) {
       console.error('Error adding card:', error);
-      alert('Error al agregar la carta. Por favor, intenta nuevamente.');
+      alert(t('cardEditor.errors.generalAddError'));
     } finally {
       setIsUploading(false);
     }
@@ -188,7 +190,7 @@ export const CardUpload = ({
     if (!file) return;
 
     if (!validateImageFile(file)) {
-      alert('Por favor, selecciona una imagen válida (JPG, PNG o WEBP)');
+      alert(t('cardUpload.errorInvalidFormat'));
       return;
     }
 
@@ -264,7 +266,7 @@ export const CardUpload = ({
           <img src={imagePreview} alt="Preview" className="card-upload__preview" />
           <div className="card-upload__edit-overlay">
             <span role="img" aria-label="edit">✏️</span>
-            <p>Haz clic en "Ajustar imagen"</p>
+            <p>{t('cardUpload.status.clickToAdjust')}</p>
           </div>
         </div>
       ) : (
@@ -276,20 +278,20 @@ export const CardUpload = ({
         >
           <div className="card-upload__placeholder">
             <span>📷</span>
-            <p className="card-upload__placeholder-main">Haz clic o arrastra una imagen aquí</p>
-            <p className="card-upload__placeholder-sub">Formatos: JPG, PNG o WEBP</p>
+            <p className="card-upload__placeholder-main">{t('cardUpload.placeholder.main')}</p>
+            <p className="card-upload__placeholder-sub">{t('cardUpload.placeholder.sub')}</p>
           </div>
         </div>
       )}
 
       <div className="card-upload__title-group">
         <label className="card-upload__label">
-          Título de la carta
+          {t('cardUpload.label')}
         </label>
         <input
           ref={titleInputRef}
           type="text"
-          placeholder="Ej: El gato, La playa, Mi familia..."
+          placeholder={t('cardUpload.inputPlaceholder')}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={handleTitleKeyDown}
@@ -299,11 +301,11 @@ export const CardUpload = ({
         />
         {isDuplicateTitle && (
           <p className="card-upload__error-text">
-            Ya existe una carta con ese nombre. Usa un título diferente.
+            {t('cardUpload.errorDuplicate')}
           </p>
         )}
         <p className="card-upload__help-text">
-          Elige un título claro y corto que sea fácil de cantar durante el juego
+          {t('cardUpload.helpText')}
         </p>
       </div>
 
@@ -317,7 +319,7 @@ export const CardUpload = ({
             className="card-upload__change-button"
             disabled={isUploading}
           >
-            Cambiar foto
+            {t('cardUpload.actions.changePhoto')}
           </button>
         )}
 
@@ -329,7 +331,7 @@ export const CardUpload = ({
             disabled={isUploading}
           >
             <span role="img" aria-label="edit">✏️</span>
-            <span>Ajustar imagen</span>
+            <span>{t('cardUpload.actions.adjustImage')}</span>
           </button>
         )}
 
@@ -338,7 +340,7 @@ export const CardUpload = ({
           disabled={!title.trim() || !imagePreview || isUploading}
           className="card-upload__submit"
         >
-          {isUploading ? 'Procesando...' : submitLabel}
+          {isUploading ? t('cardUpload.status.processing') : (submitLabel || t('cardUpload.actions.addCard'))}
         </button>
       </div>
     </form>

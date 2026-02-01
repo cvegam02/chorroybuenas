@@ -1,5 +1,6 @@
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LandingPage } from './components/LandingPage/LandingPage';
 import { CardEditor } from './components/CardEditor/CardEditor';
 import { BoardCountSelector } from './components/BoardGenerator/BoardCountSelector';
@@ -18,6 +19,7 @@ import { Board, GridSize } from './types';
 type AppStep = 'cards' | 'board-count' | 'preview' | 'confirmation';
 
 function AppContent() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [currentStep, setCurrentStep] = useState<AppStep | null>(null);
@@ -64,8 +66,8 @@ function AppContent() {
       navigate('/preview');
     } catch (error) {
       console.error('Error generating boards:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      alert(`Error al generar los tableros: ${errorMessage}. Por favor, intenta nuevamente.`);
+      const errorMessage = error instanceof Error ? error.message : t('common.error');
+      alert(`${t('boardGenerator.errors.generateError')}: ${errorMessage}. ${t('boardGenerator.errors.tryAgain')}`);
     }
   };
 
@@ -87,7 +89,7 @@ function AppContent() {
       setShowConfirmation(true);
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Error al generar el PDF. Por favor, intenta nuevamente.');
+      alert(t('boardGenerator.errors.pdfError'));
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -159,7 +161,7 @@ function AppContent() {
               />
             ) : (
               <div style={{ padding: '48px', textAlign: 'center' }}>
-                <h2>Redirigiendo...</h2>
+                <h2>{t('common.loading')}</h2>
               </div>
             )
           }
@@ -175,7 +177,7 @@ function AppContent() {
               />
             ) : (
               <div style={{ padding: '48px', textAlign: 'center' }}>
-                <h2>Redirigiendo...</h2>
+                <h2>{t('common.loading')}</h2>
               </div>
             )
           }
@@ -204,14 +206,14 @@ function AppContent() {
       {isGenerating && (
         <div className="app__loading">
           <div className="app__loading-spinner"></div>
-          <p>Generando tableros...</p>
+          <p>{t('boardGenerator.status.generatingBoards')}</p>
         </div>
       )}
 
       {isGeneratingPDF && (
         <div className="app__loading">
           <div className="app__loading-spinner"></div>
-          <p>Generando PDF...</p>
+          <p>{t('boardGenerator.status.generatingPDF')}</p>
         </div>
       )}
 
@@ -224,10 +226,10 @@ function AppContent() {
 
       <WarningModal
         isOpen={showCancelModal}
-        title="¿Cancelar proceso?"
-        message="Se perderá todo el progreso que hayas hecho hasta ahora, incluyendo las cartas subidas y los tableros generados."
-        confirmText="Sí, cancelar todo"
-        cancelText="No, continuar"
+        title={t('modals.batchCancel.title')}
+        message={t('modals.batchCancel.message')}
+        confirmText={t('modals.batchCancel.confirm')}
+        cancelText={t('modals.batchCancel.cancel')}
         onConfirm={confirmCancel}
         onCancel={() => setShowCancelModal(false)}
         type="danger"

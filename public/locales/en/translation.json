@@ -1,0 +1,397 @@
+{
+    "common": {
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "back": "Back",
+        "next": "Next",
+        "finish": "Finish",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "close": "Close",
+        "loading": "Loading...",
+        "error": "Error",
+        "warning": "Warning",
+        "success": "Success",
+        "yes": "Yes",
+        "no": "No"
+    },
+    "landing": {
+        "title": "Create your Custom Mexican Loteria | chorroybuenas.com.mx",
+        "metaDescription": "Create custom Mexican Loteria boards with your own cards and images. New Kids Mode (3x3) for children. Perfect for baby showers and family events.",
+        "hero": {
+            "badge": "Free & No Registration",
+            "title": "Mexican Loteria",
+            "titleHighlight": "Custom Edition",
+            "description": "Create unique boards with your own images for any celebration",
+            "cta": "Create Now"
+        },
+        "features": {
+            "title": "Why choose us?",
+            "subtitle": "Everything you need to create your custom loteria in one place",
+            "customizable": {
+                "title": "100% Customizable",
+                "description": "Use your own images to create unique and original cards that reflect your style"
+            },
+            "editor": {
+                "title": "Integrated Editor",
+                "description": "Crop and adjust your images easily with our intuitive tool"
+            },
+            "boards": {
+                "title": "Multiple Boards",
+                "description": "Generate all the boards you need for your event or celebration"
+            },
+            "pdf": {
+                "title": "Professional PDF",
+                "description": "Download your boards in PDF format ready to print"
+            },
+            "kids": {
+                "title": "New: Kids Mode",
+                "description": "3x3 boards with large cards, ideal for young children and preschoolers"
+            }
+        },
+        "steps": {
+            "title": "Create and Play Easily",
+            "subtitle": "In just 3 simple steps you will have your custom loteria ready to print",
+            "step1": {
+                "title": "Upload Images",
+                "description": "Minimum 20 cards to start"
+            },
+            "step2": {
+                "title": "Generate Boards",
+                "description": "Minimum 8 unique boards"
+            },
+            "step3": {
+                "title": "Download PDF",
+                "description": "Ready to print and play"
+            }
+        },
+        "events": {
+            "title": "Perfect for any occasion",
+            "subtitle": "Celebrate your special moments with a touch of Mexican tradition",
+            "babyShower": {
+                "title": "Baby Showers",
+                "description": "Create a themed loteria with photos of the future baby"
+            },
+            "family": {
+                "title": "Family Events",
+                "description": "Meetings, birthdays and anniversaries"
+            },
+            "corporate": {
+                "title": "Corporate Events",
+                "description": "Team building and office parties"
+            },
+            "friends": {
+                "title": "Friend Parties",
+                "description": "Make your meetings more fun"
+            },
+            "kids": {
+                "title": "For Kids",
+                "description": "With their favorite characters and large cards (3x3)"
+            },
+            "others": {
+                "title": "Other Celebrations",
+                "description": "Weddings, graduations and more"
+            }
+        },
+        "ctaSection": {
+            "badge": "No cost, no registration",
+            "title": "Ready to start?",
+            "description": "Create unforgettable memories in minutes. Start now and have fun with your custom loteria!",
+            "button": "Create my Loteria"
+        },
+        "info": {
+            "howToPlay": "How to play?",
+            "whatIs": "What is Loteria?"
+        },
+        "footer": {
+            "tradition": "Preserving the Mexican tradition"
+        }
+    },
+    "navbar": {
+        "support": "Support",
+        "home": "Home",
+        "create": "Create Loteria",
+        "howToPlay": "How to play?",
+        "whatIs": "What is Loteria?"
+    },
+    "footer": {
+        "creator": "Created by",
+        "devOffer": "Need a web application?",
+        "letTalk": "Let's talk!",
+        "support": "Support project",
+        "slogan": "Making the game more personal"
+    },
+    "about": {
+        "title": "What is Mexican Loteria? History and Tradition | chorroybuenas.com.mx",
+        "metaDescription": "Discover the history, culture and tradition behind Mexican Loteria. Learn about its origins and how it has united communities for generations.",
+        "header": {
+            "title": "What is Mexican Loteria?",
+            "subtitle": "Learn more about this traditional game that is part of Mexican culture"
+        },
+        "history": {
+            "title": "History and Origin",
+            "text": "Loteria is a traditional Mexican game of chance, similar to bingo, which has been a staple of Mexican culture for generations. Originating in Europe as \"Lotto,\" it was brought to Mexico during the colonial era. Over time, it evolved into a deeply rooted tradition, reflecting local art and culture, and becoming a centerpiece of Mexican festivals and family gatherings."
+        },
+        "culture": {
+            "title": "Culture and Tradition",
+            "text": "It is a game that has united families and communities for generations, especially during festivals and celebrations. Mexican Loteria is not just a game; it's a living tradition passed down within families, creating lasting memories of shared joy and connection."
+        },
+        "traditionalGame": {
+            "title": "The Traditional Game",
+            "text": "Traditionally, Mexican Loteria uses a deck with 54 cards, each with characteristic images such as \"El Gallo\" (The Rooster), \"El Diablito\" (The Little Devil), \"La Dama\" (The Lady), among others. Boards have 16 images distributed in a 4x4 grid, and the goal is to complete lines or fill the entire board while the \"announcer\" draws and calls out the cards in a rhythmic and fun way."
+        },
+        "customLoteria": {
+            "title": "Custom Loteria",
+            "text": "With our app, you can keep this tradition alive by creating custom loterias for any special occasion. Whether for a baby shower, a birthday party, a family event, or any celebration, you can create a unique loteria with your own images and themes, making each game special and memorable."
+        },
+        "cta": {
+            "title": "Ready to create your own Loteria?",
+            "text": "Customize your game with your own images and enjoy this Mexican tradition",
+            "create": "Create my Loteria",
+            "learn": "Learn how to play"
+        }
+    },
+    "howToPlay": {
+        "title": "How to play Mexican Loteria? - Step-by-Step Instructions | chorroybuenas.com.mx",
+        "metaDescription": "Learn how to play Mexican Loteria step by step. Clear instructions to prepare the game, call the cards and win. Have fun with tradition!",
+        "header": {
+            "title": "How to play Mexican Loteria?",
+            "subtitle": "Learn how to play this fun traditional Mexican game step by step"
+        },
+        "steps": {
+            "step1": {
+                "title": "Prepare the game",
+                "text": "Each player receives a board with 16 unique images arranged in a 4x4 grid. Designate one person as the \"announcer\" who will be in charge of drawing and calling the cards."
+            },
+            "step2": {
+                "title": "Game starts",
+                "text": "The announcer draws cards from the deck one by one and calls them in a fun and rhythmic way, announcing the name or description of the image. Players mark the cards that appear on their board using beans, coins or any marker."
+            },
+            "step3": {
+                "title": "Win with different patterns",
+                "text": "The goal is to complete one of the agreed patterns (Line, Center, Corners, or Full Board). Only the first person to complete a specific play wins that prize; once claimed, that play is closed for others. When you complete a pattern, shout \"Line!\", \"Center!\" or the name of the corresponding play to win."
+            },
+            "step4": {
+                "title": "Shouting Loteria and End of Round",
+                "text": "When a player fills their entire board, they shout \"Loteria!\". At that moment, the game stops to verify the cards. If correct, the round ends, the grand prize is awarded, and everything is reset to start again."
+            },
+            "betting": {
+                "title": "Bets and Boards",
+                "text": "Each participant contributes a set amount of money for each board they wish to play with (players can use one or more boards). The total money collected (pot) is divided among the winning plays."
+            },
+            "patterns": {
+                "title": "Plays and Prizes",
+                "fullBoard": "Full Board: The grand prize, won by completing all images on the board.",
+                "line": "Line (Chorro): Won by completing a horizontal, vertical, or diagonal line.",
+                "center": "Center: Won by marking the 4 cards in the center of the board.",
+                "corners": "4 Corners: Won by marking the cards in the four corners."
+            }
+        },
+        "cta": {
+            "title": "Ready to create your own Loteria?",
+            "button": "Create my Loteria"
+        }
+    },
+    "modals": {
+        "confirmation": {
+            "title": "Your PDF file has been downloaded successfully!",
+            "message": "Are you ready to exit? All temporary data will be cleared upon leaving.",
+            "modify": "Change Cards",
+            "complete": "Done"
+        },
+        "warning": {
+            "defaultTitle": "Warning",
+            "confirm": "Accept",
+            "cancel": "Cancel"
+        },
+        "clearCards": {
+            "title": "Clear all cards?",
+            "message": "All uploaded cards will be deleted and you will start from scratch.",
+            "confirm": "Yes, clear all"
+        },
+        "cardUpload": {
+            "title": "Add New Card"
+        },
+        "cardEdit": {
+            "title": "Edit Card"
+        },
+        "batchCancel": {
+            "title": "Cancel process?",
+            "message": "All progress made so far will be lost, including uploaded cards and generated boards.",
+            "confirm": "Yes, cancel all",
+            "cancel": "No, continue"
+        }
+    },
+    "cardEditor": {
+        "title": "Card Upload",
+        "subtitle": "Create your custom deck by uploading images and assigning them a title",
+        "stats": {
+            "loaded": "Cards loaded",
+            "minimum": "Minimum for {{mode}} mode: {{min}}"
+        },
+        "instructions": {
+            "title": "Instructions",
+            "step1": {
+                "title": "Select an image",
+                "text": "Click on the upload area or drag an image. Formats: JPG, PNG or WEBP"
+            },
+            "step2": {
+                "title": "Adjust the image",
+                "text": "Use zoom (mouse wheel or + / - buttons) and drag to select the area you want to show"
+            },
+            "step3": {
+                "title": "Add a title",
+                "text": "Write a descriptive name for your card. This will be the text called out during the game"
+            },
+            "step4": {
+                "title": "Add the card",
+                "text": "Click \"Add Card\" to add it to your deck. You can delete it by clicking on the X"
+            }
+        },
+        "recommendations": {
+            "title": "Recommendations for best results",
+            "quality": "Use high-quality images: Avoid blurry or pixelated images so they look sharp on the boards",
+            "subject": "Focus on the main subject: Images with a clearly visible object or person work best",
+            "lighting": "Good lighting: Choose well-lit photos so details are better appreciated",
+            "vibrant": "Vibrant colors: Images with vivid colors and clear contrasts stand out more",
+            "composition": "Centered composition: The editor allows you to crop and adjust, but it's better to start with a well-framed image",
+            "descriptive": "Descriptive titles: Choose titles that are easy to identify and fun to \"call out\""
+        },
+        "cardsList": {
+            "title": "Your Cards",
+            "missing": "({{count}} more missing)",
+            "empty": "No cards. Add one to start!"
+        },
+        "actions": {
+            "uploadBatch": "Batch Upload",
+            "clearAll": "Clear All Cards",
+            "nextStep": "Next: Generate Boards",
+            "cancelProcess": "Cancel Process",
+            "addCard": "Add Card",
+            "editCard": "Edit Card",
+            "adjustImage": "Adjust Image"
+        },
+        "errors": {
+            "duplicateTitle": "A card with that name already exists. Please use a different title.",
+            "batchDuplicates": "Duplicate titles found: {{titles}}. Please change them.",
+            "generalAddError": "Error adding card. Please try again."
+        }
+    },
+    "imageEditor": {
+        "title": "Adjust your image",
+        "description": "Select the part of the image you want to use on your card. The area inside the box will be what appears in your lottery.",
+        "zoomIn": "Zoom In",
+        "zoomOut": "Zoom Out",
+        "actions": {
+            "cancel": "Cancel",
+            "crop": "Use this area"
+        }
+    },
+    "cardUpload": {
+        "addImage": "Add Image",
+        "placeholder": {
+            "main": "Click or drag an image here",
+            "sub": "Formats: JPG, PNG or WEBP"
+        },
+        "label": "Card Title",
+        "inputPlaceholder": "Ex: The cat, The beach, My family...",
+        "helpText": "Choose a clear and short title that is easy to call out during the game",
+        "errorDuplicate": "A card with that name already exists. Use a different title.",
+        "errorNoTitle": "Please enter a title for the card",
+        "errorNoImage": "Please select an image",
+        "errorInvalidFormat": "Please select a valid image (JPG, PNG or WEBP)",
+        "status": {
+            "processing": "Processing...",
+            "adjusting": "Adjusting image...",
+            "clickToAdjust": "Click on \"Adjust image\""
+        },
+        "actions": {
+            "changePhoto": "Change photo",
+            "adjustImage": "Adjust image",
+            "addCard": "Add Card",
+            "saveChanges": "Save Changes"
+        }
+    },
+    "batchUpload": {
+        "title": "Processing Images ({{current}} of {{total}})",
+        "remaining": {
+            "one": "1 image remaining",
+            "other": "{{count}} images remaining",
+            "last": "Last image"
+        },
+        "actions": {
+            "skip": "Skip this image",
+            "adjust": "Adjust image",
+            "next": "Next ({{count}} remaining) →",
+            "finish": "Finish"
+        }
+    },
+    "boardGenerator": {
+        "gridMode": {
+            "label": "Choose your style",
+            "classic": "Classic",
+            "classicDesc": "4x4 (16 cards)",
+            "kids": "Kids",
+            "kidsDesc": "3x3 (9 cards)"
+        },
+        "title": "Generate Boards",
+        "boardTitle": "Board {{current}} of {{total}}",
+        "noImage": "No image",
+        "modeSelection": "You have chosen {{mode}} mode. How many boards do you need?",
+        "modes": {
+            "classic": "Classic (16 cards)",
+            "kids": "Kids (9 cards)"
+        },
+        "suggestion": {
+            "title": "Suggestion",
+            "text": "With your {{count}} cards, we suggest generating {{suggested}} boards for a balanced distribution.",
+            "maxTheoretical": " Theoretical maximum of unique boards: {{max}}."
+        },
+        "insufficientCards": {
+            "title": "Insufficient cards",
+            "text": "You need at least {{needed}} cards to generate a {{mode}} board. You currently have {{count}} cards."
+        },
+        "form": {
+            "label": "How many boards do you want to generate?",
+            "hint": "Suggested: {{count}} boards",
+            "errorNumbers": "Please enter only numbers",
+            "errorMin": "Please enter a valid number (minimum 1)",
+            "errorAtLeastOne": "You must generate at least 1 board",
+            "errorMaxUnique": "With {{count}} cards, the maximum unique boards possible is {{max}}. Please reduce the number of boards.",
+            "placeholder": "8"
+        },
+        "actions": {
+            "cancel": "Cancel Process",
+            "generate": "Generate Boards",
+            "prevBoard": "View previous board",
+            "nextBoard": "View next board"
+        },
+        "errors": {
+            "generateError": "Error generating boards",
+            "pdfError": "Error generating PDF. Please try again.",
+            "tryAgain": "Please try again."
+        },
+        "status": {
+            "generatingBoards": "Generating boards...",
+            "generatingPDF": "Generating PDF..."
+        },
+        "preview": {
+            "title": "Board Preview",
+            "subtitleCount": "Generated {{count}} boards.",
+            "subtitleInstructions": "Click on any board to see it in full view.",
+            "actions": {
+                "downloadPDF": "Download PDF (All Boards)",
+                "modifyCards": "Edit Cards",
+                "regenerateBoards": "Regenerate Boards"
+            }
+        }
+    },
+    "recommendations": {
+        "header": "Recommendations",
+        "warningRange": "20-40 cards: Good middle ground - Maintains variety and game duration without overcomplicating logistics.",
+        "successClassical": "54 cards: Classic and complete option - Ideal for a traditional and well-balanced experience (recommended).",
+        "infoMessage": "You have {{count}} cards. The classic option is 54 cards, but you can use all you have.",
+        "infoMessageAddMore": "You have {{count}} cards. Consider adding more cards for a better experience (54 is the classic option)."
+    }
+}

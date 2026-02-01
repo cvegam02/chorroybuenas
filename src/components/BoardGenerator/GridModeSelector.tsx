@@ -1,16 +1,21 @@
 import { FaTh, FaChild } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import { GridSize } from '../../types';
 import './GridModeSelector.css';
 
 interface GridModeSelectorProps {
     selectedSize: GridSize;
     onChange: (size: GridSize) => void;
+    t?: any; // Allow passing t for consistency with other components or use internally
 }
 
-export const GridModeSelector = ({ selectedSize, onChange }: GridModeSelectorProps) => {
+export const GridModeSelector = ({ selectedSize, onChange, t: propsT }: GridModeSelectorProps) => {
+    const { t: localT } = useTranslation();
+    const t = propsT || localT;
+
     return (
         <div className="grid-mode-selector">
-            <div className="grid-mode-selector__label">Elige tu estilo</div>
+            <div className="grid-mode-selector__label">{t('boardGenerator.gridMode.label')}</div>
             <div className="grid-mode-selector__options">
                 <button
                     className={`grid-mode-option ${selectedSize === 16 ? 'grid-mode-option--active' : ''}`}
@@ -21,8 +26,8 @@ export const GridModeSelector = ({ selectedSize, onChange }: GridModeSelectorPro
                         <FaTh />
                     </div>
                     <div className="grid-mode-option__content">
-                        <span className="grid-mode-option__title">Clásica</span>
-                        <span className="grid-mode-option__desc">4x4 (16 cartas)</span>
+                        <span className="grid-mode-option__title">{t('boardGenerator.gridMode.classic')}</span>
+                        <span className="grid-mode-option__desc">{t('boardGenerator.gridMode.classicDesc')}</span>
                     </div>
                 </button>
 
@@ -35,8 +40,8 @@ export const GridModeSelector = ({ selectedSize, onChange }: GridModeSelectorPro
                         <FaChild />
                     </div>
                     <div className="grid-mode-option__content">
-                        <span className="grid-mode-option__title">Kids</span>
-                        <span className="grid-mode-option__desc">3x3 (9 cartas)</span>
+                        <span className="grid-mode-option__title">{t('boardGenerator.gridMode.kids')}</span>
+                        <span className="grid-mode-option__desc">{t('boardGenerator.gridMode.kidsDesc')}</span>
                     </div>
                 </button>
             </div>
