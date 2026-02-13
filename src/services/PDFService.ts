@@ -11,8 +11,9 @@ import {
 } from 'pdf-lib';
 import { Board, Card } from '../types';
 import { loadCards } from '../utils/storage';
-import { blobToBase64 } from '../utils/indexedDB';
+import { blobToBase64, getImageBlob, cacheImageBlob } from '../utils/indexedDB';
 import logoImage from '../img/logo.png';
+import { CardRepository } from '../repositories/CardRepository';
 
 // Convert cm to points (1 cm = 28.35 points)
 const cmToPoints = (cm: number) => cm * 28.35;
@@ -109,17 +110,67 @@ const fitTextToWidth = (
 };
 
 /**
- * Converts blob URL to base64 for PDF generation
+ * Converts blob URL or HTTP(S) URL to base64 for PDF generation
  */
-const blobURLToBase64 = async (blobURL: string): Promise<string> => {
+const urlToBase64 = async (url: string): Promise<string> => {
   try {
-    const response = await fetch(blobURL);
+    const response = await fetch(url, { mode: 'cors' });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
     const blob = await response.blob();
     return await blobToBase64(blob);
   } catch (error) {
-    console.error('Error converting blob URL to base64:', error);
+    console.error('Error converting URL to base64:', error);
     throw error;
   }
+};
+
+const blobURLToBase64 = async (blobURL: string): Promise<string> => urlToBase64(blobURL);
+
+/** Convierte cualquier imagen (data URL) a PNG vía canvas. Útil para WebP y otros formatos que pdf-lib no soporta. */
+const dataURLToPngBytes = (dataUrl: string): Promise<Uint8Array> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('No canvas context'));
+        return;
+      }
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error('Canvas toBlob failed'));
+            return;
+          }
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result;
+            if (typeof result !== 'string') {
+              reject(new Error('Expected string from FileReader'));
+              return;
+            }
+            const base64 = result.includes(',') ? result.split(',')[1] : result;
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            resolve(bytes);
+          };
+          reader.readAsDataURL(blob);
+        },
+        'image/png',
+        0.95
+      );
+    };
+    img.onerror = () => reject(new Error('Failed to load image for conversion'));
+    img.src = dataUrl;
+  });
 };
 
 const loadImageAsUint8Array = async (imageSrc: string): Promise<ImageData> => {
@@ -183,54 +234,59 @@ const loadImageAsUint8Array = async (imageSrc: string): Promise<ImageData> => {
   };
 };
 
+type EmbedResult = { image: any; width: number; height: number };
+
 const embedImageInPDF = async (
   pdfDoc: PDFDocument,
-  imageSrc: string
-): Promise<{ image: any; width: number; height: number }> => {
+  imageSrc: string,
+  embedCache?: Map<string, EmbedResult>,
+  cacheKey?: string
+): Promise<EmbedResult> => {
+  if (embedCache && cacheKey) {
+    const cached = embedCache.get(cacheKey);
+    if (cached) return cached;
+  }
+
   try {
     let base64Image: string;
 
-    // Convert blob URL to base64 if needed
-    if (imageSrc.startsWith('blob:')) {
-      console.log(`Converting blob URL to base64: ${imageSrc.substring(0, 50)}...`);
-      base64Image = await blobURLToBase64(imageSrc);
-      console.log(`Blob URL converted successfully, base64 prefix: ${base64Image.substring(0, 50)}...`);
+    if (imageSrc.startsWith('blob:') || imageSrc.startsWith('http://') || imageSrc.startsWith('https://')) {
+      base64Image = await urlToBase64(imageSrc);
     } else {
       base64Image = imageSrc;
-      console.log(`Using base64 directly, prefix: ${base64Image.substring(0, 50)}...`);
     }
 
-    console.log(`Loading image as Uint8Array...`);
     const imageData = await loadImageAsUint8Array(base64Image);
-    console.log(`Image loaded: ${imageData.data.length} bytes, dimensions: ${imageData.width}x${imageData.height}`);
 
     let image;
-    // Determine image format from base64 header
-    if (base64Image.startsWith('data:image/png')) {
-      console.log(`Embedding as PNG...`);
-      image = await pdfDoc.embedPng(imageData.data);
-      console.log(`PNG embedded successfully`);
-    } else if (base64Image.startsWith('data:image/jpeg') || base64Image.startsWith('data:image/jpg')) {
-      console.log(`Embedding as JPEG...`);
-      image = await pdfDoc.embedJpg(imageData.data);
-      console.log(`JPEG embedded successfully`);
+    // Determine image format from magic bytes (more reliable than MIME/prefix).
+    // This fixes cases where Storage sets a wrong Content-Type (e.g. JPG bytes served as image/png).
+    const bytes = imageData.data;
+    const isPng =
+      bytes.length >= 8 &&
+      bytes[0] === 0x89 &&
+      bytes[1] === 0x50 &&
+      bytes[2] === 0x4e &&
+      bytes[3] === 0x47 &&
+      bytes[4] === 0x0d &&
+      bytes[5] === 0x0a &&
+      bytes[6] === 0x1a &&
+      bytes[7] === 0x0a;
+    const isJpg = bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+
+    if (isPng) {
+      image = await pdfDoc.embedPng(bytes);
+    } else if (isJpg) {
+      image = await pdfDoc.embedJpg(bytes);
     } else {
-      // Default to PNG
-      console.log(`Unknown format, defaulting to PNG...`);
-      try {
-        image = await pdfDoc.embedPng(imageData.data);
-        console.log(`PNG (default) embedded successfully`);
-      } catch (pngError) {
-        console.log(`PNG failed, trying JPEG as fallback...`);
-        image = await pdfDoc.embedJpg(imageData.data);
-        console.log(`JPEG (fallback) embedded successfully`);
-      }
+      const pngBytes = await dataURLToPngBytes(base64Image.startsWith('data:') ? base64Image : `data:image/png;base64,${base64Image}`);
+      image = await pdfDoc.embedPng(pngBytes);
     }
 
     const { width, height } = image.scale(1);
-    console.log(`Image ready: ${width}x${height}`);
-
-    return { image, width, height };
+    const result: EmbedResult = { image, width, height };
+    if (embedCache && cacheKey) embedCache.set(cacheKey, result);
+    return result;
   } catch (error) {
     console.error('Error in embedImageInPDF:', error);
     console.error('Image source:', imageSrc.substring(0, 100));
@@ -247,17 +303,20 @@ const drawCardOnPage = async (
   height: number,
   pdfDoc: PDFDocument,
   showTitle: boolean = true,
-  titleSize: number = 8
+  titleSize: number = 8,
+  embedCache?: Map<string, EmbedResult>
 ) => {
   try {
     if (!card.image) {
-      console.warn(`Card ${card.id} has no image, skipping`);
       return;
     }
 
-    console.log(`Drawing card ${card.id} - Image type: ${card.image.substring(0, 50)}...`);
-    const { image, width: imgWidth, height: imgHeight } = await embedImageInPDF(pdfDoc, card.image);
-    console.log(`Successfully embedded image for card ${card.id} - Dimensions: ${imgWidth}x${imgHeight}`);
+    const { image, width: imgWidth, height: imgHeight } = await embedImageInPDF(
+      pdfDoc,
+      card.image,
+      embedCache,
+      card.id || undefined
+    );
 
     // Reserve space for title if showing (more space for larger fonts)
     const titleSpace = showTitle ? titleSize + 8 : 0;
@@ -405,7 +464,8 @@ const drawBoardOnPage = async (
   page: any,
   board: Board,
   boardNumber: number,
-  pdfDoc: PDFDocument
+  pdfDoc: PDFDocument,
+  embedCache?: Map<string, EmbedResult>
 ) => {
   // Determine grid size (default to 4x4 if undefined)
   const gridSize = board.gridSize || 16;
@@ -497,108 +557,101 @@ const drawBoardOnPage = async (
           cardHeightPt,
           pdfDoc,
           true, // showTitle
-          gridSize === 9 ? 14 : 11 // Larger title title for 3x3 cards
+          gridSize === 9 ? 14 : 11, // Larger title for 3x3 cards
+          embedCache
         );
       }
     }
   }
 };
 
-export const generatePDF = async (boards: Board[]): Promise<Blob> => {
+export interface GeneratePDFOptions {
+  /** Cartas para la sección "Baraja Completa". Si no se pasa, se usa loadCards() (invitados). */
+  allCards?: Card[];
+}
+
+export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions): Promise<Blob> => {
   const pdfDoc = await PDFDocument.create();
 
-  // Refresh images for board cards from IndexedDB - get Blob directly and convert to base64
-  // This avoids using blob URLs that may have been revoked
-  const { getImageBlob } = await import('../utils/indexedDB');
+  // Una sola lectura/conversión por carta: caché base64 por card.id (IndexedDB ya tiene el blob tras prefetch)
+  const base64Cache = new Map<string, string>();
 
-  console.log(`Refreshing images for ${boards.length} boards...`);
+  const getBase64ForPDF = async (card: Card): Promise<string | null> => {
+    if (!card.id) return null;
+    const cached = base64Cache.get(card.id);
+    if (cached) return cached;
 
-  // Refresh images for all cards in boards - convert Blobs directly to base64
+    try {
+      const blob = await getImageBlob(card.id);
+      if (blob) {
+        const base64 = await blobToBase64(blob);
+        base64Cache.set(card.id, base64);
+        return base64;
+      }
+      if (card.imagePath) {
+        const downloaded = await CardRepository.downloadImage(card.imagePath);
+        try {
+          await cacheImageBlob(card.id, downloaded);
+        } catch (_) {}
+        const base64 = await blobToBase64(downloaded);
+        base64Cache.set(card.id, base64);
+        return base64;
+      }
+      if (card.image) {
+        if (card.image.startsWith('http://') || card.image.startsWith('https://') || card.image.startsWith('blob:')) {
+          const base64 = await urlToBase64(card.image);
+          base64Cache.set(card.id, base64);
+          return base64;
+        }
+        if (card.image.startsWith('data:')) {
+          base64Cache.set(card.id, card.image);
+          return card.image;
+        }
+      }
+    } catch (error) {
+      console.error(`PDF: error getting image for card ${card.id}:`, error);
+    }
+    return null;
+  };
+
   const refreshedBoards: Board[] = await Promise.all(
-    boards.map(async (board, boardIndex) => {
-      console.log(`Refreshing images for board ${boardIndex + 1} with ${board.cards.length} cards...`);
+    boards.map(async (board) => {
       const refreshedCards = await Promise.all(
-        board.cards.map(async (card, cardIndex) => {
+        board.cards.map(async (card) => {
           if (card.id) {
-            try {
-              console.log(`  Getting image blob for card ${card.id} (board ${boardIndex + 1}, card ${cardIndex + 1})...`);
-              // Get the Blob directly from IndexedDB and convert to base64
-              const imageBlob = await getImageBlob(card.id);
-              if (imageBlob) {
-                const base64Image = await blobToBase64(imageBlob);
-                console.log(`  ✓ Got image blob and converted to base64 for card ${card.id}`);
-                return {
-                  ...card,
-                  image: base64Image, // Use base64 directly instead of blob URL
-                };
-              } else {
-                console.warn(`  ⚠ No image blob found in IndexedDB for card ${card.id}`);
-              }
-            } catch (error) {
-              console.error(`  ❌ Error getting image blob for card ${card.id}:`, error);
-            }
-          } else {
-            console.warn(`  ⚠ Card at position ${cardIndex} in board ${boardIndex + 1} has no ID`);
-          }
-          // If refresh failed, return card as-is (will try to use original, but may fail)
-          if (!card.image) {
-            console.error(`  ❌ Card ${card.id || 'unknown'} has no image at all!`);
+            const base64Image = await getBase64ForPDF(card);
+            if (base64Image) return { ...card, image: base64Image };
           }
           return card;
         })
       );
-
-      console.log(`✓ Finished refreshing board ${boardIndex + 1}`);
-      return {
-        ...board,
-        cards: refreshedCards,
-      };
+      return { ...board, cards: refreshedCards };
     })
   );
 
-  console.log(`✓ Finished refreshing all boards`);
+  // Caché por card.id: cada imagen se decodifica/embebe una sola vez (evita 160+ decodificaciones cuando hay 10 tableros)
+  const embedCache = new Map<string, EmbedResult>();
 
-  // Add a page for each board
   for (let i = 0; i < refreshedBoards.length; i++) {
     const board = refreshedBoards[i];
     const page = pdfDoc.addPage([PAGE_WIDTH_PT, PAGE_HEIGHT_PT]);
 
-    await drawBoardOnPage(page, board, i + 1, pdfDoc);
+    await drawBoardOnPage(page, board, i + 1, pdfDoc, embedCache);
   }
 
   // Optionally add pages with all cards (full deck)
-  // Refresh images from IndexedDB to ensure they have the same aspect ratio as board cards
-  let allCards = await loadCards();
+  // Usar allCards pasadas (usuario logueado) o loadCards() (invitados)
+  let allCards: Card[] = options?.allCards ?? (await loadCards());
   if (allCards.length > 0) {
-    console.log(`Refreshing images for all cards (${allCards.length} cards) from IndexedDB...`);
-
-    // Refresh images for all cards - convert Blobs directly to base64
-    // This ensures they have the same aspect ratio (5:7.5) as the cards in boards
     allCards = await Promise.all(
       allCards.map(async (card) => {
         if (card.id) {
-          try {
-            // Get the Blob directly from IndexedDB and convert to base64
-            const imageBlob = await getImageBlob(card.id);
-            if (imageBlob) {
-              const base64Image = await blobToBase64(imageBlob);
-              console.log(`  ✓ Refreshed image for card ${card.id} (${card.title})`);
-              return {
-                ...card,
-                image: base64Image, // Use base64 directly instead of blob URL
-              };
-            } else {
-              console.warn(`  ⚠ No image blob found in IndexedDB for card ${card.id} (${card.title})`);
-            }
-          } catch (error) {
-            console.error(`  ❌ Error getting image blob for card ${card.id} (${card.title}):`, error);
-          }
+          const base64Image = await getBase64ForPDF(card);
+          if (base64Image) return { ...card, image: base64Image };
         }
-        return card; // Return original card if no ID or refresh failed
+        return card;
       })
     );
-
-    console.log(`✓ Finished refreshing images for all cards`);
   }
 
   if (allCards.length > 0) {
@@ -669,7 +722,8 @@ export const generatePDF = async (boards: Board[]): Promise<Blob> => {
           deckCardH,
           pdfDoc,
           true,
-          11 // titleSize (same as boards for consistency)
+          11, // titleSize (same as boards for consistency)
+          embedCache
         );
       }
 

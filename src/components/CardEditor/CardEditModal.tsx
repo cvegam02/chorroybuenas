@@ -51,6 +51,7 @@ export const CardEditModal = ({
                         ×
                     </button>
                 </div>
+                <div className="card-upload-modal__body">
                 <CardUpload
                     onCardAdd={handleCardUpdate}
                     existingTitles={existingTitles}
@@ -58,6 +59,7 @@ export const CardEditModal = ({
                     initialImage={initialImage}
                     submitLabel={t('cardUpload.actions.saveChanges')}
                 />
+                </div>
             </div>
         </div>
     );

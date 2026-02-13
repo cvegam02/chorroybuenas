@@ -1,0 +1,536 @@
+/* ============================================
+   BUY TOKENS PAGE - Congruente con BenefitsPage y tipografías de la app
+   ============================================ */
+
+.buy-tokens-page {
+  min-height: 100vh;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-main);
+  padding-bottom: 80px;
+  font-family: var(--font-body);
+}
+
+.buy-tokens-page__header {
+  background: var(--color-bg-secondary);
+  padding: 60px 24px 40px;
+  text-align: center;
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.buy-tokens-page__header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 20px,
+    rgba(194, 65, 12, 0.02) 20px,
+    rgba(194, 65, 12, 0.02) 40px
+  );
+  pointer-events: none;
+}
+
+.buy-tokens-page__container {
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.buy-tokens-page__title {
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 16px 0;
+  font-weight: 800;
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.buy-tokens-page__subtitle {
+  font-size: 1.25rem;
+  color: var(--color-text-muted);
+  max-width: 600px;
+  margin: 0 auto;
+  font-family: var(--font-body);
+}
+
+.buy-tokens-page__main {
+  padding: 60px 24px;
+}
+
+/* Sección: ¿Cómo funcionan los tokens? */
+.buy-tokens-page__info {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin-bottom: 32px;
+  box-shadow: var(--shadow-sm);
+}
+
+.buy-tokens-page__info-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin: 0 0 12px 0;
+  font-family: var(--font-display);
+}
+
+.buy-tokens-page__info-intro {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0 0 20px 0;
+}
+
+.buy-tokens-page__highlight {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-bg-subtle);
+  color: var(--color-primary-dark);
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+}
+
+.buy-tokens-page__highlight-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.buy-tokens-page__info-price {
+  font-size: 0.9375rem;
+  color: var(--color-text-main);
+  margin: 0 0 16px 0;
+}
+
+.buy-tokens-page__info-price-usd {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.buy-tokens-page__info-detail,
+.buy-tokens-page__info-where,
+.buy-tokens-page__info-example {
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0 0 10px 0;
+}
+
+.buy-tokens-page__info-example {
+  margin-bottom: 0;
+}
+
+/* Sección: ¿Por qué comprar tokens? */
+.buy-tokens-page__benefits {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin-bottom: 32px;
+  box-shadow: var(--shadow-sm);
+}
+
+.buy-tokens-page__benefits-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin: 0 0 16px 0;
+  font-family: var(--font-display);
+}
+
+.buy-tokens-page__benefits-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+  font-size: 0.9375rem;
+}
+
+.buy-tokens-page__benefits-list li {
+  margin-bottom: 10px;
+}
+
+.buy-tokens-page__benefits-list li:last-child {
+  margin-bottom: 0;
+}
+
+.buy-tokens-page__packs-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin: 0 0 20px 0;
+  font-family: var(--font-display);
+  text-align: center;
+}
+
+.buy-tokens-page__promo-code-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.buy-tokens-page__promo-label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+  margin: 0;
+}
+
+.buy-tokens-page__promo-input {
+  flex: 1;
+  min-width: 140px;
+  max-width: 200px;
+  padding: 10px 14px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-main);
+  font-family: var(--font-body);
+}
+
+.buy-tokens-page__promo-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+}
+
+.buy-tokens-page__promo-applied {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.buy-tokens-page__card-promo {
+  color: var(--color-primary-dark);
+}
+
+.buy-tokens-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.buy-tokens-page__card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  font-family: var(--font-body);
+}
+
+.buy-tokens-page__card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-md);
+}
+
+.buy-tokens-page__card-tokens {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.buy-tokens-page__card-you-pay-gift {
+  font-size: 0.875rem;
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.buy-tokens-page__card-bonus {
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+  margin-bottom: 20px;
+}
+
+.buy-tokens-page__card-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+}
+
+.buy-tokens-page__card-price-usd {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin-bottom: 20px;
+}
+
+.buy-tokens-page__card-buy {
+  width: 100%;
+  padding: 14px 24px;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  border: none;
+}
+
+.buy-tokens-page__card-buy:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.buy-tokens-page__card-buy:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Card cantidad personalizada (sin título) */
+.buy-tokens-page__card--custom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.buy-tokens-page__custom-label {
+  display: block;
+  width: 100%;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.buy-tokens-page__custom-input {
+  width: 100%;
+  max-width: 140px;
+  padding: 12px 16px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  text-align: center;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-main);
+  font-family: var(--font-body);
+  margin-bottom: 6px;
+}
+
+.buy-tokens-page__custom-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+}
+
+.buy-tokens-page__custom-input::-webkit-inner-spin-button,
+.buy-tokens-page__custom-input::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+.buy-tokens-page__custom-hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin: 0 0 8px 0;
+}
+
+.buy-tokens-page__custom-price-per-token {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin: 0 0 12px 0;
+}
+
+.buy-tokens-page__custom-price-per-token .buy-tokens-page__card-price-usd {
+  margin-left: 2px;
+}
+
+.buy-tokens-page__custom-bonus {
+  font-size: 0.8125rem;
+  color: var(--color-primary-dark);
+  margin: 0 0 12px 0;
+  font-weight: 600;
+}
+
+.buy-tokens-page__first-purchase-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-bg-subtle);
+  color: var(--color-primary-dark);
+  padding: 10px 16px;
+  border-radius: var(--radius-full);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin-bottom: 32px;
+  font-family: var(--font-body);
+}
+
+.buy-tokens-page__disclaimer {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  max-width: 560px;
+  margin: 0 auto 48px;
+  text-align: center;
+  line-height: 1.5;
+  font-family: var(--font-body);
+}
+
+.buy-tokens-page__login-cta {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 48px 24px;
+  text-align: center;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.buy-tokens-page__login-cta h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin: 0 0 16px 0;
+  font-family: var(--font-display);
+}
+
+.buy-tokens-page__login-cta p {
+  color: var(--color-text-muted);
+  margin-bottom: 24px;
+  font-family: var(--font-body);
+}
+
+.buy-tokens-page__login-cta--banner {
+  padding: 20px 24px;
+  margin-top: 20px;
+  display: inline-block;
+}
+
+.buy-tokens-page__login-cta--banner p {
+  margin-bottom: 16px;
+}
+
+.buy-tokens-page__login-btn {
+  padding: 14px 28px;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  border: none;
+  transition: filter 0.2s, transform 0.2s;
+}
+
+.buy-tokens-page__login-btn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.buy-tokens-page__loading {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+}
+
+/* Mensajes de estado de pago */
+.buy-tokens-page__payment-message {
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin: 24px auto;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: var(--font-body);
+  box-shadow: var(--shadow-md);
+}
+
+.buy-tokens-page__payment-message--success {
+  border-color: #10b981;
+  background: #ecfdf5;
+}
+
+.buy-tokens-page__payment-message--cancel {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.buy-tokens-page__payment-message--pending {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.buy-tokens-page__payment-message h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--color-text-main);
+}
+
+.buy-tokens-page__payment-message p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+.buy-tokens-page__payment-message button {
+  margin-left: auto;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: var(--font-display);
+  cursor: pointer;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-main);
+  border: 1px solid var(--color-border);
+  transition: background 0.2s;
+}
+
+.buy-tokens-page__payment-message button:hover {
+  background: var(--color-border);
+}
+
+@media (max-width: 768px) {
+  .buy-tokens-page__title {
+    font-size: 2rem;
+  }
+
+  .buy-tokens-page__info,
+  .buy-tokens-page__benefits {
+    padding: 20px 20px;
+  }
+
+  .buy-tokens-page__grid {
+    grid-template-columns: 1fr;
+  }
+}

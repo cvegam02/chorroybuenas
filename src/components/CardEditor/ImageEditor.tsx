@@ -29,57 +29,84 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
   const pinchStartRef = useRef<{ distance: number; center: { x: number; y: number } } | null>(null);
   const initialZoomRef = useRef<number>(1);
 
+  const blobUrlRef = useRef<string | null>(null);
+
   useEffect(() => {
     const img = new Image();
     let resizeHandler: (() => void) | null = null;
 
-    img.onload = () => {
-      imageRef.current = img;
-      // Calculate initial position to center the image
-      const updateSize = () => {
-        if (containerRef.current) {
-          const containerWidth = containerRef.current.clientWidth;
-          const containerHeight = containerRef.current.clientHeight;
-          if (containerWidth > 0 && containerHeight > 0) {
-            setContainerSize({ width: containerWidth, height: containerHeight });
+    const initImage = (src: string) => {
+      img.onload = () => {
+        imageRef.current = img;
+        // Calculate initial position to center the image
+        const updateSize = () => {
+          if (containerRef.current) {
+            const containerWidth = containerRef.current.clientWidth;
+            const containerHeight = containerRef.current.clientHeight;
+            if (containerWidth > 0 && containerHeight > 0) {
+              setContainerSize({ width: containerWidth, height: containerHeight });
 
-            const imgAspectRatio = img.width / img.height;
-            const containerAspectRatio = containerWidth / containerHeight;
+              const imgAspectRatio = img.width / img.height;
+              const containerAspectRatio = containerWidth / containerHeight;
 
-            let initialZoom = 1;
-            if (imgAspectRatio > containerAspectRatio) {
-              // Image is wider, fit to height
-              initialZoom = containerHeight / img.height;
-            } else {
-              // Image is taller, fit to width
-              initialZoom = containerWidth / img.width;
+              let initialZoom = 1;
+              if (imgAspectRatio > containerAspectRatio) {
+                // Image is wider, fit to height
+                initialZoom = containerHeight / img.height;
+              } else {
+                // Image is taller, fit to width
+                initialZoom = containerWidth / img.width;
+              }
+
+              // Start with the full image visible (contain)
+              // Ensure initial zoom is within allowed bounds
+              const boundedZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, initialZoom));
+              setZoom(boundedZoom);
+              setPosition({ x: 0, y: 0 });
             }
-
-            // Start with the full image visible (contain)
-            // Ensure initial zoom is within allowed bounds
-            const boundedZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, initialZoom));
-            setZoom(boundedZoom);
-            setPosition({ x: 0, y: 0 });
           }
-        }
+        };
+
+        // Initial update
+        setTimeout(updateSize, 0);
+
+        // Handle window resize
+        resizeHandler = () => {
+          updateSize();
+          setTimeout(() => drawImage(), 100);
+        };
+
+        window.addEventListener('resize', resizeHandler);
       };
-
-      // Initial update
-      setTimeout(updateSize, 0);
-
-      // Handle window resize
-      resizeHandler = () => {
-        updateSize();
-        setTimeout(() => drawImage(), 100);
-      };
-
-      window.addEventListener('resize', resizeHandler);
+      img.src = src;
     };
-    img.src = imageSrc;
+
+    // For remote URLs (e.g. Supabase Storage): fetch as blob to avoid canvas tainting
+    const isRemoteUrl = imageSrc.startsWith('http://') || imageSrc.startsWith('https://');
+    if (isRemoteUrl) {
+      fetch(imageSrc, { mode: 'cors', credentials: 'omit' })
+        .then((res) => res.blob())
+        .then((blob) => {
+          if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+          blobUrlRef.current = URL.createObjectURL(blob);
+          initImage(blobUrlRef.current);
+        })
+        .catch(() => {
+          // Fallback: try with crossOrigin if fetch fails (e.g. CORS)
+          img.crossOrigin = 'anonymous';
+          initImage(imageSrc);
+        });
+    } else {
+      initImage(imageSrc);
+    }
 
     return () => {
       if (resizeHandler) {
         window.removeEventListener('resize', resizeHandler);
+      }
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
       }
     };
   }, [imageSrc]);
@@ -407,69 +434,74 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
 
   return (
     <div className="image-editor">
-      <div className="image-editor__header">
-        <h3>
-          <FaCut className="image-editor__header-icon" />
-          {t('imageEditor.title')}
-        </h3>
-        <p>{t('imageEditor.description')}</p>
-      </div>
-
-      <div className="image-editor__viewport-container">
-        <div
-          ref={containerRef}
-          className="image-editor__viewport"
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onWheel={handleWheel}
-          style={{ cursor: isDragging ? 'grabbing' : 'grab', touchAction: 'none' }}
-        >
-          <canvas ref={canvasRef} className="image-editor__canvas" />
+      <div className="image-editor__layout">
+        <div className="image-editor__viewport-wrap">
+          <div className="image-editor__viewport-container">
+            <div
+              ref={containerRef}
+              className="image-editor__viewport"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onWheel={handleWheel}
+              style={{ cursor: isDragging ? 'grabbing' : 'grab', touchAction: 'none' }}
+            >
+              <canvas ref={canvasRef} className="image-editor__canvas" />
+            </div>
+          </div>
         </div>
-      </div>
+        <div className="image-editor__controls-side">
+          <div className="image-editor__header">
+            <h3>
+              <FaCut className="image-editor__header-icon" />
+              {t('imageEditor.title')}
+            </h3>
+            <p>{t('imageEditor.description')}</p>
+          </div>
 
-      <div className="image-editor__controls">
-        <div className="image-editor__zoom-controls">
-          <button
-            type="button"
-            onClick={handleZoomOut}
-            disabled={zoom <= MIN_ZOOM}
-            className="image-editor__zoom-button"
-            aria-label={t('imageEditor.zoomOut')}
-          >
-            −
-          </button>
-          <span className="image-editor__zoom-value">
-            {Math.round(zoom * 100)}%
-          </span>
-          <button
-            type="button"
-            onClick={handleZoomIn}
-            disabled={zoom >= MAX_ZOOM}
-            className="image-editor__zoom-button"
-            aria-label={t('imageEditor.zoomIn')}
-          >
-            +
-          </button>
-        </div>
+          <div className="image-editor__controls">
+            <div className="image-editor__zoom-controls">
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                disabled={zoom <= MIN_ZOOM}
+                className="image-editor__zoom-button"
+                aria-label={t('imageEditor.zoomOut')}
+              >
+                −
+              </button>
+              <span className="image-editor__zoom-value">
+                {Math.round(zoom * 100)}%
+              </span>
+              <button
+                type="button"
+                onClick={handleZoomIn}
+                disabled={zoom >= MAX_ZOOM}
+                className="image-editor__zoom-button"
+                aria-label={t('imageEditor.zoomIn')}
+              >
+                +
+              </button>
+            </div>
 
-        <div className="image-editor__actions">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="image-editor__cancel-button"
-          >
-            {t('imageEditor.actions.cancel')}
-          </button>
-          <button
-            type="button"
-            onClick={handleCrop}
-            className="image-editor__crop-button"
-          >
-            {t('imageEditor.actions.crop')}
-          </button>
+            <div className="image-editor__actions">
+              <button
+                type="button"
+                onClick={onCancel}
+                className="image-editor__cancel-button"
+              >
+                {t('imageEditor.actions.backToEdit')}
+              </button>
+              <button
+                type="button"
+                onClick={handleCrop}
+                className="image-editor__crop-button"
+              >
+                {t('imageEditor.actions.crop')}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

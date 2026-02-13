@@ -1,0 +1,2 @@
+[functions.create-payment-preference]
+verify_jwt = false

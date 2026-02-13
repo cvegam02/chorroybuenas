@@ -4,6 +4,9 @@ import { useTranslation } from 'react-i18next';
 import './BoardCountSelector.css';
 import { loadCards } from '../../utils/storage';
 import { GridSize } from '../../types';
+import { useAuth } from '../../contexts/AuthContext';
+import { useSetContext } from '../../contexts/SetContext';
+import { CardRepository } from '../../repositories/CardRepository';
 
 interface BoardCountSelectorProps {
   onGenerate: (count: number, gridSize: GridSize) => void;
@@ -68,20 +71,34 @@ const calculateSuggestedBoards = (availableCards: number, gridSize: GridSize): n
   return Math.max(1, Math.min(suggested, maxUniqueBoards));
 };
 
+// Minimum cards required: Kids (3x3) = 12, Classic (4x4) = 16
+const minCardsForMode = (gridSize: GridSize) => (gridSize === 9 ? 12 : 16);
+
 export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCountSelectorProps) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { currentSetId } = useSetContext();
   const [boardCount, setBoardCount] = useState<number>(8);
   const [inputValue, setInputValue] = useState<string>('8');
   const [error, setError] = useState<string>('');
   const [cardCount, setCardCount] = useState<number>(0);
   const [isLoadingCards, setIsLoadingCards] = useState(true);
   const [suggestedBoards, setSuggestedBoards] = useState<number>(8);
+  const minCards = minCardsForMode(gridSize);
 
   useEffect(() => {
-    // Load card count on mount
+    // Load card count using the SAME source as useBoard.generateBoards
     const loadCardCount = async () => {
+      setIsLoadingCards(true);
       try {
-        const cards = await loadCards();
+        let cards;
+        if (user && currentSetId) {
+          cards = await CardRepository.getCards(user.id, currentSetId);
+        } else if (user) {
+          cards = []; // Same as useBoard: logged in but no set selected = no cards
+        } else {
+          cards = await loadCards();
+        }
         const loadedCardCount = cards.length;
         setCardCount(loadedCardCount);
 
@@ -108,7 +125,7 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
       }
     };
     loadCardCount();
-  }, [gridSize]); // Re-run when gridSize changes to update suggestions and defaults
+  }, [gridSize, user?.id, currentSetId]); // Re-run when gridSize or card source changes
 
   const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.trim();
@@ -159,6 +176,11 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
       return;
     }
 
+    if (cardCount < minCards) {
+      setError(t('boardGenerator.insufficientCards.title'));
+      return;
+    }
+
     // Check if requested count exceeds maximum unique boards possible
     if (cardCount >= gridSize) {
       const maxUniqueBoards = calculateMaxUniqueBoards(cardCount, gridSize);
@@ -168,6 +190,7 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
       }
     }
 
+    setError('');
     onGenerate(boardCount, gridSize);
   };
 
@@ -182,7 +205,7 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
         </p>
       </div>
 
-      {!isLoadingCards && cardCount >= gridSize && (
+      {!isLoadingCards && cardCount >= minCards && (
         <div className="board-count-selector__suggestion">
           <div className="board-count-selector__suggestion-icon">
             <FaLightbulb />
@@ -203,7 +226,7 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
         </div>
       )}
 
-      {!isLoadingCards && cardCount < gridSize && (
+      {!isLoadingCards && cardCount < minCards && (
         <div className="board-count-selector__error-message">
           <div className="board-count-selector__error-icon">
             <FaExclamationTriangle />
@@ -212,7 +235,7 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
             <div className="board-count-selector__error-title">{t('boardGenerator.insufficientCards.title')}</div>
             <div className="board-count-selector__error-text">
               {t('boardGenerator.insufficientCards.text', {
-                needed: gridSize,
+                needed: minCards,
                 mode: gridSize === 16 ? t('boardGenerator.modes.classic') : t('boardGenerator.modes.kids'),
                 count: cardCount
               })}
@@ -226,7 +249,7 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
           <label htmlFor="board-count" className="board-count-selector__label">
             {t('boardGenerator.form.label')}
           </label>
-          {!isLoadingCards && cardCount >= gridSize && (
+          {!isLoadingCards && cardCount >= minCards && (
             <div className="board-count-selector__hint">
               {t('boardGenerator.form.hint', { count: suggestedBoards })}
             </div>
@@ -240,7 +263,7 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
             onChange={handleCountChange}
             onBlur={handleInputBlur}
             className="board-count-selector__input"
-            placeholder={!isLoadingCards && cardCount >= gridSize ? suggestedBoards.toString() : t('boardGenerator.form.placeholder')}
+            placeholder={!isLoadingCards && cardCount >= minCards ? suggestedBoards.toString() : t('boardGenerator.form.placeholder')}
           />
           {error && <div className="board-count-selector__error">{error}</div>}
         </div>
@@ -255,8 +278,8 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
           </button>
           <button
             type="submit"
-            disabled={boardCount < 1 || cardCount < gridSize}
-            className={`board-count-selector__button ${boardCount >= 1 && cardCount >= gridSize ? 'board-count-selector__button--enabled' : ''}`}
+            disabled={boardCount < 1 || cardCount < minCards}
+            className={`board-count-selector__button ${boardCount >= 1 && cardCount >= minCards ? 'board-count-selector__button--enabled' : ''}`}
           >
             <span>{t('boardGenerator.actions.generate')}</span>
             <FaArrowRight />

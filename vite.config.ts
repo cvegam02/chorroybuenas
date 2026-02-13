@@ -26,6 +26,23 @@ export default defineConfig({
   server: {
     host: true, // Permite conexiones desde la red local
     port: 5173, // Puerto por defecto de Vite
+    allowedHosts: [
+      '.ngrok.io',
+      '.ngrok-free.app',
+      '.ngrok-free.dev',
+      'localhost',
+      '127.0.0.1',
+    ],
+    proxy: {
+      '/api/replicate': {
+        target: 'https://api.replicate.com/v1',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/replicate/, ''),
+        headers: {
+          'Origin': 'https://api.replicate.com'
+        }
+      }
+    }
   },
   build: {
     // Optimización para SEO y rendimiento

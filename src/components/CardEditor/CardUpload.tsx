@@ -1,78 +1,9 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { convertFileToBase64, validateImageFile, compressImage } from '../../utils/imageUtils';
+import { convertFileToBase64, validateImageFile, compressImage, adjustImageToCardAspectRatio } from '../../utils/imageUtils';
 import { ImageEditor } from './ImageEditor';
 import './CardUpload.css';
 
-/**
- * Adjusts a base64 image to match card aspect ratio (5:7.5) using "cover" mode
- * This ensures images fill the card area exactly as shown in preview
- */
-const adjustImageToCardAspectRatio = (
-  imageSrc: string,
-  targetWidth: number = 800,
-  targetHeight: number = 1200,
-  quality: number = 0.85
-): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-    if (!ctx) {
-      reject(new Error('Could not get canvas context'));
-      return;
-    }
-
-    img.onload = () => {
-      // Card aspect ratio is 5:7.5 = 2/3 = 0.666...
-      const cardAspectRatio = targetWidth / targetHeight;
-      const imgAspectRatio = img.width / img.height;
-
-      let sourceX = 0;
-      let sourceY = 0;
-      let sourceWidth = img.width;
-      let sourceHeight = img.height;
-
-      // Use "cover" mode: crop the image to match card aspect ratio
-      // This matches how object-fit: cover works in CSS
-      if (imgAspectRatio > cardAspectRatio) {
-        // Image is wider than card - crop sides (center crop)
-        sourceHeight = img.height;
-        sourceWidth = img.height * cardAspectRatio;
-        sourceX = (img.width - sourceWidth) / 2;
-      } else {
-        // Image is taller than card - crop top/bottom (center crop)
-        sourceWidth = img.width;
-        sourceHeight = img.width / cardAspectRatio;
-        sourceY = (img.height - sourceHeight) / 2;
-      }
-
-      // Set canvas to target dimensions (high resolution)
-      canvas.width = targetWidth;
-      canvas.height = targetHeight;
-
-      // Fill with white background first
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, targetWidth, targetHeight);
-
-      // Draw the cropped portion scaled to fill the canvas
-      ctx.drawImage(
-        img,
-        sourceX, sourceY, sourceWidth, sourceHeight,
-        0, 0, targetWidth, targetHeight
-      );
-
-      resolve(canvas.toDataURL('image/jpeg', quality));
-    };
-
-    img.onerror = () => {
-      reject(new Error('Error loading image'));
-    };
-
-    img.src = imageSrc;
-  });
-};
 
 interface CardUploadProps {
   onCardAdd: (image: string, title: string) => Promise<boolean>;
@@ -148,14 +79,11 @@ export const CardUpload = ({
       let processedImage = imagePreview;
       if (!wasEdited) {
         // Image was not edited, so it needs to be adjusted to match preview (object-fit: cover)
-        console.log('Adjusting image to card aspect ratio (5:7.5)...');
         processedImage = await adjustImageToCardAspectRatio(imagePreview);
       }
 
       // Compress image before saving to reduce storage size
-      console.log('Compressing image before save...');
       const compressedImage = await compressImage(processedImage);
-      console.log(`Image compressed: ${(processedImage.length / 1024).toFixed(2)} KB -> ${(compressedImage.length / 1024).toFixed(2)} KB`);
 
       const wasAdded = await onCardAdd(compressedImage, title.trim());
       if (!wasAdded) {
@@ -261,87 +189,89 @@ export const CardUpload = ({
         className="card-upload__input"
         style={{ display: 'none' }}
       />
-      {imagePreview ? (
-        <div className="card-upload__preview-container">
-          <img src={imagePreview} alt="Preview" className="card-upload__preview" />
-          <div className="card-upload__edit-overlay">
-            <span role="img" aria-label="edit">✏️</span>
-            <p>{t('cardUpload.status.clickToAdjust')}</p>
+      <div className="card-upload__layout">
+        <div className="card-upload__media">
+          {imagePreview ? (
+            <div className="card-upload__preview-container">
+              <img src={imagePreview} alt="Preview" className="card-upload__preview" />
+              <div className="card-upload__edit-overlay">
+                <span role="img" aria-label="edit">✏️</span>
+                <p>{t('cardUpload.status.clickToAdjust')}</p>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="card-upload__dropzone"
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <div className="card-upload__placeholder">
+                <span className="card-upload__placeholder-icon">📷</span>
+                <p className="card-upload__placeholder-main">{t('cardUpload.placeholder.main')}</p>
+                <p className="card-upload__placeholder-sub">{t('cardUpload.placeholder.sub')}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="card-upload__form">
+          <div className="card-upload__title-group">
+            <label className="card-upload__label">
+              {t('cardUpload.label')}
+            </label>
+            <input
+              ref={titleInputRef}
+              type="text"
+              placeholder={t('cardUpload.inputPlaceholder')}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={handleTitleKeyDown}
+              className="card-upload__title-input"
+              maxLength={100}
+              disabled={!imagePreview}
+            />
+            {isDuplicateTitle && (
+              <p className="card-upload__error-text">
+                {t('cardUpload.errorDuplicate')}
+              </p>
+            )}
+            <p className="card-upload__help-text">
+              {t('cardUpload.helpText')}
+            </p>
+          </div>
+
+          <div className="card-upload__actions">
+            {imagePreview && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="card-upload__change-button"
+                disabled={isUploading}
+              >
+                {t('cardUpload.actions.changePhoto')}
+              </button>
+            )}
+            {imagePreview && (
+              <button
+                type="button"
+                onClick={() => setShowEditor(true)}
+                className="card-upload__edit-button"
+                disabled={isUploading}
+              >
+                <span role="img" aria-label="edit">✏️</span>
+                <span>{t('cardUpload.actions.adjustImage')}</span>
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={!title.trim() || !imagePreview || isUploading}
+              className="card-upload__submit"
+            >
+              {isUploading ? t('cardUpload.status.processing') : (submitLabel || t('cardUpload.actions.addCard'))}
+            </button>
           </div>
         </div>
-      ) : (
-        <div
-          className="card-upload__dropzone"
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <div className="card-upload__placeholder">
-            <span>📷</span>
-            <p className="card-upload__placeholder-main">{t('cardUpload.placeholder.main')}</p>
-            <p className="card-upload__placeholder-sub">{t('cardUpload.placeholder.sub')}</p>
-          </div>
-        </div>
-      )}
-
-      <div className="card-upload__title-group">
-        <label className="card-upload__label">
-          {t('cardUpload.label')}
-        </label>
-        <input
-          ref={titleInputRef}
-          type="text"
-          placeholder={t('cardUpload.inputPlaceholder')}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          onKeyDown={handleTitleKeyDown}
-          className="card-upload__title-input"
-          maxLength={100}
-          disabled={!imagePreview}
-        />
-        {isDuplicateTitle && (
-          <p className="card-upload__error-text">
-            {t('cardUpload.errorDuplicate')}
-          </p>
-        )}
-        <p className="card-upload__help-text">
-          {t('cardUpload.helpText')}
-        </p>
-      </div>
-
-      <div className="card-upload__actions">
-        {imagePreview && (
-          <button
-            type="button"
-            onClick={() => {
-              fileInputRef.current?.click();
-            }}
-            className="card-upload__change-button"
-            disabled={isUploading}
-          >
-            {t('cardUpload.actions.changePhoto')}
-          </button>
-        )}
-
-        {imagePreview && (
-          <button
-            type="button"
-            onClick={() => setShowEditor(true)}
-            className="card-upload__edit-button"
-            disabled={isUploading}
-          >
-            <span role="img" aria-label="edit">✏️</span>
-            <span>{t('cardUpload.actions.adjustImage')}</span>
-          </button>
-        )}
-
-        <button
-          type="submit"
-          disabled={!title.trim() || !imagePreview || isUploading}
-          className="card-upload__submit"
-        >
-          {isUploading ? t('cardUpload.status.processing') : (submitLabel || t('cardUpload.actions.addCard'))}
-        </button>
       </div>
     </form>
   );
