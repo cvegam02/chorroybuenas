@@ -291,6 +291,15 @@ export const Navbar = () => {
             </li>
             <li>
               <Link
+                to="/beneficios"
+                className={`navbar__link ${isActive('/beneficios') ? 'navbar__link--active' : ''}`}
+                onClick={closeMenu}
+              >
+                {t('navbar.benefits')}
+              </Link>
+            </li>
+            <li>
+              <Link
                 to="/como-se-juega"
                 className={`navbar__link ${isActive('/como-se-juega') ? 'navbar__link--active' : ''}`}
                 onClick={closeMenu}

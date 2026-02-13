@@ -248,6 +248,74 @@
 }
 
 /* ============================================
+   BANNER - Beneficios de registrarse
+   ============================================ */
+
+.landing-page__banner {
+  display: block;
+  margin-bottom: 60px;
+  padding: 32px 40px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  border-radius: 20px;
+  color: white;
+  text-decoration: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 8px 24px rgba(194, 65, 12, 0.25);
+}
+
+.landing-page__banner:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(194, 65, 12, 0.35);
+}
+
+.landing-page__banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.landing-page__banner-text {
+  flex: 1;
+  min-width: 200px;
+}
+
+.landing-page__banner-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  font-family: var(--font-body);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.landing-page__banner-subtitle {
+  font-size: 1rem;
+  margin: 0;
+  opacity: 0.95;
+  line-height: 1.5;
+  font-family: var(--font-body);
+}
+
+.landing-page__banner-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  transition: background 0.3s ease;
+}
+
+.landing-page__banner:hover .landing-page__banner-cta {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* ============================================
    STEPS SECTION
    ============================================ */
 
