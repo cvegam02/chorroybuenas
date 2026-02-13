@@ -36,7 +36,7 @@ export const initDB = (): Promise<IDBDatabase> => {
 
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
-      
+
       // Crear object store si no existe
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         const objectStore = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
@@ -54,17 +54,17 @@ export const base64ToBlob = (base64: string): Blob => {
   try {
     // Validar y limpiar el base64
     const { data: base64Data, mime } = validateAndCleanBase64(base64);
-    
+
     // Decodificar base64 a bytes
     try {
       const byteString = atob(base64Data);
       const ab = new ArrayBuffer(byteString.length);
       const ia = new Uint8Array(ab);
-      
+
       for (let i = 0; i < byteString.length; i++) {
         ia[i] = byteString.charCodeAt(i);
       }
-      
+
       return new Blob([ab], { type: mime });
     } catch (atobError) {
       // Si atob falla, puede ser porque el base64 tiene caracteres inválidos
@@ -108,17 +108,17 @@ const validateAndCleanBase64 = (base64: string): { data: string; mime: string } 
   if (!base64 || typeof base64 !== 'string') {
     throw new Error('La cadena base64 no es válida: no es un string');
   }
-  
+
   let base64Data: string;
   let mime: string = 'image/jpeg';
-  
+
   // Verificar si tiene el prefijo data:image/...
   if (base64.startsWith('data:')) {
     const parts = base64.split(',');
     if (parts.length < 2) {
       throw new Error('Formato base64 inválido: falta la parte de datos después de la coma');
     }
-    
+
     // Extraer el tipo MIME del prefijo
     const mimeMatch = parts[0].match(/:(.*?);/);
     if (mimeMatch && mimeMatch[1]) {
@@ -129,14 +129,14 @@ const validateAndCleanBase64 = (base64: string): { data: string; mime: string } 
     // Si no tiene prefijo, asumir que es solo el base64
     base64Data = base64;
   }
-  
+
   // Limpiar espacios, saltos de línea y otros caracteres whitespace
   base64Data = base64Data.replace(/\s/g, '');
-  
+
   if (base64Data.length === 0) {
     throw new Error('La cadena base64 está vacía después de limpiar espacios');
   }
-  
+
   // Validar formato base64
   const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
   if (!base64Regex.test(base64Data)) {
@@ -148,14 +148,14 @@ const validateAndCleanBase64 = (base64: string): { data: string; mime: string } 
       `Longitud: ${base64Data.length}, Primeros 100 caracteres: ${base64Data.substring(0, 100)}`
     );
   }
-  
+
   return { data: base64Data, mime };
 };
 
 /**
  * Convierte blob URL a Blob
  */
-const blobURLToBlob = async (blobURL: string): Promise<Blob> => {
+export const blobURLToBlob = async (blobURL: string): Promise<Blob> => {
   try {
     const response = await fetch(blobURL);
     if (!response.ok) {
@@ -175,9 +175,9 @@ const blobURLToBlob = async (blobURL: string): Promise<Blob> => {
 export const saveImage = async (cardId: string, imageData: string | Blob): Promise<string> => {
   try {
     const db = await initDB();
-    
+
     let blob: Blob;
-    
+
     if (typeof imageData === 'string') {
       // Verificar si es un blob URL
       if (imageData.startsWith('blob:')) {
@@ -194,23 +194,20 @@ export const saveImage = async (cardId: string, imageData: string | Blob): Promi
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([STORE_NAME], 'readwrite');
       const store = transaction.objectStore(STORE_NAME);
-      
+      const ts = Date.now();
       const request = store.put({
         id: cardId,
         image: blob,
-        timestamp: Date.now(),
+        timestamp: ts,
       });
 
       request.onsuccess = () => {
-        // Revoke old blob URL if exists
-        const oldURL = blobURLsMap.get(cardId);
-        if (oldURL) {
-          URL.revokeObjectURL(oldURL);
+        const oldEntry = blobURLsMap.get(cardId);
+        if (oldEntry) {
+          URL.revokeObjectURL(oldEntry.url);
         }
-        
-        // Retornar una URL de objeto para usar en los componentes
         const objectURL = URL.createObjectURL(blob);
-        blobURLsMap.set(cardId, objectURL);
+        blobURLsMap.set(cardId, { url: objectURL, timestamp: ts });
         resolve(objectURL);
       };
 
@@ -224,8 +221,42 @@ export const saveImage = async (cardId: string, imageData: string | Blob): Promi
   }
 };
 
-// Map to store blob URLs and their corresponding card IDs for cleanup
-const blobURLsMap = new Map<string, string>(); // cardId -> blobURL
+// Map: cardId -> { url, timestamp } so we only reuse URL when IDB blob hasn't changed
+const blobURLsMap = new Map<string, { url: string; timestamp: number }>();
+
+/**
+ * Guarda solo el blob en IndexedDB sin revocar ni crear blob URLs.
+ * Si ya existe un registro para esta carta, no se sobrescribe (evita cambiar el timestamp
+ * y que getImage revoque las URLs que la UI sigue usando al re-ejecutarse el prefetch).
+ */
+export const cacheImageBlob = async (cardId: string, blob: Blob): Promise<void> => {
+  try {
+    const db = await initDB();
+    const exists = await new Promise<boolean>((resolve, reject) => {
+      const tx = db.transaction([STORE_NAME], 'readonly');
+      const req = tx.objectStore(STORE_NAME).get(cardId);
+      req.onsuccess = () => resolve(!!req.result);
+      req.onerror = () => reject(new Error('Error al leer IndexedDB'));
+    });
+    if (exists) return;
+
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const ts = Date.now();
+      const request = store.put({
+        id: cardId,
+        image: blob,
+        timestamp: ts,
+      });
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(new Error('Error al guardar imagen en IndexedDB'));
+    });
+  } catch (error) {
+    console.error('Error caching image blob:', error);
+    throw error;
+  }
+};
 
 /**
  * Obtiene una imagen de IndexedDB como Blob (for PDF generation, avoids blob URL revocation issues)
@@ -273,18 +304,18 @@ export const getImage = async (cardId: string): Promise<string | null> => {
       request.onsuccess = () => {
         const result = request.result;
         if (result && result.image instanceof Blob) {
-          // Check if we already have a valid blob URL for this card
-          const existingURL = blobURLsMap.get(cardId);
-          if (existingURL) {
-            // Reuse existing blob URL instead of creating a new one
-            // This avoids revoking URLs that might still be in use
-            resolve(existingURL);
+          const storedTimestamp = result.timestamp as number | undefined;
+          const existing = blobURLsMap.get(cardId);
+          if (existing && storedTimestamp != null && existing.timestamp === storedTimestamp) {
+            resolve(existing.url);
             return;
           }
-          
-          // Create new blob URL and store it (only if we don't have one already)
+          if (existing) {
+            URL.revokeObjectURL(existing.url);
+            blobURLsMap.delete(cardId);
+          }
           const objectURL = URL.createObjectURL(result.image);
-          blobURLsMap.set(cardId, objectURL);
+          blobURLsMap.set(cardId, { url: objectURL, timestamp: storedTimestamp ?? Date.now() });
           resolve(objectURL);
         } else {
           resolve(null);
@@ -306,13 +337,12 @@ export const getImage = async (cardId: string): Promise<string | null> => {
  */
 export const deleteImage = async (cardId: string): Promise<void> => {
   try {
-    // Revoke blob URL before deleting
-    const blobURL = blobURLsMap.get(cardId);
-    if (blobURL) {
-      URL.revokeObjectURL(blobURL);
+    const entry = blobURLsMap.get(cardId);
+    if (entry) {
+      URL.revokeObjectURL(entry.url);
       blobURLsMap.delete(cardId);
     }
-    
+
     const db = await initDB();
 
     return new Promise((resolve, reject) => {
@@ -339,12 +369,11 @@ export const deleteImage = async (cardId: string): Promise<void> => {
  */
 export const clearAllImages = async (): Promise<void> => {
   try {
-    // Revoke all blob URLs
-    blobURLsMap.forEach((blobURL) => {
-      URL.revokeObjectURL(blobURL);
+    blobURLsMap.forEach((entry) => {
+      URL.revokeObjectURL(entry.url);
     });
     blobURLsMap.clear();
-    
+
     const db = await initDB();
 
     return new Promise((resolve, reject) => {

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirma tu cuenta - Loteria Personalizada</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f5f5f5;">
+    <tr>
+      <td style="padding: 40px 20px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 520px; margin: 0 auto; background-color: #fffbf7; border-radius: 16px; box-shadow: 0 4px 24px rgba(234, 88, 12, 0.12); overflow: hidden;">
+          <!-- Header con gradiente -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); padding: 32px 40px; text-align: center;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">
+                ¡Bienvenido a Loteria Personalizada!
+              </h1>
+              <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">
+                Crea tu lotería única en minutos
+              </p>
+            </td>
+          </tr>
+          <!-- Contenido -->
+          <tr>
+            <td style="padding: 40px;">
+              <p style="margin: 0 0 20px 0; color: #431407; font-size: 16px; line-height: 1.6;">
+                Hola{{ if .Data.first_name }} {{ .Data.first_name }}{{ end }},
+              </p>
+              <p style="margin: 0 0 24px 0; color: #431407; font-size: 16px; line-height: 1.6;">
+                Gracias por registrarte. Para completar tu registro y comenzar a crear tus loterías personalizadas, solo necesitas confirmar tu correo electrónico.
+              </p>
+              <p style="margin: 0 0 28px 0; color: #431407; font-size: 16px; line-height: 1.6;">
+                Haz clic en el botón de abajo para validar tu cuenta:
+              </p>
+              <!-- Botón CTA -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+                <tr>
+                  <td style="border-radius: 12px; background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);">
+                    <a href="{{ .ConfirmationURL }}" target="_blank" style="display: inline-block; padding: 16px 40px; font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 12px;">
+                      Confirmar mi correo
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <!-- Link alternativo -->
+              <p style="margin: 28px 0 0 0; color: #78350f; font-size: 13px; line-height: 1.6;">
+                Si el botón no funciona, copia y pega este enlace en tu navegador:
+              </p>
+              <p style="margin: 8px 0 0 0; word-break: break-all;">
+                <a href="{{ .ConfirmationURL }}" style="color: #ea580c; font-size: 13px; text-decoration: underline;">{{ .ConfirmationURL }}</a>
+              </p>
+              <p style="margin: 32px 0 0 0; color: #78350f; font-size: 13px; line-height: 1.6;">
+                Este enlace expira en 24 horas. Si no creaste esta cuenta, puedes ignorar este correo de forma segura.
+              </p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #fff7ed; padding: 24px 40px; text-align: center; border-top: 1px solid #ffedd5;">
+              <p style="margin: 0; color: #78350f; font-size: 12px;">
+                Loteria Personalizada · Crea tus propios juegos de lotería
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

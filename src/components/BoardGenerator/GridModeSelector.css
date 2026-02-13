@@ -4,7 +4,7 @@
 }
 
 .grid-mode-selector__label {
-    font-size: 1rem;
+    font-size: 1.0625rem;
     font-weight: 600;
     color: var(--color-text-secondary);
     margin-bottom: 0.75rem;
@@ -87,6 +87,10 @@
 }
 
 @media (max-width: 480px) {
+    .grid-mode-selector__label {
+        font-size: 1.125rem;
+    }
+
     .grid-mode-selector__options {
         justify-content: space-between;
     }
@@ -95,5 +99,20 @@
         width: calc(50% - 0.5rem);
         height: auto;
         aspect-ratio: 1;
+        padding: 1rem 0.75rem;
+    }
+
+    .grid-mode-option__title {
+        font-size: 1.125rem;
+    }
+
+    .grid-mode-option__desc {
+        font-size: 1rem;
+    }
+
+    .grid-mode-option__icon {
+        width: 2.25rem;
+        height: 2.25rem;
+        font-size: 1.25rem;
     }
 }

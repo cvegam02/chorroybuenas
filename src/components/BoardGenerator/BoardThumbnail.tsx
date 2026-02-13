@@ -24,22 +24,18 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
     let isMounted = true;
 
     const refreshImages = async () => {
-      console.log(`[BoardThumbnail] Refreshing images for board ${board.id} (${board.cards.length} cards)...`);
-
       const refreshedCards = await Promise.all(
         board.cards.map(async (card) => {
+          const hasRemoteImage = card.image && (card.image.startsWith('http') || card.image.startsWith('blob:'));
+          if (hasRemoteImage) {
+            return { ...card, freshImageUrl: card.image };
+          }
           if (!card.id) {
-            console.warn(`[BoardThumbnail] Card has no ID:`, card.title);
             return { ...card, freshImageUrl: null };
           }
 
           try {
             const freshImageURL = await getImage(card.id);
-            if (freshImageURL) {
-              console.log(`[BoardThumbnail] ✓ Got image URL for card ${card.id} (${card.title})`);
-            } else {
-              console.warn(`[BoardThumbnail] ⚠ No image found in IndexedDB for card ${card.id} (${card.title})`);
-            }
             return { ...card, freshImageUrl: freshImageURL || null };
           } catch (error) {
             console.error(`[BoardThumbnail] ❌ Error getting image for card ${card.id} (${card.title}):`, error);
@@ -50,8 +46,6 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
 
       // Only update state if component is still mounted
       if (isMounted) {
-        const loadedCount = refreshedCards.filter(c => c.freshImageUrl !== null).length;
-        console.log(`[BoardThumbnail] ✓ Finished refreshing images for board ${board.id}: ${loadedCount}/${refreshedCards.length} loaded`);
         setCardsWithImages(refreshedCards);
       }
     };
@@ -108,17 +102,14 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
                       onDragStart={(e) => e.preventDefault()}
                       draggable={false}
                       onError={() => {
-                        console.warn(`[BoardThumbnail] Image failed to load for card ${card.id} (${card.title}), blob URL may be invalid: ${card.freshImageUrl?.substring(0, 50)}...`);
                         // Try to refresh the image once if it fails
                         if (card.id) {
                           getImage(card.id).then(url => {
                             if (url && url !== card.freshImageUrl) {
-                              console.log(`[BoardThumbnail] ✓ Successfully refreshed image for card ${card.id}`);
                               setCardsWithImages(prev =>
                                 prev.map(c => c.id === card.id ? { ...c, freshImageUrl: url } : c)
                               );
                             } else {
-                              console.warn(`[BoardThumbnail] ⚠ Could not get new image for card ${card.id}, showing placeholder`);
                               // If no image found, set to null to show placeholder
                               setCardsWithImages(prev =>
                                 prev.map(c => c.id === card.id ? { ...c, freshImageUrl: null } : c)

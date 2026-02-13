@@ -4,9 +4,10 @@ import './ConfirmationModal.css';
 interface ConfirmationModalProps {
   onComplete: () => void;
   onModify: () => void;
+  isLoggedIn?: boolean;
 }
 
-export const ConfirmationModal = ({ onComplete, onModify }: ConfirmationModalProps) => {
+export const ConfirmationModal = ({ onComplete, onModify, isLoggedIn = false }: ConfirmationModalProps) => {
   const { t } = useTranslation();
 
   return (
@@ -22,7 +23,7 @@ export const ConfirmationModal = ({ onComplete, onModify }: ConfirmationModalPro
           {t('modals.confirmation.title')}
         </h2>
         <p className="confirmation-modal__message">
-          {t('modals.confirmation.message')}
+          {isLoggedIn ? t('modals.confirmation.messageLoggedIn') : t('modals.confirmation.message')}
         </p>
         <div className="confirmation-modal__actions">
           <button

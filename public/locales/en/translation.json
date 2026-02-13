@@ -14,7 +14,47 @@
         "warning": "Warning",
         "success": "Success",
         "yes": "Yes",
-        "no": "No"
+        "no": "No",
+        "loginWithGoogle": "Sign in with Google",
+        "loginWithEmail": "Sign in with Email",
+        "signUp": "Sign Up",
+        "email": "Email Address",
+        "password": "Password",
+        "or": "or",
+        "logout": "Sign out",
+        "auth": {
+            "titleLogin": "Sign In",
+            "titleSignUp": "Create Account",
+            "loginGoogle": "Sign in with Google",
+            "signUpGoogle": "Sign up with Google",
+            "welcomeBack": "Welcome back to chorroybuenas",
+            "joinToSave": "Join to save your progress in the cloud",
+            "orWithEmail": "or with email",
+            "emailPlaceholder": "example@email.com",
+            "fullName": "Full name",
+            "confirmPassword": "Confirm password",
+            "noAccount": "Don't have an account? Sign up",
+            "hasAccount": "Already have an account? Login",
+            "forgotPassword": "Forgot password?",
+            "forgotPasswordTitle": "Recover password",
+            "forgotPasswordDescription": "Enter your email and we'll send you a link to reset your password.",
+            "sendResetLink": "Send link",
+            "backToLogin": "Back to sign in",
+            "forgotPasswordSent": "Check your email. We sent you a link to reset your password. If you don't see it, check your spam folder.",
+            "setNewPasswordTitle": "New password",
+            "setNewPasswordDescription": "Choose a secure password for your account.",
+            "newPassword": "New password",
+            "saveNewPassword": "Save password",
+            "passwordUpdated": "Password updated. You can now sign in with your new password.",
+            "continue": "Continue",
+            "errors": {
+                "invalidEmail": "Invalid email",
+                "weakPassword": "Password must be at least 6 characters",
+                "authFailed": "Invalid email or password",
+                "emailTaken": "Email is already registered",
+                "passwordMismatch": "Passwords do not match"
+            }
+        }
     },
     "landing": {
         "title": "Create your Custom Mexican Loteria | chorroybuenas.com.mx",
@@ -100,6 +140,47 @@
             "description": "Create unforgettable memories in minutes. Start now and have fun with your custom loteria!",
             "button": "Create my Loteria"
         },
+        "benefits": {
+            "title": "Join the Tradition!",
+            "subtitle": "Register for free to unlock exclusive benefits",
+            "feature1": {
+                "title": "Cloud Storage",
+                "description": "Your cards and boards are saved forever. Access them from any device."
+            },
+            "feature2": {
+                "title": "Traditional AI Style",
+                "description": "Use our Artificial Intelligence to transform your personal photos into the classic loteria style."
+            },
+            "feature3": {
+                "title": "AI Tokens",
+                "description": "Get free tokens upon registration and buy more whenever you need to transform your photos."
+            },
+            "cta": "Sign in with Google",
+            "learnMore": "See all benefits"
+        },
+        "benefitsPage": {
+            "title": "Why Register?",
+            "subtitle": "Discover everything you can do by joining our community",
+            "cloud": {
+                "title": "Your games, always safe",
+                "description": "We save your cards and boards in the cloud so you never lose them. Access from anywhere."
+            },
+            "sync": {
+                "title": "Total Synchronization",
+                "description": "Start creating on your phone and finish on your computer. Everything stays in sync."
+            },
+            "credits": {
+                "title": "AI Tokens",
+                "description": "Receive complimentary tokens upon registration. You can also purchase additional token packs to keep transforming as many photos as you want into Lottery art."
+            },
+            "aiStyles": {
+                "title": "AI Styles (Coming Soon)",
+                "description": "Soon you'll be able to transform your photos not just to the traditional style, but also to styles like The Simpsons, Studio Ghibli, and more."
+            },
+            "cta": "Start now for free",
+            "backToHome": "Back to home",
+            "signUpGoogle": "Sign up with Google"
+        },
         "info": {
             "howToPlay": "How to play?",
             "whatIs": "What is Loteria?"
@@ -111,6 +192,8 @@
     "navbar": {
         "support": "Support",
         "home": "Home",
+        "myAccount": "My account",
+        "myLoterias": "My loterias",
         "create": "Create Loteria",
         "howToPlay": "How to play?",
         "whatIs": "What is Loteria?"
@@ -197,6 +280,7 @@
         "confirmation": {
             "title": "Your PDF file has been downloaded successfully!",
             "message": "Are you ready to exit? All temporary data will be cleared upon leaving.",
+            "messageLoggedIn": "Completed! Your cards and boards are saved in your account.",
             "modify": "Change Cards",
             "complete": "Done"
         },
@@ -270,7 +354,8 @@
             "cancelProcess": "Cancel Process",
             "addCard": "Add Card",
             "editCard": "Edit Card",
-            "adjustImage": "Adjust Image"
+            "adjustImage": "Adjust Image",
+            "aiBulkTransform": "Convert All to AI Style"
         },
         "errors": {
             "duplicateTitle": "A card with that name already exists. Please use a different title.",
@@ -283,9 +368,16 @@
         "description": "Select the part of the image you want to use on your card. The area inside the box will be what appears in your lottery.",
         "zoomIn": "Zoom In",
         "zoomOut": "Zoom Out",
+        "aiStyle": "AI Style",
+        "aiStyleInfo": "Transform your photo into traditional Mexican Loteria style",
+        "aiProcessing": "AI is painting your card...",
+        "selectStyle": "Style:",
+        "aiError": "Could not transform image. Please try again.",
         "actions": {
             "cancel": "Cancel",
-            "crop": "Use this area"
+            "backToEdit": "Back to card editing",
+            "crop": "Use this area",
+            "transform": "Transform to Loteria"
         }
     },
     "cardUpload": {
@@ -326,6 +418,25 @@
             "next": "Next ({{count}} remaining) →",
             "finish": "Finish"
         }
+    },
+    "aiBatchModal": {
+        "title": "Loteria Style Transformation",
+        "description": "You are about to transform {{count}} images using Artificial Intelligence.",
+        "costEstimate": "Estimated total cost: ${{cost}} USD",
+        "timeEstimate": "Estimated time: {{time}} min",
+        "styleStrength": "Image Fidelity vs Style",
+        "strengthLow": "Maximum fidelity: The image barely changes, it's just cleaned up with a folk art touch.",
+        "strengthMed": "Balanced: Loteria style is applied while keeping your features recognizable.",
+        "strengthHigh": "Maximum style: AI matches your photo more loosely with the Loteria artistic style.",
+        "disclaimer": "Costs are fixed estimates based on the OpenAI model ($0.013/img). Internet connection required.",
+        "start": "Start Transformation",
+        "processing": "Processing image {{current}} of {{total}}...",
+        "painting": "AI is painting...",
+        "complete": "Transformation Complete!",
+        "successMessage": "All your images have been updated to the traditional style.",
+        "skippedMessage": "{{count}} image(s) were skipped due to AI safety filters (may be false positives).",
+        "error": "There was a problem processing some images. Please try again.",
+        "close": "Close and see results"
     },
     "boardGenerator": {
         "gridMode": {

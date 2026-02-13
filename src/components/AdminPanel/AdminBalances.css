@@ -1,0 +1,298 @@
+.admin-balances {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.admin-balances__header {
+  margin-bottom: 24px;
+}
+
+.admin-balances__title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.admin-balances__subtitle {
+  margin: 0;
+  color: var(--color-text-muted, #666);
+  font-size: 0.9rem;
+}
+
+.admin-balances__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.admin-balances__card {
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border, #e0e0e0);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-balances__card--revenue {
+  border-left: 4px solid #16a34a;
+}
+
+.admin-balances__card--usage {
+  border-left: 4px solid var(--color-primary, #c41e3a);
+}
+
+.admin-balances__card--cost {
+  border-left: 4px solid #2563eb;
+}
+
+.admin-balances__card-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #666);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.admin-balances__card-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.admin-balances__card-detail {
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #666);
+}
+
+.admin-balances__table-section {
+  margin-top: 24px;
+}
+
+.admin-balances__table-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 16px;
+}
+
+.admin-balances__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px;
+  color: var(--color-text-muted, #666);
+}
+
+.admin-balances__spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border, #ddd);
+  border-top-color: var(--color-primary, #c41e3a);
+  border-radius: 50%;
+  animation: admin-balances-spin 0.8s linear infinite;
+}
+
+@keyframes admin-balances-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.admin-balances__empty {
+  text-align: center;
+  color: var(--color-text-muted, #666);
+  padding: 24px;
+  margin: 0;
+}
+
+.admin-balances__table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #e0e0e0);
+}
+
+.admin-balances__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.admin-balances__table th {
+  text-align: left;
+  padding: 12px 14px;
+  background: var(--color-bg-subtle, #f8f8f8);
+  font-weight: 600;
+  color: var(--color-text-secondary, #555);
+}
+
+.admin-balances__table td {
+  padding: 12px 14px;
+  border-top: 1px solid var(--color-border, #e0e0e0);
+  color: var(--color-text-main, #333);
+}
+
+.admin-balances__table tbody tr:hover {
+  background: var(--color-bg-subtle, #f8f8f8);
+}
+
+.admin-balances__cell-name {
+  font-weight: 500;
+}
+
+.admin-balances__cell-email {
+  font-size: 0.9rem;
+}
+
+.admin-balances__cell-balance {
+  font-weight: 600;
+}
+
+.admin-balances__cell-actions {
+  white-space: nowrap;
+}
+
+.admin-balances__gift-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.admin-balances__gift-btn:hover {
+  background: var(--color-bg-subtle, #f8f8f8);
+  border-color: var(--color-primary, #c41e3a);
+  color: var(--color-primary, #c41e3a);
+}
+
+.admin-balances__gift-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.admin-balances__gift-modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 360px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.admin-balances__gift-modal h3 {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+}
+
+.admin-balances__gift-target {
+  margin: 0 0 20px;
+  font-size: 0.9rem;
+  color: var(--color-text-muted, #666);
+}
+
+.admin-balances__gift-field {
+  margin-bottom: 16px;
+}
+
+.admin-balances__gift-field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.admin-balances__gift-field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.admin-balances__gift-error {
+  margin: 0 0 12px;
+  color: var(--color-danger, #c41e3a);
+  font-size: 0.9rem;
+}
+
+.admin-balances__gift-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.admin-balances__gift-actions .admin-balances__btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.admin-balances__gift-actions .admin-balances__btn--primary {
+  background: var(--color-primary, #c41e3a);
+  color: #fff;
+}
+
+.admin-balances__gift-actions .admin-balances__btn--secondary {
+  background: #fff;
+  color: var(--color-text, #333);
+  border: 1px solid var(--color-border, #e0e0e0);
+}
+
+.admin-balances__cell-date {
+  color: var(--color-text-muted, #666);
+}
+
+@media (max-width: 600px) {
+  .admin-balances__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-balances__table thead {
+    display: none;
+  }
+
+  .admin-balances__table tbody tr {
+    display: block;
+    border: 1px solid var(--color-border, #e0e0e0);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    padding: 14px 16px;
+  }
+
+  .admin-balances__table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-top: 1px solid var(--color-border, #e0e0e0);
+  }
+
+  .admin-balances__table td:first-child {
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .admin-balances__table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--color-text-secondary, #555);
+    font-size: 0.8125rem;
+    flex-shrink: 0;
+  }
+}

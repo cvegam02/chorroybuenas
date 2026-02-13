@@ -11,6 +11,8 @@ interface WarningModalProps {
     confirmText?: string;
     cancelText?: string;
     type?: 'warning' | 'danger';
+    /** Si es true, solo se muestra el botón de confirmar (ej. "Cerrar"). */
+    singleButton?: boolean;
 }
 
 export const WarningModal = ({
@@ -21,7 +23,8 @@ export const WarningModal = ({
     onCancel,
     confirmText,
     cancelText,
-    type = 'warning'
+    type = 'warning',
+    singleButton = false
 }: WarningModalProps) => {
     const { t } = useTranslation();
 
@@ -38,13 +41,15 @@ export const WarningModal = ({
                 <h2 className="warning-modal__title">{title}</h2>
                 <p className="warning-modal__message">{message}</p>
                 <div className="warning-modal__actions">
-                    <button
-                        type="button"
-                        onClick={onCancel}
-                        className="warning-modal__cancel-button"
-                    >
-                        {cancelText || t('modals.warning.cancel')}
-                    </button>
+                    {!singleButton && (
+                        <button
+                            type="button"
+                            onClick={onCancel}
+                            className="warning-modal__cancel-button"
+                        >
+                            {cancelText || t('modals.warning.cancel')}
+                        </button>
+                    )}
                     <button
                         type="button"
                         onClick={onConfirm}

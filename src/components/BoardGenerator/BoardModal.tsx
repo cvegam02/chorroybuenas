@@ -163,7 +163,7 @@ export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeInd
         >
           {grid.map((row, rowIndex) =>
             row.map((card, colIndex) => (
-              <div key={`${rowIndex}-${colIndex}`} className="board-modal__cell">
+              <div key={`${selectedIndex}-${rowIndex}-${colIndex}-${card?.id ?? 'empty'}`} className="board-modal__cell">
                 {card ? <BoardCell card={card} /> : null}
               </div>
             ))

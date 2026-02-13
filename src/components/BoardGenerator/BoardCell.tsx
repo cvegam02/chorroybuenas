@@ -12,24 +12,32 @@ export const BoardCell = ({ card }: BoardCellProps) => {
   const { t } = useTranslation();
   const [imageUrl, setImageUrl] = useState<string | null>(card.image || null);
 
-  // Refresh image from IndexedDB to ensure blob URL is valid
+  // When card changes (e.g. navigating between boards), update image immediately.
+  // card.image may be a Supabase URL (https:) or blob URL - use it directly.
+  // Fallback to IndexedDB only when card.image is missing (local storage).
   useEffect(() => {
-    const refreshImage = async () => {
-      if (!card.id) return;
+    if (card.image) {
+      setImageUrl(card.image);
+      return;
+    }
 
+    let cancelled = false;
+    const loadFromIndexedDB = async () => {
+      if (!card.id) return;
       try {
         const freshImageURL = await getImage(card.id);
-        if (freshImageURL) {
-          setImageUrl(freshImageURL);
+        if (!cancelled) {
+          setImageUrl(freshImageURL || null);
         }
       } catch (error) {
-        console.error(`Error refreshing image for card ${card.id}:`, error);
-        // Keep existing image URL if refresh fails
+        if (!cancelled) {
+          setImageUrl(null);
+        }
       }
     };
-
-    refreshImage();
-  }, [card.id]);
+    loadFromIndexedDB();
+    return () => { cancelled = true; };
+  }, [card.id, card.image]);
 
   const handleImageContextMenu = (e: React.MouseEvent<HTMLImageElement>) => {
     e.preventDefault(); // Prevent right-click context menu
@@ -52,7 +60,6 @@ export const BoardCell = ({ card }: BoardCellProps) => {
             draggable={false}
             onError={() => {
               // If image fails to load, try to refresh again
-              console.warn(`Image failed to load for card ${card.id}, attempting refresh...`);
               setImageUrl(null);
             }}
           />
