@@ -94,7 +94,7 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
             role="menuitem"
           >
             <FaMagic />
-            <span>{t('cardEditor.cardActions.transform')}</span>
+            <span>{t(card.isAiGenerated ? 'cardEditor.cardActions.transformRegenerate' : 'cardEditor.cardActions.transformConvert')}</span>
           </button>
         )}
         {!disabledDuringBatch && (
@@ -174,8 +174,8 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
                 if (!disableTransformButton) setPendingAction('regenerate');
               }}
               disabled={disableTransformButton}
-              aria-label="Transformar con IA"
-              title={transformButtonTitle ?? (disableTransformButton ? "Espera un momento, sincronizando..." : (card.isAiGenerated ? "Regenerar con IA" : "Transformar con IA"))}
+              aria-label={card.isAiGenerated ? t('cardEditor.cardActions.transformRegenerate') : t('cardEditor.cardActions.transformConvert')}
+              title={transformButtonTitle ?? (disableTransformButton ? t('cardEditor.syncingMessage') : (card.isAiGenerated ? t('cardEditor.cardActions.transformRegenerate') : t('cardEditor.cardActions.transformConvert')))}
             >
               <FaMagic />
             </button>
@@ -200,10 +200,10 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
         <WarningModal
           isOpen
           type="warning"
-          title={t('modals.confirmRegenerateCard.title')}
-          message={t('modals.confirmRegenerateCard.message')}
-          confirmText={t('modals.confirmRegenerateCard.confirm')}
-          cancelText={t('modals.confirmRegenerateCard.cancel')}
+          title={t(card.isAiGenerated ? 'modals.confirmRegenerateCard.title' : 'modals.confirmConvertCard.title')}
+          message={t(card.isAiGenerated ? 'modals.confirmRegenerateCard.message' : 'modals.confirmConvertCard.message')}
+          confirmText={t(card.isAiGenerated ? 'modals.confirmRegenerateCard.confirm' : 'modals.confirmConvertCard.confirm')}
+          cancelText={t(card.isAiGenerated ? 'modals.confirmRegenerateCard.cancel' : 'modals.confirmConvertCard.cancel')}
           onConfirm={() => {
             onTransform(card);
             setPendingAction(null);

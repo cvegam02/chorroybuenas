@@ -355,7 +355,7 @@
             "addCard": "Add Card",
             "editCard": "Edit Card",
             "adjustImage": "Adjust Image",
-            "aiBulkTransform": "Convert All to AI Style"
+            "aiBulkTransform": "Convert images using AI"
         },
         "errors": {
             "duplicateTitle": "A card with that name already exists. Please use a different title.",

@@ -355,7 +355,7 @@
             "addCard": "Agregar Carta",
             "editCard": "Editar Carta",
             "adjustImage": "Ajustar Imagen",
-            "aiBulkTransform": "Convertir todo a Estilo IA"
+            "aiBulkTransform": "Convertir imágenes usando IA"
         },
         "errors": {
             "duplicateTitle": "Ya existe una carta con ese nombre. Por favor usa un título diferente.",
