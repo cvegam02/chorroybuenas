@@ -62,6 +62,11 @@ export const useBoard = () => {
   const generateBoardsAsync = async (count: number, gridSize: 9 | 16 = 16): Promise<Board[]> => {
     setIsGenerating(true);
     try {
+      // Borrar tableros anteriores antes de generar nuevos (solo usuarios logueados; invitados se sobrescribe en saveBoards)
+      if (user && currentSetId) {
+        await BoardRepository.deleteAllBoardsForSet(user.id, currentSetId);
+      }
+
       // Small delay to allow UI to update
       await new Promise(resolve => setTimeout(resolve, 100));
 

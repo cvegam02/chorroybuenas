@@ -76,6 +76,20 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
       </section>
 
       <main className="landing-page__main">
+        {/* Banner: Beneficios de registrarse */}
+        <Link to="/beneficios" className="landing-page__banner">
+          <div className="landing-page__banner-content">
+            <div className="landing-page__banner-text">
+              <h2 className="landing-page__banner-title">{t('landing.banner.title')}</h2>
+              <p className="landing-page__banner-subtitle">{t('landing.banner.subtitle')}</p>
+            </div>
+            <span className="landing-page__banner-cta">
+              {t('landing.banner.cta')}
+              <FaArrowRight />
+            </span>
+          </div>
+        </Link>
+
         {/* Features Section */}
         <section className="landing-page__features">
           <div className="landing-page__features-container">

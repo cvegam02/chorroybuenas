@@ -203,7 +203,8 @@ export class CardRepository {
     }
 
     /**
-     * Delete a card and its associated images from storage
+     * Delete a card and its associated images from storage.
+     * Removes card from all boards first (board_cards FK is ON DELETE RESTRICT).
      */
     static async deleteCard(cardId: string): Promise<void> {
         // 1. Get images paths and set_id for cache invalidation
@@ -215,7 +216,15 @@ export class CardRepository {
 
         if (fetchError) throw fetchError;
 
-        // 2. Delete metadata from DB
+        // 2. Remove card from all boards (required before delete due to board_cards FK RESTRICT)
+        const { error: boardCardsError } = await supabase
+            .from('board_cards')
+            .delete()
+            .eq('card_id', cardId);
+
+        if (boardCardsError) throw boardCardsError;
+
+        // 4. Delete metadata from DB
         const { error: deleteError } = await supabase
             .from('cards')
             .delete()
@@ -224,7 +233,7 @@ export class CardRepository {
         if (deleteError) throw deleteError;
         if (card?.user_id && card?.set_id) this.invalidateCardsCache(card.user_id, card.set_id);
 
-        // 3. Delete files from Storage (best-effort: no lanzar para que la UI pueda actualizarse)
+        // 5. Delete files from Storage (best-effort: no lanzar para que la UI pueda actualizarse)
         const pathsToDelete = [];
         if (card.image_path) pathsToDelete.push(card.image_path);
         if (card.original_image_path) pathsToDelete.push(card.original_image_path);

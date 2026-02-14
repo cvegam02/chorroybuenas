@@ -71,6 +71,8 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
   const [aiBatchSkippedCount, setAiBatchSkippedCount] = useState(0);
   const [aiBatchError, setAiBatchError] = useState<string | null>(null);
   const [showBatchCompleteMessage, setShowBatchCompleteMessage] = useState(false);
+  /** ID de la carta en transformación individual; mantiene el overlay visible hasta que termine */
+  const [transformingCardId, setTransformingCardId] = useState<string | null>(null);
 
   // Dynamic minimum cards based on grid size
   // Kids (3x3) -> Min 12
@@ -216,10 +218,10 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
       alert(t('cardEditor.errors.generalAddError'));
       return;
     }
+    setTransformingCardId(card.id);
     await updateCard(card.id, { isProcessing: true });
 
     try {
-
       const transformedImage = await AIService.transformToLoteria(
         {
           image: imageToProcess,
@@ -244,6 +246,8 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
       console.error('[CardEditor] Admin: fallo transformación individual (causa real para admin):', errMsg, error);
       setAiErrorMessage(t('cardEditor.errors.genericContactAdmin'));
       await updateCard(card.id, { isProcessing: false });
+    } finally {
+      setTransformingCardId(null);
     }
   };
 
@@ -600,6 +604,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
                 transformButtonTitle={noTokensForSingle ? t('cardEditor.noTokensForTransform') : undefined}
                 onClick={handleEditCard}
                 disabledDuringBatch={isAIBatchProcessing && cardsToTransformIds.has(card.id)}
+                isTransforming={transformingCardId === card.id}
               />
             ))}
             <CardUploadThumb onSingleClick={() => !waitingForSet && setIsUploadModalOpen(true)} />

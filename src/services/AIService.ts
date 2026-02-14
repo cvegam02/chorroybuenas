@@ -1,22 +1,18 @@
 /**
  * AI Service for Loteria Style Transfer
  *
- * Modelo principal: Replicate → OpenAI GPT-Image-1.5 (img2img).
- * - Errores E005 / SENSITIVE_CONTENT_FILTER vienen del filtro de OpenAI.
- * - Fallback automático: FLUX img2img (sin filtro OpenAI) cuando GPT-Image devuelve SENSITIVE_CONTENT_FILTER.
+ * Las llamadas a Replicate se realizan vía Edge Function (transform-loteria) para
+ * mantener la API key en el servidor. El frontend solo envía la imagen y recibe el resultado.
  *
- * Opciones en Replicate (misma API key):
- * 1. openai/gpt-image-1.5: mejor calidad, filtro estricto.
- * 2. bxclib2/flux_img2img: fallback; VITE_REPLICATE_USE_FLUX=true para usarlo primero.
- *
- * Alternativas fuera de Replicate:
- * - OpenAI Images API (DALL·E 3): requiere backend para la key.
- * - Stability AI, Together AI, Fal.ai: otras APIs de imagen.
- *
- * Nota: Para producción, las llamadas deberían ir a un backend que guarde las API keys.
+ * Modelo principal: GPT-Image-1.5. Fallback: FLUX img2img cuando GPT-Image devuelve SENSITIVE_CONTENT_FILTER.
+ * VITE_REPLICATE_USE_FLUX=true para usar FLUX primero (preferencia de estilo, no secreto).
  */
 
+import { supabase } from '../utils/supabaseClient';
 import { TokenRepository } from '../repositories/TokenRepository';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? '';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
 
 export interface TransformationRequest {
     image: string; // Base64 or URL
@@ -82,17 +78,64 @@ export class AIService {
     static readonly SENSITIVE_PHOTO_NOT_SUPPORTED = 'SENSITIVE_PHOTO_NOT_SUPPORTED';
 
     /**
-     * Transforms an image to Loteria style using Replicate.
-     * En E005 (sensitive): intento 1 = prompt original, 2 = personaje original, 3 = ilustración simbólica; luego FLUX; si falla, lanza SENSITIVE_PHOTO_NOT_SUPPORTED.
+     * Llama a la Edge Function transform-loteria con la imagen en base64.
+     */
+    private static async callEdgeFunction(
+        imageBase64: string,
+        params: { model: 'gpt-image' | 'flux'; prompt_variant?: 0 | 1 | 2; prompt_strength?: number }
+    ): Promise<string> {
+        const { data: { session: refreshedSession } } = await supabase.auth.refreshSession();
+        if (!refreshedSession?.access_token) {
+            throw new Error('NOT_LOGGED_IN');
+        }
+
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/transform-loteria`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${refreshedSession.access_token}`,
+                apikey: SUPABASE_ANON_KEY,
+            },
+            body: JSON.stringify({
+                image: imageBase64,
+                model: params.model,
+                prompt_variant: params.prompt_variant ?? 0,
+                prompt_strength: params.prompt_strength ?? 0.5,
+            }),
+        });
+
+        const body = await res.json().catch(() => ({}));
+
+        if (res.status === 401) {
+            throw new Error('NOT_LOGGED_IN');
+        }
+
+        if (res.status === 500 && body.error === 'CONFIG_ERROR') {
+            console.warn('Edge Function: REPLICATE_API_TOKEN no configurado en Supabase. Usar mock.');
+            throw new Error('CONFIG_ERROR');
+        }
+
+        if (!res.ok) {
+            const msg = body.message ?? body.error ?? res.statusText;
+            if (body.error === 'NSFW_FILTER') throw new Error('NSFW_FILTER');
+            if (body.error === 'SENSITIVE_CONTENT_FILTER') throw new Error('SENSITIVE_CONTENT_FILTER');
+            throw new Error(msg);
+        }
+
+        if (body.output) return body.output;
+        throw new Error(body.message ?? 'Respuesta inválida de la IA');
+    }
+
+    /**
+     * Transforms an image to Loteria style via Edge Function.
+     * En E005 (sensitive): intento 1 = prompt original, 2 = personaje original, 3 = ilustración simbólica; luego FLUX.
      */
     static async transformToLoteria(
         request: TransformationRequest,
         userId?: string,
         callbacks?: TransformationCallbacks,
-        /** setId opcional para vincular el gasto a una lotería. */
         setId?: string
     ): Promise<string> {
-        // 1. Token Check (if logged in)
         if (userId) {
             try {
                 const balance = await TokenRepository.getBalance(userId);
@@ -105,19 +148,24 @@ export class AIService {
             }
         }
 
-        const apiKey = import.meta.env.VITE_REPLICATE_API_TOKEN;
-
-        if (!apiKey) {
-            console.warn('No Replicate API Token found. Falling back to mock.');
+        const { data: { session } } = await supabase.auth.refreshSession();
+        if (!session?.access_token) {
+            console.warn('No session. Falling back to mock.');
             await new Promise(resolve => setTimeout(resolve, this.MOCK_DELAY));
             return request.image;
         }
 
+        const imageBase64 = await this.urlToBase64(request.image, 768);
         const useFluxFirst = import.meta.env.VITE_REPLICATE_USE_FLUX === 'true';
+        const strength = request.prompt_strength ?? 0.5;
 
+        try {
         if (useFluxFirst) {
             try {
-                const result = await this.realTransformFluxImg2Img(request.image, apiKey, request.prompt_strength ?? 0.65);
+                const result = await this.callEdgeFunction(imageBase64, {
+                    model: 'flux',
+                    prompt_strength: strength || 0.65,
+                });
                 if (userId) {
                     try {
                         await TokenRepository.spendTokens(userId, 1, setId);
@@ -131,18 +179,16 @@ export class AIService {
             }
         }
 
-        const strength = request.prompt_strength ?? 0.5;
         let promptVariant: 0 | 1 | 2 = 0;
         let lastError: Error | null = null;
 
         while (promptVariant <= 2) {
             try {
-                const result = await this.realTransform(
-                    request.image,
-                    apiKey,
-                    strength,
-                    this.getPromptVariant(promptVariant as 0 | 1 | 2)
-                );
+                const result = await this.callEdgeFunction(imageBase64, {
+                    model: 'gpt-image',
+                    prompt_variant: promptVariant as 0 | 1 | 2,
+                    prompt_strength: strength,
+                });
 
                 if (userId) {
                     try {
@@ -176,9 +222,32 @@ export class AIService {
         }
 
         if (lastError?.message === 'SENSITIVE_CONTENT_FILTER') {
-            throw new Error(this.SENSITIVE_PHOTO_NOT_SUPPORTED);
+            try {
+                const result = await this.callEdgeFunction(imageBase64, {
+                    model: 'flux',
+                    prompt_strength: strength || 0.65,
+                });
+                if (userId) {
+                    try {
+                        await TokenRepository.spendTokens(userId, 1, setId);
+                    } catch (e) {
+                        console.error('Failed to deduct token after success:', e);
+                    }
+                }
+                return result;
+            } catch {
+                throw new Error(this.SENSITIVE_PHOTO_NOT_SUPPORTED);
+            }
         }
         throw lastError ?? new Error('FAILED_AFTER_RETRIES');
+        } catch (err: any) {
+            if (err.message === 'CONFIG_ERROR') {
+                console.warn('REPLICATE_API_TOKEN no configurado. Falling back to mock.');
+                await new Promise(resolve => setTimeout(resolve, this.MOCK_DELAY));
+                return request.image;
+            }
+            throw err;
+        }
     }
 
     /**
@@ -187,7 +256,6 @@ export class AIService {
     static async urlToBase64(url: string, maxDimension = 768): Promise<string> {
         return new Promise((resolve, reject) => {
             const img = new Image();
-            // Solo CORS para URLs remotas; blob/data no lo necesitan y puede dar problemas
             if (url.startsWith('http://') || url.startsWith('https://')) {
                 img.crossOrigin = 'Anonymous';
             }
@@ -220,208 +288,5 @@ export class AIService {
             img.onerror = () => reject(new Error('Could not load image'));
             img.src = url;
         });
-    }
-
-    /** Parte común del prompt (estilo Lotería) usada en todos los intentos. */
-    private static LOTERIA_PROMPT_TAIL = `
-Style: Traditional Don Clemente Gallo vintage lithograph from the 1940s. 
-Visual details:
-- Bold, thick black ink outlines. Naive folk art drawing style.
-- Vibrant primary colors (Mexican pink, deep teal, sunflower yellow).
-- Flat, solid colors with visible ink texture and aged paper grain.
-- NO 3D, NO photorealism, NO modern digital gradients.
-- NO text, NO borders inside the image.
-The output should look like a hand-painted card from a vintage Loteria set.`;
-
-    /** Prompt 0: estilo lotería fiel al sujeto de la imagen de entrada. */
-    private static PROMPT_0 = `Authentic Mexican Loteria card illustration. Style: Traditional Don Clemente Gallo vintage lithograph from the 1940s. Visual details: - Subject MUST keep the exact features, pose, and silhouette from the input image. - Bold, thick black ink outlines. Naive folk art drawing style. - Vibrant primary colors (Mexican pink, deep teal, sunflower yellow). - Flat, solid colors with visible ink texture and aged paper grain. - NO 3D, NO photorealism, NO modern digital gradients. - NO text, NO borders inside the image. The output should look like a hand-painted card from a vintage Loteria set.`;
-
-    /**
-     * Devuelve el prompt para el intento dado (0 = original, 1 = personaje original, 2 = ilustración simbólica).
-     */
-    private static getPromptVariant(attempt: 0 | 1 | 2): string {
-        if (attempt === 0) {
-            return this.PROMPT_0;
-        }
-        if (attempt === 1) {
-            return `Create an original 2D folk art illustration inspired by the input image.
-Do NOT preserve exact facial features, body proportions, or identity.
-The result must be an original character.${this.LOTERIA_PROMPT_TAIL}`;
-        }
-        return `Create a symbolic illustration inspired by the theme and colors of the image.${this.LOTERIA_PROMPT_TAIL}`;
-    }
-
-    /**
-     * Real Replicate API Call (openai/gpt-image-1.5). Opcionalmente con prompt custom (para reintentos E005).
-     */
-    static async realTransform(image: string, apiKey: string, strength = 0.3, promptOverride?: string): Promise<string> {
-        try {
-            // 1. Convert and Resize to Base64 Data URI
-            const imageData = await this.urlToBase64(image, 768);
-
-            // 2. Start prediction
-            const baseUrl = import.meta.env.DEV ? '/api/replicate' : 'https://api.replicate.com/v1';
-
-            const mainPrompt = promptOverride ?? this.getPromptVariant(0);
-
-            let response;
-            let attempts = 0;
-            const maxAttempts = 5;
-
-            // Map strength (0-1) to input_fidelity ("low" or "high")
-            const fidelity = strength > 0.4 ? "high" : "low";
-
-            while (attempts < maxAttempts) {
-                response = await fetch(`${baseUrl}/predictions`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Token ${apiKey}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        // Model: openai/gpt-image-1.5
-                        version: "118f53498ea7319519229b2d5bd0d4a69e3d77eb60d6292d5db38125534dc1ca",
-                        input: {
-                            input_images: [imageData],
-                            prompt: mainPrompt,
-                            input_fidelity: fidelity,
-                            quality: "low",
-                            aspect_ratio: "2:3",
-                            output_format: "webp"
-                        }
-                    })
-                });
-
-                if (response.status === 429) {
-                    try {
-                        const errorJson = await response.json();
-                        const waitTime = (errorJson.retry_after || 10) * 1000;
-                        await new Promise(resolve => setTimeout(resolve, waitTime));
-                        attempts++;
-                        continue;
-                    } catch (e) {
-                        await new Promise(resolve => setTimeout(resolve, 5000));
-                        attempts++;
-                        continue;
-                    }
-                }
-                break;
-            }
-
-            if (!response || !response.ok) {
-                const errorText = response ? await response.text() : 'No response from AI';
-                let detail = response ? response.statusText : 'Unknown';
-                try {
-                    const errorJson = JSON.parse(errorText);
-                    detail = errorJson.detail || JSON.stringify(errorJson);
-                } catch (e) { /* ignore */ }
-
-                console.error('Replicate raw error:', errorText);
-                throw new Error(`AI Error (${response?.status}): ${detail}`);
-            }
-
-            let prediction = await response.json();
-
-            // 3. Poll for the result
-            while (prediction.status !== 'succeeded' && prediction.status !== 'failed') {
-                await new Promise(resolve => setTimeout(resolve, 3000));
-                const pollResponse = await fetch(`${baseUrl}/predictions/${prediction.id}`, {
-                    headers: { 'Authorization': `Token ${apiKey}` }
-                });
-                prediction = await pollResponse.json();
-
-                if (prediction.status === 'failed') {
-                    const errorMsg = ((prediction.error || '') + (prediction.logs || '')).toLowerCase();
-                    const isSafetyError = errorMsg.includes('nsfw') ||
-                        errorMsg.includes('blocked') ||
-                        errorMsg.includes('safety') ||
-                        errorMsg.includes('content policy');
-
-                    if (isSafetyError) {
-                        throw new Error('NSFW_FILTER');
-                    }
-                    // E005 / "sensitive": input or output flagged by content filter (OpenAI/Replicate)
-                    const isSensitiveError = errorMsg.includes('sensitive') || errorMsg.includes('e005');
-                    if (isSensitiveError) {
-                        throw new Error('SENSITIVE_CONTENT_FILTER');
-                    }
-                    throw new Error(`AI Transformation failed: ${prediction.error || 'Unknown error'}`);
-                }
-            }
-
-            return Array.isArray(prediction.output) ? prediction.output[0] : prediction.output;
-        } catch (error) {
-            console.error('Replicate API Error:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Prompt único para estilo lotería (FLUX); enfatiza sujeto primero, luego estilo.
-     */
-    private static getLoteriaStylePrompt(): string {
-        return `Same subject, same pose and composition as the input image. Mexican Loteria card, Don Clemente Gallo vintage 1940s style, lithograph print. Bold thick black outlines, naive folk art, flat colors. Mexican pink, teal, sunflower yellow, solid flat fills. Visible ink texture, aged paper grain. Illustration only, no photorealism, no 3D, no text.`;
-    }
-
-    /**
-     * Fallback: FLUX img2img (bxclib2/flux_img2img).
-     * Sin filtro OpenAI. denoising bajo (0.52) preserva sujeto y aplica estilo sobre la estructura.
-     */
-    static async realTransformFluxImg2Img(
-        image: string,
-        apiKey: string,
-        denoising = 0.52
-    ): Promise<string> {
-        const imageData = await this.urlToBase64(image, 768);
-        const baseUrl = import.meta.env.DEV ? '/api/replicate' : 'https://api.replicate.com/v1';
-
-        const response = await fetch(`${baseUrl}/predictions`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Token ${apiKey}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                version: "0ce45202d83c6bd379dfe58f4c0c41e6cadf93ebbd9d938cc63cc0f2fcb729a5",
-                input: {
-                    image: imageData,
-                    positive_prompt: this.getLoteriaStylePrompt(),
-                    denoising: Math.min(0.72, Math.max(0.45, denoising)),
-                    steps: 28,
-                    scheduler: "simple",
-                    sampler_name: "euler",
-                    seed: 0,
-                },
-            }),
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            let detail = response.statusText;
-            try {
-                const errorJson = JSON.parse(errorText);
-                detail = errorJson.detail ?? JSON.stringify(errorJson);
-            } catch {
-                // ignore
-            }
-            throw new Error(`FLUX img2img error (${response.status}): ${detail}`);
-        }
-
-        let prediction = await response.json();
-
-        while (prediction.status !== 'succeeded' && prediction.status !== 'failed') {
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            const pollResponse = await fetch(`${baseUrl}/predictions/${prediction.id}`, {
-                headers: { 'Authorization': `Token ${apiKey}` },
-            });
-            prediction = await pollResponse.json();
-        }
-
-        if (prediction.status === 'failed') {
-            throw new Error(`FLUX img2img failed: ${prediction.error ?? 'Unknown'}`);
-        }
-
-        const output = prediction.output;
-        return typeof output === 'string' ? output : (Array.isArray(output) ? output[0] : output);
     }
 }

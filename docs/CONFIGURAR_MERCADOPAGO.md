@@ -87,7 +87,7 @@ Con solo la `notification_url` de la preferencia, MP suele enviar **solo** `merc
 2. Menú **Webhooks** → **Configurar notificaciones**.
 3. **URL de producción** (o la que uses):  
    `https://<tu-proyecto>.supabase.co/functions/v1/webhook-mercadopago`  
-   (misma URL que usa la preferencia; reemplaza `<tu-proyecto>` por tu ref de Supabase, ej. `vjglrfofyzvyvaetakpu`).
+   (misma URL que usa la preferencia; reemplaza `<tu-proyecto>` por tu ref de Supabase, ej. `<tu-proyecto-ref>`).
 4. En **Eventos**, marca **Pagos** (y si quieres, deja también Órdenes comerciales).
 5. Guarda.
 

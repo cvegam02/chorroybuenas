@@ -19,9 +19,11 @@ interface CardPreviewProps {
   onClick?: (card: Card) => void;
   /** Durante conversión batch con IA: bloquea eliminar, editar y revertir para evitar errores */
   disabledDuringBatch?: boolean;
+  /** Carta en transformación individual; mantiene overlay visible hasta que termine */
+  isTransforming?: boolean;
 }
 
-export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTransformButton, transformButtonTitle, onClick, disabledDuringBatch }: CardPreviewProps) => {
+export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTransformButton, transformButtonTitle, onClick, disabledDuringBatch, isTransforming }: CardPreviewProps) => {
   const { t } = useTranslation();
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -83,7 +85,7 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
             <span>{t('cardEditor.cardActions.revert')}</span>
           </button>
         )}
-        {card.image && onTransform && !card.isProcessing && !disabledDuringBatch && (
+        {card.image && onTransform && !card.isProcessing && !isTransforming && !disabledDuringBatch && (
           <button
             type="button"
             className="card-preview__actions-menu-item"
@@ -133,24 +135,24 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
             <div className="card-preview__image-placeholder">{t('setView.noImage')}</div>
           )}
 
-          {card.isProcessing && (
+          {(card.isProcessing || isTransforming) && (
             <div className="card-preview__processing">
               <div className="card-preview__processing-painter">🎨</div>
               <p className="card-preview__processing-text">{t('cardEditor.cardProcessing')}</p>
             </div>
           )}
 
-          {disabledDuringBatch && !card.isProcessing && (
+          {disabledDuringBatch && !card.isProcessing && !isTransforming && (
             <div className="card-preview__batch-queued" aria-hidden="true" />
           )}
 
-          {card.isAiGenerated && !card.isProcessing && !onTransform && (
+          {card.isAiGenerated && !card.isProcessing && !isTransforming && !onTransform && (
             <div className="card-preview__ai-badge" title="Generado con IA">
               <FaMagic />
             </div>
           )}
 
-          {!isTouchDevice && card.originalImage && onRevert && !disabledDuringBatch && (
+          {!isTouchDevice && card.originalImage && onRevert && !disabledDuringBatch && !isTransforming && (
             <button
               className="card-preview__revert"
               onClick={(e) => {
@@ -164,7 +166,7 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
             </button>
           )}
 
-          {!isTouchDevice && card.image && onTransform && !card.isProcessing && !disabledDuringBatch && (
+          {!isTouchDevice && card.image && onTransform && !card.isProcessing && !isTransforming && !disabledDuringBatch && (
             <button
               className="card-preview__transform"
               onClick={(e) => {

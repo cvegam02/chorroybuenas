@@ -187,7 +187,7 @@ Puedes probar directamente la API de MercadoPago:
 curl -X POST \
   'https://api.mercadopago.com/checkout/preferences' \
   -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer APP_USR-2419090923672573-020902-5155f5eba9e00547f91f2a2cee11d6b3-2691981774' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
   -d '{
     "items": [
       {

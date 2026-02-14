@@ -23,14 +23,15 @@ import { SetRepository } from './repositories/SetRepository';
 import { useBoard } from './hooks/useBoard';
 import { useCards } from './hooks/useCards';
 import { generatePDF, downloadPDF } from './services/PDFService';
-import { saveBoards, saveBoardCount, clearAllData } from './utils/storage';
+import { saveBoards, saveBoardCount, loadBoards, clearAllData } from './utils/storage';
+import { BoardRepository } from './repositories/BoardRepository';
 import { Board, GridSize } from './types';
 
 type AppStep = 'cards' | 'board-count' | 'preview' | 'confirmation';
 
 function AppContent() {
   const { t } = useTranslation();
-  const { user, recoverySession } = useAuth();
+  const { user, recoverySession, isLoading: authLoading } = useAuth();
   const { currentSetId, sets, setSets } = useSetContext();
   const { cards } = useCards();
   const navigate = useNavigate();
@@ -78,6 +79,44 @@ function AppContent() {
       setGridSize(location.state.gridSize as GridSize);
     }
   }, [location.pathname, location.state]);
+
+  // Cargar tableros al refrescar en /preview (evita quedarse en "Redirigiendo...")
+  useEffect(() => {
+    if (location.pathname !== '/preview' || boards.length > 0 || authLoading) return;
+
+    let cancelled = false;
+    const loadAndRedirect = async () => {
+      if (user) {
+        if (!currentSetId) return; // Esperar a que SetContext cargue
+        try {
+          const cloudBoards = await BoardRepository.getBoards(user.id, currentSetId);
+          if (cancelled) return;
+          if (cloudBoards?.length > 0) {
+            setBoards(cloudBoards);
+          } else {
+            navigate('/cards', { replace: true });
+          }
+        } catch (e) {
+          console.error('Error loading preview boards:', e);
+          if (!cancelled) navigate('/cards', { replace: true });
+        }
+      } else {
+        try {
+          const localBoards = await loadBoards();
+          if (cancelled) return;
+          if (localBoards?.length > 0) {
+            setBoards(localBoards);
+          } else {
+            navigate('/cards', { replace: true });
+          }
+        } catch (e) {
+          if (!cancelled) navigate('/cards', { replace: true });
+        }
+      }
+    };
+    loadAndRedirect();
+    return () => { cancelled = true; };
+  }, [location.pathname, boards.length, user, currentSetId, authLoading, navigate]);
 
   const handleCardsNext = async () => {
     if (user && currentSetId) {
@@ -271,8 +310,8 @@ function AppContent() {
               />
             ) : (
               <div style={{ padding: '48px', textAlign: 'center' }}>
-                <h2>Redirigiendo...</h2>
-                <button onClick={() => navigate('/cards')} className="btn btn--primary">
+                <h2>{t('common.loading')}</h2>
+                <button onClick={() => navigate('/cards')} className="btn btn--primary" style={{ marginTop: 16 }}>
                   {t('common.back')}
                 </button>
               </div>

@@ -33,8 +33,80 @@ const BenefitsPage: React.FC = () => {
 
             <main className="benefits-page__main">
                 <div className="benefits-page__container">
+                    {/* Antes / Después - Transformación con IA (video izquierda, texto derecha) */}
+                    <section className="benefits-page__before-after">
+                        <div className="benefits-page__before-after-inner">
+                            <div className="benefits-page__comparison">
+                                <div className="benefits-page__comparison-image-wrap">
+                                    <video
+                                        src="/videopromo.mp4"
+                                        className="benefits-page__comparison-video"
+                                        autoPlay
+                                        muted
+                                        loop
+                                        playsInline
+                                        aria-label={t('landing.benefitsPage.beforeAfter.imageAlt')}
+                                    />
+                                </div>
+                            </div>
+                            <div className="benefits-page__ai-content benefits-page__ai-content--right">
+                                <h2>{t('landing.benefitsPage.beforeAfter.title')}</h2>
+                                <p>{t('landing.benefitsPage.beforeAfter.description')}</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="benefits-page__section benefits-page__section--benefits">
+                        <h2 className="benefits-page__section-title">{t('landing.benefitsPage.moreBenefitsTitle')}</h2>
+                        <div className="benefits-page__grid">
+                            {/* AI Transform - Principal */}
+                            <div className="benefits-page__card benefits-page__card--featured">
+                                <div className="benefits-page__icon benefits-page__icon--ai">
+                                    <FaImage />
+                                </div>
+                                <div className="benefits-page__card-content">
+                                    <h3>{t('landing.benefitsPage.aiTransform.title')}</h3>
+                                    <p>{t('landing.benefitsPage.aiTransform.description')}</p>
+                                </div>
+                            </div>
+
+                            {/* Cloud Storage */}
+                            <div className="benefits-page__card">
+                                <div className="benefits-page__icon benefits-page__icon--cloud">
+                                    <FaCloud />
+                                </div>
+                                <div className="benefits-page__card-content">
+                                    <h3>{t('landing.benefitsPage.cloud.title')}</h3>
+                                    <p>{t('landing.benefitsPage.cloud.description')}</p>
+                                </div>
+                            </div>
+
+                            {/* Sync */}
+                            <div className="benefits-page__card">
+                                <div className="benefits-page__icon benefits-page__icon--sync">
+                                    <FaSync />
+                                </div>
+                                <div className="benefits-page__card-content">
+                                    <h3>{t('landing.benefitsPage.sync.title')}</h3>
+                                    <p>{t('landing.benefitsPage.sync.description')}</p>
+                                </div>
+                            </div>
+
+                            {/* AI Credits */}
+                            <div className="benefits-page__card">
+                                <div className="benefits-page__icon benefits-page__icon--credits">
+                                    <FaCoins />
+                                </div>
+                                <div className="benefits-page__card-content">
+                                    <h3>{t('landing.benefitsPage.credits.title')}</h3>
+                                    <p>{t('landing.benefitsPage.credits.description')}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
                     {!user && !isLoading && (
-                        <section className="benefits-page__cta-section benefits-page__cta-section--top">
+                        <section className="benefits-page__cta-section benefits-page__cta-section--bottom">
                             <div className="benefits-page__cta-card">
                                 <h2>{t('landing.benefitsPage.cta')}</h2>
                                 <div className="benefits-page__auth-options">
@@ -55,83 +127,6 @@ const BenefitsPage: React.FC = () => {
                             </div>
                         </section>
                     )}
-
-                    <section className="benefits-page__section">
-                        <div className="benefits-page__grid">
-                            {/* Cloud Storage */}
-                            <div className="benefits-page__card">
-                                <div className="benefits-page__icon benefits-page__icon--cloud">
-                                    <FaCloud />
-                                </div>
-                                <h3>{t('landing.benefitsPage.cloud.title')}</h3>
-                                <p>{t('landing.benefitsPage.cloud.description')}</p>
-                            </div>
-
-                            {/* Sync */}
-                            <div className="benefits-page__card">
-                                <div className="benefits-page__icon benefits-page__icon--sync">
-                                    <FaSync />
-                                </div>
-                                <h3>{t('landing.benefitsPage.sync.title')}</h3>
-                                <p>{t('landing.benefitsPage.sync.description')}</p>
-                            </div>
-
-                            {/* AI Credits */}
-                            <div className="benefits-page__card">
-                                <div className="benefits-page__icon benefits-page__icon--credits">
-                                    <FaCoins />
-                                </div>
-                                <h3>{t('landing.benefitsPage.credits.title')}</h3>
-                                <p>{t('landing.benefitsPage.credits.description')}</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* AI Styles Showcase */}
-                    <section className="benefits-page__ai-showcase">
-                        <div className="benefits-page__ai-content">
-                            <h2>{t('landing.benefitsPage.aiStyles.title')}</h2>
-                            <p>{t('landing.benefitsPage.aiStyles.description')}</p>
-                        </div>
-
-                        <div className="benefits-page__showcase-grid">
-                            {/* Traditional Style */}
-                            <div className="benefits-page__showcase-item">
-                                <div className="benefits-page__showcase-label">Tradicional</div>
-                                <div className="benefits-page__showcase-image-container">
-                                    <img
-                                        src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-                                        alt="Traditional Style"
-                                        className="benefits-page__showcase-placeholder"
-                                        style={{ opacity: 0.1, filter: 'grayscale(1)' }}
-                                    />
-                                    <div className="benefits-page__style-preview benefits-page__style-preview--traditional">
-                                        <FaImage />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Simpsons Style */}
-                            <div className="benefits-page__showcase-item">
-                                <div className="benefits-page__showcase-label">Simpsons</div>
-                                <div className="benefits-page__showcase-image-container">
-                                    <div className="benefits-page__style-preview benefits-page__style-preview--simpsons">
-                                        <FaImage />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Ghibli Style */}
-                            <div className="benefits-page__showcase-item">
-                                <div className="benefits-page__showcase-label">Ghibli</div>
-                                <div className="benefits-page__showcase-image-container">
-                                    <div className="benefits-page__style-preview benefits-page__style-preview--ghibli">
-                                        <FaImage />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
                 </div>
             </main>
             <EmailAuthModal

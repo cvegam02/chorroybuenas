@@ -5,6 +5,7 @@ const CARDS_KEY = 'loteria_cards';
 const BOARDS_KEY = 'loteria_boards';
 const BOARD_COUNT_KEY = 'loteria_board_count';
 const MIGRATION_FLAG_KEY = 'loteria_migrated_to_indexeddb';
+const CURRENT_SET_PREFIX = 'loteria_current_set_';
 
 // Card metadata (without images) for localStorage
 interface CardMetadata {
@@ -314,12 +315,31 @@ export const loadBoardCount = (): number | null => {
   }
 };
 
+/** Persiste el set activo por usuario para restaurar al refrescar */
+export const saveCurrentSetId = (userId: string, setId: string): void => {
+  try {
+    localStorage.setItem(`${CURRENT_SET_PREFIX}${userId}`, setId);
+  } catch (e) {
+    console.warn('Could not persist current set:', e);
+  }
+};
+
+/** Obtiene el set persistido para un usuario (null si no hay) */
+export const loadCurrentSetId = (userId: string): string | null => {
+  try {
+    return localStorage.getItem(`${CURRENT_SET_PREFIX}${userId}`);
+  } catch {
+    return null;
+  }
+};
+
 export const clearAllData = async (): Promise<void> => {
   try {
     localStorage.removeItem(CARDS_KEY);
     localStorage.removeItem(BOARDS_KEY);
     localStorage.removeItem(BOARD_COUNT_KEY);
     localStorage.removeItem(MIGRATION_FLAG_KEY);
+    // No borrar CURRENT_SET_* aquí; se limpian al cerrar sesión
 
     // Clear IndexedDB images
     const { clearAllImages } = await import('./indexedDB');
