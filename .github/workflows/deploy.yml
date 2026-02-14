@@ -33,6 +33,13 @@ jobs:
       
       - name: Build
         run: npm run build
+        env:
+          # Variables VITE_* se embeben en build time (Vite)
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_APP_URL: ${{ secrets.VITE_APP_URL }}
+          # Opcional: VITE_REPLICATE_USE_FLUX=true
+          VITE_REPLICATE_USE_FLUX: ${{ secrets.VITE_REPLICATE_USE_FLUX }}
       
       - name: Setup Pages
         uses: actions/configure-pages@v4

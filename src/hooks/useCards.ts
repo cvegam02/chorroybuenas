@@ -13,6 +13,9 @@ const SYNC_COOLDOWN_MS = 2500;
 /** Supabase error when update/delete returns 0 rows (e.g. row does not exist or RLS) */
 const PGRST116 = 'PGRST116';
 
+/** Descargas paralelas por batch (evita saturar la conexión pero acelera vs secuencial). */
+const PREFETCH_BATCH_SIZE = 6;
+
 export const useCards = () => {
   const [cards, setCards] = useState<Card[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,14 +40,26 @@ export const useCards = () => {
             await migrateLocalToCloud(localCards, user.id, currentSetId);
             if (cancelled) return;
             const updated = await CardRepository.getCards(user.id, currentSetId);
-            await prefetchAndHydrate(updated);
-            if (!cancelled) setCards(await hydrateCards(updated));
+            if (!cancelled) setCards(updated);
+            setIsLoading(false);
+            prefetchAndHydrateParallel(updated, () => cancelled).then(async () => {
+              if (cancelled) return;
+              const hydrated = await hydrateCards(updated);
+              if (!cancelled) setCards(hydrated);
+            });
+            return;
           } else {
             if (cloudCards.length === 0) {
               setCards([]);
             } else {
-              await prefetchAndHydrate(cloudCards);
-              if (!cancelled) setCards(await hydrateCards(cloudCards));
+              if (!cancelled) setCards(cloudCards);
+              setIsLoading(false);
+              prefetchAndHydrateParallel(cloudCards, () => cancelled).then(async () => {
+                if (cancelled) return;
+                const hydrated = await hydrateCards(cloudCards);
+                if (!cancelled) setCards(hydrated);
+              });
+              return;
             }
           }
         } else if (!user) {
@@ -70,6 +85,25 @@ export const useCards = () => {
         } catch (_) {
           // Continuar con el resto; la carta conserva signed URL de la API
         }
+      }
+    }
+
+    async function prefetchAndHydrateParallel(cardList: Card[], isCancelled: () => boolean) {
+      const withPath = cardList.filter(c => c.imagePath);
+      for (let i = 0; i < withPath.length; i += PREFETCH_BATCH_SIZE) {
+        if (isCancelled()) return;
+        const batch = withPath.slice(i, i + PREFETCH_BATCH_SIZE);
+        await Promise.all(
+          batch.map(async (card) => {
+            if (isCancelled()) return;
+            try {
+              const blob = await CardRepository.downloadImage(card.imagePath!);
+              if (!isCancelled()) await cacheImageBlob(card.id, blob);
+            } catch (_) {
+              // La carta conserva signed URL
+            }
+          })
+        );
       }
     }
 

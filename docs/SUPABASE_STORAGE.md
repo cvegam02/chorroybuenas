@@ -9,13 +9,29 @@ La app usa **Supabase Storage** para guardar las imágenes de las cartas cuando 
 - **Nombre:** `card-images` (debe coincidir exactamente).
 - **Uso en código:** `CardRepository` en `src/repositories/CardRepository.ts` (`BUCKET_NAME = 'card-images'`). Las rutas son `userId/cardId_timestamp.png` (y `_orig` para la imagen original antes de IA).
 
-### Crear el bucket
+### Opción A: Migración automática (recomendado)
+
+La migración `supabase/migrations/021_storage_card_images.sql` crea el bucket y las políticas RLS al ejecutar:
+
+```bash
+npx supabase db push
+```
+
+Aplica a proyectos DEV y PROD cuando vinculas el proyecto correspondiente.
+
+### Opción B: Crear manualmente en el Dashboard
+
+Si la migración falla (p. ej. el esquema `storage` no permite INSERT en `storage.buckets`):
 
 1. [Supabase Dashboard](https://supabase.com/dashboard) → tu proyecto.
 2. **Storage** → **New bucket**.
 3. **Name:** `card-images`.
 4. **Public bucket:** desactivado (privado).
-5. Guardar.
+5. **File size limit:** 5MB (opcional).
+6. **Allowed MIME types:** image/png, image/jpeg, image/jpg, image/webp (opcional).
+7. Guardar.
+
+Luego ejecuta las políticas de la sección 2 (o aplica solo la migración 021 si el bucket ya existe; las políticas se crearán igual).
 
 ---
 
