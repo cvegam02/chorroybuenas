@@ -33,16 +33,6 @@ export default defineConfig({
       'localhost',
       '127.0.0.1',
     ],
-    proxy: {
-      '/api/replicate': {
-        target: 'https://api.replicate.com/v1',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/replicate/, ''),
-        headers: {
-          'Origin': 'https://api.replicate.com'
-        }
-      }
-    }
   },
   build: {
     // Optimización para SEO y rendimiento

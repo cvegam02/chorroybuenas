@@ -1,6 +1,6 @@
 # Mostrar chorroybuenas.com.mx en la pantalla de inicio de sesión de Google
 
-Cuando los usuarios inician sesión con Google, ven **"Sign in to continue to vjglrfofyzvyvaetakpu.supabase.co"** porque la URL de callback de OAuth es la de tu proyecto Supabase. Para que aparezca **chorroybuenas.com.mx** (o un subdominio tuyo), hay que usar un **dominio personalizado** para Auth.
+Cuando los usuarios inician sesión con Google, ven **"Sign in to continue to <tu-proyecto-ref>.supabase.co"** porque la URL de callback de OAuth es la de tu proyecto Supabase. Para que aparezca **chorroybuenas.com.mx** (o un subdominio tuyo), hay que usar un **dominio personalizado** para Auth.
 
 ## Requisitos
 
@@ -18,7 +18,7 @@ Cuando los usuarios inician sesión con Google, ven **"Sign in to continue to vj
    - **auth.chorroybuenas.com.mx** (recomendado)
    - o **api.chorroybuenas.com.mx**
 5. Supabase te dará:
-   - Un **CNAME**: apunta `auth.chorroybuenas.com.mx` a `vjglrfofyzvyvaetakpu.supabase.co`
+   - Un **CNAME**: apunta `auth.chorroybuenas.com.mx` a `<tu-proyecto-ref>.supabase.co`
    - Un **registro TXT** (ej. `_acme-challenge.auth.chorroybuenas.com.mx`) para verificación.
 6. Crea esos registros en el DNS de chorroybuenas.com.mx (donde gestiones el dominio).
 7. Espera a que Supabase verifique el dominio y active el certificado (puede tardar unos minutos).

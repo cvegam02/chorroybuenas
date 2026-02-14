@@ -50,7 +50,8 @@ export const useCards = () => {
         } else if (!user) {
           setCards(await loadCards());
         } else {
-          setCards([]);
+          /* user existe pero currentSetId aún no cargó (SetContext async).
+             No borrar cartas; esperar a que currentSetId esté disponible. */
         }
       } catch (error) {
         console.error('Error loading cards:', error);

@@ -238,7 +238,7 @@ export const Navbar = () => {
           {!isLoading && !user && (
             <div className="navbar__auth-guest">
               <button
-                className="navbar__auth-btn navbar__auth-btn--login-text"
+                className="navbar__auth-btn navbar__auth-btn--login-text navbar__auth-guest--desktop-only"
                 onClick={() => {
                   setEmailModalMode('login');
                   setIsEmailModalOpen(true);
@@ -248,7 +248,7 @@ export const Navbar = () => {
               </button>
               <button
                 type="button"
-                className="navbar__auth-btn navbar__auth-btn--signup"
+                className="navbar__auth-btn navbar__auth-btn--signup navbar__auth-guest--desktop-only"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -315,6 +315,31 @@ export const Navbar = () => {
               >
                 {t('navbar.whatIs')}
               </Link>
+            </li>
+            <li className="navbar__menu-auth navbar__menu-auth--mobile-only">
+              <div className="navbar__menu-auth-divider" />
+              <button
+                type="button"
+                className="navbar__link navbar__link--button navbar__auth-btn-mobile"
+                onClick={() => {
+                  setEmailModalMode('login');
+                  setIsEmailModalOpen(true);
+                  closeMenu();
+                }}
+              >
+                {t('common.auth.titleLogin')}
+              </button>
+              <button
+                type="button"
+                className="navbar__auth-btn navbar__auth-btn--signup navbar__auth-btn-mobile-full"
+                onClick={() => {
+                  setEmailModalMode('signup');
+                  setIsEmailModalOpen(true);
+                  closeMenu();
+                }}
+              >
+                {t('common.auth.titleSignUp')}
+              </button>
             </li>
           </ul>
         )}
