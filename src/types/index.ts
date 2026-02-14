@@ -4,6 +4,13 @@ export interface Card {
   id: string;
   title: string;
   image?: string; // blob URL when loaded from IndexedDB, base64 only during migration/legacy
+  originalImage?: string; // Backup of the original image before AI transformation
+  /** Supabase Storage path (cuando está logueado). Permite descargar sin depender de CORS de la signed URL. */
+  imagePath?: string;
+  /** Supabase Storage path para la imagen original (cuando aplica). */
+  originalImagePath?: string;
+  isAiGenerated?: boolean;
+  isProcessing?: boolean;
 }
 
 // Board can have either full cards or just card IDs (for storage optimization)

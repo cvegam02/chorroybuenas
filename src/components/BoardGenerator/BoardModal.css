@@ -78,12 +78,17 @@
 
 .board-modal__title {
   font-size: 2rem;
-  color: #ea580c;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0;
-  font-weight: 700;
+  font-weight: 800;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  letter-spacing: -0.02em;
+  font-family: var(--font-body);
 }
 
 .board-modal__nav {

@@ -1,6 +1,9 @@
-import { useState } from 'react';
-import { Board } from '../types';
+import { useState, useEffect } from 'react';
+import { Board, Card } from '../types';
 import { loadCards } from '../utils/storage';
+import { useAuth } from '../contexts/AuthContext';
+import { useSetContext } from '../contexts/SetContext';
+import { BoardRepository } from '../repositories/BoardRepository';
 
 // Fisher-Yates shuffle algorithm
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -37,16 +40,46 @@ const isDuplicateBoard = (board: Board, existingBoards: Board[]): boolean => {
 export const useBoard = () => {
   const [boards, setBoards] = useState<Board[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const { user } = useAuth();
+  const { currentSetId } = useSetContext();
+
+  useEffect(() => {
+    const loadCloudBoards = async () => {
+      if (user && currentSetId) {
+        try {
+          const cloudBoards = await BoardRepository.getBoards(user.id, currentSetId);
+          setBoards(cloudBoards);
+        } catch (error) {
+          console.error('Error loading cloud boards:', error);
+        }
+      } else {
+        setBoards([]);
+      }
+    };
+    loadCloudBoards();
+  }, [user, currentSetId]);
 
   const generateBoardsAsync = async (count: number, gridSize: 9 | 16 = 16): Promise<Board[]> => {
     setIsGenerating(true);
     try {
+      // Borrar tableros anteriores antes de generar nuevos (solo usuarios logueados; invitados se sobrescribe en saveBoards)
+      if (user && currentSetId) {
+        await BoardRepository.deleteAllBoardsForSet(user.id, currentSetId);
+      }
+
       // Small delay to allow UI to update
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const allCards = await loadCards();
+      let allCards: Card[];
+      if (user && currentSetId) {
+        const { CardRepository } = await import('../repositories/CardRepository');
+        allCards = await CardRepository.getCards(user.id, currentSetId);
+      } else if (user) {
+        allCards = [];
+      } else {
+        allCards = await loadCards();
+      }
 
-      console.log(`Generating boards with ${allCards.length} cards from IndexedDB (Grid: ${gridSize === 16 ? '4x4' : '3x3'})`);
 
       if (!Array.isArray(allCards)) {
         throw new Error('Error al cargar las cartas. Por favor, asegúrate de haber guardado las cartas correctamente.');
@@ -86,32 +119,42 @@ export const useBoard = () => {
           }
         }
 
-        if (!isUnique) {
-          console.warn(`Could not generate unique board ${i + 1} after ${MAX_ATTEMPTS} attempts. Using last generated board.`);
-        }
-
         // Add the board even if not unique (to avoid infinite loop)
         generatedBoards.push(board!);
-
-        if (attempts > 0) {
-          console.log(`Board ${i + 1} generated after ${attempts} attempts to avoid duplicates`);
-        }
-      }
-
-      if (totalAttempts > 0) {
-        console.log(`Total attempts to avoid duplicates: ${totalAttempts}`);
       }
 
       setBoards(generatedBoards);
+
+      if (user && currentSetId) {
+        for (const board of generatedBoards) {
+          await BoardRepository.saveBoard(user.id, board, currentSetId);
+        }
+      }
+
       return generatedBoards;
     } finally {
       setIsGenerating(false);
     }
   };
 
+  const clearBoardsAsync = async (): Promise<void> => {
+    if (!user || !currentSetId) {
+      setBoards([]);
+      return;
+    }
+    try {
+      await BoardRepository.deleteAllBoardsForSet(user.id, currentSetId);
+      setBoards([]);
+    } catch (error) {
+      console.error('Error clearing boards:', error);
+      throw error;
+    }
+  };
+
   return {
     boards,
     generateBoards: generateBoardsAsync,
+    clearBoards: clearBoardsAsync,
     isGenerating,
   };
 };

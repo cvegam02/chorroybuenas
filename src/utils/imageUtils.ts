@@ -8,29 +8,29 @@
  */
 export const compressImage = (
   imageSrc: string,
-  maxWidth: number = 800,
-  maxHeight: number = 800,
-  quality: number = 0.65
+  maxWidth: number = 768,
+  maxHeight: number = 768,
+  quality: number = 0.7
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    
+
     img.onload = () => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      
+
       if (!ctx) {
         reject(new Error('Could not get canvas context'));
         return;
       }
-      
+
       // Calculate new dimensions maintaining aspect ratio
       let width = img.width;
       let height = img.height;
-      
+
       if (width > maxWidth || height > maxHeight) {
         const aspectRatio = width / height;
-        
+
         if (width > height) {
           width = Math.min(width, maxWidth);
           height = width / aspectRatio;
@@ -39,22 +39,22 @@ export const compressImage = (
           width = height * aspectRatio;
         }
       }
-      
+
       canvas.width = width;
       canvas.height = height;
-      
+
       // Draw and compress
       ctx.drawImage(img, 0, 0, width, height);
-      
+
       // Convert to JPEG with compression (even if original was PNG)
       const compressed = canvas.toDataURL('image/jpeg', quality);
       resolve(compressed);
     };
-    
+
     img.onerror = () => {
       reject(new Error('Error loading image for compression'));
     };
-    
+
     img.src = imageSrc;
   });
 };
@@ -62,7 +62,7 @@ export const compressImage = (
 export const convertFileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
+
     reader.onload = () => {
       if (typeof reader.result === 'string') {
         resolve(reader.result);
@@ -70,11 +70,11 @@ export const convertFileToBase64 = (file: File): Promise<string> => {
         reject(new Error('Failed to convert file to base64'));
       }
     };
-    
+
     reader.onerror = () => {
       reject(new Error('Error reading file'));
     };
-    
+
     reader.readAsDataURL(file);
   });
 };
@@ -93,22 +93,22 @@ export const resizeImageToAspectRatio = (
     const img = new Image();
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    
+
     if (!ctx) {
       reject(new Error('Could not get canvas context'));
       return;
     }
-    
+
     img.onload = () => {
       // Calculate dimensions to maintain aspect ratio while fitting target size
       const aspectRatio = targetWidth / targetHeight;
       const imgAspectRatio = img.width / img.height;
-      
+
       let drawWidth = img.width;
       let drawHeight = img.height;
       let x = 0;
       let y = 0;
-      
+
       if (imgAspectRatio > aspectRatio) {
         // Image is wider than target aspect ratio
         drawHeight = img.height;
@@ -120,23 +120,23 @@ export const resizeImageToAspectRatio = (
         drawHeight = img.width / aspectRatio;
         y = (img.height - drawHeight) / 2;
       }
-      
+
       canvas.width = targetWidth;
       canvas.height = targetHeight;
-      
+
       ctx.drawImage(
         img,
         x, y, drawWidth, drawHeight,
         0, 0, targetWidth, targetHeight
       );
-      
+
       resolve(canvas.toDataURL('image/jpeg', 0.9));
     };
-    
+
     img.onerror = () => {
       reject(new Error('Error loading image'));
     };
-    
+
     const reader = new FileReader();
     reader.onload = (e) => {
       if (e.target?.result) {
@@ -151,9 +151,26 @@ export const resizeImageToAspectRatio = (
 };
 
 /**
+ * Converts an image URL (http/https/blob) to base64 data URL to avoid canvas tainting
+ */
+const urlToDataUrl = (url: string): Promise<string> => {
+  return fetch(url, { mode: 'cors' })
+    .then((res) => res.blob())
+    .then(
+      (blob) =>
+        new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        })
+    );
+};
+
+/**
  * Adjusts a base64 image to match card aspect ratio (5:7.5) using "cover" mode
  * This ensures images fill the card area exactly as shown in preview
- * @param imageSrc - Base64 image string
+ * @param imageSrc - Base64 image string or image URL
  * @param targetWidth - Target width (default: 800px)
  * @param targetHeight - Target height (default: 1200px for 5:7.5 ratio)
  * @param quality - JPEG quality 0-1 (default: 0.85)
@@ -161,66 +178,72 @@ export const resizeImageToAspectRatio = (
  */
 export const adjustImageToCardAspectRatio = (
   imageSrc: string,
-  targetWidth: number = 800,
-  targetHeight: number = 1200,
-  quality: number = 0.85
+  targetWidth: number = 512,
+  targetHeight: number = 768,
+  quality: number = 0.8
 ): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    if (!ctx) {
-      reject(new Error('Could not get canvas context'));
-      return;
-    }
-    
-    img.onload = () => {
-      // Card aspect ratio is 5:7.5 = 2/3 = 0.666...
-      const cardAspectRatio = targetWidth / targetHeight;
-      const imgAspectRatio = img.width / img.height;
-      
-      let sourceX = 0;
-      let sourceY = 0;
-      let sourceWidth = img.width;
-      let sourceHeight = img.height;
-      
-      // Use "cover" mode: crop the image to match card aspect ratio
-      // This matches how object-fit: cover works in CSS
-      if (imgAspectRatio > cardAspectRatio) {
-        // Image is wider than card - crop sides
-        sourceHeight = img.height;
-        sourceWidth = img.height * cardAspectRatio;
-        sourceX = (img.width - sourceWidth) / 2;
-      } else {
-        // Image is taller than card - crop top/bottom
-        sourceWidth = img.width;
-        sourceHeight = img.width / cardAspectRatio;
-        sourceY = (img.height - sourceHeight) / 2;
+  const run = (dataUrl: string) =>
+    new Promise<string>((resolve, reject) => {
+      const img = new Image();
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'));
+        return;
       }
-      
-      // Set canvas to target dimensions (high resolution)
-      canvas.width = targetWidth;
-      canvas.height = targetHeight;
-      
-      // Fill with white background first
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, targetWidth, targetHeight);
-      
-      // Draw the cropped portion scaled to fill the canvas
-      ctx.drawImage(
-        img,
-        sourceX, sourceY, sourceWidth, sourceHeight,
-        0, 0, targetWidth, targetHeight
-      );
-      
-      resolve(canvas.toDataURL('image/jpeg', quality));
-    };
-    
-    img.onerror = () => {
-      reject(new Error('Error loading image'));
-    };
-    
-    img.src = imageSrc;
-  });
+
+      img.onload = () => {
+        // Card aspect ratio is 5:7.5 = 2/3 = 0.666...
+        const cardAspectRatio = targetWidth / targetHeight;
+        const imgAspectRatio = img.width / img.height;
+
+        let sourceX = 0;
+        let sourceY = 0;
+        let sourceWidth = img.width;
+        let sourceHeight = img.height;
+
+        // Use "cover" mode: crop the image to match card aspect ratio
+        if (imgAspectRatio > cardAspectRatio) {
+          sourceHeight = img.height;
+          sourceWidth = img.height * cardAspectRatio;
+          sourceX = (img.width - sourceWidth) / 2;
+        } else {
+          sourceWidth = img.width;
+          sourceHeight = img.width / cardAspectRatio;
+          sourceY = (img.height - sourceHeight) / 2;
+        }
+
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, targetWidth, targetHeight);
+
+        ctx.drawImage(
+          img,
+          sourceX, sourceY, sourceWidth, sourceHeight,
+          0, 0, targetWidth, targetHeight
+        );
+
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+
+      img.onerror = () => {
+        reject(new Error('Error loading image'));
+      };
+
+      img.src = dataUrl;
+    });
+
+  const isDataUrl = imageSrc.startsWith('data:');
+  const isUrl = imageSrc.startsWith('http://') || imageSrc.startsWith('https://') || imageSrc.startsWith('blob:');
+
+  if (isDataUrl) {
+    return run(imageSrc);
+  }
+  if (isUrl) {
+    return urlToDataUrl(imageSrc).then(run);
+  }
+  return run(imageSrc);
 };

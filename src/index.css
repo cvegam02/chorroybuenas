@@ -1,6 +1,6 @@
 :root {
-  /* Typography - Playful & Rounded */
-  --font-display: 'Fredoka', 'Quicksand', system-ui, sans-serif;
+  /* Typography - Quicksand en toda la app */
+  --font-display: 'Quicksand', system-ui, sans-serif;
   --font-body: 'Quicksand', system-ui, sans-serif;
 
   line-height: 1.6;
@@ -82,6 +82,12 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+html {
+  overflow-x: hidden;
+  /* Reserva espacio para scrollbar: márgenes izquierdo y derecho iguales */
+  scrollbar-gutter: stable;
 }
 
 body {

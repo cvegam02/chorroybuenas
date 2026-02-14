@@ -14,7 +14,47 @@
         "warning": "Advertencia",
         "success": "Éxito",
         "yes": "Sí",
-        "no": "No"
+        "no": "No",
+        "loginWithGoogle": "Entrar con Google",
+        "loginWithEmail": "Entrar con Correo",
+        "signUp": "Registrarse",
+        "email": "Correo Electrónico",
+        "password": "Contraseña",
+        "or": "o",
+        "logout": "Cerrar sesión",
+        "auth": {
+            "titleLogin": "Iniciar Sesión",
+            "titleSignUp": "Crear Cuenta",
+            "loginGoogle": "Iniciar sesión con Google",
+            "signUpGoogle": "Registrarse con Google",
+            "welcomeBack": "Bienvenido de nuevo a chorroybuenas",
+            "joinToSave": "Únete para guardar tu progreso en la nube",
+            "orWithEmail": "o con correo electrónico",
+            "emailPlaceholder": "ejemplo@correo.com",
+            "fullName": "Nombre completo",
+            "confirmPassword": "Confirmar contraseña",
+            "noAccount": "¿No tienes cuenta? Registrate",
+            "hasAccount": "¿Ya tienes cuenta? Entra aquí",
+            "forgotPassword": "¿Olvidaste tu contraseña?",
+            "forgotPasswordTitle": "Recuperar contraseña",
+            "forgotPasswordDescription": "Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.",
+            "sendResetLink": "Enviar enlace",
+            "backToLogin": "Volver al inicio de sesión",
+            "forgotPasswordSent": "Revisa tu correo. Te enviamos un enlace para restablecer tu contraseña. Si no aparece, revisa la carpeta de spam.",
+            "setNewPasswordTitle": "Nueva contraseña",
+            "setNewPasswordDescription": "Elige una contraseña segura para tu cuenta.",
+            "newPassword": "Nueva contraseña",
+            "saveNewPassword": "Guardar contraseña",
+            "passwordUpdated": "Contraseña actualizada. Ya puedes iniciar sesión con tu nueva contraseña.",
+            "continue": "Continuar",
+            "errors": {
+                "invalidEmail": "Correo inválido",
+                "weakPassword": "La contraseña debe tener al menos 6 caracteres",
+                "authFailed": "Correo o contraseña incorrectos",
+                "emailTaken": "Este correo ya está registrado",
+                "passwordMismatch": "Las contraseñas no coinciden"
+            }
+        }
     },
     "landing": {
         "title": "Crea tu Lotería Mexicana Personalizada | chorroybuenas.com.mx",
@@ -100,6 +140,47 @@
             "description": "Crea recuerdos inolvidables en minutos. ¡Empieza ahora y diviértete con tu lotería personalizada!",
             "button": "Crear mi Lotería"
         },
+        "benefits": {
+            "title": "¡Únete a la Tradición!",
+            "subtitle": "Regístrate gratis para obtener beneficios exclusivos",
+            "feature1": {
+                "title": "Guardado en la Nube",
+                "description": "Tus cartas y tableros se guardan para siempre. Accede desde cualquier dispositivo."
+            },
+            "feature2": {
+                "title": "IA Estilo Tradicional",
+                "description": "Usa nuestra Inteligencia Artificial para transformar tus fotos personales al estilo de la lotería clásica."
+            },
+            "feature3": {
+                "title": "Tokens de IA",
+                "description": "Obtén tokens gratis al registrarte y compra más cuando los necesites para transformar tus fotos."
+            },
+            "cta": "Iniciar con Google",
+            "learnMore": "Conocer más beneficios"
+        },
+        "benefitsPage": {
+            "title": "¿Por qué registrarte?",
+            "subtitle": "Descubre todo lo que puedes hacer al unirte a nuestra comunidad",
+            "cloud": {
+                "title": "Tus juegos, siempre seguros",
+                "description": "Guardamos tus cartas y tableros en la nube para que nunca los pierdas. Accede desde cualquier lugar."
+            },
+            "sync": {
+                "title": "Sincronización Total",
+                "description": "Empieza a crear en tu celular y termina en tu computadora. Todo sincronizado al instante."
+            },
+            "credits": {
+                "title": "Tokens de IA",
+                "description": "Al registrarte recibes tokens de cortesía. Además, podrás adquirir paquetes adicionales para seguir transformando todas las fotos que desees en arte de Lotería."
+            },
+            "aiStyles": {
+                "title": "Estilos de IA (Próximamente)",
+                "description": "Pronto podrás transformar tus fotos no solo al estilo tradicional, sino también a estilos como Los Simpsons, Studio Ghibli y más."
+            },
+            "cta": "Empezar ahora",
+            "backToHome": "Volver al inicio",
+            "signUpGoogle": "Registrarse con Google"
+        },
         "info": {
             "howToPlay": "¿Cómo se juega?",
             "whatIs": "¿Qué es la Lotería?"
@@ -111,6 +192,8 @@
     "navbar": {
         "support": "Apoyar",
         "home": "Inicio",
+        "myAccount": "Mi cuenta",
+        "myLoterias": "Mis loterías",
         "create": "Crear Lotería",
         "howToPlay": "¿Cómo se juega?",
         "whatIs": "¿Qué es la Lotería?"
@@ -197,6 +280,7 @@
         "confirmation": {
             "title": "¡Tu archivo PDF ha sido descargado exitosamente!",
             "message": "¿Estás listo para salir? Una vez que salgas, todos los datos generados se eliminarán.",
+            "messageLoggedIn": "¡Completado! Tus cartas y tableros están guardados en tu cuenta.",
             "modify": "Modificar",
             "complete": "Completo"
         },
@@ -270,7 +354,8 @@
             "cancelProcess": "Cancelar Proceso",
             "addCard": "Agregar Carta",
             "editCard": "Editar Carta",
-            "adjustImage": "Ajustar Imagen"
+            "adjustImage": "Ajustar Imagen",
+            "aiBulkTransform": "Convertir todo a Estilo IA"
         },
         "errors": {
             "duplicateTitle": "Ya existe una carta con ese nombre. Por favor usa un título diferente.",
@@ -283,9 +368,16 @@
         "description": "Selecciona la parte de la imagen que quieres usar en tu carta. El área dentro del recuadro será la que aparezca en tu lotería.",
         "zoomIn": "Acercar",
         "zoomOut": "Alejar",
+        "aiStyle": "Estilo IA",
+        "aiStyleInfo": "Transforma tu foto al estilo tradicional de la Lotería Mexicana",
+        "aiProcessing": "La IA está pintando tu carta...",
+        "selectStyle": "Estilo:",
+        "aiError": "No pudimos transformar la imagen. Inténtalo de nuevo.",
         "actions": {
             "cancel": "Cancelar",
-            "crop": "Usar esta área"
+            "backToEdit": "Volver a la edición de la carta",
+            "crop": "Usar esta área",
+            "transform": "Convertir a Lotería"
         }
     },
     "cardUpload": {
@@ -326,6 +418,32 @@
             "next": "Siguiente ({{count}} restantes) →",
             "finish": "Finalizar"
         }
+    },
+    "aiBatchModal": {
+        "title": "Transformación a Estilo Lotería",
+        "description": "Estás a punto de transformar {{count}} imágenes usando Inteligencia Artificial.",
+        "selectStyle": "Selecciona un Estilo Artístico",
+        "styles": {
+            "traditional": "Tradicional",
+            "simpsons": "Simpsons",
+            "ghibli": "Studio Ghibli",
+            "calaverita": "Calaverita"
+        },
+        "costEstimate": "Costo estimado total: ${{cost}} USD",
+        "timeEstimate": "Tiempo estimado: {{time}} min",
+        "styleStrength": "Fidelidad de la Imagen vs Estilo",
+        "strengthLow": "Máxima fidelidad: La imagen casi no cambia, solo se limpia y se le da un toque folk.",
+        "strengthMed": "Equilibrado: Se aplica el estilo de Lotería manteniendo tus rasgos reconocibles.",
+        "strengthHigh": "Máximo estilo: La IA interpreta libremente tu foto con el estilo artístico de Lotería.",
+        "disclaimer": "Los costos son estimaciones fijas basadas en el modelo OpenAI ($0.013/img). Requiere conexión a internet.",
+        "start": "Comenzar Transformación",
+        "processing": "Procesando imagen {{current}} de {{total}}...",
+        "painting": "La IA está pintando...",
+        "complete": "¡Transformación Completada!",
+        "successMessage": "Todas tus imágenes han sido actualizadas al estilo tradicional.",
+        "skippedMessage": "{{count}} imagen(es) fueron omitidas debido al filtro de seguridad de la IA (pueden ser falsos positivos).",
+        "error": "Hubo un problema al procesar algunas imágenes. Por favor intenta de nuevo.",
+        "close": "Cerrar y ver resultados"
     },
     "boardGenerator": {
         "gridMode": {

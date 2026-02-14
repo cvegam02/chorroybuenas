@@ -1,25 +1,40 @@
 .image-editor {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  max-width: 400px;
-  margin: 0 auto;
+  gap: 0;
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
   font-family: var(--font-body);
+  min-height: 0;
+}
+
+/* Layout dos columnas - igual que CardUpload / BatchUploadModal */
+.image-editor__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 28px;
+  align-items: start;
+  min-width: 0;
+}
+
+.image-editor__viewport-wrap {
+  min-width: 0;
 }
 
 .image-editor__header {
-  text-align: center;
+  text-align: left;
 }
 
 .image-editor__header h3 {
+  font-family: var(--font-display);
   font-size: 1.25rem;
   color: var(--color-primary);
-  margin-bottom: 8px;
-  font-weight: 700;
-  font-family: var(--font-body);
+  margin: 0 0 8px 0;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 10px;
 }
 
@@ -29,16 +44,19 @@
 }
 
 .image-editor__header p {
+  font-family: var(--font-body);
   font-size: 0.875rem;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
+  margin: 0 0 16px 0;
 }
 
 .image-editor__viewport-container {
   width: 100%;
   background: var(--color-bg-secondary);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 8px;
   border: 2px solid var(--color-primary-lightest);
+  box-shadow: var(--shadow-sm);
 }
 
 .image-editor__viewport {
@@ -57,6 +75,14 @@
   display: block;
 }
 
+.image-editor__controls-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+  padding-top: 4px;
+}
+
 .image-editor__controls {
   display: flex;
   flex-direction: column;
@@ -68,9 +94,9 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 12px;
-  background: var(--color-bg-primary);
-  border-radius: 8px;
+  padding: 14px 18px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
   border: 2px solid var(--color-border);
 }
 
@@ -80,11 +106,12 @@
   min-width: 44px;
   min-height: 44px;
   border: 2px solid var(--color-primary);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--color-bg-primary);
   color: var(--color-primary);
+  font-family: var(--font-display);
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -109,70 +136,76 @@
 
 .image-editor__zoom-button:disabled {
   border-color: var(--color-border-dark);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-muted);
   cursor: not-allowed;
 }
 
 .image-editor__zoom-value {
+  font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--color-text-main);
   min-width: 60px;
   text-align: center;
 }
 
+/* Actions - mismo estilo que CardUpload */
 .image-editor__actions {
   display: flex;
+  flex-direction: column;
   gap: 12px;
+  margin-top: 8px;
 }
 
 .image-editor__cancel-button,
 .image-editor__crop-button {
-  flex: 1;
+  width: 100%;
   padding: 14px 24px;
-  min-height: 44px;
+  min-height: 48px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 600;
+  letter-spacing: -0.01em;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
 }
 
-.image-editor__cancel-button:focus,
-.image-editor__crop-button:focus {
+.image-editor__cancel-button:focus-visible,
+.image-editor__crop-button:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
-.image-editor__cancel-button:active,
-.image-editor__crop-button:active {
-  transform: scale(0.98);
-}
-
 .image-editor__cancel-button {
-  background: var(--color-text-secondary);
-  color: white;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
 }
 
 .image-editor__cancel-button:hover {
-  background: var(--color-text-primary);
-  transform: translateY(-1px);
+  background: var(--color-border-dark);
+  color: var(--color-text-main);
 }
 
 .image-editor__crop-button {
-  background: var(--color-primary);
+  margin-top: 0;
+  padding: 16px 28px;
+  min-height: 52px;
+  font-size: 1.0625rem;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   color: white;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
 }
 
 .image-editor__crop-button:hover {
-  background: var(--color-primary-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(234, 88, 12, 0.4);
 }
 
 .image-editor__help-text {
@@ -200,15 +233,36 @@
 }
 
 .image-editor__help-text p strong {
-  color: var(--color-text-primary);
+  color: var(--color-text-main);
   font-weight: 600;
 }
 
-@media (max-width: 768px) {
-  .image-editor {
-    max-width: 100%;
+/* Móvil - una columna */
+@media (max-width: 640px) {
+  .image-editor__layout {
+    grid-template-columns: 1fr;
+    gap: 22px;
   }
 
+  .image-editor__viewport-wrap {
+    max-width: 220px;
+    margin: 0 auto;
+  }
+
+  .image-editor__header {
+    text-align: center;
+  }
+
+  .image-editor__header h3 {
+    justify-content: center;
+  }
+
+  .image-editor__header p {
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 768px) {
   .image-editor__zoom-button {
     width: 48px;
     height: 48px;

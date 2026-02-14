@@ -1,5 +1,5 @@
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LandingPage } from './components/LandingPage/LandingPage';
 import { CardEditor } from './components/CardEditor/CardEditor';
@@ -9,17 +9,31 @@ import { ConfirmationModal } from './components/ConfirmationModal/ConfirmationMo
 import { WarningModal } from './components/ConfirmationModal/WarningModal';
 import { HowToPlay } from './components/HowToPlay/HowToPlay';
 import { AboutLoteria } from './components/AboutLoteria/AboutLoteria';
+import BenefitsPage from './components/BenefitsPage/BenefitsPage';
+import { SetView } from './components/SetView/SetView';
+import { BuyTokensPage } from './components/BuyTokens/BuyTokensPage';
+import { Dashboard } from './components/Dashboard/Dashboard';
+import { AdminPanel } from './components/AdminPanel/AdminPanel';
 import { Navbar } from './components/Navbar/Navbar';
 import { Footer } from './components/Footer/Footer';
+import { SetNewPasswordModal } from './components/Auth/SetNewPasswordModal';
+import { useAuth } from './contexts/AuthContext';
+import { useSetContext } from './contexts/SetContext';
+import { SetRepository } from './repositories/SetRepository';
 import { useBoard } from './hooks/useBoard';
+import { useCards } from './hooks/useCards';
 import { generatePDF, downloadPDF } from './services/PDFService';
-import { saveBoards, saveBoardCount, clearAllData } from './utils/storage';
+import { saveBoards, saveBoardCount, loadBoards, clearAllData } from './utils/storage';
+import { BoardRepository } from './repositories/BoardRepository';
 import { Board, GridSize } from './types';
 
 type AppStep = 'cards' | 'board-count' | 'preview' | 'confirmation';
 
 function AppContent() {
   const { t } = useTranslation();
+  const { user, recoverySession, isLoading: authLoading } = useAuth();
+  const { currentSetId, sets, setSets } = useSetContext();
+  const { cards } = useCards();
   const navigate = useNavigate();
   const location = useLocation();
   const [currentStep, setCurrentStep] = useState<AppStep | null>(null);
@@ -42,7 +56,77 @@ function AppContent() {
     }
   }, [location.pathname, currentStep]);
 
-  const handleCardsNext = () => {
+  // Sync gridSize when entering /cards: prioridad set del contexto (incluye cambios del usuario), luego state de navegación
+  useEffect(() => {
+    if (location.pathname === '/cards') {
+      if (currentSetId) {
+        const set = sets.find(s => s.id === currentSetId);
+        if (set?.grid_size != null) {
+          setGridSize(set.grid_size);
+          return;
+        }
+      }
+      const fromState = (location.state as { gridSize?: GridSize })?.gridSize;
+      if (fromState != null) {
+        setGridSize(fromState);
+      }
+    }
+  }, [location.pathname, currentSetId, sets, location.state]);
+
+  // Sync gridSize from location.state when entering /board-count (e.g. from SetView)
+  useEffect(() => {
+    if (location.pathname === '/board-count' && location.state?.gridSize != null) {
+      setGridSize(location.state.gridSize as GridSize);
+    }
+  }, [location.pathname, location.state]);
+
+  // Cargar tableros al refrescar en /preview (evita quedarse en "Redirigiendo...")
+  useEffect(() => {
+    if (location.pathname !== '/preview' || boards.length > 0 || authLoading) return;
+
+    let cancelled = false;
+    const loadAndRedirect = async () => {
+      if (user) {
+        if (!currentSetId) return; // Esperar a que SetContext cargue
+        try {
+          const cloudBoards = await BoardRepository.getBoards(user.id, currentSetId);
+          if (cancelled) return;
+          if (cloudBoards?.length > 0) {
+            setBoards(cloudBoards);
+          } else {
+            navigate('/cards', { replace: true });
+          }
+        } catch (e) {
+          console.error('Error loading preview boards:', e);
+          if (!cancelled) navigate('/cards', { replace: true });
+        }
+      } else {
+        try {
+          const localBoards = await loadBoards();
+          if (cancelled) return;
+          if (localBoards?.length > 0) {
+            setBoards(localBoards);
+          } else {
+            navigate('/cards', { replace: true });
+          }
+        } catch (e) {
+          if (!cancelled) navigate('/cards', { replace: true });
+        }
+      }
+    };
+    loadAndRedirect();
+    return () => { cancelled = true; };
+  }, [location.pathname, boards.length, user, currentSetId, authLoading, navigate]);
+
+  const handleCardsNext = async () => {
+    if (user && currentSetId) {
+      try {
+        const updated = await SetRepository.updateSet(currentSetId, user.id, { grid_size: gridSize });
+        setSets(prev => prev.map(s => s.id === currentSetId ? { ...s, grid_size: updated.grid_size } : s));
+      } catch (err) {
+        console.error('Error saving grid size:', err);
+      }
+    }
     setCurrentStep('board-count');
     navigate('/board-count');
   };
@@ -81,10 +165,24 @@ function AppContent() {
     navigate('/board-count');
   };
 
+  /** Tableros con cartas que usan imágenes desde IndexedDB (hidratadas) para vista previa al instante (usuario logueado). */
+  const boardsWithHydratedImages = useMemo(() => {
+    return boards.map((board) => ({
+      ...board,
+      cards: board.cards.map((boardCard) => {
+        const hydratedCard = cards.find((c) => c.id === boardCard.id);
+        return {
+          ...boardCard,
+          image: hydratedCard?.image ?? boardCard.image,
+        };
+      }),
+    }));
+  }, [boards, cards]);
+
   const handlePreviewConfirm = async () => {
     setIsGeneratingPDF(true);
     try {
-      const pdfBlob = await generatePDF(boards);
+      const pdfBlob = await generatePDF(boardsWithHydratedImages, user && currentSetId ? { allCards: cards } : undefined);
       downloadPDF(pdfBlob);
       setShowConfirmation(true);
     } catch (error) {
@@ -139,7 +237,25 @@ function AppContent() {
       <Routes>
         <Route
           path="/"
-          element={<LandingPage onStart={handleLandingStart} />}
+          element={
+            user ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <LandingPage onStart={handleLandingStart} />
+            )
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
+        <Route
+          path="/admin"
+          element={<AdminPanel />}
+        />
+        <Route
+          path="/beneficios"
+          element={<BenefitsPage />}
         />
         <Route
           path="/como-se-juega"
@@ -150,51 +266,54 @@ function AppContent() {
           element={<AboutLoteria />}
         />
         <Route
+          path="/crear"
+          element={<Navigate to="/cards" replace />}
+        />
+        <Route
+          path="/loteria/:setId"
+          element={<SetView />}
+        />
+        <Route
+          path="/comprar-tokens"
+          element={<BuyTokensPage />}
+        />
+        <Route
           path="/cards"
           element={
-            currentStep === 'cards' || location.pathname === '/cards' ? (
-              <CardEditor
-                onNext={handleCardsNext}
-                onCancel={handleCancelProcess}
-                gridSize={gridSize}
-                onGridSizeChange={setGridSize}
-              />
-            ) : (
-              <div style={{ padding: '48px', textAlign: 'center' }}>
-                <h2>{t('common.loading')}</h2>
-              </div>
-            )
+            <CardEditor
+              onNext={handleCardsNext}
+              onCancel={handleCancelProcess}
+              gridSize={gridSize}
+              onGridSizeChange={setGridSize}
+            />
           }
         />
         <Route
           path="/board-count"
           element={
-            currentStep === 'board-count' ? (
-              <BoardCountSelector
-                onGenerate={handleBoardCountGenerate}
-                onCancel={handleCancelProcess}
-                gridSize={gridSize}
-              />
-            ) : (
-              <div style={{ padding: '48px', textAlign: 'center' }}>
-                <h2>{t('common.loading')}</h2>
-              </div>
-            )
+            <BoardCountSelector
+              onGenerate={handleBoardCountGenerate}
+              onCancel={handleCancelProcess}
+              gridSize={gridSize}
+            />
           }
         />
         <Route
           path="/preview"
           element={
-            currentStep === 'preview' ? (
+            boards.length > 0 ? (
               <BoardPreview
-                boards={boards}
+                boards={boardsWithHydratedImages}
                 onModify={handlePreviewModify}
                 onConfirm={handlePreviewConfirm}
                 onRegenerate={handlePreviewRegenerate}
               />
             ) : (
               <div style={{ padding: '48px', textAlign: 'center' }}>
-                <h2>Redirigiendo...</h2>
+                <h2>{t('common.loading')}</h2>
+                <button onClick={() => navigate('/cards')} className="btn btn--primary" style={{ marginTop: 16 }}>
+                  {t('common.back')}
+                </button>
               </div>
             )
           }
@@ -221,6 +340,7 @@ function AppContent() {
         <ConfirmationModal
           onComplete={handleConfirmationComplete}
           onModify={handleConfirmationModify}
+          isLoggedIn={!!user}
         />
       )}
 
@@ -234,6 +354,8 @@ function AppContent() {
         onCancel={() => setShowCancelModal(false)}
         type="danger"
       />
+
+      {recoverySession && <SetNewPasswordModal />}
     </>
   );
 }

@@ -1,80 +1,11 @@
 import { useState, useEffect, useRef, useMemo, type FC } from 'react';
 import { createPortal } from 'react-dom';
-import { FaEdit } from 'react-icons/fa';
+import { FaEdit, FaForward } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { ImageEditor } from './ImageEditor';
-import { convertFileToBase64, validateImageFile, compressImage } from '../../utils/imageUtils';
+import { convertFileToBase64, validateImageFile, compressImage, adjustImageToCardAspectRatio } from '../../utils/imageUtils';
 import './BatchUploadModal.css';
 
-/**
- * Adjusts a base64 image to match card aspect ratio (5:7.5) using "cover" mode
- * This ensures images fill the card area exactly as shown in preview
- */
-const adjustImageToCardAspectRatio = (
-  imageSrc: string,
-  targetWidth: number = 800,
-  targetHeight: number = 1200,
-  quality: number = 0.85
-): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-    if (!ctx) {
-      reject(new Error('Could not get canvas context'));
-      return;
-    }
-
-    img.onload = () => {
-      // Card aspect ratio is 5:7.5 = 2/3 = 0.666...
-      const cardAspectRatio = targetWidth / targetHeight;
-      const imgAspectRatio = img.width / img.height;
-
-      let sourceX = 0;
-      let sourceY = 0;
-      let sourceWidth = img.width;
-      let sourceHeight = img.height;
-
-      // Use "cover" mode: crop the image to match card aspect ratio
-      // This matches how object-fit: cover works in CSS
-      if (imgAspectRatio > cardAspectRatio) {
-        // Image is wider than card - crop sides (center crop)
-        sourceHeight = img.height;
-        sourceWidth = img.height * cardAspectRatio;
-        sourceX = (img.width - sourceWidth) / 2;
-      } else {
-        // Image is taller than card - crop top/bottom (center crop)
-        sourceWidth = img.width;
-        sourceHeight = img.width / cardAspectRatio;
-        sourceY = (img.height - sourceHeight) / 2;
-      }
-
-      // Set canvas to target dimensions (high resolution)
-      canvas.width = targetWidth;
-      canvas.height = targetHeight;
-
-      // Fill with white background first
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, targetWidth, targetHeight);
-
-      // Draw the cropped portion scaled to fill the canvas
-      ctx.drawImage(
-        img,
-        sourceX, sourceY, sourceWidth, sourceHeight,
-        0, 0, targetWidth, targetHeight
-      );
-
-      resolve(canvas.toDataURL('image/jpeg', quality));
-    };
-
-    img.onerror = () => {
-      reject(new Error('Error loading image'));
-    };
-
-    img.src = imageSrc;
-  });
-};
 
 interface PendingImage {
   file: File;
@@ -209,7 +140,6 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
     if (!wasEdited) {
       // Image was not edited, so it needs to be adjusted to match preview (object-fit: cover)
       try {
-        console.log(`Adjusting image ${currentIndex + 1} to card aspect ratio (5:7.5)...`);
         imageToSave = await adjustImageToCardAspectRatio(currentImage);
       } catch (error) {
         console.error('Error adjusting image aspect ratio:', error);
@@ -219,11 +149,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
 
     // Compress image before saving
     try {
-      console.log(`Compressing image ${currentIndex + 1} before save...`);
       imageToSave = await compressImage(imageToSave);
-      const originalSize = (currentImage.length / 1024).toFixed(2);
-      const compressedSize = (imageToSave.length / 1024).toFixed(2);
-      console.log(`Image ${currentIndex + 1} compressed: ${originalSize} KB -> ${compressedSize} KB`);
     } catch (error) {
       console.error('Error compressing image:', error);
       // Continue with uncompressed if compression fails
@@ -247,7 +173,6 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
     } else {
       // All images processed, save all cards (including the one we just added)
       const allCards = [...completedCardsRef.current];
-      console.log('Saving batch cards:', allCards.length); // Debug log
       onCardsAdd(allCards);
       // Reset state
       completedCardsRef.current = [];
@@ -354,40 +279,42 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
           </div>
         ) : (
           <div className="batch-upload-modal__form">
-            <div className="batch-upload-modal__preview">
-              <img src={currentImage} alt="Preview" className="batch-upload-modal__preview-img" />
-            </div>
+            <div className="batch-upload-modal__layout">
+              <div className="batch-upload-modal__preview-wrap">
+                <img src={currentImage} alt="Preview" className="batch-upload-modal__preview-img" />
+              </div>
+              <div className="batch-upload-modal__form-side">
+                <div className="batch-upload-modal__title-input-group">
+                  <label className="batch-upload-modal__label">
+                    {t('cardUpload.label')}
+                  </label>
+                  <input
+                    ref={titleInputRef}
+                    type="text"
+                    placeholder={t('cardUpload.inputPlaceholder')}
+                    value={currentTitle}
+                    onChange={(e) => setCurrentTitle(e.target.value)}
+                    onKeyDown={handleTitleKeyDown}
+                    className="batch-upload-modal__title-input"
+                    maxLength={100}
+                  />
+                  {isDuplicateTitle && (
+                    <p className="batch-upload-modal__error-text">
+                      {t('cardUpload.errorDuplicate')}
+                    </p>
+                  )}
+                  <p className="batch-upload-modal__help-text">
+                    {t('cardUpload.helpText')}
+                  </p>
+                </div>
 
-            <div className="batch-upload-modal__title-input-group">
-              <label className="batch-upload-modal__label">
-                {t('cardUpload.label')}
-              </label>
-              <input
-                ref={titleInputRef}
-                type="text"
-                placeholder={t('cardUpload.inputPlaceholder')}
-                value={currentTitle}
-                onChange={(e) => setCurrentTitle(e.target.value)}
-                onKeyDown={handleTitleKeyDown}
-                className="batch-upload-modal__title-input"
-                maxLength={100}
-              />
-              {isDuplicateTitle && (
-                <p className="batch-upload-modal__error-text">
-                  {t('cardUpload.errorDuplicate')}
-                </p>
-              )}
-              <p className="batch-upload-modal__help-text">
-                {t('cardUpload.helpText')}
-              </p>
-            </div>
-
-            <div className="batch-upload-modal__actions">
+                <div className="batch-upload-modal__actions">
               <button
                 type="button"
                 onClick={handleSkip}
                 className="batch-upload-modal__skip-button"
               >
+                <FaForward />
                 {t('batchUpload.actions.skip')}
               </button>
               <button
@@ -403,9 +330,11 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
                 onClick={handleNext}
                 disabled={!currentTitle.trim()}
                 className="batch-upload-modal__next-button"
-              >
-                {remaining > 0 ? t('batchUpload.actions.next', { count: remaining }) : t('batchUpload.actions.finish')}
-              </button>
+                  >
+                    {remaining > 0 ? t('batchUpload.actions.next', { count: remaining }) : t('batchUpload.actions.finish')}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

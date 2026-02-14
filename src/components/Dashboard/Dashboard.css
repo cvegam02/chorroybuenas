@@ -1,0 +1,1034 @@
+/* ============================================
+   DASHBOARD - Bienvenida y Panel de Usuario
+   ============================================ */
+
+.dashboard {
+  min-height: 100vh;
+  background: var(--color-bg-secondary);
+  font-family: var(--font-body);
+  padding-bottom: 64px;
+}
+
+.dashboard--loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+  color: var(--color-text-muted);
+}
+
+.dashboard__spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: dashboard-spin 0.8s linear infinite;
+}
+
+.dashboard__spinner--small {
+  width: 24px;
+  height: 24px;
+  border-width: 2px;
+}
+
+@keyframes dashboard-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dashboard__container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ============================================
+   HERO / WELCOME SECTION
+   ============================================ */
+
+.dashboard__hero {
+  position: relative;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  padding: 48px 24px 56px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  overflow: hidden;
+}
+
+.dashboard__hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 45%),
+    radial-gradient(circle at 85% 70%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.dashboard__hero-shapes {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.dashboard__hero-shape {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dashboard__hero-shape--1 {
+  width: 280px;
+  height: 280px;
+  top: -80px;
+  right: -60px;
+}
+
+.dashboard__hero-shape--2 {
+  width: 160px;
+  height: 160px;
+  bottom: -40px;
+  left: 10%;
+}
+
+.dashboard__hero-shape--3 {
+  width: 100px;
+  height: 100px;
+  top: 40%;
+  right: 15%;
+}
+
+.dashboard__hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.dashboard__hero-profile {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.dashboard__hero-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+.dashboard__hero-avatar-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+}
+
+.dashboard__hero-greeting {
+  color: white;
+}
+
+.dashboard__hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 100px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard__hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 800;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard__hero-email {
+  font-size: 0.9375rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+
+.dashboard__main {
+  margin-top: -32px;
+  padding: 0 0 48px;
+}
+
+/* Quick Actions */
+.dashboard__quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.dashboard__action-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: var(--color-bg-primary);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard__action-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.dashboard__action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.dashboard__action-card:hover::before {
+  opacity: 1;
+}
+
+.dashboard__action-card--primary {
+  border: 1px solid var(--color-primary-lighter);
+}
+
+.dashboard__action-card--primary:hover {
+  background: var(--color-primary-lightest);
+}
+
+.dashboard__action-card--secondary {
+  border: 1px solid var(--color-border);
+}
+
+.dashboard__action-card--secondary:hover {
+  border-color: var(--color-primary-lighter);
+  background: var(--color-bg-subtle);
+}
+
+.dashboard__action-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.dashboard__action-card--primary .dashboard__action-icon {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+}
+
+.dashboard__action-card--secondary .dashboard__action-icon {
+  background: var(--color-bg-subtle);
+  color: var(--color-primary);
+}
+
+.dashboard__action-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard__action-text strong {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin-bottom: 4px;
+}
+
+.dashboard__action-text span {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+.dashboard__action-arrow {
+  font-size: 1.25rem;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+/* Section Title */
+.dashboard__section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin: 0 0 20px;
+}
+
+.dashboard__section-title svg {
+  color: var(--color-primary);
+  font-size: 1.25rem;
+}
+
+/* Stats Grid */
+.dashboard__stats {
+  margin-bottom: 40px;
+}
+
+.dashboard__link-button {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-family: inherit;
+  transition: color 0.2s;
+}
+
+.dashboard__link-button:hover {
+  color: var(--color-primary-dark);
+}
+
+.dashboard__stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.dashboard__stat-card {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  text-align: center;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.dashboard__stat-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.dashboard__stat-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.dashboard__stat-card--balance .dashboard__stat-icon {
+  background: linear-gradient(135deg, var(--color-primary-lightest) 0%, var(--color-primary-lighter) 100%);
+  color: var(--color-primary);
+}
+
+.dashboard__stat-card--spent .dashboard__stat-icon {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #b45309;
+}
+
+.dashboard__stat-card--received .dashboard__stat-icon {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: var(--color-secondary-dark);
+}
+
+.dashboard__stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-text-main);
+  margin-bottom: 4px;
+}
+
+.dashboard__stat-label {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+/* Loterias Section */
+.dashboard__loterias-card {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  padding: 28px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  overflow: visible;
+}
+
+.dashboard__loading-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 0;
+  color: var(--color-text-muted);
+}
+
+/* Empty State */
+.dashboard__empty-state {
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.dashboard__empty-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: var(--color-bg-subtle);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.dashboard__empty-text {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  margin: 0 0 24px;
+  max-width: 280px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Loterias List */
+.dashboard__loterias-list {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  overflow: visible;
+}
+
+.dashboard__loteria-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 10px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: visible;
+}
+
+.dashboard__loteria-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  min-width: 0;
+}
+
+.dashboard__loteria-main:hover {
+  background: var(--color-primary-lightest);
+}
+
+.dashboard__loteria-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dashboard__loteria-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard__loteria-tokens {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.dashboard__loteria-arrow {
+  font-size: 0.875rem;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.dashboard__loteria-menu-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.dashboard__loteria-menu-trigger {
+  width: 52px;
+  min-width: 52px;
+  height: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-left: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: background 0.2s, color 0.2s;
+}
+
+.dashboard__loteria-menu-trigger:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-primary);
+}
+
+.dashboard__loteria-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  min-width: 200px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  padding: 8px 0;
+  z-index: 1000;
+}
+
+.dashboard__loteria-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dashboard__loteria-dropdown-item:hover {
+  background: var(--color-bg-subtle);
+}
+
+.dashboard__loteria-dropdown-item--danger:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.dashboard__loteria-dropdown-item svg {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* Bottom sheet (móvil) - modal deslizable desde abajo */
+.dashboard__loteria-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  animation: dashboard-sheet-overlay-in 0.2s ease;
+}
+
+@keyframes dashboard-sheet-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.dashboard__loteria-sheet {
+  background: var(--color-bg-primary);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 480px;
+  padding: 20px 0 max(20px, env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+  animation: dashboard-sheet-in 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes dashboard-sheet-in {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.dashboard__loteria-sheet-header {
+  padding: 0 24px 16px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 8px;
+}
+
+.dashboard__loteria-sheet-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.dashboard__loteria-sheet-tokens {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+.dashboard__loteria-sheet-actions {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard__loteria-sheet-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 24px;
+  border: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-main);
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: left;
+}
+
+.dashboard__loteria-sheet-item:hover {
+  background: var(--color-bg-subtle);
+}
+
+.dashboard__loteria-sheet-item:active {
+  background: var(--color-bg-subtle);
+}
+
+.dashboard__loteria-sheet-item svg {
+  font-size: 1.25rem;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.dashboard__loteria-sheet-item--danger svg,
+.dashboard__loteria-sheet-item--danger {
+  color: #dc2626;
+}
+
+.dashboard__loteria-sheet-item--danger:hover,
+.dashboard__loteria-sheet-item--danger:active {
+  background: #fee2e2;
+}
+
+/* Rename modal */
+.dashboard__rename-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: dashboard-fade-in 0.2s ease-out;
+}
+
+@keyframes dashboard-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.dashboard__rename-modal {
+  background: var(--color-bg-primary);
+  border-radius: 20px;
+  padding: 28px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--color-border);
+  animation: dashboard-slide-up 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes dashboard-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard__rename-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin: 0 0 20px;
+}
+
+.dashboard__rename-input {
+  width: 100%;
+  padding: 14px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  color: var(--color-text-main);
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.dashboard__rename-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+}
+
+.dashboard__rename-input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.dashboard__rename-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.dashboard__rename-cancel,
+.dashboard__rename-save {
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dashboard__rename-cancel {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+.dashboard__rename-cancel:hover:not(:disabled) {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-main);
+}
+
+.dashboard__rename-save {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+}
+
+.dashboard__rename-save:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.dashboard__rename-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Buttons */
+.dashboard__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.dashboard__btn--primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+}
+
+.dashboard__btn--primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.dashboard__btn--secondary {
+  background: var(--color-bg-primary);
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary-lighter);
+}
+
+.dashboard__btn--secondary:hover {
+  background: var(--color-primary-lightest);
+  border-color: var(--color-primary);
+}
+
+/* ============================================
+   RESPONSIVE - MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .dashboard {
+    padding-bottom: max(64px, env(safe-area-inset-bottom));
+  }
+
+  .dashboard__container {
+    padding: 0 16px;
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+
+  .dashboard__hero {
+    min-height: 240px;
+    padding: 28px 16px 36px;
+    padding-top: max(28px, env(safe-area-inset-top));
+  }
+
+  .dashboard__hero-profile {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .dashboard__hero-avatar,
+  .dashboard__hero-avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+  }
+
+  .dashboard__hero-badge {
+    font-size: 0.75rem;
+    padding: 6px 14px;
+    margin-bottom: 10px;
+  }
+
+  .dashboard__hero-title {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+  }
+
+  .dashboard__hero-email {
+    font-size: 0.8125rem;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 16px;
+  }
+
+  .dashboard__hero-shape--1 {
+    width: 180px;
+    height: 180px;
+  }
+
+  .dashboard__main {
+    margin-top: -20px;
+    padding-bottom: 32px;
+  }
+
+  .dashboard__quick-actions {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .dashboard__action-card {
+    padding: 18px 20px;
+    gap: 16px;
+    min-height: 72px;
+  }
+
+  .dashboard__action-card:hover {
+    transform: none;
+  }
+
+  .dashboard__action-card:active {
+    transform: scale(0.98);
+  }
+
+  .dashboard__section-title {
+    font-size: 1.125rem;
+    margin-bottom: 16px;
+  }
+
+  .dashboard__stats {
+    margin-bottom: 28px;
+  }
+
+  .dashboard__stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .dashboard__stat-card {
+    padding: 16px 12px;
+  }
+
+  .dashboard__stat-card:hover {
+    transform: none;
+  }
+
+  .dashboard__stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .dashboard__stat-value {
+    font-size: 1.5rem;
+  }
+
+  .dashboard__stat-label {
+    font-size: 0.6875rem;
+    line-height: 1.2;
+  }
+
+  .dashboard__loterias-card {
+    padding: 20px 16px;
+  }
+
+  .dashboard__loteria-main {
+    padding: 16px;
+    min-height: 56px;
+  }
+
+  .dashboard__loteria-menu-trigger {
+    width: 56px;
+    min-width: 56px;
+    min-height: 56px;
+  }
+
+  /* En móvil se usa el bottom sheet, no el dropdown */
+
+  .dashboard__btn {
+    padding: 14px 24px;
+    min-height: 48px;
+    width: 100%;
+  }
+
+  .dashboard__empty-state {
+    padding: 32px 16px;
+  }
+
+  .dashboard__empty-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 1.75rem;
+  }
+}
+
+/* Pantallas muy pequeñas (ej. iPhone SE) */
+@media (max-width: 390px) {
+  .dashboard__stats-grid {
+    gap: 8px;
+  }
+
+  .dashboard__stat-card {
+    padding: 12px 8px;
+  }
+
+  .dashboard__stat-value {
+    font-size: 1.25rem;
+  }
+
+  .dashboard__stat-label {
+    font-size: 0.625rem;
+  }
+
+  .dashboard__action-text span {
+    display: none;
+  }
+
+  .dashboard__action-card {
+    min-height: 64px;
+  }
+}
+
+/* Mejoras táctiles: desactivar hover en móvil, usar active */
+@media (hover: none) {
+  .dashboard__action-card:hover {
+    transform: none;
+  }
+
+  .dashboard__stat-card:hover {
+    transform: none;
+  }
+
+  .dashboard__loteria-main:active {
+    background: var(--color-primary-lightest);
+  }
+
+  .dashboard__loteria-menu-trigger:active {
+    background: var(--color-bg-subtle);
+  }
+}

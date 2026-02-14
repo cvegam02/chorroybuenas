@@ -42,7 +42,9 @@ export const CardUploadModal = ({ isOpen, onClose, onCardAdd, existingTitles }: 
             ×
           </button>
         </div>
-        <CardUpload onCardAdd={handleCardAdd} existingTitles={existingTitles} />
+        <div className="card-upload-modal__body">
+          <CardUpload onCardAdd={handleCardAdd} existingTitles={existingTitles} />
+        </div>
       </div>
     </div>
   );

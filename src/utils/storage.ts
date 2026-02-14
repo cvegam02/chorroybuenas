@@ -5,11 +5,13 @@ const CARDS_KEY = 'loteria_cards';
 const BOARDS_KEY = 'loteria_boards';
 const BOARD_COUNT_KEY = 'loteria_board_count';
 const MIGRATION_FLAG_KEY = 'loteria_migrated_to_indexeddb';
+const CURRENT_SET_PREFIX = 'loteria_current_set_';
 
 // Card metadata (without images) for localStorage
 interface CardMetadata {
   id: string;
   title: string;
+  isAiGenerated?: boolean;
 }
 
 /**
@@ -21,11 +23,10 @@ export const saveCards = async (cards: Card[]): Promise<void> => {
     const cardsMetadata: CardMetadata[] = cards.map(card => ({
       id: card.id,
       title: card.title,
+      isAiGenerated: card.isAiGenerated,
     }));
 
     const serialized = JSON.stringify(cardsMetadata);
-    const sizeKB = serialized.length / 1024;
-    console.log(`Saving ${cards.length} cards metadata to localStorage (size: ${sizeKB.toFixed(2)} KB)`);
 
     localStorage.setItem(CARDS_KEY, serialized);
 
@@ -36,7 +37,6 @@ export const saveCards = async (cards: Card[]): Promise<void> => {
         try {
           // Save base64 image to IndexedDB and get blob URL
           const blobURL = await saveImageToIndexedDB(card.id, card.image!);
-          console.log(`✓ Saved image for card ${card.id} to IndexedDB`);
           return blobURL;
         } catch (error) {
           console.error(`Error saving image for card ${card.id}:`, error);
@@ -46,6 +46,21 @@ export const saveCards = async (cards: Card[]): Promise<void> => {
       });
 
     await Promise.all(imagePromises);
+
+    // Save original images to IndexedDB
+    const originalImagePromises = cards
+      .filter(card => card.originalImage && card.originalImage.startsWith('data:'))
+      .map(async (card) => {
+        try {
+          const blobURL = await saveImageToIndexedDB(`${card.id}_orig`, card.originalImage!);
+          return blobURL;
+        } catch (error) {
+          console.error(`Error saving original image for card ${card.id}:`, error);
+          return null;
+        }
+      });
+
+    await Promise.all(originalImagePromises);
 
     // Verify the metadata save worked
     const verifyStored = localStorage.getItem(CARDS_KEY);
@@ -57,7 +72,6 @@ export const saveCards = async (cards: Card[]): Promise<void> => {
       throw new Error(`Data corruption: tried to save ${cards.length} cards but only ${verifyParsed.length} were saved`);
     }
 
-    console.log(`✓ Successfully saved ${cards.length} cards (metadata + images)`);
   } catch (error) {
     console.error('Error saving cards:', error);
     if (error instanceof DOMException && error.name === 'QuotaExceededError') {
@@ -76,13 +90,11 @@ export const loadCards = async (): Promise<Card[]> => {
   try {
     const stored = localStorage.getItem(CARDS_KEY);
     if (!stored) {
-      console.log('No cards found in localStorage');
       // Check for legacy format and migrate
       return await migrateLegacyCards();
     }
 
     const cardsMetadata: CardMetadata[] = JSON.parse(stored);
-    console.log(`Loaded ${cardsMetadata.length} cards metadata from localStorage`);
 
     if (!Array.isArray(cardsMetadata)) {
       return [];
@@ -95,25 +107,30 @@ export const loadCards = async (): Promise<Card[]> => {
     const cardsWithImages = await Promise.all(
       cardsMetadata.map(async (metadata) => {
         try {
-          const imageURL = await getImage(metadata.id);
+          const [imageURL, originalImageURL] = await Promise.all([
+            getImage(metadata.id),
+            getImage(`${metadata.id}_orig`)
+          ]);
+
           return {
             id: metadata.id,
             title: metadata.title,
             image: imageURL || undefined,
+            originalImage: originalImageURL || undefined,
+            isAiGenerated: metadata.isAiGenerated,
           };
         } catch (imgError) {
-          console.error(`Error loading image for card ${metadata.id}:`, imgError);
-          // Return card without image rather than failing
+          console.error(`Error loading images for card ${metadata.id}:`, imgError);
           return {
             id: metadata.id,
             title: metadata.title,
-            image: undefined
+            image: undefined,
+            originalImage: undefined
           };
         }
       })
     );
 
-    console.log(`✓ Loaded ${cardsWithImages.length} cards from storage`);
     return cardsWithImages;
   } catch (error) {
     console.error('Error loading cards:', error);
@@ -134,7 +151,6 @@ const migrateLegacyCards = async (): Promise<Card[]> => {
     }
 
     // Try to find cards with base64 images in localStorage (old format)
-    console.log('Checking for legacy cards format...');
     const stored = localStorage.getItem(CARDS_KEY);
     if (!stored) {
       localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
@@ -148,7 +164,6 @@ const migrateLegacyCards = async (): Promise<Card[]> => {
         // Check if any card has base64 image
         const hasBase64Images = oldCards.some(card => card.image && card.image.startsWith('data:'));
         if (hasBase64Images) {
-          console.log(`Found ${oldCards.length} legacy cards with base64 images. Migrating to IndexedDB...`);
 
           // Migrate images to IndexedDB
           const { migrateImagesToIndexedDB } = await import('./indexedDB');
@@ -158,7 +173,6 @@ const migrateLegacyCards = async (): Promise<Card[]> => {
 
           if (cardsToMigrate.length > 0) {
             await migrateImagesToIndexedDB(cardsToMigrate);
-            console.log(`✓ Migrated ${cardsToMigrate.length} images to IndexedDB`);
           }
 
           // Save only metadata (without images) to localStorage
@@ -181,14 +195,12 @@ const migrateLegacyCards = async (): Promise<Card[]> => {
             })
           );
 
-          console.log(`✓ Migration complete. Loaded ${migratedCards.length} cards with images from IndexedDB`);
           localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
           return migratedCards;
         }
       }
     } catch (parseError) {
       // If parse fails, might be new format already
-      console.log('Could not parse as legacy format, assuming new format');
     }
 
     // Set migration flag
@@ -214,8 +226,6 @@ export const saveBoards = async (boards: Board[], count: number): Promise<void> 
     };
 
     const serialized = JSON.stringify(collection);
-    const sizeKB = serialized.length / 1024;
-    console.log(`Saving ${boards.length} boards (${sizeKB.toFixed(2)} KB - optimized with IDs only)`);
 
     localStorage.setItem(BOARDS_KEY, serialized);
 
@@ -225,7 +235,6 @@ export const saveBoards = async (boards: Board[], count: number): Promise<void> 
       throw new Error('Failed to verify saved boards');
     }
 
-    console.log(`✓ Successfully saved ${boards.length} boards to localStorage`);
   } catch (error) {
     console.error('Error saving boards to localStorage:', error);
     if (error instanceof DOMException && error.name === 'QuotaExceededError') {
@@ -268,7 +277,6 @@ export const loadBoards = async (): Promise<Board[] | null> => {
       };
     });
 
-    console.log(`Loaded ${boards.length} boards (reconstructed from ${collection.boards.length} stored)`);
     return boards;
   } catch (error) {
     console.error('Error loading boards from localStorage:', error);
@@ -307,17 +315,35 @@ export const loadBoardCount = (): number | null => {
   }
 };
 
+/** Persiste el set activo por usuario para restaurar al refrescar */
+export const saveCurrentSetId = (userId: string, setId: string): void => {
+  try {
+    localStorage.setItem(`${CURRENT_SET_PREFIX}${userId}`, setId);
+  } catch (e) {
+    console.warn('Could not persist current set:', e);
+  }
+};
+
+/** Obtiene el set persistido para un usuario (null si no hay) */
+export const loadCurrentSetId = (userId: string): string | null => {
+  try {
+    return localStorage.getItem(`${CURRENT_SET_PREFIX}${userId}`);
+  } catch {
+    return null;
+  }
+};
+
 export const clearAllData = async (): Promise<void> => {
   try {
     localStorage.removeItem(CARDS_KEY);
     localStorage.removeItem(BOARDS_KEY);
     localStorage.removeItem(BOARD_COUNT_KEY);
     localStorage.removeItem(MIGRATION_FLAG_KEY);
+    // No borrar CURRENT_SET_* aquí; se limpian al cerrar sesión
 
     // Clear IndexedDB images
     const { clearAllImages } = await import('./indexedDB');
     await clearAllImages();
-    console.log('✓ Cleared all data from localStorage and IndexedDB');
   } catch (error) {
     console.error('Error clearing data:', error);
   }

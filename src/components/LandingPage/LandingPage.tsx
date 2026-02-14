@@ -23,7 +23,6 @@ import {
 } from 'react-icons/fa';
 import './LandingPage.css';
 import logoImage from '../../img/logo.png';
-
 interface LandingPageProps {
   onStart: () => void;
 }
@@ -56,13 +55,15 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
           <p className="landing-page__hero-description">
             {t('landing.hero.description')}
           </p>
-          <button
-            onClick={onStart}
-            className="landing-page__cta-button landing-page__cta-button--hero"
-          >
-            {t('landing.hero.cta')}
-            <FaArrowRight />
-          </button>
+          <div className="landing-page__hero-actions">
+            <button
+              onClick={onStart}
+              className="landing-page__cta-button landing-page__cta-button--hero"
+            >
+              {t('landing.hero.cta')}
+              <FaArrowRight />
+            </button>
+          </div>
         </div>
         <div className="landing-page__hero-logo">
           <img src={logoImage} alt="chorroybuenas.com.mx" />
@@ -75,6 +76,20 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
       </section>
 
       <main className="landing-page__main">
+        {/* Banner: Beneficios de registrarse */}
+        <Link to="/beneficios" className="landing-page__banner">
+          <div className="landing-page__banner-content">
+            <div className="landing-page__banner-text">
+              <h2 className="landing-page__banner-title">{t('landing.banner.title')}</h2>
+              <p className="landing-page__banner-subtitle">{t('landing.banner.subtitle')}</p>
+            </div>
+            <span className="landing-page__banner-cta">
+              {t('landing.banner.cta')}
+              <FaArrowRight />
+            </span>
+          </div>
+        </Link>
+
         {/* Features Section */}
         <section className="landing-page__features">
           <div className="landing-page__features-container">
@@ -138,6 +153,8 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             </div>
           </div>
         </section>
+
+        {/* EmailAuthModal eliminated from here as it's now in Navbar and BenefitsPage */}
 
         {/* Quick Steps - Horizontal Bar */}
         <section className="landing-page__steps">
@@ -249,6 +266,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             </div>
           </div>
         </section>
+
 
         {/* CTA Section */}
         <section className="landing-page__cta">

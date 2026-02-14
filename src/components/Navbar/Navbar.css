@@ -9,6 +9,11 @@
   backdrop-filter: blur(12px);
 }
 
+:root {
+  --color-primary-rgb: 234, 88, 12;
+  --color-primary-gradient: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+}
+
 .navbar__overlay {
   display: none;
 }
@@ -20,7 +25,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 32px;
+  gap: 24px;
+  flex-wrap: nowrap;
+  min-width: 0;
 }
 
 .navbar__logo {
@@ -56,8 +63,9 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .navbar__actions {
@@ -65,6 +73,7 @@
   align-items: center;
   gap: 16px;
   order: 2;
+  flex-shrink: 0;
 }
 
 .navbar__paypal-pill {
@@ -93,7 +102,8 @@
   font-size: 1rem;
 }
 
-.navbar__link {
+.navbar__link,
+.navbar__link--button {
   color: var(--color-text-secondary);
   text-decoration: none;
   font-weight: 500;
@@ -105,9 +115,23 @@
   font-family: var(--font-body);
 }
 
+.navbar__link--button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: inherit;
+}
+
+.navbar__link--button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .navbar__link:hover {
   color: var(--color-primary);
-  background-color: var(--color-bg-hover);
+  background-color: var(--color-bg-subtle);
+  transform: translateY(-1px);
 }
 
 .navbar__link--active {
@@ -128,6 +152,480 @@
   border-radius: 1px;
 }
 
+/* Mis loterías dropdown */
+.navbar__menu-item--dropdown {
+  position: relative;
+}
+
+.navbar__link--trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.navbar__dropdown-chevron {
+  font-size: 0.7rem;
+  opacity: 0.8;
+  transition: transform 0.2s ease;
+}
+
+.navbar__dropdown-chevron--open {
+  transform: rotate(180deg);
+}
+
+.navbar__sets-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  min-width: 200px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-xs);
+  z-index: 1002;
+  font-family: var(--font-body);
+}
+
+.navbar__sets-dropdown-empty {
+  padding: var(--spacing-md);
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+}
+
+.navbar__sets-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  text-align: left;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-main);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+  font-family: var(--font-body);
+}
+
+.navbar__sets-dropdown-item:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-primary);
+}
+
+.navbar__sets-dropdown-item--active {
+  background: var(--color-primary-lightest);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Auth guest: botones en barra solo en desktop; en móvil van al menú */
+.navbar__auth-guest--desktop-only {
+  /* visible por defecto en desktop */
+}
+
+/* Auth Section */
+.navbar__auth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.navbar__user-trigger {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  border-radius: var(--radius-full);
+  transition: opacity 0.2s;
+}
+
+.navbar__user-trigger:hover {
+  opacity: 0.9;
+}
+
+.navbar__user-chevron {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-left: 4px;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.navbar__user-chevron--open {
+  transform: rotate(180deg);
+}
+
+.navbar__user-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-bg-subtle);
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+}
+
+.navbar__user-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-primary-lightest);
+  color: var(--color-primary);
+}
+
+.navbar__user-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.navbar__user-icon {
+  font-size: 1rem;
+}
+
+.navbar__user-name {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navbar__tokens-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-primary-lightest);
+  color: var(--color-primary);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  border: 1px solid var(--color-primary-light);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.navbar__tokens-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.15);
+}
+
+.navbar__tokens-badge svg {
+  color: #f59e0b;
+  /* Golden coin */
+  font-size: 0.875rem;
+}
+
+/* User dropdown menu */
+.navbar__user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  max-width: 320px;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 8px 0;
+  z-index: 1001;
+  font-family: var(--font-body);
+}
+
+/* Sección "Mis loterías": mismo nivel visual que Crear / Comprar tokens / Cerrar sesión */
+.navbar__user-dropdown-section {
+  padding: 0 8px;
+}
+
+.navbar__user-dropdown-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--color-text-main);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  box-sizing: border-box;
+  border-radius: var(--radius-md);
+  transition: background 0.15s, color 0.15s;
+}
+
+.navbar__user-dropdown-section-title:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-primary);
+}
+
+.navbar__user-dropdown-section-chevron {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.navbar__user-dropdown-section-title--open .navbar__user-dropdown-section-chevron {
+  transform: rotate(0deg);
+}
+
+.navbar__user-dropdown-section-title:not(.navbar__user-dropdown-section-title--open) .navbar__user-dropdown-section-chevron {
+  transform: rotate(-90deg);
+}
+
+.navbar__user-dropdown-section-icon {
+  font-size: 1rem;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* Lista anidada: claramente DENTRO de "Mis loterías" */
+.navbar__user-dropdown-section-list {
+  border-left: 3px solid var(--color-primary);
+  margin-left: 12px;
+  margin-bottom: 4px;
+  padding: 2px 0 2px 8px;
+  background: var(--color-bg-subtle);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.navbar__user-dropdown-item--set {
+  padding-left: 12px;
+  font-weight: 500;
+}
+
+.navbar__user-dropdown-empty {
+  padding: 10px 12px 10px 20px;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.navbar__user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  font-family: var(--font-body);
+  color: var(--color-text-main);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.navbar__user-dropdown-item:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-primary);
+}
+
+.navbar__user-dropdown-item--active {
+  background: var(--color-primary-lightest);
+  color: var(--color-primary);
+}
+
+.navbar__user-dropdown-item--logout {
+  color: var(--color-text-secondary);
+}
+
+.navbar__user-dropdown-item--logout:hover {
+  background: rgba(255, 0, 0, 0.05);
+  color: #d32f2f;
+}
+
+.navbar__user-dropdown-item--create {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.navbar__user-dropdown-item--create:hover:not(:disabled) {
+  background: var(--color-primary-lightest);
+  color: var(--color-primary);
+}
+
+.navbar__user-dropdown-item-icon {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-right: 6px;
+  line-height: 1;
+}
+
+.navbar__user-dropdown-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 8px 0;
+  border: none;
+}
+
+.navbar__auth-guest {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Breakpoint: debajo de esto usamos menú hamburguesa (evita que "Crear cuenta" desaparezca) */
+/* Antes 768px causaba overflow en viewports 768–1400px */
+@media (max-width: 1200px) {
+  .navbar__auth-btn.navbar__auth-guest--desktop-only {
+    display: none;
+  }
+}
+
+/* Auth en menú desplegable: oculto en desktop ancho, visible cuando hay hamburguesa */
+.navbar__menu-auth--mobile-only {
+  display: none;
+}
+
+@media (max-width: 1200px) {
+  .navbar__menu-auth--mobile-only {
+    display: block;
+  }
+
+  .navbar__menu-auth-divider {
+    height: 1px;
+    background: var(--color-border);
+    margin: 12px 0 16px;
+    border: none;
+  }
+
+  /* Mismo estilo que los links del menú (Crear, Beneficios, etc.) */
+  .navbar__auth-btn-mobile,
+  .navbar__auth-btn-mobile-full {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    font-size: 1rem;
+    font-weight: 500;
+    min-height: 48px;
+    border-radius: var(--radius-md);
+    text-align: center;
+    transition: all 0.2s ease;
+    font-family: var(--font-body);
+    box-sizing: border-box;
+  }
+
+  .navbar__auth-btn-mobile {
+    background: transparent;
+    color: var(--color-text-main);
+  }
+
+  .navbar__auth-btn-mobile:hover {
+    background: var(--color-bg-subtle);
+    color: var(--color-primary);
+  }
+
+  .navbar__auth-btn-mobile-full {
+    background: var(--color-primary-gradient);
+    color: white;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+
+  .navbar__auth-btn-mobile-full:hover {
+    opacity: 0.95;
+    box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.25);
+  }
+}
+
+.navbar__auth-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-family: var(--font-body);
+}
+
+.navbar__auth-btn--login-text {
+  background: transparent;
+  color: var(--color-text-main);
+  font-weight: 800;
+  padding: 10px 16px;
+  font-size: 1rem;
+}
+
+.navbar__auth-btn--login-text:hover {
+  color: var(--color-primary);
+  background: var(--color-bg-subtle);
+  transform: translateY(-1px);
+}
+
+.navbar__auth-btn--signup {
+  background: var(--color-primary-gradient);
+  color: white;
+  text-decoration: none;
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.25);
+}
+
+.navbar__auth-btn--signup:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(var(--color-primary-rgb), 0.3);
+  color: white;
+  opacity: 0.9;
+}
+
+.navbar__auth-btn--logout {
+  background: transparent;
+  color: var(--color-text-secondary);
+  padding: 8px;
+  border-radius: 50%;
+}
+
+.navbar__auth-btn--logout:hover {
+  background: rgba(255, 0, 0, 0.05);
+  color: #d32f2f;
+}
+
+.navbar__auth-text {
+  display: inline-block;
+}
+
+@media (max-width: 600px) {
+  .navbar__auth-text {
+    display: none;
+  }
+
+  .navbar__user-name {
+    display: none;
+  }
+}
+
 /* Toggle button para móviles */
 .navbar__toggle {
   display: none;
@@ -139,7 +637,6 @@
   position: relative;
   min-width: 44px;
   min-height: 44px;
-  display: flex;
   align-items: center;
   justify-content: center;
 }
@@ -189,8 +686,8 @@
   }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* Responsive: menú hamburguesa desde 1200px (evita overflow y botón "Crear cuenta" oculto) */
+@media (max-width: 1200px) {
   .navbar__container {
     padding: 12px 16px;
     position: relative;
@@ -261,7 +758,8 @@
     transform: translateY(0);
     opacity: 1;
     visibility: visible;
-    max-height: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
   }
 
   .navbar__menu li {
@@ -300,6 +798,11 @@
     border-left: 3px solid var(--color-primary);
   }
 
+  .navbar__sets-dropdown {
+    min-width: 100%;
+    left: 0;
+  }
+
   .navbar__overlay {
     display: block !important;
     position: fixed;
@@ -314,12 +817,107 @@
   }
 }
 
+@media (max-width: 600px) {
+  .navbar__container {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .navbar__actions {
+    gap: 8px;
+  }
+
+  .navbar__auth-guest {
+    gap: 6px;
+  }
+
+  .navbar__auth-btn--login-text {
+    padding: 8px 12px;
+    font-size: 0.8125rem;
+  }
+
+  .navbar__auth-btn--signup {
+    padding: 8px 16px;
+    font-size: 0.8125rem;
+  }
+}
+
 @media (max-width: 480px) {
-  .navbar__logo-text {
-    display: none;
+  .navbar__container {
+    padding: 8px 10px;
+    gap: 6px;
   }
 
   .navbar__logo-image {
     height: 32px;
+  }
+
+  .navbar__auth-guest {
+    gap: 4px;
+  }
+
+  .navbar__auth-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+
+  .navbar__auth-btn--signup {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+  }
+
+  .navbar__toggle {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 8px;
+  }
+
+  .navbar__menu {
+    top: 56px;
+    padding: 12px;
+  }
+
+  .navbar__overlay {
+    top: 56px;
+  }
+
+  .navbar__link {
+    padding: 12px 14px;
+    font-size: 0.9375rem;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 380px) {
+  .navbar__container {
+    padding: 6px 8px;
+  }
+
+  .navbar__logo-image {
+    height: 28px;
+  }
+
+  .navbar__auth-btn--login-text {
+    padding: 6px 8px;
+  }
+
+  .navbar__auth-btn--login-text,
+  .navbar__auth-btn--signup {
+    font-size: 0.75rem;
+  }
+
+  .navbar__auth-btn--signup {
+    padding: 6px 10px;
+  }
+}
+
+/* Language switcher más compacto en pantallas muy pequeñas */
+@media (max-width: 400px) {
+  .navbar__actions .language-switcher .language-switcher__label {
+    display: none;
+  }
+
+  .navbar__actions .language-switcher {
+    padding: 8px 10px;
   }
 }

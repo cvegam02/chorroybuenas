@@ -1,0 +1,15 @@
+# Configuración de Edge Functions (Supabase)
+# La que está en cada función (functions/<nombre>/config.toml) puede no aplicarse al desplegar;
+# esta es la que usa el CLI al hacer deploy.
+
+[functions.webhook-mercadopago]
+verify_jwt = false
+
+[functions.transform-loteria]
+verify_jwt = false
+
+# Plantilla de correo de confirmación (registro)
+# Para proyectos hosted: copia el contenido de supabase/templates/confirmation.html al Dashboard → Authentication → Email Templates
+[auth.email.template.confirmation]
+subject = "Confirma tu cuenta - Loteria Personalizada"
+content_path = "./supabase/templates/confirmation.html"
