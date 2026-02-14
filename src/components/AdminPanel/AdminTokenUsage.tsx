@@ -280,7 +280,8 @@ export const AdminTokenUsage = () => {
                       />
                       <YAxis tick={{ fontSize: isMobile ? 9 : 11 }} allowDecimals={false} width={28} />
                       <Tooltip
-                        formatter={(value: number) => [value.toLocaleString(), 'Tokens']}
+                        formatter={(value: number | undefined) =>
+                            [typeof value === 'number' ? value.toLocaleString() : String(value ?? 0), 'Tokens']}
                         labelFormatter={(l) => chartData.find((d) => d.label === l)?.day ?? l}
                         contentStyle={{ fontSize: '13px', padding: '8px 12px' }}
                       />
@@ -311,7 +312,8 @@ export const AdminTokenUsage = () => {
                       >
                         <XAxis type="number" tick={{ fontSize: isMobile ? 9 : 10 }} allowDecimals={false} />
                         <YAxis type="category" dataKey="name" width={isMobile ? 80 : 100} tick={{ fontSize: isMobile ? 9 : 10 }} />
-                        <Tooltip formatter={(v: number) => [v.toLocaleString(), 'Tokens']} contentStyle={{ fontSize: '12px', padding: '6px 10px' }} />
+                        <Tooltip formatter={(v: number | undefined) =>
+                          [typeof v === 'number' ? v.toLocaleString() : String(v ?? 0), 'Tokens']} contentStyle={{ fontSize: '12px', padding: '6px 10px' }} />
                         <Bar dataKey="tokens" fill={CHART_COLOR} radius={[0, 4, 4, 0]} barSize={isMobile ? 16 : 20} />
                       </BarChart>
                     </ResponsiveContainer>
@@ -333,7 +335,8 @@ export const AdminTokenUsage = () => {
                       >
                         <XAxis type="number" tick={{ fontSize: isMobile ? 9 : 10 }} allowDecimals={false} />
                         <YAxis type="category" dataKey="name" width={isMobile ? 80 : 100} tick={{ fontSize: isMobile ? 9 : 10 }} />
-                        <Tooltip formatter={(v: number) => [v.toLocaleString(), 'Tokens']} contentStyle={{ fontSize: '12px', padding: '6px 10px' }} />
+                        <Tooltip formatter={(v: number | undefined) =>
+                          [typeof v === 'number' ? v.toLocaleString() : String(v ?? 0), 'Tokens']} contentStyle={{ fontSize: '12px', padding: '6px 10px' }} />
                         <Bar dataKey="tokens" fill={CHART_COLOR} radius={[0, 4, 4, 0]} barSize={isMobile ? 16 : 20} />
                       </BarChart>
                     </ResponsiveContainer>
