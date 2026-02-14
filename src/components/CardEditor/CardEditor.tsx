@@ -68,6 +68,8 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
   const [showAllTransformedModal, setShowAllTransformedModal] = useState(false);
   const [aiBatchStatus, setAiBatchStatus] = useState<'idle' | 'processing' | 'complete' | 'error'>('idle');
   const [aiBatchCurrentIndex, setAiBatchCurrentIndex] = useState(0);
+  const [aiBatchTotalCount, setAiBatchTotalCount] = useState(0);
+  const [aiBatchCurrentTitle, setAiBatchCurrentTitle] = useState<string>('');
   const [aiBatchSkippedCount, setAiBatchSkippedCount] = useState(0);
   const [aiBatchError, setAiBatchError] = useState<string | null>(null);
   const [showBatchCompleteMessage, setShowBatchCompleteMessage] = useState(false);
@@ -253,13 +255,15 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
 
   const runAIBatchTransformation = async (cardsToProcess: Card[]) => {
     setAiBatchStatus('processing');
+    setAiBatchTotalCount(cardsToProcess.length);
     setAiBatchSkippedCount(0);
     setAiBatchError(null);
     const strength = 0.30;
 
     for (let i = 0; i < cardsToProcess.length; i++) {
-      setAiBatchCurrentIndex(i);
       const card = cardsToProcess[i];
+      setAiBatchCurrentIndex(i);
+      setAiBatchCurrentTitle(card?.title ?? '');
 
       await updateCard(card.id, { isProcessing: true });
 
@@ -306,6 +310,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
 
     setAiBatchStatus('complete');
     setAiBatchCurrentIndex(0);
+    setAiBatchCurrentTitle('');
     refreshBalance();
     if (batchModalClosedDuringProcessingRef.current) {
       setShowBatchCompleteMessage(true);
@@ -321,6 +326,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
     if (isAIModalOpen && aiBatchStatus !== 'processing') {
       setAiBatchStatus('idle');
       setAiBatchCurrentIndex(0);
+      setAiBatchTotalCount(0);
       setAiBatchSkippedCount(0);
       setAiBatchError(null);
       batchModalClosedDuringProcessingRef.current = false;
@@ -679,6 +685,8 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
         onCloseAndContinue={() => { batchModalClosedDuringProcessingRef.current = true; }}
         cards={cardsToTransform}
         totalCards={cards.length}
+        totalToProcess={aiBatchTotalCount || cardsToTransform.length}
+        currentCardTitle={aiBatchCurrentTitle}
         onStart={handleAIStart}
         status={aiBatchStatus}
         currentIndex={aiBatchCurrentIndex}

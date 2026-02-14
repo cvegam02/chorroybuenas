@@ -186,11 +186,21 @@ Deno.serve(async (req) => {
     }
 
     const userId = metadata.user_id ?? externalReference;
-    const totalTokens = metadata.total_tokens ?? 0;
     const baseTokens = metadata.base_tokens ?? 0;
-    const bonusTokens = (metadata.bonus_tokens ?? 0) + (metadata.promotion_bonus ?? 0);
+    const packBonus = metadata.bonus_tokens ?? 0;
+    const promotionBonus = metadata.promotion_bonus ?? 0;
     const amountCents = metadata.amount_cents ?? 0;
     const packId = metadata.pack_id ?? null;
+
+    const { count: purchaseCount } = await supabase
+      .from('token_purchases')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    const isFirstPurchase = (purchaseCount ?? 0) === 0;
+    const effectivePromoBonus = isFirstPurchase ? promotionBonus : 0;
+    const totalTokens = baseTokens + packBonus + effectivePromoBonus;
+    const bonusTokens = packBonus + effectivePromoBonus;
 
     if (totalTokens <= 0) {
       return new Response(JSON.stringify({ received: true }), {

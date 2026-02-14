@@ -255,6 +255,9 @@ export const SetView = () => {
         <div className="set-view__loading">
           <div className="set-view__spinner" />
           <p>{user ? t('setView.loadingCards') : t('common.loading')}</p>
+          {user && (
+            <p className="set-view__loading-patience">{t('setView.loadingCardsPatience')}</p>
+          )}
         </div>
       ) : (
         <>

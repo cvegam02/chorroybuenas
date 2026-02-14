@@ -127,6 +127,14 @@
   font-family: var(--font-body);
 }
 
+.set-view__loading-patience {
+  margin: 0;
+  font-size: 0.8125rem;
+  opacity: 0.85;
+  max-width: 280px;
+  text-align: center;
+}
+
 .set-view__spinner {
   width: 40px;
   height: 40px;

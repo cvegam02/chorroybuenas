@@ -16,6 +16,10 @@ interface AIBatchModalProps {
     cards: Card[];
     /** Total cards (incl. already AI-generated). Used to show "X omitted" message when some are already transformed. */
     totalCards?: number;
+    /** Total a procesar en este batch (fijado al iniciar; evita que progress se distorsione cuando cardsToTransform se reduce) */
+    totalToProcess?: number;
+    /** Título de la carta actualmente en proceso */
+    currentCardTitle?: string;
     /** Called when user clicks "Iniciar". Parent starts the transformation. */
     onStart: () => void;
     /** Status from parent (transformation runs in parent so it persists when modal closes). */
@@ -33,6 +37,8 @@ export const AIBatchModal: React.FC<AIBatchModalProps> = ({
     onCloseAndContinue,
     cards,
     totalCards,
+    totalToProcess,
+    currentCardTitle,
     onStart,
     status,
     currentIndex,
@@ -104,23 +110,26 @@ export const AIBatchModal: React.FC<AIBatchModalProps> = ({
                         </div>
                     )}
 
-                    {status === 'processing' && (
+                    {status === 'processing' && (() => {
+                        const total = totalToProcess ?? cards.length;
+                        const progress = total > 0 ? Math.min(100, ((currentIndex + 1) / total) * 100) : 0;
+                        return (
                         <div className="ai-batch-modal__processing">
                             <div className="ai-batch-modal__progress-container">
                                 <div
                                     className="ai-batch-modal__progress-bar"
-                                    style={{ width: `${(currentIndex / cards.length) * 100}%` }}
+                                    style={{ width: `${progress}%` }}
                                 ></div>
                             </div>
                             <p className="ai-batch-modal__status-text">
-                                {t('aiBatchModal.processing', { current: currentIndex + 1, total: cards.length })}
+                                {t('aiBatchModal.processing', { current: currentIndex + 1, total })}
                             </p>
                             <div className="ai-batch-modal__painter">
                                 <div className="ai-batch-modal__painter-anim">🎨</div>
                                 <span>{t('aiBatchModal.painting')}</span>
                             </div>
                             <div className="ai-batch-modal__current-card">
-                                <strong>{cards[currentIndex]?.title}</strong>
+                                <strong>{currentCardTitle}</strong>
                             </div>
                             <p className="ai-batch-modal__processing-info">
                                 {t('aiBatchModal.processingInfo')}
@@ -136,7 +145,8 @@ export const AIBatchModal: React.FC<AIBatchModalProps> = ({
                                 {t('aiBatchModal.closeAndContinue')}
                             </button>
                         </div>
-                    )}
+                        );
+                    })()}
 
                     {status === 'complete' && (
                         <div className="ai-batch-modal__complete">
