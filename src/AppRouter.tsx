@@ -104,7 +104,7 @@ function AppContent() {
         try {
           const localBoards = await loadBoards();
           if (cancelled) return;
-          if (localBoards?.length > 0) {
+          if (localBoards && localBoards.length > 0) {
             setBoards(localBoards);
           } else {
             navigate('/cards', { replace: true });

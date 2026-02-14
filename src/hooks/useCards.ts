@@ -75,19 +75,6 @@ export const useCards = () => {
       }
     };
 
-    async function prefetchAndHydrate(cardList: Card[]) {
-      for (const card of cardList) {
-        if (cancelled) return;
-        if (!card.imagePath) continue;
-        try {
-          const blob = await CardRepository.downloadImage(card.imagePath);
-          if (!cancelled) await cacheImageBlob(card.id, blob);
-        } catch (_) {
-          // Continuar con el resto; la carta conserva signed URL de la API
-        }
-      }
-    }
-
     async function prefetchAndHydrateParallel(cardList: Card[], isCancelled: () => boolean) {
       const withPath = cardList.filter(c => c.imagePath);
       for (let i = 0; i < withPath.length; i += PREFETCH_BATCH_SIZE) {
