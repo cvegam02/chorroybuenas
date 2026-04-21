@@ -26,6 +26,14 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const ALLOWED_AVATAR_TYPES: Record<string, string> = {
+    'image/png': 'png',
+    'image/jpeg': 'jpg',
+    'image/webp': 'webp',
+};
+
+const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
@@ -124,6 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const clearRecovery = () => setRecoverySession(null);
 
     const updateProfile = async (updates: { fullName?: string; avatarUrl?: string }): Promise<void> => {
+        if (updates.fullName === undefined && updates.avatarUrl === undefined) return;
         const data: Record<string, string> = {};
         if (updates.fullName !== undefined) data.full_name = updates.fullName;
         if (updates.avatarUrl !== undefined) data.avatar_url = updates.avatarUrl;
@@ -134,15 +143,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const uploadAvatar = async (file: File): Promise<string> => {
         if (!user) throw new Error('NOT_LOGGED_IN');
-        const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-        const path = `avatars/${user.id}/avatar_${Date.now()}.${ext}`;
+        const ext = ALLOWED_AVATAR_TYPES[file.type];
+        if (!ext) throw new Error('INVALID_FILE_TYPE');
+        const path = `${user.id}/avatar_${Date.now()}.${ext}`;
         const { error: uploadError } = await supabase.storage
             .from('card-images')
             .upload(path, file, { upsert: true, contentType: file.type });
         if (uploadError) throw uploadError;
         const { data } = await supabase.storage
             .from('card-images')
-            .createSignedUrl(path, 31536000);
+            .createSignedUrl(path, ONE_YEAR_IN_SECONDS);
         if (!data?.signedUrl) throw new Error('Could not get avatar URL');
         return data.signedUrl;
     };
