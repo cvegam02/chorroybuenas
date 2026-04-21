@@ -18,6 +18,10 @@ interface AuthContextType {
     resetPasswordForEmail: (email: string) => Promise<void>;
     updatePassword: (newPassword: string) => Promise<void>;
     clearRecovery: () => void;
+    /** Updates full_name and/or avatar_url in user_metadata. */
+    updateProfile: (updates: { fullName?: string; avatarUrl?: string }) => Promise<void>;
+    /** Uploads a File to the card-images bucket under avatars/{userId}/ and returns a 1-year signed URL. */
+    uploadAvatar: (file: File) => Promise<string>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -119,6 +123,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const clearRecovery = () => setRecoverySession(null);
 
+    const updateProfile = async (updates: { fullName?: string; avatarUrl?: string }): Promise<void> => {
+        const data: Record<string, string> = {};
+        if (updates.fullName !== undefined) data.full_name = updates.fullName;
+        if (updates.avatarUrl !== undefined) data.avatar_url = updates.avatarUrl;
+        const { data: result, error } = await supabase.auth.updateUser({ data });
+        if (error) throw error;
+        if (result.user) setUser(result.user);
+    };
+
+    const uploadAvatar = async (file: File): Promise<string> => {
+        if (!user) throw new Error('NOT_LOGGED_IN');
+        const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const path = `avatars/${user.id}/avatar_${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+            .from('card-images')
+            .upload(path, file, { upsert: true, contentType: file.type });
+        if (uploadError) throw uploadError;
+        const { data } = await supabase.storage
+            .from('card-images')
+            .createSignedUrl(path, 31536000);
+        if (!data?.signedUrl) throw new Error('Could not get avatar URL');
+        return data.signedUrl;
+    };
+
     return (
         <AuthContext.Provider value={{
             user,
@@ -132,7 +160,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             signOut,
             resetPasswordForEmail,
             updatePassword,
-            clearRecovery
+            clearRecovery,
+            updateProfile,
+            uploadAvatar,
         }}>
             {children}
         </AuthContext.Provider>
