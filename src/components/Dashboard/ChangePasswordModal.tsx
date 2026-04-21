@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { FaLock, FaTimes, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import './ChangePasswordModal.css';
+
+const MIN_PASSWORD_LENGTH = 6;
 
 interface ChangePasswordModalProps {
     isOpen: boolean;
@@ -21,20 +23,29 @@ export const ChangePasswordModal = ({ isOpen, onClose }: ChangePasswordModalProp
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
-    if (!isOpen) return null;
-
     const handleClose = () => {
         setPassword('');
         setConfirmPassword('');
+        setShowPassword(false);
+        setShowConfirm(false);
         setError(null);
         setSuccess(false);
         onClose();
     };
 
+    useEffect(() => {
+        if (!isOpen) return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') handleClose();
+        };
+        document.addEventListener('keydown', onKeyDown);
+        return () => document.removeEventListener('keydown', onKeyDown);
+    }, [isOpen]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
-        if (password.length < 6) {
+        if (password.length < MIN_PASSWORD_LENGTH) {
             setError(t('common.auth.errors.weakPassword'));
             return;
         }
@@ -59,6 +70,9 @@ export const ChangePasswordModal = ({ isOpen, onClose }: ChangePasswordModalProp
     const content = (
         <div
             className="change-password-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cp-modal-title"
             onClick={e => { if (e.target === e.currentTarget) handleClose(); }}
         >
             <div className="change-password-modal__content">
@@ -74,7 +88,7 @@ export const ChangePasswordModal = ({ isOpen, onClose }: ChangePasswordModalProp
                     <div className="change-password-modal__icon-circle">
                         <FaLock />
                     </div>
-                    <h2>{t('dashboard.changePasswordModal.title')}</h2>
+                    <h2 id="cp-modal-title">{t('dashboard.changePasswordModal.title')}</h2>
                     <p>{t('dashboard.changePasswordModal.description')}</p>
                 </div>
 
@@ -100,7 +114,7 @@ export const ChangePasswordModal = ({ isOpen, onClose }: ChangePasswordModalProp
                                     value={password}
                                     onChange={e => setPassword(e.target.value)}
                                     placeholder="••••••••"
-                                    minLength={6}
+                                    minLength={MIN_PASSWORD_LENGTH}
                                     required
                                     disabled={isLoading}
                                     autoComplete="new-password"
@@ -125,7 +139,7 @@ export const ChangePasswordModal = ({ isOpen, onClose }: ChangePasswordModalProp
                                     value={confirmPassword}
                                     onChange={e => setConfirmPassword(e.target.value)}
                                     placeholder="••••••••"
-                                    minLength={6}
+                                    minLength={MIN_PASSWORD_LENGTH}
                                     required
                                     disabled={isLoading}
                                     autoComplete="new-password"
@@ -149,5 +163,5 @@ export const ChangePasswordModal = ({ isOpen, onClose }: ChangePasswordModalProp
         </div>
     );
 
-    return createPortal(content, document.body);
+    return isOpen ? createPortal(content, document.body) : null;
 };
