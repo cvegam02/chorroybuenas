@@ -45,12 +45,16 @@ const formatProvider = (provider: string) => {
   return provider;
 };
 
-const formatStatus = (status: string | null) => {
-  if (!status) return '—';
-  if (status === 'approved') return 'Aprobado';
-  if (status === 'pending') return 'Pendiente';
-  if (status === 'rejected') return 'Rechazado';
-  return status;
+const statusBadge = (status: string | null) => {
+  if (!status) return <span>—</span>;
+  const map: Record<string, { label: string; mod: string }> = {
+    approved: { label: 'Aprobado',  mod: 'approved' },
+    pending:  { label: 'Pendiente', mod: 'pending'  },
+    rejected: { label: 'Rechazado', mod: 'rejected' },
+  };
+  const entry = map[status];
+  if (!entry) return <span>{status}</span>;
+  return <span className={`admin-badge admin-badge--${entry.mod}`}>{entry.label}</span>;
 };
 
 const formatPack = (p: AdminPurchase) => {
@@ -199,7 +203,7 @@ export const AdminPurchases = () => {
                       {formatAmount(p.amount_cents)}
                     </td>
                     <td data-label="Proveedor">{formatProvider(p.payment_provider)}</td>
-                    <td data-label="Estado">{formatStatus(p.payment_status)}</td>
+                    <td data-label="Estado">{statusBadge(p.payment_status)}</td>
                   </tr>
                 ))}
               </tbody>

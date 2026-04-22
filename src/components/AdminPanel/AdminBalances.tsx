@@ -120,27 +120,28 @@ export const AdminBalances = () => {
       </div>
 
       <div className="admin-balances__summary">
-        <div className="admin-balances__card admin-balances__card--revenue">
-          <span className="admin-balances__card-label">Ingresos totales</span>
-          <span className="admin-balances__card-value">
+        <div className="admin-stat-card admin-stat-card--green">
+          <span className="admin-stat-card__label">Ingresos totales</span>
+          <span className="admin-stat-card__value">
             {totalRevenueCents != null ? formatPesos(totalRevenueCents) : '—'}
           </span>
-          <span className="admin-balances__card-detail">
+          <span className="admin-stat-card__detail">
             {totalPurchases != null ? `${totalPurchases} compra${totalPurchases !== 1 ? 's' : ''}` : ''}
           </span>
         </div>
-        <div className="admin-balances__card admin-balances__card--usage">
-          <span className="admin-balances__card-label">Tokens gastados (IA)</span>
-          <span className="admin-balances__card-value">
+        <div className="admin-stat-card admin-stat-card--primary">
+          <span className="admin-stat-card__label">Tokens gastados (IA)</span>
+          <span className="admin-stat-card__value">
             {totalTokensUsed != null ? totalTokensUsed.toLocaleString() : '—'}
           </span>
+          <span className="admin-stat-card__detail">&nbsp;</span>
         </div>
-        <div className="admin-balances__card admin-balances__card--cost">
-          <span className="admin-balances__card-label">Costo estimado IA (MXN)</span>
-          <span className="admin-balances__card-value">
+        <div className="admin-stat-card admin-stat-card--blue">
+          <span className="admin-stat-card__label">Costo estimado IA (MXN)</span>
+          <span className="admin-stat-card__value">
             {estimatedCostMxn != null ? formatPesos(Math.round(estimatedCostMxn * 100)) : '—'}
           </span>
-          <span className="admin-balances__card-detail">
+          <span className="admin-stat-card__detail">
             {estimatedCostUsd != null && (
               <>≈ {formatUsd(estimatedCostUsd)} · {COST_PER_TOKEN_USD} USD/imagen</>
             )}

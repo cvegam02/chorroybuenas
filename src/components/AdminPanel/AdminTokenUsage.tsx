@@ -219,39 +219,42 @@ export const AdminTokenUsage = () => {
         <>
           {/* Tarjetas de resumen */}
           <div className="admin-token-usage__summary">
-            <div className="admin-token-usage__card admin-token-usage__card--images">
-              <span className="admin-token-usage__card-label">Imágenes transformadas</span>
-              <span className="admin-token-usage__card-value">
+            <div className="admin-stat-card admin-stat-card--primary">
+              <span className="admin-stat-card__label">Imágenes transformadas</span>
+              <span className="admin-stat-card__value">
                 {(summary?.totalTokens ?? 0).toLocaleString()}
               </span>
-              <span className="admin-token-usage__card-detail">1 token = 1 imagen</span>
+              <span className="admin-stat-card__detail">1 token = 1 imagen</span>
             </div>
-            <div className="admin-token-usage__card admin-token-usage__card--cost">
-              <span className="admin-token-usage__card-label">Costo estimado (USD)</span>
-              <span className="admin-token-usage__card-value">
+            <div className="admin-stat-card admin-stat-card--blue">
+              <span className="admin-stat-card__label">Costo estimado (USD)</span>
+              <span className="admin-stat-card__value">
                 {costUsd != null ? formatUsd(costUsd) : '—'}
               </span>
-              <span className="admin-token-usage__card-detail">
+              <span className="admin-stat-card__detail">
                 {COST_PER_TOKEN_USD} USD/imagen
               </span>
             </div>
-            <div className="admin-token-usage__card admin-token-usage__card--mxn">
-              <span className="admin-token-usage__card-label">Costo estimado (MXN)</span>
-              <span className="admin-token-usage__card-value">
+            <div className="admin-stat-card admin-stat-card--green">
+              <span className="admin-stat-card__label">Costo estimado (MXN)</span>
+              <span className="admin-stat-card__value">
                 {costMxn != null ? formatPesos(Math.round(costMxn * 100)) : '—'}
               </span>
+              <span className="admin-stat-card__detail">&nbsp;</span>
             </div>
-            <div className="admin-token-usage__card admin-token-usage__card--users">
-              <span className="admin-token-usage__card-label">Usuarios activos</span>
-              <span className="admin-token-usage__card-value">
+            <div className="admin-stat-card admin-stat-card--teal">
+              <span className="admin-stat-card__label">Usuarios activos</span>
+              <span className="admin-stat-card__value">
                 {(summary?.uniqueUsers ?? 0).toLocaleString()}
               </span>
+              <span className="admin-stat-card__detail">&nbsp;</span>
             </div>
-            <div className="admin-token-usage__card admin-token-usage__card--sets">
-              <span className="admin-token-usage__card-label">Loterías usadas</span>
-              <span className="admin-token-usage__card-value">
+            <div className="admin-stat-card admin-stat-card--amber">
+              <span className="admin-stat-card__label">Loterías usadas</span>
+              <span className="admin-stat-card__value">
                 {(summary?.uniqueSets ?? 0).toLocaleString()}
               </span>
+              <span className="admin-stat-card__detail">&nbsp;</span>
             </div>
           </div>
 

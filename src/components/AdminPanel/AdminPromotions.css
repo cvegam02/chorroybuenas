@@ -256,8 +256,11 @@
 }
 
 .admin-promotions__card--inactive {
-  opacity: 0.7;
   background: var(--color-bg-subtle, #f8f8f8);
+}
+
+.admin-promotions__card--inactive .admin-promotions__card-body {
+  opacity: 0.55;
 }
 
 .admin-promotions__card-body {

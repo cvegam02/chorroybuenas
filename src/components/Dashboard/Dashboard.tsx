@@ -13,7 +13,10 @@ import {
   FaStar,
   FaTrash,
   FaEllipsisV,
-  FaPencilAlt
+  FaPencilAlt,
+  FaCamera,
+  FaCheck,
+  FaTimes as FaTimesIcon
 } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSetContext } from '../../contexts/SetContext';
@@ -23,12 +26,13 @@ import { TokenPricingRepository, type TokenPurchase } from '../../repositories/T
 import { AppConfigRepository } from '../../repositories/AppConfigRepository';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
 import { PurchaseHistoryModal } from './PurchaseHistoryModal';
+import { ChangePasswordModal } from './ChangePasswordModal';
 import './Dashboard.css';
 
 export const Dashboard = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, updateProfile, uploadAvatar } = useAuth();
   const { sets, setSets, setCurrentSetId, refreshSets } = useSetContext();
   const { balance, refreshBalance } = useTokenBalance();
   const [initialTokens, setInitialTokens] = useState<number>(0);
@@ -47,6 +51,12 @@ export const Dashboard = () => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isCreatingSet, setIsCreatingSet] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState('');
+  const [isSavingName, setIsSavingName] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const sheetOpenedAtRef = useRef<number>(0);
 
@@ -136,6 +146,44 @@ export const Dashboard = () => {
     }
   };
 
+  const handleAvatarClick = () => avatarInputRef.current?.click();
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingAvatar(true);
+    try {
+      const avatarUrl = await uploadAvatar(file);
+      await updateProfile({ avatarUrl });
+    } catch (err) {
+      console.error('Error uploading avatar:', err);
+      alert(t('dashboard.avatarUploadError'));
+    } finally {
+      setIsUploadingAvatar(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
+    }
+  };
+
+  const handleNameSave = async () => {
+    const trimmed = nameValue.trim();
+    if (!trimmed) return;
+    setIsSavingName(true);
+    try {
+      await updateProfile({ fullName: trimmed });
+      setIsEditingName(false);
+    } catch (err) {
+      console.error('Error saving name:', err);
+      alert(t('dashboard.nameUpdateError'));
+    } finally {
+      setIsSavingName(false);
+    }
+  };
+
+  const handleNameEditStart = () => {
+    setNameValue(displayName);
+    setIsEditingName(true);
+  };
+
   return (
     <div className="dashboard">
       {/* Hero / Welcome Section */}
@@ -148,26 +196,108 @@ export const Dashboard = () => {
         </div>
         <div className="dashboard__hero-content">
           <div className="dashboard__hero-profile">
-            {user.user_metadata?.avatar_url ? (
-              <img
-                src={user.user_metadata.avatar_url}
-                alt=""
-                className="dashboard__hero-avatar"
-              />
-            ) : (
-              <div className="dashboard__hero-avatar-placeholder">
-                <FaUser />
+            {/* Clickable avatar */}
+            <button
+              className="dashboard__hero-avatar-wrapper"
+              onClick={handleAvatarClick}
+              disabled={isUploadingAvatar}
+              aria-label="Cambiar foto de perfil"
+              type="button"
+            >
+              {isUploadingAvatar ? (
+                <div className="dashboard__hero-avatar-placeholder">
+                  <div className="dashboard__spinner dashboard__spinner--small" />
+                </div>
+              ) : user.user_metadata?.avatar_url ? (
+                <img
+                  src={user.user_metadata.avatar_url}
+                  alt=""
+                  className="dashboard__hero-avatar"
+                />
+              ) : (
+                <div className="dashboard__hero-avatar-placeholder">
+                  <FaUser />
+                </div>
+              )}
+              <div className="dashboard__hero-avatar-overlay" aria-hidden="true">
+                <FaCamera />
               </div>
-            )}
+            </button>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              style={{ display: 'none' }}
+              onChange={handleAvatarChange}
+            />
+
             <div className="dashboard__hero-greeting">
               <span className="dashboard__hero-badge">
                 <FaStar />
                 {t('dashboard.welcomeBack')}
               </span>
-              <h1 className="dashboard__hero-title">
-                {t('dashboard.welcome', { name: displayName })}
-              </h1>
+
+              {/* Inline name editing */}
+              {isEditingName ? (
+                <div className="dashboard__hero-name-edit">
+                  <input
+                    className="dashboard__hero-name-input"
+                    value={nameValue}
+                    onChange={e => setNameValue(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') handleNameSave();
+                      if (e.key === 'Escape') setIsEditingName(false);
+                    }}
+                    placeholder={t('dashboard.editNamePlaceholder')}
+                    maxLength={60}
+                    autoFocus
+                    disabled={isSavingName}
+                  />
+                  <button
+                    type="button"
+                    className="dashboard__hero-name-btn dashboard__hero-name-btn--save"
+                    onClick={handleNameSave}
+                    disabled={isSavingName}
+                    aria-label="Guardar nombre"
+                  >
+                    <FaCheck />
+                  </button>
+                  <button
+                    type="button"
+                    className="dashboard__hero-name-btn dashboard__hero-name-btn--cancel"
+                    onClick={() => setIsEditingName(false)}
+                    disabled={isSavingName}
+                    aria-label="Cancelar"
+                  >
+                    <FaTimesIcon />
+                  </button>
+                </div>
+              ) : (
+                <h1 className="dashboard__hero-title">
+                  {t('dashboard.welcome', { name: displayName })}
+                  <button
+                    type="button"
+                    className="dashboard__hero-name-edit-trigger"
+                    onClick={handleNameEditStart}
+                    aria-label="Editar nombre"
+                  >
+                    <FaPencilAlt />
+                  </button>
+                </h1>
+              )}
+
               <p className="dashboard__hero-email">{user.email}</p>
+
+              {/* Password change — only for email-authenticated users */}
+              {user.app_metadata?.provider === 'email' && (
+                <button
+                  type="button"
+                  className="dashboard__hero-change-password"
+                  onClick={() => setIsChangePasswordOpen(true)}
+                >
+                  {t('dashboard.changePassword')}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -590,6 +720,11 @@ export const Dashboard = () => {
           }
         }}
         onCancel={() => !isDeleting && setSetToDelete(null)}
+      />
+
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
       />
     </div>
   );

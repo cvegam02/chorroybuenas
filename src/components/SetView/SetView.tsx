@@ -23,7 +23,7 @@ export const SetView = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { sets, setSets, currentSetId, setCurrentSetId } = useSetContext();
   const { cards, isLoading: cardsLoading } = useCards();
-  const { boards, clearBoards, isGenerating } = useBoard();
+  const { boards, clearBoards, isGenerating, isBoardsLoading } = useBoard();
   const [selectedBoardIndex, setSelectedBoardIndex] = useState<number | null>(null);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -34,10 +34,12 @@ export const SetView = () => {
   const [isSavingName, setIsSavingName] = useState(false);
   const [tokensSpentInSet, setTokensSpentInSet] = useState<number | null>(null);
   const [fetchedSet, setFetchedSet] = useState<LoteriaSet | null>(null);
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (setId) {
       setCurrentSetId(setId);
+      setLoadedImages(new Set());
     }
   }, [setId, setCurrentSetId]);
 
@@ -251,7 +253,7 @@ export const SetView = () => {
         )}
       </header>
 
-      {(!isSynced || cardsLoading) ? (
+      {(!isSynced || cardsLoading || isBoardsLoading) ? (
         <div className="set-view__loading">
           <div className="set-view__spinner" />
           <p>{user ? t('setView.loadingCards') : t('common.loading')}</p>
@@ -283,7 +285,18 @@ export const SetView = () => {
                     onClick={() => setSelectedCard(card)}
                   >
                     {card.image ? (
-                      <img src={card.image} alt={card.title} className="set-view__card-img" />
+                      <div className="set-view__card-img-wrapper">
+                        {!loadedImages.has(card.id) && (
+                          <div className="set-view__card-skeleton" aria-hidden="true" />
+                        )}
+                        <img
+                          src={card.image}
+                          alt={card.title}
+                          className="set-view__card-img"
+                          style={loadedImages.has(card.id) ? undefined : { opacity: 0 }}
+                          onLoad={() => setLoadedImages((prev) => new Set(prev).add(card.id))}
+                        />
+                      </div>
                     ) : (
                       <div className="set-view__card-placeholder">{t('setView.noImage')}</div>
                     )}

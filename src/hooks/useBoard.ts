@@ -40,23 +40,33 @@ const isDuplicateBoard = (board: Board, existingBoards: Board[]): boolean => {
 export const useBoard = () => {
   const [boards, setBoards] = useState<Board[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isBoardsLoading, setIsBoardsLoading] = useState(false);
   const { user } = useAuth();
   const { currentSetId } = useSetContext();
 
   useEffect(() => {
-    const loadCloudBoards = async () => {
-      if (user && currentSetId) {
-        try {
-          const cloudBoards = await BoardRepository.getBoards(user.id, currentSetId);
-          setBoards(cloudBoards);
-        } catch (error) {
-          console.error('Error loading cloud boards:', error);
-        }
-      } else {
-        setBoards([]);
-      }
+    // Clear immediately so stale boards from a previous set are never shown
+    setBoards([]);
+
+    if (!user || !currentSetId) return;
+
+    let cancelled = false;
+    setIsBoardsLoading(true);
+
+    BoardRepository.getBoards(user.id, currentSetId)
+      .then((cloudBoards) => {
+        if (!cancelled) setBoards(cloudBoards);
+      })
+      .catch((error) => {
+        console.error('Error loading cloud boards:', error);
+      })
+      .finally(() => {
+        if (!cancelled) setIsBoardsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
     };
-    loadCloudBoards();
   }, [user, currentSetId]);
 
   const generateBoardsAsync = async (count: number, gridSize: 9 | 16 = 16): Promise<Board[]> => {
@@ -156,6 +166,7 @@ export const useBoard = () => {
     generateBoards: generateBoardsAsync,
     clearBoards: clearBoardsAsync,
     isGenerating,
+    isBoardsLoading,
   };
 };
 

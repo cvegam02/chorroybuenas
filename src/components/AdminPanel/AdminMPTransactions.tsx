@@ -31,12 +31,16 @@ const formatDate = (iso: string) =>
 const formatAmount = (cents: number) =>
   new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 2 }).format(cents / 100);
 
-const formatStatus = (s: string | null) => {
-  if (!s) return '—';
-  if (s === 'approved') return 'Aprobado';
-  if (s === 'pending') return 'Pendiente';
-  if (s === 'rejected') return 'Rechazado';
-  return s;
+const statusBadge = (s: string | null) => {
+  if (!s) return <span>—</span>;
+  const map: Record<string, { label: string; mod: string }> = {
+    approved: { label: 'Aprobado',  mod: 'approved' },
+    pending:  { label: 'Pendiente', mod: 'pending'  },
+    rejected: { label: 'Rechazado', mod: 'rejected' },
+  };
+  const entry = map[s];
+  if (!entry) return <span>{s}</span>;
+  return <span className={`admin-badge admin-badge--${entry.mod}`}>{entry.label}</span>;
 };
 
 const formatPack = (p: AdminMPTransaction) =>
@@ -200,7 +204,7 @@ export const AdminMPTransactions = () => {
                     <td className="admin-mp__cell-payment-id" data-label="Payment ID">
                       {t.payment_id || '—'}
                     </td>
-                    <td data-label="Estado">{formatStatus(t.payment_status)}</td>
+                    <td data-label="Estado">{statusBadge(t.payment_status)}</td>
                     <td className="admin-mp__cell-actions" data-label="">
                       <button
                         type="button"
@@ -276,7 +280,7 @@ export const AdminMPTransactions = () => {
                 <dt>Monto</dt>
                 <dd>{formatAmount(detailRow.amount_cents)}</dd>
                 <dt>Estado</dt>
-                <dd>{formatStatus(detailRow.payment_status)}</dd>
+                <dd>{statusBadge(detailRow.payment_status)}</dd>
                 {detailFields.map(({ label, value }) => (
                   <React.Fragment key={label}>
                     <dt>{label}</dt>

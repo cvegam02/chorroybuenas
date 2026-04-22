@@ -145,7 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!user) throw new Error('NOT_LOGGED_IN');
         const ext = ALLOWED_AVATAR_TYPES[file.type];
         if (!ext) throw new Error('INVALID_FILE_TYPE');
-        const path = `${user.id}/avatar_${Date.now()}.${ext}`;
+        const path = `${user.id}/avatar.${ext}`;
         const { error: uploadError } = await supabase.storage
             .from('card-images')
             .upload(path, file, { upsert: true, contentType: file.type });

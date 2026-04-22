@@ -1032,3 +1032,154 @@
     background: var(--color-bg-subtle);
   }
 }
+
+/* ============================================
+   HERO — PROFILE EDITING
+   ============================================ */
+
+/* Clickable avatar wrapper */
+.dashboard__hero-avatar-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dashboard__hero-avatar-wrapper:disabled {
+  cursor: not-allowed;
+}
+
+/* Camera overlay (shown on hover) */
+.dashboard__hero-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 22px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.dashboard__hero-avatar-wrapper:hover .dashboard__hero-avatar-overlay,
+.dashboard__hero-avatar-wrapper:focus-visible .dashboard__hero-avatar-overlay {
+  opacity: 1;
+}
+
+/* Inline name editing row */
+.dashboard__hero-name-edit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+.dashboard__hero-name-input {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  outline: none;
+  max-width: 280px;
+  font-family: inherit;
+}
+
+.dashboard__hero-name-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dashboard__hero-name-input:focus {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.dashboard__hero-name-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  font-size: 14px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.dashboard__hero-name-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.dashboard__hero-name-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dashboard__hero-name-btn--save {
+  background: rgba(40, 167, 69, 0.5);
+}
+
+.dashboard__hero-name-btn--save:hover:not(:disabled) {
+  background: rgba(40, 167, 69, 0.7);
+}
+
+/* Pencil icon trigger next to name */
+.dashboard__hero-name-edit-trigger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  padding: 4px 6px;
+  margin-left: 8px;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+  vertical-align: middle;
+}
+
+.dashboard__hero-name-edit-trigger:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Change password link */
+.dashboard__hero-change-password {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+  padding: 0;
+  margin-top: 4px;
+  text-decoration: underline;
+  font-family: inherit;
+  transition: color 0.2s;
+}
+
+.dashboard__hero-change-password:hover {
+  color: #fff;
+}
+
+/* Responsive: name input on mobile */
+@media (max-width: 600px) {
+  .dashboard__hero-name-input {
+    font-size: 1.1rem;
+    max-width: 200px;
+  }
+}
