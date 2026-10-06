@@ -13,7 +13,11 @@ export function resolveAppUrl(requested: string | null, allowedOrigins: string[]
   return fallback.replace(/\/$/, '');
 }
 
-/** Producción por default. Sandbox solo si el secret MP_USE_SANDBOX_CHECKOUT es exactamente "true". */
+/**
+ * Qué URL de checkout se usa. Por default init_point, que sirve tanto con credenciales de producción
+ * como con las de prueba de Mercado Pago. sandbox_init_point (heredado) solo si el secret
+ * MP_USE_SANDBOX_CHECKOUT es exactamente "true".
+ */
 export function resolveCheckoutMode(flag: string | undefined): CheckoutMode {
   return flag === 'true' ? 'sandbox' : 'production';
 }
