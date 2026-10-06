@@ -53,7 +53,7 @@ Como desarrollador, quiero que el repositorio tenga todo lo que Vercel necesita 
 
 - **Tipo:** Tarea técnica
 - **Prioridad:** Alta
-- **Estado:** Por hacer
+- **Estado:** En revisión — proyecto de Vercel conectado y publicando `main` como Production (`chorroybuenas.vercel.app` usa Supabase PROD). Falta confirmar que las variables de Preview apuntan a DEV
 - **Depende de:** CYB-1301
 - **Responsable:** Carlos (requiere su cuenta de Vercel)
 
@@ -92,7 +92,7 @@ Como dueño del proyecto, quiero un proyecto de Vercel conectado al repositorio,
 
 - **Tipo:** Historia
 - **Prioridad:** Alta
-- **Estado:** Por hacer
+- **Estado:** En curso — rama `dev` creada; `ALLOWED_ORIGINS` y las Redirect URLs de Supabase DEV ya incluyen `dev.chorroybuenas.com.mx`. Falta asignar el dominio a la rama en Vercel y crear el CNAME en GoDaddy
 - **Depende de:** CYB-1302
 - **Responsable:** Carlos (DNS y configuración de Supabase DEV)
 - **Decisión a confirmar:** rama `dev` con el dominio `dev.chorroybuenas.com.mx`

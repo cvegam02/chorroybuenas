@@ -17,7 +17,8 @@
 | C1 | CRITICAL | PAT de Supabase (`sbp_…`) commiteado en `.env.example:38`, repo público | 1 |
 | C2 | CRITICAL | `transform-loteria` no cobra tokens; el cobro lo hace el navegador | 4, 11, 12 |
 | C3 | CRITICAL | Doble acreditación: check-then-insert sin `unique` en `payment_id` | 3, 10 |
-| C4 | CRITICAL | `add_tokens_after_purchase` es ejecutable por `anon` y `authenticated`: la migración 004 solo revoca de `public`, y Supabase concede `EXECUTE` a esos roles por privilegios por defecto. Detectado con el arnés el 2026-10-06; pendiente de confirmar en prod | 3 |
+| C4 | CRITICAL | `add_tokens_after_purchase` es ejecutable por `anon` y `authenticated`: la migración 004 solo revoca de `public`, y Supabase concede `EXECUTE` a esos roles por privilegios por defecto. Detectado con el arnés y confirmado en la base DEV real el 2026-10-06 (corregido ahí); PROD pendiente | 3 |
+| C5 | CRITICAL | En la base real `user_tokens` tiene la policy `"Service role can manage credits"` (`FOR ALL TO public USING (true)`): cualquiera con la anon key puede leer y modificar todos los saldos. Las bases se crearon a mano y no coinciden con las migraciones. Confirmado en DEV el 2026-10-06 y corregido ahí; PROD pendiente | 5 (migración 024, PR #7) |
 | H4 | HIGH | Bono de código promocional se muestra y no se acredita; sin límite por usuario | 6, 9, 10 |
 | H5 | HIGH | `spend_tokens` permite saldo negativo (race) | 4 |
 | H6 | HIGH | Tokens iniciales escritos desde el cliente (`initializeUser`, `addTokens`) | 5 |
@@ -77,6 +78,8 @@ Hallazgos nuevos encontrados al preparar el plan (se arreglan en el task indicad
 - **2026-10-06 — Task 15 (pasos locales).** El orden de despliegue y la tabla de secrets quedaron en `docs/ENTORNOS_DEV_PROD.md` (sección 10 nueva). `credit-payment-on-return` pasa a `verify_jwt = false` en `config.toml`, igual que las otras funciones que llama el navegador: valida el JWT ella misma y necesita responder al preflight. Los pasos 4 a 6 del Task 15 (despliegue en dev y prod) no se ejecutaron: modifican entornos reales y requieren confirmación de Carlos. Solo existe `.env` en la máquina (no hay `.env.production`) y no hay proyecto enlazado en el CLI: falta confirmar si dev y prod son proyectos distintos.
 
 - **2026-10-06 — El frontend se despliega con Vercel, no con GitHub Actions/Pages (decisión de Carlos).** Hay dos proyectos de Supabase: Production de Vercel (`main`) usa PROD, y Preview usa DEV, con la rama `dev` en `dev.chorroybuenas.com.mx`. Se agregó `vercel.json`, el workflow pasó a `ci.yml` (solo verifica) y se quitaron `public/CNAME`, `public/404.html` y el plugin `copy-404`. Esto reemplaza lo que el Task 2 Step 7 y el Task 15 decían sobre `deploy.yml`, GitHub Pages y ngrok. Guía: `docs/VERCEL_DEPLOY.md`; historias: `docs/features/FEAT-13-despliegue-en-vercel.md`. Costo si está mal: mientras no se haga el corte de DNS, un merge a `main` ya no actualiza el sitio de GitHub Pages.
+
+- **2026-10-06 — Despliegue en DEV.** Las bases no tienen historial de migraciones (`supabase_migrations.schema_migrations` no existe): `supabase db push` intentaría correr las 26 migraciones, así que las 022–025 se aplicaron una por una, cada una en su transacción, por la Management API, tras respaldar saldos, policies y funciones. Las funciones se desplegaron con `--use-api` (sin Docker, por espacio en disco). Antes de aplicar se corrigieron las migraciones 024 y 025 para no depender del nombre de las policies (PR #7). No se borró `MP_USE_PRODUCTION_CHECKOUT` de DEV hasta comprobar que el checkout de sandbox funciona. Pendiente: registrar el historial de migraciones en ambas bases para poder volver a usar `db push`.
 
 ## Global Constraints
 

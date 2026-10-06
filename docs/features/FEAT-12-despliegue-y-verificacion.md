@@ -50,7 +50,7 @@ Como desarrollador, quiero que los secrets nuevos estén documentados y que la c
 
 - **Tipo:** Tarea técnica
 - **Prioridad:** Alta
-- **Estado:** Bloqueada — requiere la confirmación de Carlos para modificar el entorno de dev, y antes: revocar el token (CYB-101), confirmar cuál es el proyecto de dev y correr las consultas previas. La compuerta local (typecheck, lint, 248 tests, 86 aserciones de BD, build) está en verde.
+- **Estado:** En curso — backend desplegado en DEV el 2026-10-06 (migraciones 022–025, secrets y las 4 funciones) y verificado con la anon key real y con un usuario temporal. Falta que Carlos pruebe en el navegador una transformación de IA exitosa y una compra con tarjeta de prueba
 - **Plan:** Task 15, Steps 4–5
 - **Depende de:** CYB-1201, CYB-305, CYB-403, CYB-1302, CYB-1303 y todas las historias de FEAT-03 a FEAT-10
 - **Responsable:** Carlos confirma cada paso
@@ -116,7 +116,7 @@ Como dueño del proyecto, quiero validar todo el cambio en dev con pagos de prue
 
 - **Tipo:** Tarea técnica
 - **Prioridad:** Alta
-- **Estado:** Bloqueada — depende de CYB-1202
+- **Estado:** Bloqueada — falta un access token con acceso al proyecto PROD (`bdruzgjboxalpywljemk`) y el visto bueno de Carlos tras probar en DEV. El frontend nuevo ya está en `main` y publicado en Vercel; el dominio sigue en GitHub Pages
 - **Plan:** Task 15, Step 6 y sección "Cierre"
 - **Depende de:** CYB-1202, CYB-1304
 - **Responsable:** Carlos confirma cada paso
