@@ -36,12 +36,10 @@ export interface TokenPurchase {
   created_at: string;
 }
 
-/** Promoción activa para mostrar en compra de tokens */
-export interface ActivePromotion {
-  id: string;
-  type: 'first_purchase' | 'code';
-  code: string | null;
-  percent: number;
+/** Resumen público de promociones vigentes; nunca incluye códigos. */
+export interface PromoSummary {
+  firstPurchasePercent: number;
+  hasCodePromos: boolean;
 }
 
 const FALLBACK_PACKS: TokenPack[] = [
@@ -104,39 +102,25 @@ export class TokenPricingRepository {
   }
 
   /**
-   * Promociones activas y vigentes (para mostrar en compra de tokens).
-   * Filtra por is_active y valid_from/valid_until.
+   * Resumen público de promociones (para la página de compra). No expone los códigos.
    */
-  static async getActivePromotions(): Promise<ActivePromotion[]> {
-    const { data, error } = await supabase
-      .from('promotions')
-      .select('id, type, code, config, valid_from, valid_until, is_active');
+  static async getPromoSummary(): Promise<PromoSummary> {
+    const { data, error } = await supabase.rpc('get_public_promo_summary').maybeSingle();
+    const row = data as { first_purchase_percent: number; has_code_promos: boolean } | null;
+    if (error || !row) return { firstPurchasePercent: 0, hasCodePromos: false };
+    return { firstPurchasePercent: row.first_purchase_percent ?? 0, hasCodePromos: row.has_code_promos === true };
+  }
 
-    if (error || !data) return [];
-
-    const now = new Date();
-    const valid = data.filter((p) => {
-      if (!p.is_active) return false;
-      if (p.valid_from && new Date(p.valid_from) > now) return false;
-      if (p.valid_until && new Date(p.valid_until) < now) return false;
-      return true;
-    });
-
-    return valid
-      .filter((p) => p.type === 'first_purchase' || p.type === 'code')
-      .map((p) => {
-        const config = (p.config ?? {}) as { percent?: number };
-        const percent = typeof config.percent === 'number' && config.percent >= 1 && config.percent <= 100
-          ? Math.round(config.percent)
-          : 0;
-        return {
-          id: p.id,
-          type: p.type as 'first_purchase' | 'code',
-          code: p.code?.trim() || null,
-          percent,
-        };
-      })
-      .filter((p) => p.percent > 0);
+  /**
+   * Porcentaje de bono de un código para el usuario actual; 0 si no existe, no está vigente o ya lo usó.
+   * Se valida en el servidor: el navegador nunca recibe la lista de códigos.
+   */
+  static async checkPromoCode(code: string): Promise<number> {
+    const trimmed = code.trim();
+    if (!trimmed) return 0;
+    const { data, error } = await supabase.rpc('check_promo_code', { p_code: trimmed });
+    if (error || typeof data !== 'number') return 0;
+    return data;
   }
 
   /**
