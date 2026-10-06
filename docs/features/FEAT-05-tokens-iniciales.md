@@ -12,7 +12,7 @@
 
 - **Tipo:** Bug
 - **Prioridad:** Alta
-- **Estado:** En revisión — implementado y probado (migración 024); falta probar el registro por correo y por Google en dev (FEAT-12)
+- **Estado:** Hecho — desplegado en DEV y PROD el 2026-10-06; en PROD el trigger real asignó 5 tokens a un usuario de prueba y el backfill dio 5 tokens a 7 usuarios
 - **Finding:** H6
 - **Plan:** Task 5 (migración 024)
 - **Depende de:** CYB-204
@@ -63,7 +63,7 @@ Como usuario nuevo, quiero recibir mis tokens de bienvenida en cuanto creo mi cu
 
 - **Tipo:** Bug de seguridad
 - **Prioridad:** Alta
-- **Estado:** En revisión — implementado y probado (migración 024, `TokenRepository` de solo lectura); falta ver en dev/prod si la migración elimina alguna policy manual
+- **Estado:** Hecho — desplegado en DEV y PROD el 2026-10-06; en PROD el trigger real asignó 5 tokens a un usuario de prueba y el backfill dio 5 tokens a 7 usuarios
 - **Finding:** H6
 - **Plan:** Task 5 (migración 024 y `TokenRepository.ts`)
 - **Depende de:** CYB-501
@@ -113,7 +113,7 @@ Como dueño del negocio, quiero que ningún usuario pueda modificar su saldo des
 
 - **Tipo:** Tarea técnica (datos)
 - **Prioridad:** Media
-- **Estado:** En revisión — backfill implementado y verificado con datos simulados; falta que Carlos anote cuántos usuarios afectará en prod
+- **Estado:** Hecho — desplegado en DEV y PROD el 2026-10-06; en PROD el trigger real asignó 5 tokens a un usuario de prueba y el backfill dio 5 tokens a 7 usuarios
 - **Finding:** H6
 - **Plan:** Task 5 (backfill en la migración 024)
 - **Depende de:** CYB-501

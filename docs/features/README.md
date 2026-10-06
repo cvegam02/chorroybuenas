@@ -2,6 +2,8 @@
 
 Backlog en formato de historias de usuario, derivado del code review del 2026-10-06. Cada archivo es una feature (épica) y contiene sus historias.
 
+Lo que sigue abierto después del despliegue está en [`docs/PENDIENTES.md`](../PENDIENTES.md).
+
 El detalle técnico de implementación (código, migraciones, tests) está en [`docs/superpowers/plans/2026-10-06-code-review-remediation.md`](../superpowers/plans/2026-10-06-code-review-remediation.md). Cada historia indica el task del plan que la implementa.
 
 ## Índice

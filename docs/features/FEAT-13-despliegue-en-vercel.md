@@ -53,7 +53,7 @@ Como desarrollador, quiero que el repositorio tenga todo lo que Vercel necesita 
 
 - **Tipo:** Tarea técnica
 - **Prioridad:** Alta
-- **Estado:** En revisión — proyecto de Vercel conectado y publicando `main` como Production (`chorroybuenas.vercel.app` usa Supabase PROD). Falta confirmar que las variables de Preview apuntan a DEV
+- **Estado:** Hecho — Production usa Supabase PROD y Preview usa Supabase DEV, ambas claves verificadas contra su proyecto
 - **Depende de:** CYB-1301
 - **Responsable:** Carlos (requiere su cuenta de Vercel)
 
@@ -92,7 +92,7 @@ Como dueño del proyecto, quiero un proyecto de Vercel conectado al repositorio,
 
 - **Tipo:** Historia
 - **Prioridad:** Alta
-- **Estado:** En curso — rama `dev` creada; `ALLOWED_ORIGINS` y las Redirect URLs de Supabase DEV ya incluyen `dev.chorroybuenas.com.mx`. Falta asignar el dominio a la rama en Vercel y crear el CNAME en GoDaddy
+- **Estado:** Hecho — `dev.chorroybuenas.com.mx` sirve la rama `dev` contra Supabase DEV; login, IA y compra probados ahí
 - **Depende de:** CYB-1302
 - **Responsable:** Carlos (DNS y configuración de Supabase DEV)
 - **Decisión a confirmar:** rama `dev` con el dominio `dev.chorroybuenas.com.mx`
@@ -136,7 +136,7 @@ La URL debe ser fija porque las Edge Functions solo aceptan orígenes de una lis
 
 - **Tipo:** Tarea técnica
 - **Prioridad:** Alta
-- **Estado:** Por hacer
+- **Estado:** En revisión — `chorroybuenas.com.mx` y `www` ya resuelven a Vercel con certificado válido y sin registros AAAA; `ALLOWED_ORIGINS` y las Redirect URLs de PROD incluyen ambos. Falta desactivar GitHub Pages y borrar los secrets `VITE_*` de Actions
 - **Depende de:** CYB-1302
 - **Responsable:** Carlos (DNS en GoDaddy, GitHub Pages)
 

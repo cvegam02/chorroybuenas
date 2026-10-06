@@ -12,7 +12,7 @@
 
 - **Tipo:** Bug de seguridad
 - **Prioridad:** Crítica
-- **Estado:** En revisión — implementado y probado (migración 023, handler `transform-loteria`); falta desplegar y probar en dev (FEAT-12)
+- **Estado:** Hecho — validado en DEV con una transformación real y desplegado en PROD el 2026-10-06
 - **Finding:** C2
 - **Plan:** Task 4 (migración 023), Task 11
 - **Depende de:** CYB-204, CYB-403
@@ -114,7 +114,7 @@ Como usuario, quiero que se me devuelva el token si la imagen no se pudo generar
 
 - **Tipo:** Bug
 - **Prioridad:** Alta
-- **Estado:** En revisión — implementado; probado con 20 cobros en paralelo (5 cobrados, saldo 0). Falta que Carlos consulte saldos negativos en dev y prod
+- **Estado:** Hecho — validado en DEV con una transformación real y desplegado en PROD el 2026-10-06
 - **Finding:** H5
 - **Plan:** Task 4 (migración 023)
 - **Depende de:** CYB-204
@@ -207,7 +207,7 @@ Como dueño del negocio, quiero limitar cuántas transformaciones puede pedir un
 
 - **Tipo:** Tarea técnica
 - **Prioridad:** Crítica
-- **Estado:** En revisión — implementado; falta verificar en dev el caso del navegador con frontend viejo en caché
+- **Estado:** Hecho — validado en DEV con una transformación real y desplegado en PROD el 2026-10-06
 - **Finding:** C2
 - **Plan:** Task 4 (drop de `spend_tokens`), Task 5 (`TokenRepository`), Task 12 (`AIService`)
 - **Depende de:** CYB-401
