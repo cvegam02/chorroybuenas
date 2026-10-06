@@ -12,7 +12,7 @@
 
 - **Tipo:** Bug
 - **Prioridad:** Crítica
-- **Estado:** En revisión — código y tests listos (migración 022, `paymentFlow.ts`); falta desplegar y probar con un pago real en dev (FEAT-12)
+- **Estado:** Hecho — validado en DEV con un pago de prueba real y desplegado en PROD el 2026-10-06
 - **Finding:** C3
 - **Plan:** Task 3 (migración 022), Task 10
 - **Depende de:** CYB-204, CYB-305
@@ -63,7 +63,7 @@ Como dueño del negocio, quiero que un mismo pago nunca sume tokens dos veces, p
 
 - **Tipo:** Bug
 - **Prioridad:** Media
-- **Estado:** En revisión — implementado y probado con tests unitarios; falta verificar el reintento real de Mercado Pago en dev (FEAT-12)
+- **Estado:** Hecho — validado en DEV con un pago de prueba real y desplegado en PROD el 2026-10-06
 - **Finding:** M3
 - **Plan:** Task 10
 - **Depende de:** CYB-301
@@ -156,7 +156,7 @@ Las notificaciones IPN antiguas (`?topic=…&id=…`) no vienen firmadas y se si
 
 - **Tipo:** Historia (seguridad)
 - **Prioridad:** Alta
-- **Estado:** En revisión — implementado y probado con tests unitarios; falta la prueba de punta a punta en dev (FEAT-12)
+- **Estado:** Hecho — validado en DEV con un pago de prueba real y desplegado en PROD el 2026-10-06
 - **Findings:** C3, M5
 - **Plan:** Task 6 (`credit.ts`), Task 10
 - **Depende de:** nada

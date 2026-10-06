@@ -115,7 +115,7 @@ Como dueño del negocio, quiero que cada usuario pueda usar un código una sola 
 
 - **Tipo:** Bug de seguridad
 - **Prioridad:** Media
-- **Estado:** En revisión — implementado y probado (migración 025); falta comprobar en dev que el panel de Admin sigue gestionando promociones
+- **Estado:** Hecho — desplegado en DEV y PROD el 2026-10-06; con la anon key real `promotions` devuelve `[]`
 - **Finding:** M2
 - **Plan:** Task 13 (migración 025)
 - **Depende de:** CYB-204
