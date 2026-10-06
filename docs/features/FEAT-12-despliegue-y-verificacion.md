@@ -116,7 +116,7 @@ Como dueño del proyecto, quiero validar todo el cambio en dev con pagos de prue
 
 - **Tipo:** Tarea técnica
 - **Prioridad:** Alta
-- **Estado:** En revisión — backend desplegado en PROD el 2026-10-06 21:46 UTC (secrets, migraciones 022–025 registradas en el historial, 4 funciones) y verificado con la anon key real y un usuario temporal; el dominio ya lo sirve Vercel con el frontend nuevo. Falta: una compra real mínima, desactivar GitHub Pages y borrar los secrets `VITE_*` de Actions
+- **Estado:** Hecho — backend desplegado en PROD el 2026-10-06 21:46 UTC y validado con dinero real: una transformación de IA (1 token cobrado) y una compra de $10.00 MXN (5 tokens, una sola acreditación con 4 notificaciones). Lo que queda (desactivar GitHub Pages, borrar secrets de Actions) está en `docs/PENDIENTES.md`
 - **Plan:** Task 15, Step 6 y sección "Cierre"
 - **Depende de:** CYB-1202, CYB-1304
 - **Responsable:** Carlos confirma cada paso
