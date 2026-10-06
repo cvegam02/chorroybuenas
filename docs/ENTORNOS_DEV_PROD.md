@@ -74,31 +74,51 @@ VITE_APP_URL=https://chorroybuenas.com.mx
 
 ---
 
-## 4. Mercado Pago: tokens distintos por proyecto
+## 4. Secrets de las Edge Functions por proyecto
 
-El token de Mercado Pago se guarda como **secret en Supabase** (no en el frontend). Cada proyecto Supabase tiene sus propios secrets.
+Los tokens de Mercado Pago y Replicate y la configuración de las funciones se guardan como **secrets en Supabase** (no en el frontend). Cada proyecto Supabase tiene sus propios secrets.
 
 ### Proyecto DEV
 - Token de **prueba/sandbox** de Mercado Pago
 - Los pagos no son reales
+- `MP_USE_SANDBOX_CHECKOUT=true`: sin este secret el checkout es el de producción
 
 ```bash
 npx supabase link --project-ref <REF-DEV>
 npx supabase secrets set MERCADOPAGO_ACCESS_TOKEN=APP_USR-xxx-token-prueba
+npx supabase secrets set MERCADOPAGO_WEBHOOK_SECRET=<clave secreta de Webhooks, app de prueba>
+npx supabase secrets set MP_USE_SANDBOX_CHECKOUT=true
+npx supabase secrets set ALLOWED_ORIGINS=https://dev.chorroybuenas.com.mx,http://localhost:5173
 npx supabase secrets set SERVICE_ROLE_KEY=<service_role_del_proyecto_dev>
 npx supabase secrets set REPLICATE_API_TOKEN=r8_xxx
+npx supabase secrets unset MP_USE_PRODUCTION_CHECKOUT
 ```
 
 ### Proyecto PROD
 - Token de **producción** de Mercado Pago
 - Los pagos son reales
+- **No** definir `MP_USE_SANDBOX_CHECKOUT`: producción es el comportamiento por defecto
 
 ```bash
 npx supabase link --project-ref <REF-PROD>
 npx supabase secrets set MERCADOPAGO_ACCESS_TOKEN=APP_USR-xxx-token-produccion
+npx supabase secrets set MERCADOPAGO_WEBHOOK_SECRET=<clave secreta de Webhooks, app productiva>
+npx supabase secrets set ALLOWED_ORIGINS=https://chorroybuenas.com.mx,https://www.chorroybuenas.com.mx
+npx supabase secrets set APP_URL=https://chorroybuenas.com.mx
 npx supabase secrets set SERVICE_ROLE_KEY=<service_role_del_proyecto_prod>
 npx supabase secrets set REPLICATE_API_TOKEN=r8_xxx
+npx supabase secrets unset MP_USE_PRODUCTION_CHECKOUT
 ```
+
+### Qué hace cada secret
+
+| Secret | Para qué sirve | Si falta |
+|--------|----------------|----------|
+| `ALLOWED_ORIGINS` | Lista blanca de orígenes para CORS y para la URL de retorno del pago. Separados por coma, sin diagonal final | El navegador bloquea las respuestas de compra, retorno e IA |
+| `MP_USE_SANDBOX_CHECKOUT` | `true` usa el checkout de prueba y no envía el correo del comprador | Se usa el checkout de producción |
+| `MERCADOPAGO_WEBHOOK_SECRET` | Verifica la firma `x-signature` de las notificaciones | Las notificaciones se aceptan sin verificar la firma (el pago se consulta siempre en la API de Mercado Pago) |
+| `APP_URL` | URL de retorno cuando la que envía el frontend no está en la lista blanca | Se usa `https://chorroybuenas.com.mx` |
+| `MP_USE_PRODUCTION_CHECKOUT` | **Ya no se usa.** Borrarlo | — |
 
 ---
 
@@ -187,6 +207,10 @@ Así, cuando pagues con credenciales de prueba, MP notificará al webhook de dev
 | `VITE_SUPABASE_ANON_KEY` | Frontend (.env) | anon key dev | anon key prod |
 | `VITE_APP_URL` | Frontend (.env) | ngrok | chorroybuenas.com.mx |
 | `MERCADOPAGO_ACCESS_TOKEN` | Secret Supabase | Token sandbox | Token producción |
+| `MERCADOPAGO_WEBHOOK_SECRET` | Secret Supabase | Clave de la app de prueba | Clave de la app productiva |
+| `MP_USE_SANDBOX_CHECKOUT` | Secret Supabase | `true` | No definir |
+| `ALLOWED_ORIGINS` | Secret Supabase | `dev.chorroybuenas.com.mx` y localhost | Dominio con y sin `www` |
+| `APP_URL` | Secret Supabase | Opcional | `https://chorroybuenas.com.mx` |
 | `SERVICE_ROLE_KEY` | Secret Supabase | Del proyecto dev | Del proyecto prod |
 | `REPLICATE_API_TOKEN` | Secret Supabase | Mismo (o distinto si quieres) | Mismo |
 
@@ -195,5 +219,26 @@ Así, cuando pagues con credenciales de prueba, MP notificará al webhook de dev
 ## 9. Seguridad
 
 - Nunca subas `.env` o `.env.production` al repo si contienen keys reales
-- Usa variables de entorno en la plataforma de deploy (Vercel, Netlify)
+- Las variables `VITE_*` de cada entorno se configuran en Vercel (ver `docs/VERCEL_DEPLOY.md`)
 - Mantén `SERVICE_ROLE_KEY` solo en Supabase Secrets, nunca en el frontend
+
+---
+
+## 10. Orden de despliegue
+
+Los cambios de base de datos, funciones y frontend dependen unos de otros. Desplegar siempre en este orden, primero en DEV y después en PROD, sin pausas largas entre pasos:
+
+1. **Consultas previas** (SQL Editor): pagos duplicados, saldos negativos y usuarios sin fila de saldo. Las migraciones 022 y 023 se detienen si encuentran datos que violan las nuevas restricciones.
+2. **Migraciones**: `npx supabase db push`
+3. **Secrets**: los de la sección 4. Sin `ALLOWED_ORIGINS` el frontend no puede llamar a las funciones.
+4. **Edge Functions**: `npm run deploy:functions:all`
+5. **Frontend**: lo publica Vercel. En DEV, merge a `dev` (`dev.chorroybuenas.com.mx`) o `npm run dev` en local; en PROD, merge a `main`. Ver `docs/VERCEL_DEPLOY.md`.
+
+Por qué importa el orden:
+
+- Las migraciones son compatibles con las funciones anteriores, salvo dos efectos mientras no se despliegan las nuevas: la IA no cobra tokens (la migración 023 elimina la RPC que llamaba el navegador) y las compras no aplican promociones (la migración 025 oculta la tabla). Por eso los pasos 2 a 4 se hacen seguidos.
+- Las funciones nuevas necesitan las migraciones: llaman a `spend_tokens_for_user` y a la versión nueva de `add_tokens_after_purchase`.
+- Un navegador con el frontend anterior en caché sigue funcionando: su intento de cobrar falla en silencio y el cobro lo hace el servidor.
+
+Antes de desplegar, en local: `npm run typecheck && npm run lint && npm run test:coverage && npm run test:db && npm run build`.
+

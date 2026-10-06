@@ -1,12 +1,13 @@
 import { FaTh, FaChild } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { GridSize } from '../../types';
 import './GridModeSelector.css';
 
 interface GridModeSelectorProps {
     selectedSize: GridSize;
     onChange: (size: GridSize) => void;
-    t?: any; // Allow passing t for consistency with other components or use internally
+    t?: TFunction; // Allow passing t for consistency with other components or use internally
 }
 
 export const GridModeSelector = ({ selectedSize, onChange, t: propsT }: GridModeSelectorProps) => {

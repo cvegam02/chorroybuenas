@@ -7,6 +7,7 @@ import { GridSize } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSetContext } from '../../contexts/SetContext';
 import { CardRepository } from '../../repositories/CardRepository';
+import { logger } from '../../utils/logger';
 
 interface BoardCountSelectorProps {
   onGenerate: (count: number, gridSize: GridSize) => void;
@@ -77,6 +78,7 @@ const minCardsForMode = (gridSize: GridSize) => (gridSize === 9 ? 12 : 16);
 export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCountSelectorProps) => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const userId = user?.id;
   const { currentSetId } = useSetContext();
   const [boardCount, setBoardCount] = useState<number>(8);
   const [inputValue, setInputValue] = useState<string>('8');
@@ -92,9 +94,9 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
       setIsLoadingCards(true);
       try {
         let cards;
-        if (user && currentSetId) {
-          cards = await CardRepository.getCards(user.id, currentSetId);
-        } else if (user) {
+        if (userId && currentSetId) {
+          cards = await CardRepository.getCards(userId, currentSetId);
+        } else if (userId) {
           cards = []; // Same as useBoard: logged in but no set selected = no cards
         } else {
           cards = await loadCards();
@@ -119,13 +121,13 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
         setBoardCount(defaultCount);
         setInputValue(defaultCount.toString());
       } catch (error) {
-        console.error('Error loading cards:', error);
+        logger.error('Error loading cards:', error);
       } finally {
         setIsLoadingCards(false);
       }
     };
     loadCardCount();
-  }, [gridSize, user?.id, currentSetId]); // Re-run when gridSize or card source changes
+  }, [gridSize, userId, currentSetId]); // Re-run when gridSize or card source changes
 
   const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.trim();

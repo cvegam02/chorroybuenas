@@ -1,6 +1,7 @@
 import { supabase } from '../utils/supabaseClient';
 import { Card } from '../types';
 import { z } from 'zod';
+import { logger } from '../utils/logger';
 
 // Zod Schema for Card Validation
 export const CardSchema = z.object({
@@ -242,7 +243,7 @@ export class CardRepository {
             try {
                 await supabase.storage.from(this.BUCKET_NAME).remove(pathsToDelete);
             } catch (storageErr) {
-                console.warn('Error removing card images from storage (card already deleted from DB):', storageErr);
+                logger.warn('Error removing card images from storage (card already deleted from DB):', storageErr);
             }
         }
     }

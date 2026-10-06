@@ -201,7 +201,7 @@ location / {
     "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
   }
   ```
-- **GitHub Pages**: Ya está configurado en `vite.config.ts` (copia `index.html` a `404.html`)
+- **Vercel** (donde se despliega este proyecto): ya está configurado en `vercel.json`
 
 ## Notas
 

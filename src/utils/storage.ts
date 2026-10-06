@@ -1,5 +1,6 @@
 import { Card, Board, BoardStorage, BoardsCollection } from '../types';
 import { saveImage as saveImageToIndexedDB } from './indexedDB';
+import { logger } from './logger';
 
 const CARDS_KEY = 'loteria_cards';
 const BOARDS_KEY = 'loteria_boards';
@@ -39,7 +40,7 @@ export const saveCards = async (cards: Card[]): Promise<void> => {
           const blobURL = await saveImageToIndexedDB(card.id, card.image!);
           return blobURL;
         } catch (error) {
-          console.error(`Error saving image for card ${card.id}:`, error);
+          logger.error(`Error saving image for card ${card.id}:`, error);
           // Continue with other images even if one fails
           return null;
         }
@@ -55,7 +56,7 @@ export const saveCards = async (cards: Card[]): Promise<void> => {
           const blobURL = await saveImageToIndexedDB(`${card.id}_orig`, card.originalImage!);
           return blobURL;
         } catch (error) {
-          console.error(`Error saving original image for card ${card.id}:`, error);
+          logger.error(`Error saving original image for card ${card.id}:`, error);
           return null;
         }
       });
@@ -73,9 +74,9 @@ export const saveCards = async (cards: Card[]): Promise<void> => {
     }
 
   } catch (error) {
-    console.error('Error saving cards:', error);
+    logger.error('Error saving cards:', error);
     if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-      console.error('localStorage quota exceeded! This should not happen with IndexedDB migration.');
+      logger.error('localStorage quota exceeded! This should not happen with IndexedDB migration.');
       alert('Error: No hay suficiente espacio en el almacenamiento. Por favor, intenta nuevamente.');
       throw new Error('QuotaExceededError: No hay suficiente espacio para guardar todas las cartas');
     }
@@ -120,7 +121,7 @@ export const loadCards = async (): Promise<Card[]> => {
             isAiGenerated: metadata.isAiGenerated,
           };
         } catch (imgError) {
-          console.error(`Error loading images for card ${metadata.id}:`, imgError);
+          logger.error(`Error loading images for card ${metadata.id}:`, imgError);
           return {
             id: metadata.id,
             title: metadata.title,
@@ -133,7 +134,7 @@ export const loadCards = async (): Promise<Card[]> => {
 
     return cardsWithImages;
   } catch (error) {
-    console.error('Error loading cards:', error);
+    logger.error('Error loading cards:', error);
     // If we fail completely (e.g. localStorage issue), return empty
     return [];
   }
@@ -207,7 +208,7 @@ const migrateLegacyCards = async (): Promise<Card[]> => {
     localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
     return [];
   } catch (error) {
-    console.error('Error during legacy migration:', error);
+    logger.error('Error during legacy migration:', error);
     return [];
   }
 };
@@ -236,9 +237,9 @@ export const saveBoards = async (boards: Board[], count: number): Promise<void> 
     }
 
   } catch (error) {
-    console.error('Error saving boards to localStorage:', error);
+    logger.error('Error saving boards to localStorage:', error);
     if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-      console.error('localStorage quota exceeded when saving boards!');
+      logger.error('localStorage quota exceeded when saving boards!');
       alert('Error: No hay suficiente espacio para guardar los tableros. Esto no debería pasar si las cartas se guardaron correctamente.');
       throw error;
     }
@@ -279,7 +280,7 @@ export const loadBoards = async (): Promise<Board[] | null> => {
 
     return boards;
   } catch (error) {
-    console.error('Error loading boards from localStorage:', error);
+    logger.error('Error loading boards from localStorage:', error);
     return null;
   }
 };
@@ -292,7 +293,7 @@ export const loadBoardsCollection = (): BoardsCollection | null => {
     const stored = localStorage.getItem(BOARDS_KEY);
     return stored ? JSON.parse(stored) : null;
   } catch (error) {
-    console.error('Error loading boards collection from localStorage:', error);
+    logger.error('Error loading boards collection from localStorage:', error);
     return null;
   }
 };
@@ -301,7 +302,7 @@ export const saveBoardCount = (count: number): void => {
   try {
     localStorage.setItem(BOARD_COUNT_KEY, JSON.stringify(count));
   } catch (error) {
-    console.error('Error saving board count to localStorage:', error);
+    logger.error('Error saving board count to localStorage:', error);
   }
 };
 
@@ -310,7 +311,7 @@ export const loadBoardCount = (): number | null => {
     const stored = localStorage.getItem(BOARD_COUNT_KEY);
     return stored ? JSON.parse(stored) : null;
   } catch (error) {
-    console.error('Error loading board count from localStorage:', error);
+    logger.error('Error loading board count from localStorage:', error);
     return null;
   }
 };
@@ -320,7 +321,7 @@ export const saveCurrentSetId = (userId: string, setId: string): void => {
   try {
     localStorage.setItem(`${CURRENT_SET_PREFIX}${userId}`, setId);
   } catch (e) {
-    console.warn('Could not persist current set:', e);
+    logger.warn('Could not persist current set:', e);
   }
 };
 
@@ -345,7 +346,7 @@ export const clearAllData = async (): Promise<void> => {
     const { clearAllImages } = await import('./indexedDB');
     await clearAllImages();
   } catch (error) {
-    console.error('Error clearing data:', error);
+    logger.error('Error clearing data:', error);
   }
 };
 

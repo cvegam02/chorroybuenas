@@ -1,3 +1,5 @@
+import { logger } from './logger';
+
 /**
  * Servicio para manejar el almacenamiento de imágenes en IndexedDB
  * IndexedDB permite almacenar mucho más datos que localStorage (cientos de MB o GB)
@@ -11,7 +13,7 @@ interface DBInstance {
   db: IDBDatabase | null;
 }
 
-let dbInstance: DBInstance = { db: null };
+const dbInstance: DBInstance = { db: null };
 
 /**
  * Inicializa la base de datos IndexedDB
@@ -75,10 +77,10 @@ export const base64ToBlob = (base64: string): Blob => {
       );
     }
   } catch (error) {
-    console.error('Error convirtiendo base64 a Blob:', error);
-    console.error('Base64 recibido (tipo):', typeof base64);
-    console.error('Base64 recibido (longitud):', base64?.length);
-    console.error('Base64 recibido (primeros 200 caracteres):', base64?.substring(0, 200));
+    logger.error('Error convirtiendo base64 a Blob:', error);
+    logger.error('Base64 recibido (tipo):', typeof base64);
+    logger.error('Base64 recibido (longitud):', base64?.length);
+    logger.error('Base64 recibido (primeros 200 caracteres):', base64?.substring(0, 200));
     throw error instanceof Error ? error : new Error('Error desconocido al convertir base64 a Blob');
   }
 };
@@ -163,7 +165,7 @@ export const blobURLToBlob = async (blobURL: string): Promise<Blob> => {
     }
     return await response.blob();
   } catch (error) {
-    console.error('Error convirtiendo blob URL a Blob:', error);
+    logger.error('Error convirtiendo blob URL a Blob:', error);
     throw new Error(`Error al convertir blob URL a Blob: ${error instanceof Error ? error.message : 'Error desconocido'}`);
   }
 };
@@ -216,7 +218,7 @@ export const saveImage = async (cardId: string, imageData: string | Blob): Promi
       };
     });
   } catch (error) {
-    console.error('Error saving image:', error);
+    logger.error('Error saving image:', error);
     throw error;
   }
 };
@@ -253,7 +255,7 @@ export const cacheImageBlob = async (cardId: string, blob: Blob): Promise<void> 
       request.onerror = () => reject(new Error('Error al guardar imagen en IndexedDB'));
     });
   } catch (error) {
-    console.error('Error caching image blob:', error);
+    logger.error('Error caching image blob:', error);
     throw error;
   }
 };
@@ -284,7 +286,7 @@ export const getImageBlob = async (cardId: string): Promise<Blob | null> => {
       };
     });
   } catch (error) {
-    console.error('Error getting image blob:', error);
+    logger.error('Error getting image blob:', error);
     return null;
   }
 };
@@ -327,7 +329,7 @@ export const getImage = async (cardId: string): Promise<string | null> => {
       };
     });
   } catch (error) {
-    console.error('Error getting image:', error);
+    logger.error('Error getting image:', error);
     return null;
   }
 };
@@ -359,7 +361,7 @@ export const deleteImage = async (cardId: string): Promise<void> => {
       };
     });
   } catch (error) {
-    console.error('Error deleting image:', error);
+    logger.error('Error deleting image:', error);
     throw error;
   }
 };
@@ -390,7 +392,7 @@ export const clearAllImages = async (): Promise<void> => {
       };
     });
   } catch (error) {
-    console.error('Error clearing images:', error);
+    logger.error('Error clearing images:', error);
     throw error;
   }
 };
@@ -427,7 +429,7 @@ export const migrateImagesToIndexedDB = async (cards: Array<{ id: string; image:
             putRequest.onsuccess = () => resolve();
             putRequest.onerror = () => reject(new Error(`Error migrando imagen ${card.id}`));
           } catch (error) {
-            console.warn(`Error convirtiendo imagen ${card.id}:`, error);
+            logger.warn(`Error convirtiendo imagen ${card.id}:`, error);
             resolve(); // Continuar con otras imágenes aunque una falle
           }
         };
@@ -437,7 +439,7 @@ export const migrateImagesToIndexedDB = async (cards: Array<{ id: string; image:
 
     await Promise.all(migrationPromises);
   } catch (error) {
-    console.error('Error en migración de imágenes:', error);
+    logger.error('Error en migración de imágenes:', error);
     throw error;
   }
 };

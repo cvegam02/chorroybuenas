@@ -4,6 +4,7 @@ import { SetRepository } from '../repositories/SetRepository';
 import { loadCards, loadBoards } from '../utils/storage';
 import { blobURLToBlob } from '../utils/indexedDB';
 import type { Card } from '../types';
+import { logger } from '../utils/logger';
 
 export class SyncService {
     /**
@@ -13,7 +14,7 @@ export class SyncService {
     static async syncLocalDataToCloud(userId: string): Promise<{ cardsMigrated: number, boardsMigrated: number }> {
 
         // Los tokens se leen siempre de la DB (TokenRepository.getBalance).
-        // La fila en user_tokens se crea con app_config.initial_tokens la primera vez que se pide el balance (getBalance → initializeUser si no existe).
+        // La fila en user_tokens la crea el trigger handle_new_user al registrarse (app_config.initial_tokens).
 
         // 1. Fetch local data
         const localCards = await loadCards();
@@ -62,7 +63,7 @@ export class SyncService {
                 migratedCardIds[localCard.id] = dbCard.id!;
                 cardsMigratedCount++;
             } catch (error) {
-                console.error(`Failed to migrate card: ${localCard.title}`, error);
+                logger.error(`Failed to migrate card: ${localCard.title}`, error);
             }
         }
 
@@ -82,7 +83,7 @@ export class SyncService {
                     boardsMigratedCount++;
                 }
             } catch (error) {
-                console.error(`Failed to migrate board: ${localBoard.id}`, error);
+                logger.error(`Failed to migrate board: ${localBoard.id}`, error);
             }
         }
 

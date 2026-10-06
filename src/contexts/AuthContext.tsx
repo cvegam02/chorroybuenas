@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
 import { SyncService } from '../services/SyncService';
+import { AVATAR_BUCKET } from '../utils/avatar';
 
 interface AuthContextType {
     user: User | null;
@@ -18,9 +19,9 @@ interface AuthContextType {
     resetPasswordForEmail: (email: string) => Promise<void>;
     updatePassword: (newPassword: string) => Promise<void>;
     clearRecovery: () => void;
-    /** Updates full_name and/or avatar_url in user_metadata. */
-    updateProfile: (updates: { fullName?: string; avatarUrl?: string }) => Promise<void>;
-    /** Uploads a File to the card-images bucket under avatars/{userId}/ and returns a 1-year signed URL. */
+    /** Actualiza full_name y/o avatar_path en user_metadata. */
+    updateProfile: (updates: { fullName?: string; avatarPath?: string }) => Promise<void>;
+    /** Sube el avatar a la carpeta del usuario en el bucket privado y devuelve su ruta (no una URL). */
     uploadAvatar: (file: File) => Promise<string>;
 }
 
@@ -31,8 +32,6 @@ const ALLOWED_AVATAR_TYPES: Record<string, string> = {
     'image/jpeg': 'jpg',
     'image/webp': 'webp',
 };
-
-const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
@@ -131,11 +130,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const clearRecovery = () => setRecoverySession(null);
 
-    const updateProfile = async (updates: { fullName?: string; avatarUrl?: string }): Promise<void> => {
-        if (updates.fullName === undefined && updates.avatarUrl === undefined) return;
+    const updateProfile = async (updates: { fullName?: string; avatarPath?: string }): Promise<void> => {
+        if (updates.fullName === undefined && updates.avatarPath === undefined) return;
         const data: Record<string, string> = {};
         if (updates.fullName !== undefined) data.full_name = updates.fullName;
-        if (updates.avatarUrl !== undefined) data.avatar_url = updates.avatarUrl;
+        if (updates.avatarPath !== undefined) data.avatar_path = updates.avatarPath;
         const { data: result, error } = await supabase.auth.updateUser({ data });
         if (error) throw error;
         if (result.user) setUser(result.user);
@@ -147,14 +146,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!ext) throw new Error('INVALID_FILE_TYPE');
         const path = `${user.id}/avatar.${ext}`;
         const { error: uploadError } = await supabase.storage
-            .from('card-images')
+            .from(AVATAR_BUCKET)
             .upload(path, file, { upsert: true, contentType: file.type });
         if (uploadError) throw uploadError;
-        const { data } = await supabase.storage
-            .from('card-images')
-            .createSignedUrl(path, ONE_YEAR_IN_SECONDS);
-        if (!data?.signedUrl) throw new Error('Could not get avatar URL');
-        return data.signedUrl;
+        // Se guarda la ruta; la URL firmada (de vida corta) se genera al mostrar: ver useAvatarUrl.
+        return path;
     };
 
     return (

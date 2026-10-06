@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Board, Card } from '../../types';
 import { getImage } from '../../utils/indexedDB';
 import './BoardThumbnail.css';
+import { logger } from '../../utils/logger';
 
 interface BoardThumbnailProps {
   board: Board;
@@ -38,7 +39,7 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
             const freshImageURL = await getImage(card.id);
             return { ...card, freshImageUrl: freshImageURL || null };
           } catch (error) {
-            console.error(`[BoardThumbnail] ❌ Error getting image for card ${card.id} (${card.title}):`, error);
+            logger.error(`[BoardThumbnail] ❌ Error getting image for card ${card.id} (${card.title}):`, error);
             return { ...card, freshImageUrl: null };
           }
         })
@@ -116,7 +117,7 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
                               );
                             }
                           }).catch(err => {
-                            console.error(`[BoardThumbnail] ❌ Error refreshing image for card ${card.id}:`, err);
+                            logger.error(`[BoardThumbnail] ❌ Error refreshing image for card ${card.id}:`, err);
                             // Set to null to show placeholder on error
                             setCardsWithImages(prev =>
                               prev.map(c => c.id === card.id ? { ...c, freshImageUrl: null } : c)

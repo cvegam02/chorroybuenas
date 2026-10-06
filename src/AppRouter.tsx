@@ -26,6 +26,7 @@ import { generatePDF, downloadPDF } from './services/PDFService';
 import { saveBoards, saveBoardCount, loadBoards, clearAllData } from './utils/storage';
 import { BoardRepository } from './repositories/BoardRepository';
 import { Board, GridSize } from './types';
+import { logger } from './utils/logger';
 
 type AppStep = 'cards' | 'board-count' | 'preview' | 'confirmation';
 
@@ -97,7 +98,7 @@ function AppContent() {
             navigate('/cards', { replace: true });
           }
         } catch (e) {
-          console.error('Error loading preview boards:', e);
+          logger.error('Error loading preview boards:', e);
           if (!cancelled) navigate('/cards', { replace: true });
         }
       } else {
@@ -124,7 +125,7 @@ function AppContent() {
         const updated = await SetRepository.updateSet(currentSetId, user.id, { grid_size: gridSize });
         setSets(prev => prev.map(s => s.id === currentSetId ? { ...s, grid_size: updated.grid_size } : s));
       } catch (err) {
-        console.error('Error saving grid size:', err);
+        logger.error('Error saving grid size:', err);
       }
     }
     setCurrentStep('board-count');
@@ -149,7 +150,7 @@ function AppContent() {
       setCurrentStep('preview');
       navigate('/preview');
     } catch (error) {
-      console.error('Error generating boards:', error);
+      logger.error('Error generating boards:', error);
       const errorMessage = error instanceof Error ? error.message : t('common.error');
       alert(`${t('boardGenerator.errors.generateError')}: ${errorMessage}. ${t('boardGenerator.errors.tryAgain')}`);
     }
@@ -186,7 +187,7 @@ function AppContent() {
       downloadPDF(pdfBlob);
       setShowConfirmation(true);
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      logger.error('Error generating PDF:', error);
       alert(t('boardGenerator.errors.pdfError'));
     } finally {
       setIsGeneratingPDF(false);

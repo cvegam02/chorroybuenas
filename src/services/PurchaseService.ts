@@ -1,4 +1,5 @@
 import { supabase } from '../utils/supabaseClient';
+import { logger } from '../utils/logger';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
@@ -26,7 +27,7 @@ export async function createPaymentPreference(params: {
   } = await supabase.auth.getSession();
 
   if (sessionError) {
-    console.error('Error al obtener sesión:', sessionError);
+    logger.error('Error al obtener sesión:', sessionError);
     return {
       success: false,
       error: 'NOT_LOGGED_IN',
@@ -49,7 +50,7 @@ export async function createPaymentPreference(params: {
   } = await supabase.auth.refreshSession();
 
   if (refreshError) {
-    console.error('Error al refrescar sesión:', refreshError);
+    logger.error('Error al refrescar sesión:', refreshError);
     return {
       success: false,
       error: 'NOT_LOGGED_IN',
@@ -58,7 +59,7 @@ export async function createPaymentPreference(params: {
   }
 
   if (!refreshedSession?.access_token) {
-    console.error('No se pudo obtener token después de refrescar');
+    logger.error('No se pudo obtener token después de refrescar');
     return {
       success: false,
       error: 'NOT_LOGGED_IN',
@@ -91,7 +92,7 @@ export async function createPaymentPreference(params: {
 
     // Manejar errores 401 (sesión inválida o expirada)
     if (res.status === 401) {
-      console.error('Error 401 desde Edge Function:', body);
+      logger.error('Error 401 desde Edge Function:', body);
       // Error genérico de Supabase "Invalid JWT" o nuestro error personalizado
       if (body?.error === 'NOT_LOGGED_IN') {
         return {
@@ -110,20 +111,17 @@ export async function createPaymentPreference(params: {
 
     if (!res.ok) {
       const errorType = body?.error || 'NETWORK';
-      console.error('Error desde Edge Function:', {
+      logger.error('Error desde Edge Function:', {
         status: res.status,
         statusText: res.statusText,
         error: body?.error,
         message: body?.message,
-        details: body?.details,
       });
-      // Mostrar detalles del error si están disponibles (útil para debugging)
-      const errorMessage = body?.message ?? 'Error al iniciar la compra. Intenta de nuevo.';
-      const errorDetails = body?.details ? `\n\nDetalles: ${body.details}` : '';
+      // El servidor ya envía un mensaje apto para el usuario; el detalle técnico queda en sus logs.
       return {
         success: false,
         error: errorType,
-        message: errorMessage + errorDetails,
+        message: body?.message ?? 'Error al iniciar la compra. Intenta de nuevo.',
       };
     }
 
@@ -141,7 +139,7 @@ export async function createPaymentPreference(params: {
       message: 'Respuesta inválida del servidor.',
     };
   } catch (error) {
-    console.error('Error de red al llamar a Edge Function:', error);
+    logger.error('Error de red al llamar a Edge Function:', error);
     return {
       success: false,
       error: 'NETWORK',

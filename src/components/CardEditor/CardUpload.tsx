@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { convertFileToBase64, validateImageFile, compressImage, adjustImageToCardAspectRatio } from '../../utils/imageUtils';
 import { ImageEditor } from './ImageEditor';
 import './CardUpload.css';
+import { logger } from '../../utils/logger';
 
 
 interface CardUploadProps {
@@ -51,7 +52,7 @@ export const CardUpload = ({
     setWasEdited(false); // Reset edit flag when new image is loaded
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
 
     const normalizedTitle = normalizeTitle(title);
@@ -98,7 +99,7 @@ export const CardUpload = ({
         fileInputRef.current.value = '';
       }
     } catch (error) {
-      console.error('Error adding card:', error);
+      logger.error('Error adding card:', error);
       alert(t('cardEditor.errors.generalAddError'));
     } finally {
       setIsUploading(false);
@@ -135,7 +136,7 @@ export const CardUpload = ({
       const compressed = await compressImage(croppedImage);
       setImagePreview(compressed);
     } catch (error) {
-      console.error('Error compressing cropped image:', error);
+      logger.error('Error compressing cropped image:', error);
       // Fallback to uncompressed if compression fails
       setImagePreview(croppedImage);
     }
@@ -157,7 +158,7 @@ export const CardUpload = ({
   const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && title.trim() && imagePreview && !isUploading) {
       e.preventDefault();
-      handleSubmit(e as any);
+      handleSubmit(e);
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { FaLock, FaTimes, FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -23,7 +23,7 @@ export const ChangePasswordModal = ({ isOpen, onClose }: ChangePasswordModalProp
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         setPassword('');
         setConfirmPassword('');
         setShowPassword(false);
@@ -31,7 +31,7 @@ export const ChangePasswordModal = ({ isOpen, onClose }: ChangePasswordModalProp
         setError(null);
         setSuccess(false);
         onClose();
-    };
+    }, [onClose]);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -40,7 +40,7 @@ export const ChangePasswordModal = ({ isOpen, onClose }: ChangePasswordModalProp
         };
         document.addEventListener('keydown', onKeyDown);
         return () => document.removeEventListener('keydown', onKeyDown);
-    }, [isOpen]);
+    }, [isOpen, handleClose]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

@@ -15,6 +15,7 @@ import { WarningModal } from '../ConfirmationModal/WarningModal';
 import { generatePDF, downloadPDF } from '../../services/PDFService';
 import { Card, GridSize } from '../../types';
 import './SetView.css';
+import { logger } from '../../utils/logger';
 
 export const SetView = () => {
   const { setId } = useParams<{ setId: string }>();
@@ -44,19 +45,20 @@ export const SetView = () => {
   }, [setId, setCurrentSetId]);
 
   // Si el set no está en la lista (ej. carga directa por URL), cargarlo individualmente
+  const userId = user?.id;
   useEffect(() => {
-    if (!setId || !user) return;
+    if (!setId || !userId) return;
     const s = sets.find(x => x.id === setId);
     if (s) {
       setFetchedSet(null);
       return;
     }
     let cancelled = false;
-    SetRepository.getSet(setId, user.id).then((data) => {
+    SetRepository.getSet(setId, userId).then((data) => {
       if (!cancelled) setFetchedSet(data ?? null);
     });
     return () => { cancelled = true; };
-  }, [setId, user?.id, sets]);
+  }, [setId, userId, sets]);
 
   useEffect(() => {
     if (user && setId) {
@@ -119,7 +121,7 @@ export const SetView = () => {
       setSets(prev => prev.map(s => (s.id === setId ? { ...s, name: updated.name } : s)));
       setIsRenaming(false);
     } catch (err) {
-      console.error('Error renaming set:', err);
+      logger.error('Error renaming set:', err);
       alert(t('common.error'));
     } finally {
       setIsSavingName(false);
@@ -138,7 +140,7 @@ export const SetView = () => {
       const blob = await generatePDF(boards, { allCards: cards });
       downloadPDF(blob);
     } catch (err) {
-      console.error('Error generating PDF:', err);
+      logger.error('Error generating PDF:', err);
       alert(t('boardGenerator.errors.pdfError'));
     } finally {
       setIsGeneratingPDF(false);
@@ -156,7 +158,7 @@ export const SetView = () => {
       setShowRegenerateBoardsModal(false);
       navigate('/board-count', { state: { gridSize } });
     } catch (err) {
-      console.error('Error clearing boards before regenerate:', err);
+      logger.error('Error clearing boards before regenerate:', err);
       alert(t('common.error'));
     }
   };
@@ -169,7 +171,7 @@ export const SetView = () => {
       setSelectedBoardIndex(null);
       setShowClearBoardsModal(false);
     } catch (err) {
-      console.error('Error clearing boards:', err);
+      logger.error('Error clearing boards:', err);
       alert(t('common.error'));
     }
   };

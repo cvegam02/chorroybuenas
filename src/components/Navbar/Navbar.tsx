@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaSignOutAlt, FaUser, FaChevronDown, FaThList, FaCog } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAvatarUrl } from '../../hooks/useAvatarUrl';
 import { useSetContext } from '../../contexts/SetContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import { SetRepository } from '../../repositories/SetRepository';
@@ -11,11 +12,13 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 import { FaCoins } from 'react-icons/fa';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import './Navbar.css';
+import { logger } from '../../utils/logger';
 
 export const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut, isLoading, isAdmin } = useAuth();
+  const avatarUrl = useAvatarUrl(user);
   const { sets, currentSetId, setCurrentSetId, setSets } = useSetContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -73,7 +76,7 @@ export const Navbar = () => {
       closeMenu();
       navigate('/cards');
     } catch (err) {
-      console.error('Error creating set:', err);
+      logger.error('Error creating set:', err);
     } finally {
       setIsCreatingSet(false);
     }
@@ -106,8 +109,8 @@ export const Navbar = () => {
               >
                 <div className="navbar__user-container">
                   <div className="navbar__user-info" title={user.email}>
-                    {user.user_metadata?.avatar_url ? (
-                      <img src={user.user_metadata.avatar_url} alt="" className="navbar__user-avatar" />
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt="" className="navbar__user-avatar" />
                     ) : (
                       <FaUser className="navbar__user-icon" />
                     )}

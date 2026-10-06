@@ -4,6 +4,7 @@ import { loadCards } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
 import { useSetContext } from '../contexts/SetContext';
 import { BoardRepository } from '../repositories/BoardRepository';
+import { logger } from '../utils/logger';
 
 // Fisher-Yates shuffle algorithm
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -58,7 +59,7 @@ export const useBoard = () => {
         if (!cancelled) setBoards(cloudBoards);
       })
       .catch((error) => {
-        console.error('Error loading cloud boards:', error);
+        logger.error('Error loading cloud boards:', error);
       })
       .finally(() => {
         if (!cancelled) setIsBoardsLoading(false);
@@ -101,7 +102,6 @@ export const useBoard = () => {
 
       const generatedBoards: Board[] = [];
       const MAX_ATTEMPTS = 1000; // Maximum attempts to find a unique board
-      let totalAttempts = 0;
 
       for (let i = 0; i < count; i++) {
         let board: Board;
@@ -125,7 +125,6 @@ export const useBoard = () => {
             isUnique = true;
           } else {
             attempts++;
-            totalAttempts++;
           }
         }
 
@@ -156,7 +155,7 @@ export const useBoard = () => {
       await BoardRepository.deleteAllBoardsForSet(user.id, currentSetId);
       setBoards([]);
     } catch (error) {
-      console.error('Error clearing boards:', error);
+      logger.error('Error clearing boards:', error);
       throw error;
     }
   };

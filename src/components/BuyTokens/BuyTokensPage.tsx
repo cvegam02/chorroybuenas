@@ -4,11 +4,13 @@ import { useSearchParams } from 'react-router-dom';
 import { FaCoins } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
-import { TokenPricingRepository, TokenPack, type ActivePromotion } from '../../repositories/TokenPricingRepository';
+import { TokenPricingRepository, TokenPack, type PromoSummary } from '../../repositories/TokenPricingRepository';
+import { usePromoCode } from '../../hooks/usePromoCode';
 import { createPaymentPreference } from '../../services/PurchaseService';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
 import './BuyTokensPage.css';
+import { logger } from '../../utils/logger';
 
 /** Redondea a valor amigable para USD (ej. 0.43 → 0.50). */
 function roundUsdFriendly(value: number): number {
@@ -31,7 +33,8 @@ export const BuyTokensPage: React.FC = () => {
   const [isNotLoggedInModalOpen, setIsNotLoggedInModalOpen] = useState(false);
   const [customTokens, setCustomTokens] = useState<number>(10);
   const [promoCode, setPromoCode] = useState('');
-  const [promotions, setPromotions] = useState<ActivePromotion[]>([]);
+  const [promoSummary, setPromoSummary] = useState<PromoSummary>({ firstPurchasePercent: 0, hasCodePromos: false });
+  const codePromoPercent = usePromoCode(promoCode, !!user);
   const [buyLoading, setBuyLoading] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'success' | 'cancel' | 'pending' | null>(null);
 
@@ -74,13 +77,13 @@ export const BuyTokensPage: React.FC = () => {
         TokenPricingRepository.getPacks(),
         showUsd ? TokenPricingRepository.getExchangeRateMxnUsd() : Promise.resolve(null),
         TokenPricingRepository.getPricing('MXN'),
-        TokenPricingRepository.getActivePromotions(),
+        TokenPricingRepository.getPromoSummary(),
       ]);
       if (cancelled) return;
       setPacks(packsData);
       setUsdRate(rate ?? null);
       setPricePerTokenCents(pricePerToken);
-      setPromotions(promos);
+      setPromoSummary(promos);
 
       if (user?.id) {
         const count = await TokenPricingRepository.getPurchaseCount(user.id);
@@ -125,14 +128,14 @@ export const BuyTokensPage: React.FC = () => {
         window.location.href = result.init_point;
       } else if (!result.success) {
         const errorMsg = result.message || t('buyTokens.errors.createPreferenceFailed');
-        console.error('Error al crear preferencia:', result);
+        logger.error('Error al crear preferencia:', result);
         alert(errorMsg);
       } else {
         alert(t('buyTokens.errors.createPreferenceFailed'));
       }
     } catch (error) {
       setBuyLoading(false);
-      console.error('Error al crear preferencia:', error);
+      logger.error('Error al crear preferencia:', error);
       alert(t('buyTokens.errors.networkError'));
     }
   };
@@ -155,14 +158,14 @@ export const BuyTokensPage: React.FC = () => {
         window.location.href = result.init_point;
       } else if (!result.success) {
         const errorMsg = result.message || t('buyTokens.errors.createPreferenceFailed');
-        console.error('Error al crear preferencia:', result);
+        logger.error('Error al crear preferencia:', result);
         alert(errorMsg);
       } else {
         alert(t('buyTokens.errors.createPreferenceFailed'));
       }
     } catch (error) {
       setBuyLoading(false);
-      console.error('Error al crear preferencia:', error);
+      logger.error('Error al crear preferencia:', error);
       alert(t('buyTokens.errors.networkError'));
     }
   };
@@ -171,12 +174,10 @@ export const BuyTokensPage: React.FC = () => {
   const customPriceCents = customTokensClamped * pricePerTokenCents;
   const customValid = customTokens >= CUSTOM_MIN && customTokens <= CUSTOM_MAX;
 
-  const firstPurchasePromo = promotions.find((p) => p.type === 'first_purchase');
-  const codePromos = promotions.filter((p) => p.type === 'code');
   const promoCodeTrimmed = promoCode.trim().toUpperCase();
-  const codePromoApplied = codePromos.find((p) => p.code === promoCodeTrimmed);
-  const appliedPromoPercent =
-    codePromoApplied?.percent ?? (isFirstPurchase && firstPurchasePromo ? firstPurchasePromo.percent : 0);
+  // Mismo orden que el servidor: un código válido tiene prioridad sobre la promo de primera compra.
+  const firstPurchasePercent = isFirstPurchase ? promoSummary.firstPurchasePercent : 0;
+  const appliedPromoPercent = codePromoPercent > 0 ? codePromoPercent : firstPurchasePercent;
 
   const getTotalTokensWithPromo = (baseTokens: number, bonusTokens: number) => {
     const promoBonus = appliedPromoPercent > 0 ? Math.floor(baseTokens * (appliedPromoPercent / 100)) : 0;
@@ -245,10 +246,10 @@ export const BuyTokensPage: React.FC = () => {
               </button>
             </div>
           )}
-          {isLoggedIn && isFirstPurchase && firstPurchasePromo && (
+          {isLoggedIn && firstPurchasePercent > 0 && (
             <div className="buy-tokens-page__first-purchase-badge">
               <FaCoins />
-              {t('buyTokens.firstPurchaseBadge', { percent: firstPurchasePromo.percent })}
+              {t('buyTokens.firstPurchaseBadge', { percent: firstPurchasePercent })}
             </div>
           )}
         </div>
@@ -293,7 +294,7 @@ export const BuyTokensPage: React.FC = () => {
 
           <h2 className="buy-tokens-page__packs-title">{t('buyTokens.choosePack')}</h2>
 
-          {codePromos.length > 0 && isLoggedIn && (
+          {promoSummary.hasCodePromos && isLoggedIn && (
             <div className="buy-tokens-page__promo-code-section">
               <label htmlFor="buy-tokens-promo-code" className="buy-tokens-page__promo-label">
                 {t('buyTokens.promoCodeLabel')}
@@ -307,9 +308,9 @@ export const BuyTokensPage: React.FC = () => {
                 className="buy-tokens-page__promo-input"
                 maxLength={32}
               />
-              {codePromoApplied && (
+              {codePromoPercent > 0 && (
                 <span className="buy-tokens-page__promo-applied">
-                  ✓ {t('buyTokens.promoCodeApplied', { percent: codePromoApplied.percent })}
+                  ✓ {t('buyTokens.promoCodeApplied', { percent: codePromoPercent })}
                 </span>
               )}
             </div>
@@ -378,8 +379,8 @@ export const BuyTokensPage: React.FC = () => {
               </p>
               {appliedPromoPercent > 0 && (
                 <p className="buy-tokens-page__custom-bonus">
-                  {codePromoApplied
-                    ? t('buyTokens.promoCodeBonus', { percent: codePromoApplied.percent })
+                  {codePromoPercent > 0
+                    ? t('buyTokens.promoCodeBonus', { percent: codePromoPercent })
                     : t('buyTokens.customBonus', { percent: appliedPromoPercent })}
                 </p>
               )}

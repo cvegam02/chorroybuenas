@@ -1,202 +1,76 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
-
-const MERCADOPAGO_API_BASE = 'https://api.mercadopago.com';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Content-Type': 'application/json',
-};
-
-interface PreferenceMetadata {
-  user_id?: string;
-  pack_id?: string | null;
-  base_tokens?: number;
-  bonus_tokens?: number;
-  promotion_bonus?: number;
-  total_tokens?: number;
-  amount_cents?: number;
-}
+import { buildCorsHeaders, parseAllowedOrigins } from '../_shared/cors.ts';
+import { createMpGet } from '../_shared/mpClient.ts';
+import { creditPayment, findApprovedPayment, type PaymentDeps } from '../_shared/paymentFlow.ts';
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
+  const headers = buildCorsHeaders(req.headers.get('Origin'), parseAllowedOrigins(Deno.env.get('ALLOWED_ORIGINS')));
+  const reply = (status: number, body: Record<string, unknown>) =>
+    new Response(JSON.stringify(body), { status, headers });
 
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: corsHeaders,
-    });
+  if (req.method === 'OPTIONS') return new Response('ok', { headers });
+  if (req.method !== 'POST') return reply(405, { error: 'INVALID_REQUEST', message: 'Método no permitido.' });
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+  const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+  const serviceRoleKey = Deno.env.get('SERVICE_ROLE_KEY');
+  const mpToken = Deno.env.get('MERCADOPAGO_ACCESS_TOKEN');
+  if (!serviceRoleKey || !mpToken) {
+    console.error('credit-payment-on-return: falta SERVICE_ROLE_KEY o MERCADOPAGO_ACCESS_TOKEN');
+    return reply(500, { error: 'CONFIG', message: 'Error de configuración.' });
   }
 
   const authHeader = req.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
-    return new Response(
-      JSON.stringify({ error: 'NOT_LOGGED_IN', message: 'Sesion requerida.' }),
-      { status: 401, headers: corsHeaders }
-    );
+    return reply(401, { error: 'NOT_LOGGED_IN', message: 'Sesión requerida.' });
   }
-
-  const token = authHeader.replace('Bearer ', '').trim();
-  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-
+  const { data: { user }, error: userError } = await createClient(supabaseUrl, anonKey)
+    .auth.getUser(authHeader.replace('Bearer ', '').trim());
   if (userError || !user) {
-    return new Response(
-      JSON.stringify({ error: 'NOT_LOGGED_IN', message: userError?.message ?? 'Sesion invalida.' }),
-      { status: 401, headers: corsHeaders }
-    );
+    return reply(401, { error: 'NOT_LOGGED_IN', message: 'Sesión inválida o expirada.' });
   }
 
-  let body: { payment_id?: string };
+  const body = (await req.json().catch(() => null)) as { payment_id?: unknown } | null;
+  const paymentId = typeof body?.payment_id === 'string' ? body.payment_id.trim() : '';
+  if (!/^\d{1,20}$/.test(paymentId)) {
+    return reply(400, { error: 'INVALID_REQUEST', message: 'payment_id inválido.' });
+  }
+
   try {
-    body = await req.json();
-  } catch {
-    return new Response(
-      JSON.stringify({ error: 'INVALID_REQUEST', message: 'Body invalido.' }),
-      { status: 400, headers: corsHeaders }
-    );
-  }
+    const admin = createClient(supabaseUrl, serviceRoleKey);
+    const deps: PaymentDeps = {
+      mpGet: createMpGet(mpToken),
+      sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+      countPurchases: async (userId) => {
+        const { count, error } = await admin
+          .from('token_purchases')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId);
+        if (error) throw new Error(`token_purchases: ${error.message}`);
+        return count ?? 0;
+      },
+      credit: async (params) => {
+        const { data, error } = await admin.rpc('add_tokens_after_purchase', params);
+        if (error) throw new Error(`add_tokens_after_purchase: ${error.message}`);
+        return data as number;
+      },
+    };
 
-  const paymentId = body.payment_id?.trim();
-  if (!paymentId) {
-    return new Response(
-      JSON.stringify({ error: 'INVALID_REQUEST', message: 'payment_id es requerido.' }),
-      { status: 400, headers: corsHeaders }
-    );
-  }
-
-  const mpToken = Deno.env.get('MERCADOPAGO_ACCESS_TOKEN');
-  if (!mpToken) {
-    return new Response(
-      JSON.stringify({ error: 'CONFIG', message: 'Error de configuracion.' }),
-      { status: 500, headers: corsHeaders }
-    );
-  }
-
-  const paymentRes = await fetch(`${MERCADOPAGO_API_BASE}/v1/payments/${paymentId}`, {
-    headers: { Authorization: `Bearer ${mpToken}` },
-  });
-
-  if (!paymentRes.ok) {
-    return new Response(
-      JSON.stringify({ credited: false, error: 'payment_not_found' }),
-      { status: 200, headers: corsHeaders }
-    );
-  }
-
-  const payment = await paymentRes.json();
-  const status = payment.status;
-  const externalReference = payment.external_reference;
-  const preferenceId = payment.metadata?.preference_id ?? payment.preference_id;
-
-  if (status !== 'approved') {
-    return new Response(
-      JSON.stringify({ credited: false, reason: 'not_approved', status }),
-      { status: 200, headers: corsHeaders }
-    );
-  }
-
-  if (externalReference !== user.id) {
-    return new Response(
-      JSON.stringify({ error: 'FORBIDDEN', message: 'Este pago no corresponde a tu cuenta.' }),
-      { status: 403, headers: corsHeaders }
-    );
-  }
-
-  const serviceRoleKey = Deno.env.get('SERVICE_ROLE_KEY');
-  if (!serviceRoleKey) {
-    return new Response(
-      JSON.stringify({ error: 'CONFIG', message: 'Error de configuracion.' }),
-      { status: 500, headers: corsHeaders }
-    );
-  }
-
-  const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
-  const { data: existing } = await supabaseAdmin
-    .from('token_purchases')
-    .select('id')
-    .eq('payment_id', String(paymentId))
-    .maybeSingle();
-
-  if (existing) {
-    return new Response(
-      JSON.stringify({ credited: true, already_processed: true }),
-      { status: 200, headers: corsHeaders }
-    );
-  }
-
-  let metadata: PreferenceMetadata = {
-    user_id: externalReference,
-    base_tokens: 0,
-    bonus_tokens: 0,
-    promotion_bonus: 0,
-    total_tokens: 0,
-    amount_cents: 0,
-    pack_id: null,
-  };
-
-  if (preferenceId) {
-    const prefRes = await fetch(`${MERCADOPAGO_API_BASE}/checkout/preferences/${preferenceId}`, {
-      headers: { Authorization: `Bearer ${mpToken}` },
-    });
-    if (prefRes.ok) {
-      const pref = await prefRes.json();
-      if (pref.metadata && typeof pref.metadata === 'object') {
-        metadata = { ...metadata, ...pref.metadata };
-      }
+    const found = await findApprovedPayment(deps, { topic: 'payment', id: paymentId });
+    if (!found.ok) {
+      return reply(200, { credited: false, reason: found.reason, status: found.status });
     }
+    if (found.value.externalReference !== user.id) {
+      return reply(403, { error: 'FORBIDDEN', message: 'Este pago no corresponde a tu cuenta.' });
+    }
+
+    // Idempotente: si el webhook ya acreditó este pago, devuelve el saldo actual sin sumar.
+    const credited = await creditPayment(deps, found.value);
+    if (!credited.ok) return reply(200, { credited: false, reason: credited.reason });
+
+    return reply(200, { credited: true, new_balance: credited.value });
+  } catch (err) {
+    console.error('credit-payment-on-return:', err);
+    return reply(500, { error: 'INTERNAL', message: 'No se pudo acreditar el pago. Intenta de nuevo en unos minutos.' });
   }
-
-  const baseTokens = metadata.base_tokens ?? 0;
-  const packBonus = metadata.bonus_tokens ?? 0;
-  const promotionBonus = metadata.promotion_bonus ?? 0;
-  const amountCents = metadata.amount_cents ?? 0;
-  const packId = metadata.pack_id ?? null;
-
-  const { count: purchaseCount } = await supabaseAdmin
-    .from('token_purchases')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.id);
-
-  const isFirstPurchase = (purchaseCount ?? 0) === 0;
-  const effectivePromoBonus = isFirstPurchase ? promotionBonus : 0;
-  const totalTokens = baseTokens + packBonus + effectivePromoBonus;
-  const bonusTokens = packBonus + effectivePromoBonus;
-
-  if (totalTokens <= 0) {
-    return new Response(
-      JSON.stringify({ credited: false, reason: 'invalid_metadata' }),
-      { status: 200, headers: corsHeaders }
-    );
-  }
-
-  const { data: rpcResult, error: rpcError } = await supabaseAdmin.rpc('add_tokens_after_purchase', {
-    p_user_id: user.id,
-    p_tokens_to_add: totalTokens,
-    p_pack_id: packId,
-    p_base_tokens: baseTokens,
-    p_bonus_tokens: bonusTokens,
-    p_total_tokens: totalTokens,
-    p_amount_cents: amountCents,
-    p_payment_provider: 'mercadopago',
-    p_payment_id: String(paymentId),
-    p_payment_status: status,
-    p_payment_metadata: payment,
-  });
-
-  if (rpcError) {
-    return new Response(
-      JSON.stringify({ error: 'RPC', message: rpcError.message }),
-      { status: 500, headers: corsHeaders }
-    );
-  }
-
-  return new Response(
-    JSON.stringify({ credited: true, new_balance: rpcResult }),
-    { status: 200, headers: corsHeaders }
-  );
 });

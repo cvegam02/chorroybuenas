@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Board } from '../../types';
@@ -15,19 +15,18 @@ interface BoardModalProps {
 
 export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeIndex }: BoardModalProps) => {
   const { t } = useTranslation();
-  if (!isOpen) return null;
 
   const total = boards.length;
-  const board = boards[selectedIndex];
+  const board: Board | undefined = boards[selectedIndex];
   const title = t('boardGenerator.boardTitle', { current: selectedIndex + 1, total });
 
-  const clampIndex = (idx: number) => {
-    if (total <= 0) return 0;
-    return (idx + total) % total; // wrap-around carousel
-  };
-
-  const goPrev = () => onChangeIndex(clampIndex(selectedIndex - 1));
-  const goNext = () => onChangeIndex(clampIndex(selectedIndex + 1));
+  // wrap-around carousel
+  const goTo = useCallback(
+    (idx: number) => onChangeIndex(total <= 0 ? 0 : (idx + total) % total),
+    [onChangeIndex, total]
+  );
+  const goPrev = useCallback(() => goTo(selectedIndex - 1), [goTo, selectedIndex]);
+  const goNext = useCallback(() => goTo(selectedIndex + 1), [goTo, selectedIndex]);
 
   const canNavigate = total > 1;
 
@@ -42,7 +41,7 @@ export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeInd
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isOpen, canNavigate, selectedIndex, total, onClose]);
+  }, [isOpen, canNavigate, goPrev, goNext, onClose]);
 
   // Touch swipe navigation
   const touchStartX = useRef<number | null>(null);
@@ -87,21 +86,23 @@ export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeInd
   };
 
   // Organize cards in grid
-  const gridSize = board.gridSize || 16;
+  const gridSize = board?.gridSize || 16;
   const cols = gridSize === 9 ? 3 : 4;
   const rows = gridSize === 9 ? 3 : 4;
 
-  const grid: (typeof board.cards[0] | null)[][] = useMemo(() => {
-    const next: (typeof board.cards[0] | null)[][] = [];
+  const grid: (Board['cards'][number] | null)[][] = useMemo(() => {
+    const next: (Board['cards'][number] | null)[][] = [];
     for (let i = 0; i < rows; i++) {
       next[i] = [];
       for (let j = 0; j < cols; j++) {
         const cardIndex = i * cols + j;
-        next[i][j] = board.cards[cardIndex] || null;
+        next[i][j] = board?.cards[cardIndex] || null;
       }
     }
     return next;
   }, [board, rows, cols]);
+
+  if (!isOpen || !board) return null;
 
   const modalContent = (
     <div

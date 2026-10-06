@@ -19,6 +19,8 @@ import {
   FaTimes as FaTimesIcon
 } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAvatarUrl } from '../../hooks/useAvatarUrl';
+import { useProfileEditing } from './useProfileEditing';
 import { useSetContext } from '../../contexts/SetContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import { SetRepository, LoteriaSet } from '../../repositories/SetRepository';
@@ -28,6 +30,7 @@ import { WarningModal } from '../ConfirmationModal/WarningModal';
 import { PurchaseHistoryModal } from './PurchaseHistoryModal';
 import { ChangePasswordModal } from './ChangePasswordModal';
 import './Dashboard.css';
+import { logger } from '../../utils/logger';
 
 export const Dashboard = () => {
   const { t } = useTranslation();
@@ -51,12 +54,20 @@ export const Dashboard = () => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isCreatingSet, setIsCreatingSet] = useState(false);
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [nameValue, setNameValue] = useState('');
-  const [isSavingName, setIsSavingName] = useState(false);
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const {
+    isEditingName,
+    setIsEditingName,
+    nameValue,
+    setNameValue,
+    isSavingName,
+    isUploadingAvatar,
+    avatarInputRef,
+    handleAvatarClick,
+    handleAvatarChange,
+    handleNameSave,
+    startNameEdit,
+  } = useProfileEditing({ updateProfile, uploadAvatar, t });
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
-  const avatarInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const sheetOpenedAtRef = useRef<number>(0);
 
@@ -87,8 +98,11 @@ export const Dashboard = () => {
     document.title = t('dashboard.title');
   }, [t]);
 
+  const userId = user?.id;
+  const avatarUrl = useAvatarUrl(user);
+
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
 
     const load = async () => {
       setIsLoading(true);
@@ -97,18 +111,18 @@ export const Dashboard = () => {
           refreshSets(),
           refreshBalance(),
           AppConfigRepository.getInitialTokens().then(setInitialTokens),
-          TokenPricingRepository.getTotalTokensReceived(user.id).then(setTotalReceived),
-          TokenPricingRepository.getTotalTokensSpent(user.id).then(setTotalSpent),
-          TokenPricingRepository.getTokensSpentBySet(user.id).then(setTokensSpentBySet)
+          TokenPricingRepository.getTotalTokensReceived(userId).then(setTotalReceived),
+          TokenPricingRepository.getTotalTokensSpent(userId).then(setTotalSpent),
+          TokenPricingRepository.getTokensSpentBySet(userId).then(setTokensSpentBySet)
         ]);
       } catch (e) {
-        console.error('Error loading dashboard:', e);
+        logger.error('Error loading dashboard:', e);
       } finally {
         setIsLoading(false);
       }
     };
     load();
-  }, [user?.id, refreshSets, refreshBalance]);
+  }, [userId, refreshSets, refreshBalance]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -140,49 +154,13 @@ export const Dashboard = () => {
       await refreshSets();
       setSetToRename(null);
     } catch (err) {
-      console.error('Error renaming set:', err);
+      logger.error('Error renaming set:', err);
     } finally {
       setIsRenameSaving(false);
     }
   };
 
-  const handleAvatarClick = () => avatarInputRef.current?.click();
-
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setIsUploadingAvatar(true);
-    try {
-      const avatarUrl = await uploadAvatar(file);
-      await updateProfile({ avatarUrl });
-    } catch (err) {
-      console.error('Error uploading avatar:', err);
-      alert(t('dashboard.avatarUploadError'));
-    } finally {
-      setIsUploadingAvatar(false);
-      if (avatarInputRef.current) avatarInputRef.current.value = '';
-    }
-  };
-
-  const handleNameSave = async () => {
-    const trimmed = nameValue.trim();
-    if (!trimmed) return;
-    setIsSavingName(true);
-    try {
-      await updateProfile({ fullName: trimmed });
-      setIsEditingName(false);
-    } catch (err) {
-      console.error('Error saving name:', err);
-      alert(t('dashboard.nameUpdateError'));
-    } finally {
-      setIsSavingName(false);
-    }
-  };
-
-  const handleNameEditStart = () => {
-    setNameValue(displayName);
-    setIsEditingName(true);
-  };
+  const handleNameEditStart = () => startNameEdit(displayName);
 
   return (
     <div className="dashboard">
@@ -208,9 +186,9 @@ export const Dashboard = () => {
                 <div className="dashboard__hero-avatar-placeholder">
                   <div className="dashboard__spinner dashboard__spinner--small" />
                 </div>
-              ) : user.user_metadata?.avatar_url ? (
+              ) : avatarUrl ? (
                 <img
-                  src={user.user_metadata.avatar_url}
+                  src={avatarUrl}
                   alt=""
                   className="dashboard__hero-avatar"
                 />
@@ -323,7 +301,7 @@ export const Dashboard = () => {
                   await refreshSets();
                   navigate('/cards');
                 } catch (e) {
-                  console.error('Error creating set:', e);
+                  logger.error('Error creating set:', e);
                   alert(t('common.error'));
                 } finally {
                   setIsCreatingSet(false);
@@ -435,7 +413,7 @@ export const Dashboard = () => {
                         await refreshSets();
                         navigate('/cards');
                       } catch (e) {
-                        console.error('Error creating set:', e);
+                        logger.error('Error creating set:', e);
                         alert(t('common.error'));
                       } finally {
                         setIsCreatingSet(false);
@@ -553,7 +531,7 @@ export const Dashboard = () => {
                         await refreshSets();
                         navigate('/cards');
                       } catch (e) {
-                        console.error('Error creating set:', e);
+                        logger.error('Error creating set:', e);
                         alert(t('common.error'));
                       } finally {
                         setIsCreatingSet(false);
@@ -714,7 +692,7 @@ export const Dashboard = () => {
             await refreshSets();
             setSetToDelete(null);
           } catch (e) {
-            console.error('Error deleting set:', e);
+            logger.error('Error deleting set:', e);
           } finally {
             setIsDeleting(false);
           }
