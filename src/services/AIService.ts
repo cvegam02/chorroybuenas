@@ -10,6 +10,7 @@
 
 import { supabase } from '../utils/supabaseClient';
 import { TokenRepository } from '../repositories/TokenRepository';
+import { transformWithFallback } from './aiFallback';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
@@ -33,7 +34,6 @@ export type AIStyle = {
 };
 
 export class AIService {
-    private static MOCK_DELAY = 2000;
     public static COST_PER_IMAGE = 0.013; // USD (OpenAI GPT-Image-1.5 Low)
 
     /** Solo estilo lotería tradicional (Don Clemente Gallo). */
@@ -80,56 +80,35 @@ export class AIService {
     /**
      * Llama a la Edge Function transform-loteria con la imagen en base64.
      * El servidor cobra el token antes de generar y lo devuelve si la transformación falla.
+     * Rechaza con un Error cuyo message es el código que respondió el servidor.
      */
     private static async callEdgeFunction(
+        accessToken: string,
         imageBase64: string,
-        params: { model: 'gpt-image' | 'flux'; prompt_variant?: 0 | 1 | 2; prompt_strength?: number; set_id?: string }
+        params: { model: 'gpt-image' | 'flux'; prompt_variant?: 0 | 1 | 2; prompt_strength: number; set_id?: string }
     ): Promise<string> {
-        const { data: { session: refreshedSession } } = await supabase.auth.refreshSession();
-        if (!refreshedSession?.access_token) {
-            throw new Error('NOT_LOGGED_IN');
-        }
-
         const res = await fetch(`${SUPABASE_URL}/functions/v1/transform-loteria`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${refreshedSession.access_token}`,
+                Authorization: `Bearer ${accessToken}`,
                 apikey: SUPABASE_ANON_KEY,
             },
-            body: JSON.stringify({
-                image: imageBase64,
-                model: params.model,
-                prompt_variant: params.prompt_variant ?? 0,
-                prompt_strength: params.prompt_strength ?? 0.5,
-                set_id: params.set_id,
-            }),
+            body: JSON.stringify({ image: imageBase64, prompt_variant: 0, ...params }),
         });
 
         const body = await res.json().catch(() => ({}));
-
-        if (res.status === 401) {
-            throw new Error('NOT_LOGGED_IN');
-        }
-
-        if (res.status === 500 && body.error === 'CONFIG_ERROR') {
-            console.warn('Edge Function: REPLICATE_API_TOKEN no configurado en Supabase. Usar mock.');
-            throw new Error('CONFIG_ERROR');
-        }
-
-        if (!res.ok) {
-            // El servidor responde con un código estable en body.error (INSUFFICIENT_TOKENS, RATE_LIMITED,
-            // AI_TIMEOUT, NSFW_FILTER, SENSITIVE_CONTENT_FILTER, AI_ERROR…): ese código es el mensaje del Error.
-            throw new Error(typeof body.error === 'string' ? body.error : res.statusText);
-        }
-
-        if (body.output) return body.output;
-        throw new Error(body.message ?? 'Respuesta inválida de la IA');
+        if (res.ok && typeof body.output === 'string' && body.output) return body.output;
+        if (res.status === 401) throw new Error('NOT_LOGGED_IN');
+        if (body.error === 'CONFIG_ERROR') throw new Error('AI_NOT_CONFIGURED');
+        throw new Error(typeof body.error === 'string' ? body.error : 'AI_ERROR');
     }
 
     /**
-     * Transforms an image to Loteria style via Edge Function.
-     * En E005 (sensitive): intento 1 = prompt original, 2 = personaje original, 3 = ilustración simbólica; luego FLUX.
+     * Transforma una imagen al estilo Lotería. Nunca devuelve la imagen original: si no se pudo
+     * transformar, rechaza con un Error cuyo message es un código (NOT_LOGGED_IN, INSUFFICIENT_TOKENS,
+     * RATE_LIMITED, AI_TIMEOUT, AI_NOT_CONFIGURED, NSFW_FILTER, SENSITIVE_PHOTO_NOT_SUPPORTED, AI_ERROR).
+     * La estrategia de reintentos está en aiFallback.ts.
      */
     static async transformToLoteria(
         request: TransformationRequest,
@@ -137,102 +116,25 @@ export class AIService {
         callbacks?: TransformationCallbacks,
         setId?: string
     ): Promise<string> {
-        if (userId) {
-            try {
-                const balance = await TokenRepository.getBalance(userId);
-                if (balance < 1) {
-                    throw new Error('INSUFFICIENT_TOKENS');
-                }
-            } catch (error: any) {
-                if (error.message === 'INSUFFICIENT_TOKENS') throw error;
-                console.warn('Error checking token balance, proceeding anyway:', error);
-            }
-        }
-
         const { data: { session } } = await supabase.auth.refreshSession();
-        if (!session?.access_token) {
-            console.warn('No session. Falling back to mock.');
-            await new Promise(resolve => setTimeout(resolve, this.MOCK_DELAY));
-            return request.image;
-        }
+        if (!session?.access_token) throw new Error('NOT_LOGGED_IN');
+        const accessToken = session.access_token;
 
         const imageBase64 = await this.urlToBase64(request.image, 768);
-        const useFluxFirst = import.meta.env.VITE_REPLICATE_USE_FLUX === 'true';
         const strength = request.prompt_strength ?? 0.5;
 
         try {
-        if (useFluxFirst) {
-            try {
-                const result = await this.callEdgeFunction(imageBase64, {
-                    model: 'flux',
-                    prompt_strength: strength || 0.65,
-                    set_id: setId,
-                });
-                return result;
-            } catch (error: any) {
-                console.warn('FLUX img2img failed, falling back to GPT-Image:', error.message);
-            }
-        }
-
-        let promptVariant: 0 | 1 | 2 = 0;
-        let lastError: Error | null = null;
-        // Cada intento cobra y reembolsa en el servidor: un bloqueo NSFW se reintenta con tope.
-        let nsfwRetries = 0;
-        const MAX_NSFW_RETRIES = 2;
-
-        while (promptVariant <= 2) {
-            try {
-                const result = await this.callEdgeFunction(imageBase64, {
-                    model: 'gpt-image',
-                    prompt_variant: promptVariant as 0 | 1 | 2,
+            return await transformWithFallback(
+                (params) => this.callEdgeFunction(accessToken, imageBase64, {
+                    ...params,
                     prompt_strength: strength,
                     set_id: setId,
-                });
-
-                return result;
-            } catch (error: any) {
-                lastError = error;
-                const isNsfw = error.message === 'NSFW_FILTER';
-                const isSensitive = error.message === 'SENSITIVE_CONTENT_FILTER';
-
-                if (isNsfw && nsfwRetries < MAX_NSFW_RETRIES) {
-                    nsfwRetries++;
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    continue;
+                }),
+                {
+                    useFluxFirst: import.meta.env.VITE_REPLICATE_USE_FLUX === 'true',
+                    onSensitiveRetry: callbacks?.onSensitiveRetry,
                 }
-                if (isSensitive) {
-                    if (promptVariant < 2) {
-                        callbacks?.onSensitiveRetry?.(promptVariant + 1, 'cardEditor.errors.aiSensitiveRetrying');
-                        promptVariant++;
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                        continue;
-                    }
-                    break;
-                }
-                throw error;
-            }
-        }
-
-        if (lastError?.message === 'SENSITIVE_CONTENT_FILTER') {
-            try {
-                const result = await this.callEdgeFunction(imageBase64, {
-                    model: 'flux',
-                    prompt_strength: strength || 0.65,
-                    set_id: setId,
-                });
-                return result;
-            } catch {
-                throw new Error(this.SENSITIVE_PHOTO_NOT_SUPPORTED);
-            }
-        }
-        throw lastError ?? new Error('FAILED_AFTER_RETRIES');
-        } catch (err: any) {
-            if (err.message === 'CONFIG_ERROR') {
-                console.warn('REPLICATE_API_TOKEN no configurado. Falling back to mock.');
-                await new Promise(resolve => setTimeout(resolve, this.MOCK_DELAY));
-                return request.image;
-            }
-            throw err;
+            );
         } finally {
             // El servidor cobró (o reembolsó) el token: que la UI vuelva a pedir el saldo.
             if (userId) TokenRepository.invalidateBalance(userId);

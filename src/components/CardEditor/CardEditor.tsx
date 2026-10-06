@@ -26,6 +26,7 @@ import { SetRepository } from '../../repositories/SetRepository';
 import { AIBatchModal } from './AIBatchModal';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
 import { AIService } from '../../services/AIService';
+import { aiErrorToI18nKey, isSensitiveContentError } from '../../services/aiFallback';
 import { adjustImageToCardAspectRatio } from '../../utils/imageUtils';
 import { Card, GridSize } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
@@ -246,11 +247,12 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
         isProcessing: false
       });
       refreshBalance();
-    } catch (error: any) {
-      const errMsg = error?.message ?? String(error ?? '');
-      console.error('[CardEditor] Admin: fallo transformación individual (causa real para admin):', errMsg, error);
-      setAiErrorMessage(t('cardEditor.errors.genericContactAdmin'));
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error ?? '');
+      console.error('[CardEditor] fallo transformación individual:', errMsg);
+      setAiErrorMessage(t(aiErrorToI18nKey(errMsg)));
       await updateCard(card.id, { isProcessing: false });
+      refreshBalance();
     } finally {
       setTransformingCardId(null);
     }
@@ -288,20 +290,17 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
         });
       } catch (error: unknown) {
         const errMsg = error instanceof Error ? error.message : String(error ?? '');
-        const isSensitiveContent =
-          errMsg === 'SENSITIVE_CONTENT_FILTER' ||
-          errMsg === 'SENSITIVE_PHOTO_NOT_SUPPORTED' ||
-          /sensitive|e005|content.?filter/i.test(errMsg);
-
-        if (isSensitiveContent) {
+        // Una foto rechazada por el filtro de contenido se omite; cualquier otro error detiene el lote.
+        if (isSensitiveContentError(errMsg)) {
           setAiBatchSkippedCount(prev => prev + 1);
           await updateCard(card.id, { isProcessing: false });
         } else {
-          console.error('[CardEditor] AI batch error:', errMsg, error);
+          console.error('[CardEditor] AI batch error:', errMsg);
           setAiBatchStatus('error');
-          setAiBatchError(t('cardEditor.errors.genericContactAdmin'));
-          setAiErrorMessage(t('cardEditor.errors.genericContactAdmin'));
+          setAiBatchError(t(aiErrorToI18nKey(errMsg)));
+          setAiErrorMessage(t(aiErrorToI18nKey(errMsg)));
           await updateCard(card.id, { isProcessing: false });
+          refreshBalance();
           return;
         }
       }
