@@ -79,10 +79,11 @@ export class AIService {
 
     /**
      * Llama a la Edge Function transform-loteria con la imagen en base64.
+     * El servidor cobra el token antes de generar y lo devuelve si la transformación falla.
      */
     private static async callEdgeFunction(
         imageBase64: string,
-        params: { model: 'gpt-image' | 'flux'; prompt_variant?: 0 | 1 | 2; prompt_strength?: number }
+        params: { model: 'gpt-image' | 'flux'; prompt_variant?: 0 | 1 | 2; prompt_strength?: number; set_id?: string }
     ): Promise<string> {
         const { data: { session: refreshedSession } } = await supabase.auth.refreshSession();
         if (!refreshedSession?.access_token) {
@@ -101,6 +102,7 @@ export class AIService {
                 model: params.model,
                 prompt_variant: params.prompt_variant ?? 0,
                 prompt_strength: params.prompt_strength ?? 0.5,
+                set_id: params.set_id,
             }),
         });
 
@@ -116,10 +118,9 @@ export class AIService {
         }
 
         if (!res.ok) {
-            const msg = body.message ?? body.error ?? res.statusText;
-            if (body.error === 'NSFW_FILTER') throw new Error('NSFW_FILTER');
-            if (body.error === 'SENSITIVE_CONTENT_FILTER') throw new Error('SENSITIVE_CONTENT_FILTER');
-            throw new Error(msg);
+            // El servidor responde con un código estable en body.error (INSUFFICIENT_TOKENS, RATE_LIMITED,
+            // AI_TIMEOUT, NSFW_FILTER, SENSITIVE_CONTENT_FILTER, AI_ERROR…): ese código es el mensaje del Error.
+            throw new Error(typeof body.error === 'string' ? body.error : res.statusText);
         }
 
         if (body.output) return body.output;
@@ -165,14 +166,8 @@ export class AIService {
                 const result = await this.callEdgeFunction(imageBase64, {
                     model: 'flux',
                     prompt_strength: strength || 0.65,
+                    set_id: setId,
                 });
-                if (userId) {
-                    try {
-                        await TokenRepository.spendTokens(userId, 1, setId);
-                    } catch (error) {
-                        console.error('Failed to deduct token after success:', error);
-                    }
-                }
                 return result;
             } catch (error: any) {
                 console.warn('FLUX img2img failed, falling back to GPT-Image:', error.message);
@@ -181,6 +176,9 @@ export class AIService {
 
         let promptVariant: 0 | 1 | 2 = 0;
         let lastError: Error | null = null;
+        // Cada intento cobra y reembolsa en el servidor: un bloqueo NSFW se reintenta con tope.
+        let nsfwRetries = 0;
+        const MAX_NSFW_RETRIES = 2;
 
         while (promptVariant <= 2) {
             try {
@@ -188,15 +186,8 @@ export class AIService {
                     model: 'gpt-image',
                     prompt_variant: promptVariant as 0 | 1 | 2,
                     prompt_strength: strength,
+                    set_id: setId,
                 });
-
-                if (userId) {
-                    try {
-                        await TokenRepository.spendTokens(userId, 1, setId);
-                    } catch (error) {
-                        console.error('Failed to deduct token after success:', error);
-                    }
-                }
 
                 return result;
             } catch (error: any) {
@@ -204,7 +195,8 @@ export class AIService {
                 const isNsfw = error.message === 'NSFW_FILTER';
                 const isSensitive = error.message === 'SENSITIVE_CONTENT_FILTER';
 
-                if (isNsfw && promptVariant <= 2) {
+                if (isNsfw && nsfwRetries < MAX_NSFW_RETRIES) {
+                    nsfwRetries++;
                     await new Promise(resolve => setTimeout(resolve, 500));
                     continue;
                 }
@@ -226,14 +218,8 @@ export class AIService {
                 const result = await this.callEdgeFunction(imageBase64, {
                     model: 'flux',
                     prompt_strength: strength || 0.65,
+                    set_id: setId,
                 });
-                if (userId) {
-                    try {
-                        await TokenRepository.spendTokens(userId, 1, setId);
-                    } catch (e) {
-                        console.error('Failed to deduct token after success:', e);
-                    }
-                }
                 return result;
             } catch {
                 throw new Error(this.SENSITIVE_PHOTO_NOT_SUPPORTED);
@@ -247,6 +233,9 @@ export class AIService {
                 return request.image;
             }
             throw err;
+        } finally {
+            // El servidor cobró (o reembolsó) el token: que la UI vuelva a pedir el saldo.
+            if (userId) TokenRepository.invalidateBalance(userId);
         }
     }
 

@@ -16,6 +16,11 @@ function invalidateBalanceCache(userId: string): void {
 }
 
 export class TokenRepository {
+    /** Fuerza que el próximo getBalance consulte al servidor (p. ej. tras usar IA, que cobra en el servidor). */
+    static invalidateBalance(userId: string): void {
+        invalidateBalanceCache(userId);
+    }
+
     /**
      * Get the token balance for a specific user.
      * If no record exists, it attempts to initialize one with a default balance.
@@ -74,28 +79,6 @@ export class TokenRepository {
         if (error) throw error;
         balanceCache.set(userId, { balance: data.balance, expiresAt: Date.now() + BALANCE_CACHE_TTL_MS });
         return data.balance;
-    }
-
-    /**
-     * Spend tokens for a user.
-     * Uses RPC spend_tokens (el frontend no tiene política UPDATE en user_tokens; la RPC usa SECURITY DEFINER).
-     * @param setId Lotería (set) en la que se gastan. Opcional.
-     */
-    static async spendTokens(userId: string, amount: number, setId?: string): Promise<number> {
-        const currentBalance = await this.getBalance(userId);
-
-        if (currentBalance < amount) {
-            throw new Error('Insufficient tokens');
-        }
-
-        const { data, error } = await supabase.rpc('spend_tokens', {
-            p_amount: amount,
-            p_set_id: setId ?? null
-        });
-
-        if (error) throw error;
-        invalidateBalanceCache(userId);
-        return data as number;
     }
 
     /**
