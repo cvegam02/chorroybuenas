@@ -32,6 +32,7 @@ import { useSetContext } from '../../contexts/SetContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import './CardEditor.css';
 import { logger } from '../../utils/logger';
+import { minCardsForGrid } from '../../utils/gridRules';
 
 interface CardEditorProps {
   onNext: () => void;
@@ -83,10 +84,8 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
   const [uploadProgress, setUploadProgress] = useState(-1);
   const [showAllTransformedModal, setShowAllTransformedModal] = useState(false);
 
-  // Dynamic minimum cards based on grid size
-  // Kids (3x3) -> Min 12
-  // Classic (4x4) -> Min 20
-  const minCards = gridSize === 9 ? 12 : 20;
+  // Mínimo de cartas según el modo (ver utils/gridRules)
+  const minCards = minCardsForGrid(gridSize);
   const hasMinimumCards = cardCount >= minCards;
   const noTokensForSingle = user && tokenBalance !== null && tokenBalance < 1;
   const noTokensForBulk = user && tokenBalance !== null && tokenBalance < cardsToTransform.length;

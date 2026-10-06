@@ -8,6 +8,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useSetContext } from '../../contexts/SetContext';
 import { CardRepository } from '../../repositories/CardRepository';
 import { logger } from '../../utils/logger';
+import { minCardsForGrid } from '../../utils/gridRules';
 
 interface BoardCountSelectorProps {
   onGenerate: (count: number, gridSize: GridSize) => void;
@@ -72,9 +73,6 @@ const calculateSuggestedBoards = (availableCards: number, gridSize: GridSize): n
   return Math.max(1, Math.min(suggested, maxUniqueBoards));
 };
 
-// Minimum cards required: Kids (3x3) = 12, Classic (4x4) = 16
-const minCardsForMode = (gridSize: GridSize) => (gridSize === 9 ? 12 : 16);
-
 export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCountSelectorProps) => {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -86,7 +84,7 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
   const [cardCount, setCardCount] = useState<number>(0);
   const [isLoadingCards, setIsLoadingCards] = useState(true);
   const [suggestedBoards, setSuggestedBoards] = useState<number>(8);
-  const minCards = minCardsForMode(gridSize);
+  const minCards = minCardsForGrid(gridSize);
 
   useEffect(() => {
     // Load card count using the SAME source as useBoard.generateBoards
