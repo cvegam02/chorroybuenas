@@ -86,10 +86,10 @@ Creado el 2026-10-06.
 - **Notificaciones**: Ninguna.
 - **Auditoría**: No.
 
-### 8. Elegir el modo de juego
+### 8. Elegir el modo de juego 🔧
 - **Actor(es)**: Visitante o usuario registrado.
 - **Precondiciones**: Tener una lotería abierta.
-- **Flujo principal**: (1) Elige Clásico (4 × 4) o Kids (3 × 3). (2) El mínimo de cartas se ajusta: 20 en Clásico, 12 en Kids (§4).
+- **Flujo principal**: (1) Elige Clásico (4 × 4) o Kids (3 × 3). (2) El mínimo de cartas se ajusta: 24 en Clásico, 15 en Kids (§4).
 - **Excepciones**: Ninguna.
 - **Resultado**: La lotería queda en el modo elegido.
 - **Estados afectados**: Lotería (§11).
@@ -100,7 +100,7 @@ Creado el 2026-10-06.
 - **Actor(es)**: Visitante o usuario registrado.
 - **Precondiciones**: La lotería tiene al menos el mínimo de cartas de su modo (§4).
 - **Flujo principal**: (1) Ve la cantidad de tableros sugerida y puede cambiarla (§4). (2) Genera los tableros. (3) Los revisa uno por uno.
-- **Excepciones**: Faltan cartas para el mínimo (20 en Clásico, 12 en Kids): no puede generar y se le dice cuántas faltan. Si pide más tableros distintos de los que sus cartas permiten, no todos saldrán diferentes.
+- **Excepciones**: Faltan cartas para el mínimo (24 en Clásico, 15 en Kids): no puede generar y se le dice cuántas faltan. Si pide más tableros distintos de los que sus cartas permiten, no todos saldrán diferentes.
 - **Resultado**: La lotería tiene sus tableros, armados al azar y sin repetidos (§4).
 - **Estados afectados**: Tableros (§11).
 - **Notificaciones**: Ninguna.

@@ -46,8 +46,8 @@ Cuando dos reglas choquen, o haya que decidir algo que no está escrito, se elig
   - **Clásico:** tableros de 4 × 4 (16 cartas).
   - **Kids:** tableros de 3 × 3 (9 cartas).
 - **Mínimo de cartas para generar tableros:**
-  - Kids: 12 cartas. _(confirmado el 2026-10-06)_
-  - Clásico: **20 cartas. DEFINIDO** (2026-10-06). La pantalla de tableros todavía acepta 16: está por corregirse.
+  - Kids: **15 cartas. DEFINIDO** (2026-10-06; ese mismo día se había confirmado en 12 y se subió a 15). El sitio todavía pide 12: está por corregirse.
+  - Clásico: **24 cartas. DEFINIDO** (2026-10-06; ese mismo día se había fijado en 20 y se subió a 24). La pantalla de cartas todavía pide 20 y la de tableros acepta 16: están por corregirse.
 - **Tableros:** se generan al azar con las cartas de la lotería. No se generan dos tableros iguales. _(confirmado el 2026-10-06)_
 - **Cantidad sugerida de tableros:** en Clásico, la que hace que cada carta aparezca unas 8 veces en total; en Kids, un tablero por cada 3 cartas. El usuario puede cambiarla. _(confirmado el 2026-10-06)_
 - **Al iniciar sesión**, lo que el visitante tenía guardado en su navegador se pasa a su cuenta, dentro de una lotería por defecto. _(confirmado el 2026-10-06)_
@@ -183,7 +183,8 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-06 | Los códigos promocionales no son visibles públicamente; se validan en el servidor. |
 | 2026-10-06 | La IA requiere cuenta. Sin sesión se muestra un aviso; nunca se devuelve la foto original como si fuera el resultado. |
 | 2026-10-06 | Máximo 10 transformaciones de IA por minuto por usuario. |
-| 2026-10-06 | En modo Clásico se necesitan al menos 20 cartas para generar tableros. _(Descartada: 16, el mínimo matemático, porque todos los tableros tendrían las mismas cartas.)_ |
+| 2026-10-06 | En modo Clásico se necesitan al menos 24 cartas para generar tableros. _(Descartadas: 16, el mínimo matemático, porque todos los tableros tendrían las mismas cartas; 20, porque jugando a tablero lleno con 10 jugadores más de la mitad de las partidas terminaba en empate; 30, porque deja fuera a quien tiene pocas fotos. Origen del cambio de 20 a 24: fase 1, historia A1.)_ |
+| 2026-10-06 | En modo Kids se necesitan al menos 15 cartas para generar tableros. _(Descartadas: 12, porque daba los mismos empates que Clásico con 20, un 52 %; 18, porque es demasiado para un modo pensado como sencillo. Origen: fase 1, historia A1.)_ |
 | 2026-10-06 | El mínimo de compra en cantidad libre es de 5 tokens ($10.00 MXN). _(Descartadas: 1 token, porque Mercado Pago no permite pagar $2.00; 10 tokens, porque duplica al paquete más chico.)_ |
 | 2026-10-06 | Ante un reembolso o contracargo se descuentan los tokens de esa compra, dejando el saldo en 0 como mínimo. _(Descartadas: dejar deuda de tokens y bloquear la IA; no hacer nada automático.)_ |
 | 2026-10-06 | El sitio no emite comprobante propio de las compras. _(Descartadas: correo de confirmación; factura fiscal.)_ |
@@ -209,7 +210,8 @@ Decididas el 2026-10-06 y pendientes de construir. Cada una se convierte en una 
 
 | Regla | Dónde está | Qué hace hoy el sitio |
 |---|---|---|
-| Mínimo de 20 cartas en Clásico | §4 | La pantalla de tableros acepta 16 |
+| Mínimo de 24 cartas en Clásico | §4 | La pantalla de cartas pide 20 y la de tableros acepta 16 |
+| Mínimo de 15 cartas en Kids | §4 | Las dos pantallas piden 12 |
 | Mínimo de compra de 5 tokens | §8 | Deja comprar desde 1 token |
 | Descontar tokens ante reembolso o contracargo | §8 | No descuenta nada |
 | Registrar cada regalo de tokens | §7 | Solo sube el saldo, sin registro |
