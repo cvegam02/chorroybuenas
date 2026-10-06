@@ -3,6 +3,7 @@ import type { LoteriaSet } from '../repositories/SetRepository';
 import { SetRepository } from '../repositories/SetRepository';
 import { saveCurrentSetId, loadCurrentSetId } from '../utils/storage';
 import { useAuth } from './AuthContext';
+import { logger } from '../utils/logger';
 
 interface SetContextType {
     /** Set activo para cartas y tableros (solo usuario logueado). */
@@ -44,7 +45,7 @@ export const SetProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const fallback = data[0]?.id ?? null;
             setCurrentSetIdState(validPrev ? persistedId : fallback);
         } catch (e) {
-            console.error('Error loading sets:', e);
+            logger.error('Error loading sets:', e);
         }
     }, [user, authLoading]);
 

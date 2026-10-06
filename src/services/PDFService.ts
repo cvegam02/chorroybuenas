@@ -14,6 +14,7 @@ import { loadCards } from '../utils/storage';
 import { blobToBase64, getImageBlob, cacheImageBlob } from '../utils/indexedDB';
 import logoImage from '../img/logo.png';
 import { CardRepository } from '../repositories/CardRepository';
+import { logger } from '../utils/logger';
 
 // Convert cm to points (1 cm = 28.35 points)
 const cmToPoints = (cm: number) => cm * 28.35;
@@ -121,7 +122,7 @@ const urlToBase64 = async (url: string): Promise<string> => {
     const blob = await response.blob();
     return await blobToBase64(blob);
   } catch (error) {
-    console.error('Error converting URL to base64:', error);
+    logger.error('Error converting URL to base64:', error);
     throw error;
   }
 };
@@ -181,7 +182,7 @@ const loadImageAsUint8Array = async (imageSrc: string): Promise<ImageData> => {
     try {
       base64Image = await blobURLToBase64(imageSrc);
     } catch (error) {
-      console.error('Error converting blob URL to base64:', error);
+      logger.error('Error converting blob URL to base64:', error);
       throw new Error(`No se pudo convertir el blob URL a base64: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
   } else {
@@ -201,7 +202,7 @@ const loadImageAsUint8Array = async (imageSrc: string): Promise<ImageData> => {
   try {
     binaryString = atob(base64Data);
   } catch (error) {
-    console.error('Error decoding base64:', error);
+    logger.error('Error decoding base64:', error);
     throw new Error(`Error al decodificar base64: ${error instanceof Error ? error.message : 'Error desconocido'}`);
   }
 
@@ -222,7 +223,7 @@ const loadImageAsUint8Array = async (imageSrc: string): Promise<ImageData> => {
       }
     };
     img.onerror = (error) => {
-      console.error('Error loading image:', error);
+      logger.error('Error loading image:', error);
       reject(new Error('No se pudo cargar la imagen para obtener sus dimensiones'));
     };
   });
@@ -288,8 +289,8 @@ const embedImageInPDF = async (
     if (embedCache && cacheKey) embedCache.set(cacheKey, result);
     return result;
   } catch (error) {
-    console.error('Error in embedImageInPDF:', error);
-    console.error('Image source:', imageSrc.substring(0, 100));
+    logger.error('Error in embedImageInPDF:', error);
+    logger.error('Image source:', imageSrc.substring(0, 100));
     throw error;
   }
 };
@@ -405,12 +406,12 @@ const drawCardOnPage = async (
       borderWidth: 2,
     });
   } catch (error) {
-    console.error(`Error drawing card ${card.id}:`, error);
-    console.error(`Card title: ${card.title}`);
-    console.error(`Card image: ${card.image ? card.image.substring(0, 100) : 'null'}...`);
+    logger.error(`Error drawing card ${card.id}:`, error);
+    logger.error(`Card title: ${card.title}`);
+    logger.error(`Card image: ${card.image ? card.image.substring(0, 100) : 'null'}...`);
     if (error instanceof Error) {
-      console.error(`Error message: ${error.message}`);
-      console.error(`Error stack: ${error.stack}`);
+      logger.error(`Error message: ${error.message}`);
+      logger.error(`Error stack: ${error.stack}`);
     }
     // Draw error rectangle
     page.drawRectangle({
@@ -455,7 +456,7 @@ const getLogoImage = async (pdfDoc: PDFDocument): Promise<{ image: any; width: n
     logoImageCache.set(pdfDoc, entry);
     return entry;
   } catch (error) {
-    console.error('Error loading logo image:', error);
+    logger.error('Error loading logo image:', error);
     throw error;
   }
 };
@@ -531,7 +532,7 @@ const drawBoardOnPage = async (
       height: logoDisplayHeight,
     });
   } catch (error) {
-    console.warn('Could not draw logo on board:', error);
+    logger.warn('Could not draw logo on board:', error);
     // Continue without logo if there's an error
   }
 
@@ -611,7 +612,7 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
         }
       }
     } catch (error) {
-      console.error(`PDF: error getting image for card ${card.id}:`, error);
+      logger.error(`PDF: error getting image for card ${card.id}:`, error);
     }
     return null;
   };

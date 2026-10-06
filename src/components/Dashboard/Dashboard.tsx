@@ -29,6 +29,7 @@ import { WarningModal } from '../ConfirmationModal/WarningModal';
 import { PurchaseHistoryModal } from './PurchaseHistoryModal';
 import { ChangePasswordModal } from './ChangePasswordModal';
 import './Dashboard.css';
+import { logger } from '../../utils/logger';
 
 export const Dashboard = () => {
   const { t } = useTranslation();
@@ -106,7 +107,7 @@ export const Dashboard = () => {
           TokenPricingRepository.getTokensSpentBySet(userId).then(setTokensSpentBySet)
         ]);
       } catch (e) {
-        console.error('Error loading dashboard:', e);
+        logger.error('Error loading dashboard:', e);
       } finally {
         setIsLoading(false);
       }
@@ -144,7 +145,7 @@ export const Dashboard = () => {
       await refreshSets();
       setSetToRename(null);
     } catch (err) {
-      console.error('Error renaming set:', err);
+      logger.error('Error renaming set:', err);
     } finally {
       setIsRenameSaving(false);
     }
@@ -160,7 +161,7 @@ export const Dashboard = () => {
       const avatarPath = await uploadAvatar(file);
       await updateProfile({ avatarPath });
     } catch (err) {
-      console.error('Error uploading avatar:', err);
+      logger.error('Error uploading avatar:', err);
       alert(t('dashboard.avatarUploadError'));
     } finally {
       setIsUploadingAvatar(false);
@@ -176,7 +177,7 @@ export const Dashboard = () => {
       await updateProfile({ fullName: trimmed });
       setIsEditingName(false);
     } catch (err) {
-      console.error('Error saving name:', err);
+      logger.error('Error saving name:', err);
       alert(t('dashboard.nameUpdateError'));
     } finally {
       setIsSavingName(false);
@@ -327,7 +328,7 @@ export const Dashboard = () => {
                   await refreshSets();
                   navigate('/cards');
                 } catch (e) {
-                  console.error('Error creating set:', e);
+                  logger.error('Error creating set:', e);
                   alert(t('common.error'));
                 } finally {
                   setIsCreatingSet(false);
@@ -439,7 +440,7 @@ export const Dashboard = () => {
                         await refreshSets();
                         navigate('/cards');
                       } catch (e) {
-                        console.error('Error creating set:', e);
+                        logger.error('Error creating set:', e);
                         alert(t('common.error'));
                       } finally {
                         setIsCreatingSet(false);
@@ -557,7 +558,7 @@ export const Dashboard = () => {
                         await refreshSets();
                         navigate('/cards');
                       } catch (e) {
-                        console.error('Error creating set:', e);
+                        logger.error('Error creating set:', e);
                         alert(t('common.error'));
                       } finally {
                         setIsCreatingSet(false);
@@ -718,7 +719,7 @@ export const Dashboard = () => {
             await refreshSets();
             setSetToDelete(null);
           } catch (e) {
-            console.error('Error deleting set:', e);
+            logger.error('Error deleting set:', e);
           } finally {
             setIsDeleting(false);
           }

@@ -33,6 +33,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useSetContext } from '../../contexts/SetContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import './CardEditor.css';
+import { logger } from '../../utils/logger';
 
 interface CardEditorProps {
   onNext: () => void;
@@ -249,7 +250,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
       refreshBalance();
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error ?? '');
-      console.error('[CardEditor] fallo transformación individual:', errMsg);
+      logger.error('[CardEditor] fallo transformación individual:', errMsg);
       setAiErrorMessage(t(aiErrorToI18nKey(errMsg)));
       await updateCard(card.id, { isProcessing: false });
       refreshBalance();
@@ -295,7 +296,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
           setAiBatchSkippedCount(prev => prev + 1);
           await updateCard(card.id, { isProcessing: false });
         } else {
-          console.error('[CardEditor] AI batch error:', errMsg);
+          logger.error('[CardEditor] AI batch error:', errMsg);
           setAiBatchStatus('error');
           setAiBatchError(t(aiErrorToI18nKey(errMsg)));
           setAiErrorMessage(t(aiErrorToI18nKey(errMsg)));
@@ -362,7 +363,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
       setSets(prev => prev.map(s => (s.id === currentSet.id ? { ...s, name: updated.name } : s)));
       setIsRenaming(false);
     } catch (err) {
-      console.error('Error renaming set:', err);
+      logger.error('Error renaming set:', err);
     } finally {
       setIsSavingName(false);
     }
@@ -380,7 +381,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
         .then((updated) => {
           setSets(prev => prev.map(s => s.id === currentSetId ? { ...s, grid_size: updated.grid_size } : s));
         })
-        .catch((err) => console.error('Error saving grid size:', err));
+        .catch((err) => logger.error('Error saving grid size:', err));
     }
   };
 

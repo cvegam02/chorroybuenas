@@ -10,6 +10,7 @@ import { createPaymentPreference } from '../../services/PurchaseService';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
 import './BuyTokensPage.css';
+import { logger } from '../../utils/logger';
 
 /** Redondea a valor amigable para USD (ej. 0.43 → 0.50). */
 function roundUsdFriendly(value: number): number {
@@ -127,14 +128,14 @@ export const BuyTokensPage: React.FC = () => {
         window.location.href = result.init_point;
       } else if (!result.success) {
         const errorMsg = result.message || t('buyTokens.errors.createPreferenceFailed');
-        console.error('Error al crear preferencia:', result);
+        logger.error('Error al crear preferencia:', result);
         alert(errorMsg);
       } else {
         alert(t('buyTokens.errors.createPreferenceFailed'));
       }
     } catch (error) {
       setBuyLoading(false);
-      console.error('Error al crear preferencia:', error);
+      logger.error('Error al crear preferencia:', error);
       alert(t('buyTokens.errors.networkError'));
     }
   };
@@ -157,14 +158,14 @@ export const BuyTokensPage: React.FC = () => {
         window.location.href = result.init_point;
       } else if (!result.success) {
         const errorMsg = result.message || t('buyTokens.errors.createPreferenceFailed');
-        console.error('Error al crear preferencia:', result);
+        logger.error('Error al crear preferencia:', result);
         alert(errorMsg);
       } else {
         alert(t('buyTokens.errors.createPreferenceFailed'));
       }
     } catch (error) {
       setBuyLoading(false);
-      console.error('Error al crear preferencia:', error);
+      logger.error('Error al crear preferencia:', error);
       alert(t('buyTokens.errors.networkError'));
     }
   };

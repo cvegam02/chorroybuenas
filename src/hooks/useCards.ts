@@ -5,6 +5,7 @@ import { saveImage as saveImageToIndexedDB, cacheImageBlob, blobURLToBlob, getIm
 import { useAuth } from '../contexts/AuthContext';
 import { useSetContext } from '../contexts/SetContext';
 import { CardRepository } from '../repositories/CardRepository';
+import { logger } from '../utils/logger';
 
 const MIN_CARDS = 20;
 /** Tiempo (ms) que el botón "Generar con IA" permanece deshabilitado tras añadir una carta (evita race con Supabase) */
@@ -69,7 +70,7 @@ export const useCards = () => {
              No borrar cartas; esperar a que currentSetId esté disponible. */
         }
       } catch (error) {
-        console.error('Error loading cards:', error);
+        logger.error('Error loading cards:', error);
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -140,7 +141,7 @@ export const useCards = () => {
           is_ai_generated: card.isAiGenerated || false
         });
       } catch (err) {
-        console.error(`Failed to migrate card ${card.id}:`, err);
+        logger.error(`Failed to migrate card ${card.id}:`, err);
       }
     }
     const { clearAllImages } = await import('../utils/indexedDB');
@@ -162,7 +163,7 @@ export const useCards = () => {
         }
 
         if (!currentSetId) {
-          console.error('addCard: currentSetId is null, cannot save to cloud');
+          logger.error('addCard: currentSetId is null, cannot save to cloud');
           throw new Error('NO_SET_SELECTED');
         }
         await CardRepository.createCard({
@@ -198,7 +199,7 @@ export const useCards = () => {
         });
       }
     } catch (error) {
-      console.error('Error adding card:', error);
+      logger.error('Error adding card:', error);
       const msg = error instanceof Error && error.message === 'NO_SET_SELECTED'
         ? 'No hay una lotería seleccionada. Por favor, recarga la página o crea una nueva lotería desde el menú.'
         : 'Error al agregar la carta. Por favor, intenta nuevamente.';
@@ -213,7 +214,7 @@ export const useCards = () => {
     try {
       if (user) {
         if (!currentSetId) {
-          console.error('addCards: currentSetId is null, cannot save to cloud');
+          logger.error('addCards: currentSetId is null, cannot save to cloud');
           throw new Error('NO_SET_SELECTED');
         }
         const total = newCards.length;
@@ -265,7 +266,7 @@ export const useCards = () => {
                 const blobURL = await saveImageToIndexedDB(card.id, card.image);
                 card = { ...card, image: blobURL };
               } catch (error) {
-                console.error(`Error saving image for card ${card.id}:`, error);
+                logger.error(`Error saving image for card ${card.id}:`, error);
               }
             }
 
@@ -274,7 +275,7 @@ export const useCards = () => {
                 const blobURL = await saveImageToIndexedDB(`${card.id}_orig`, card.originalImage);
                 card = { ...card, originalImage: blobURL };
               } catch (error) {
-                console.error(`Error saving original image for card ${card.id}:`, error);
+                logger.error(`Error saving original image for card ${card.id}:`, error);
               }
             }
             return card;
@@ -283,12 +284,12 @@ export const useCards = () => {
 
         setCards((prevCards: Card[]) => {
           const updatedCards = [...prevCards, ...cardsWithImages];
-          saveCards(updatedCards).catch(console.error);
+          saveCards(updatedCards).catch(logger.error);
           return updatedCards;
         });
       }
     } catch (error) {
-      console.error('Error adding cards:', error);
+      logger.error('Error adding cards:', error);
       const msg = error instanceof Error && error.message === 'NO_SET_SELECTED'
         ? 'No hay una lotería seleccionada. Por favor, recarga la página o crea una nueva lotería desde el menú.'
         : 'Error al agregar las cartas. Por favor, intenta nuevamente.';
@@ -305,13 +306,13 @@ export const useCards = () => {
         await deleteImage(cardId);
       }
     } catch (error) {
-      console.error('Error removing card:', error);
+      logger.error('Error removing card:', error);
       return;
     }
     // Actualizar la UI siempre tras un delete exitoso (o tras delete en DB aunque falle storage)
     setCards((prevCards: Card[]) => {
       const newCards = prevCards.filter(card => card.id !== cardId);
-      if (!user) saveCards(newCards).catch(console.error);
+      if (!user) saveCards(newCards).catch(logger.error);
       return newCards;
     });
   };
@@ -332,7 +333,7 @@ export const useCards = () => {
         await saveCards([]);
       }
     } catch (error) {
-      console.error('Error clearing cards:', error);
+      logger.error('Error clearing cards:', error);
     }
   };
 
@@ -483,7 +484,7 @@ export const useCards = () => {
       }
       return true;
     } catch (error) {
-      console.error('Error updating card:', error);
+      logger.error('Error updating card:', error);
       alert('Error al actualizar la carta. Por favor, intenta nuevamente.');
       return false;
     }
@@ -586,7 +587,7 @@ export const useCards = () => {
         });
       }
     } catch (error) {
-      console.error('Error batch updating cards:', error);
+      logger.error('Error batch updating cards:', error);
       return false;
     }
   };

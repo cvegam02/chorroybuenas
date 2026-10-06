@@ -11,9 +11,11 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   rules: {
     '@typescript-eslint/no-explicit-any': 'off',
-    'no-console': 'off',
+    'no-console': 'error',
   },
   overrides: [
     { files: ['vite.config.ts', 'vitest.config.ts'], env: { node: true } },
+    // En las edge functions console.error es el log del servidor.
+    { files: ['supabase/functions/**/*.ts', 'vite.config.ts'], rules: { 'no-console': 'off' } },
   ],
 };

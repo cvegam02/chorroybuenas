@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { FaEnvelope, FaLock, FaTimes, FaUserPlus, FaSignInAlt, FaUser, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import './EmailAuthModal.css';
+import { logger } from '../../utils/logger';
 
 interface EmailAuthModalProps {
     isOpen: boolean;
@@ -53,7 +54,7 @@ export const EmailAuthModal: React.FC<EmailAuthModalProps> = ({ isOpen, onClose,
             await resetPasswordForEmail(email.trim());
             setForgotPasswordSent(true);
         } catch (err: any) {
-            console.error('Reset password error:', err);
+            logger.error('Reset password error:', err);
             setError(err.message || t('common.auth.errors.authFailed'));
         } finally {
             setIsLoading(false);
@@ -81,7 +82,7 @@ export const EmailAuthModal: React.FC<EmailAuthModalProps> = ({ isOpen, onClose,
                 setSignUpSuccess(true);
             }
         } catch (err: any) {
-            console.error('Auth error:', err);
+            logger.error('Auth error:', err);
             if (err.message?.includes('invalid_credentials')) {
                 setError(t('common.auth.errors.authFailed'));
             } else if (err.message?.includes('User already registered')) {

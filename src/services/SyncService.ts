@@ -4,6 +4,7 @@ import { SetRepository } from '../repositories/SetRepository';
 import { loadCards, loadBoards } from '../utils/storage';
 import { blobURLToBlob } from '../utils/indexedDB';
 import type { Card } from '../types';
+import { logger } from '../utils/logger';
 
 export class SyncService {
     /**
@@ -62,7 +63,7 @@ export class SyncService {
                 migratedCardIds[localCard.id] = dbCard.id!;
                 cardsMigratedCount++;
             } catch (error) {
-                console.error(`Failed to migrate card: ${localCard.title}`, error);
+                logger.error(`Failed to migrate card: ${localCard.title}`, error);
             }
         }
 
@@ -82,7 +83,7 @@ export class SyncService {
                     boardsMigratedCount++;
                 }
             } catch (error) {
-                console.error(`Failed to migrate board: ${localBoard.id}`, error);
+                logger.error(`Failed to migrate board: ${localBoard.id}`, error);
             }
         }
 

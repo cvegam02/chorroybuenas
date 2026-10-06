@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import { TokenRepository } from '../repositories/TokenRepository';
+import { logger } from '../utils/logger';
 
 interface TokenContextType {
     /** Balance de tokens del usuario (null si no cargado o invitado). */
@@ -24,7 +25,7 @@ export const TokenProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             const b = await TokenRepository.getBalance(user.id);
             setBalance(b);
         } catch (e) {
-            console.error('Error fetching token balance:', e);
+            logger.error('Error fetching token balance:', e);
         }
     }, [user]);
 

@@ -7,6 +7,7 @@ import { GridSize } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSetContext } from '../../contexts/SetContext';
 import { CardRepository } from '../../repositories/CardRepository';
+import { logger } from '../../utils/logger';
 
 interface BoardCountSelectorProps {
   onGenerate: (count: number, gridSize: GridSize) => void;
@@ -120,7 +121,7 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
         setBoardCount(defaultCount);
         setInputValue(defaultCount.toString());
       } catch (error) {
-        console.error('Error loading cards:', error);
+        logger.error('Error loading cards:', error);
       } finally {
         setIsLoadingCards(false);
       }

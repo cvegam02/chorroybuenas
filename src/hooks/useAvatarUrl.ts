@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
 import { AVATAR_BUCKET, resolveAvatarSource } from '../utils/avatar';
+import { logger } from '../utils/logger';
 
 const SIGNED_URL_TTL_SECONDS = 60 * 60; // 1 hora; se renueva en cada montaje
 
@@ -30,7 +31,7 @@ export function useAvatarUrl(user: User | null): string | null {
       .createSignedUrl(value, SIGNED_URL_TTL_SECONDS)
       .then(({ data, error }) => {
         if (cancelled) return;
-        if (error) console.error('No se pudo firmar la URL del avatar:', error.message);
+        if (error) logger.error('No se pudo firmar la URL del avatar:', error.message);
         setUrl(data?.signedUrl ?? null);
       });
     return () => {

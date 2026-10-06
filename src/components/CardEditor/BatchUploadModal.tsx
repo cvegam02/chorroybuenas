@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ImageEditor } from './ImageEditor';
 import { convertFileToBase64, validateImageFile, compressImage, adjustImageToCardAspectRatio } from '../../utils/imageUtils';
 import './BatchUploadModal.css';
+import { logger } from '../../utils/logger';
 
 
 interface PendingImage {
@@ -84,7 +85,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
       const compressed = await compressImage(croppedImage);
       setCurrentImage(compressed);
     } catch (error) {
-      console.error('Error compressing cropped image:', error);
+      logger.error('Error compressing cropped image:', error);
       // Fallback to uncompressed if compression fails
       setCurrentImage(croppedImage);
     }
@@ -142,7 +143,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
       try {
         imageToSave = await adjustImageToCardAspectRatio(currentImage);
       } catch (error) {
-        console.error('Error adjusting image aspect ratio:', error);
+        logger.error('Error adjusting image aspect ratio:', error);
         // Continue with original if adjustment fails
       }
     }
@@ -151,7 +152,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
     try {
       imageToSave = await compressImage(imageToSave);
     } catch (error) {
-      console.error('Error compressing image:', error);
+      logger.error('Error compressing image:', error);
       // Continue with uncompressed if compression fails
     }
 

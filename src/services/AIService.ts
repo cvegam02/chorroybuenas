@@ -11,6 +11,7 @@
 import { supabase } from '../utils/supabaseClient';
 import { TokenRepository } from '../repositories/TokenRepository';
 import { transformWithFallback } from './aiFallback';
+import { logger } from '../utils/logger';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
@@ -59,7 +60,7 @@ export class AIService {
                 reader.readAsDataURL(blob);
             });
         } catch (error) {
-            console.error('Error fetching image to DataURI:', error);
+            logger.error('Error fetching image to DataURI:', error);
             return url; // Fallback to original URL if it fails
         }
     }

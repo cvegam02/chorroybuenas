@@ -15,6 +15,7 @@ import { WarningModal } from '../ConfirmationModal/WarningModal';
 import { generatePDF, downloadPDF } from '../../services/PDFService';
 import { Card, GridSize } from '../../types';
 import './SetView.css';
+import { logger } from '../../utils/logger';
 
 export const SetView = () => {
   const { setId } = useParams<{ setId: string }>();
@@ -120,7 +121,7 @@ export const SetView = () => {
       setSets(prev => prev.map(s => (s.id === setId ? { ...s, name: updated.name } : s)));
       setIsRenaming(false);
     } catch (err) {
-      console.error('Error renaming set:', err);
+      logger.error('Error renaming set:', err);
       alert(t('common.error'));
     } finally {
       setIsSavingName(false);
@@ -139,7 +140,7 @@ export const SetView = () => {
       const blob = await generatePDF(boards, { allCards: cards });
       downloadPDF(blob);
     } catch (err) {
-      console.error('Error generating PDF:', err);
+      logger.error('Error generating PDF:', err);
       alert(t('boardGenerator.errors.pdfError'));
     } finally {
       setIsGeneratingPDF(false);
@@ -157,7 +158,7 @@ export const SetView = () => {
       setShowRegenerateBoardsModal(false);
       navigate('/board-count', { state: { gridSize } });
     } catch (err) {
-      console.error('Error clearing boards before regenerate:', err);
+      logger.error('Error clearing boards before regenerate:', err);
       alert(t('common.error'));
     }
   };
@@ -170,7 +171,7 @@ export const SetView = () => {
       setSelectedBoardIndex(null);
       setShowClearBoardsModal(false);
     } catch (err) {
-      console.error('Error clearing boards:', err);
+      logger.error('Error clearing boards:', err);
       alert(t('common.error'));
     }
   };

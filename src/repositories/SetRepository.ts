@@ -1,4 +1,5 @@
 import { supabase } from '../utils/supabaseClient';
+import { logger } from '../utils/logger';
 
 const SETS_CACHE_TTL_MS = 15 * 1000; // 15 segundos
 const setsCache = new Map<string, { sets: LoteriaSet[]; expiresAt: number }>();
@@ -158,7 +159,7 @@ export class SetRepository {
       try {
         await supabase.storage.from('card-images').remove(uniquePaths);
       } catch (storageErr) {
-        console.warn('Error removing set images from storage:', storageErr);
+        logger.warn('Error removing set images from storage:', storageErr);
       }
     }
 

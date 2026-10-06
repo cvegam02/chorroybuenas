@@ -12,6 +12,7 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 import { FaCoins } from 'react-icons/fa';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import './Navbar.css';
+import { logger } from '../../utils/logger';
 
 export const Navbar = () => {
   const location = useLocation();
@@ -75,7 +76,7 @@ export const Navbar = () => {
       closeMenu();
       navigate('/cards');
     } catch (err) {
-      console.error('Error creating set:', err);
+      logger.error('Error creating set:', err);
     } finally {
       setIsCreatingSet(false);
     }
