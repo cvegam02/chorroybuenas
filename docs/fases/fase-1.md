@@ -1,6 +1,6 @@
 # Fase 1 — Reglas que el sitio contradice hoy
 
-**Estado: 🚧 en curso** (A1 y A2 hechas el 2026-10-06; B1 construida, falta la demo)
+**Estado: ✅ completa en dev (2026-10-06)** — las tres historias están hechas y probadas en `dev`. Falta llevarla a producción: publicar la función de compra en el Supabase de producción y pasar `dev` a `main`, con confirmación de Carlos.
 
 **Contexto.** El 2026-10-06 Carlos definió reglas que el sitio todavía no cumple (`contexto-negocio.md` §17). Tres de ellas se arreglan sin construir nada nuevo por debajo: el mínimo de cartas en Clásico, el mínimo de compra, y que el saldo aparezca al volver de pagar. Las tres las ve el usuario hoy: puede generar tableros con menos cartas de las debidas, puede llegar a un pago que Mercado Pago no le deja completar, y puede ver "pago exitoso" con su saldo viejo.
 
@@ -78,18 +78,19 @@ Los textos nuevos van en español y en inglés.
 
 ## Grupo B — Pago
 
-### US B1 — El saldo aparece al volver del pago   ·   Estado: 🚧 construida, falta la demo de Carlos
+### US B1 — El saldo aparece al volver del pago   ·   Estado: ✅ hecha (2026-10-06)
 
 - **Historia** — Como comprador, quiero ver mis tokens en cuanto regreso de pagar, para no dudar de si mi compra funcionó.
 - **Entrega demostrable** — Al volver de un pago aprobado, la página muestra un momento "acreditando", y enseguida el éxito con el saldo ya sumado.
 - **Construcción (propuesta)** — Función nueva en `src/services/PurchaseService.ts` que llama a la función del servidor `credit-payment-on-return` con el identificador del pago; en `src/components/BuyTokens/BuyTokensPage.tsx`, el paso de regreso (hoy solo refresca el saldo) la llama antes de refrescar; textos nuevos en los dos idiomas. Sin cambios de servidor.
 - **Construido** — 2026-10-06, en la rama `feature/fase-1-reglas`. Se empezó por las pruebas: 21 nuevas sobre cómo leer la respuesta del servidor (`src/services/creditOnReturn.ts`), con la regla de que la página solo dice "acreditado" si el servidor lo confirma; cualquier otra respuesta, incluido un fallo de conexión, se trata como "en proceso". `creditPaymentOnReturn` en `src/services/PurchaseService.ts` llama a la función del servidor, que ya estaba publicada en dev y en producción. En la página de compra, al volver con un pago aprobado se muestra "Acreditando tu compra…", y después el éxito o el mensaje de pago en proceso; el saldo se vuelve a pedir al servidor al terminar. Solo se agregó un texto nuevo, el de "acreditando", en los dos idiomas; para "aún no acreditado" se reutiliza el mensaje de pago pendiente que ya existía. Revisión de tipos, lint y pruebas en verde (285). **No verificado:** el recorrido completo en la página (regresar de Mercado Pago y ver el saldo) no se ha ejecutado; solo se puede probar en el sitio de dev, porque desde una máquina local Mercado Pago no regresa. Falta la demo de Carlos.
   - **Corrección tras la primera demo (2026-10-06).** Carlos pagó en dev y vio "Pago pendiente" aunque los tokens sí llegaron. Causa: la dirección de regreso trae primero el marcador sin sustituir `payment_id={payment_id}` y después el identificador real que agrega Mercado Pago; la página leía el primero, lo descartaba por no ser un número y nunca llamaba al servidor (los logs de dev no registraron ninguna llamada). Los tokens llegaron por el aviso de Mercado Pago. Arreglo: `readReturnedPaymentId` toma el primer identificador válido entre `payment_id` y `collection_id`, con 6 pruebas nuevas (291 en total). Además, un regreso de éxito sin identificador legible muestra el mensaje de pago en proceso en vez de no mostrar nada.
+  - **Demo confirmada (2026-10-06).** Carlos repitió la compra en `dev.chorroybuenas.com.mx` y confirmó que funciona. Comprobado en la base y los logs de dev: una sola compra nueva de 12 tokens, saldo de 103 a 115, y la página sí llamó al servidor al volver (respuesta 200). En esa compra el aviso de Mercado Pago llegó 4 segundos antes que la página, y no se acreditó dos veces.
 - **Depende de** — nada. Conviene hacerla después de A2 para probar las dos con una sola compra.
 - **Cómo se prueba (guion de demo)** — En `dev.chorroybuenas.com.mx`, anota tu saldo → compra el paquete de 10 tokens con el comprador de prueba y la tarjeta de prueba → pulsa el botón de volver de Mercado Pago. Al llegar a la página de compra debería verse "Acreditando tu compra…" un instante y luego "¡Pago exitoso!", con el saldo de la barra de arriba 12 tokens más alto, sin recargar la página.
 - **Escenarios cubiertos**:
-  - [ ] Pago aprobado: al volver, el saldo ya incluye los tokens.
-  - [ ] El aviso de Mercado Pago llegó antes que el usuario: no se suma dos veces.
+  - [x] Pago aprobado: al volver, el saldo ya incluye los tokens.
+  - [x] El aviso de Mercado Pago llegó antes que el usuario: no se suma dos veces. (Visto en la demo: el aviso llegó 4 segundos antes.)
   - [ ] Pago pendiente (efectivo o transferencia): mensaje de que se acreditará al confirmarse; no es error.
   - [ ] Pago cancelado: el mensaje de cancelado de hoy; no se llama al servidor.
   - [ ] Falla la llamada al servidor: mensaje de "se está procesando"; los tokens llegan por el aviso.
