@@ -86,7 +86,7 @@ Creado el 2026-10-06.
 - **Notificaciones**: Ninguna.
 - **Auditoría**: No.
 
-### 8. Elegir el modo de juego 🔧
+### 8. Elegir el modo de juego
 - **Actor(es)**: Visitante o usuario registrado.
 - **Precondiciones**: Tener una lotería abierta.
 - **Flujo principal**: (1) Elige Clásico (4 × 4) o Kids (3 × 3). (2) El mínimo de cartas se ajusta: 24 en Clásico, 15 en Kids (§4).
@@ -96,7 +96,7 @@ Creado el 2026-10-06.
 - **Notificaciones**: Ninguna.
 - **Auditoría**: No.
 
-### 9. Generar tableros 🔧
+### 9. Generar tableros
 - **Actor(es)**: Visitante o usuario registrado.
 - **Precondiciones**: La lotería tiene al menos el mínimo de cartas de su modo (§4).
 - **Flujo principal**: (1) Ve la cantidad de tableros sugerida y puede cambiarla (§4). (2) Genera los tableros. (3) Los revisa uno por uno.
@@ -154,11 +154,11 @@ Creado el 2026-10-06.
 
 ## Bloque 4 — Tokens
 
-### 14. Comprar tokens 🔧
+### 14. Comprar tokens
 - **Actor(es)**: Usuario registrado.
 - **Precondiciones**: Sesión iniciada.
 - **Flujo principal**: (1) Elige un paquete, o una cantidad libre de 5 a 500 tokens (§8). (2) Si tiene un código promocional, lo escribe y ve el bono (§9). (3) Es enviado al pago de Mercado Pago. (4) Paga. (5) Vuelve al sitio y ve el resultado.
-- **Excepciones**: Sin sesión: se le pide iniciar sesión. Pago cancelado o rechazado: vuelve sin tokens. Pago pendiente (efectivo o transferencia): se le avisa que se acreditará al confirmarse (§8). Cantidad libre menor a 5 tokens: no se permite (§8; hoy el sitio aún deja pedir desde 1).
+- **Excepciones**: Sin sesión: se le pide iniciar sesión. Pago cancelado o rechazado: vuelve sin tokens. Pago pendiente (efectivo o transferencia): se le avisa que se acreditará al confirmarse (§8). Cantidad libre menor a 5 tokens: no se permite (§8).
 - **Resultado**: Un pago iniciado. Los tokens llegan por el caso 15.
 - **Estados afectados**: Ninguno hasta que el pago se aprueba.
 - **Notificaciones**: Ninguna. El sitio no emite comprobante propio (§8, §13).
