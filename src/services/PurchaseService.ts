@@ -115,15 +115,12 @@ export async function createPaymentPreference(params: {
         statusText: res.statusText,
         error: body?.error,
         message: body?.message,
-        details: body?.details,
       });
-      // Mostrar detalles del error si están disponibles (útil para debugging)
-      const errorMessage = body?.message ?? 'Error al iniciar la compra. Intenta de nuevo.';
-      const errorDetails = body?.details ? `\n\nDetalles: ${body.details}` : '';
+      // El servidor ya envía un mensaje apto para el usuario; el detalle técnico queda en sus logs.
       return {
         success: false,
         error: errorType,
-        message: errorMessage + errorDetails,
+        message: body?.message ?? 'Error al iniciar la compra. Intenta de nuevo.',
       };
     }
 
