@@ -13,7 +13,7 @@ export class SyncService {
     static async syncLocalDataToCloud(userId: string): Promise<{ cardsMigrated: number, boardsMigrated: number }> {
 
         // Los tokens se leen siempre de la DB (TokenRepository.getBalance).
-        // La fila en user_tokens se crea con app_config.initial_tokens la primera vez que se pide el balance (getBalance → initializeUser si no existe).
+        // La fila en user_tokens la crea el trigger handle_new_user al registrarse (app_config.initial_tokens).
 
         // 1. Fetch local data
         const localCards = await loadCards();
