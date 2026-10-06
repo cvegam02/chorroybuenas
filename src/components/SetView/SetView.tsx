@@ -16,6 +16,7 @@ import { generatePDF, downloadPDF } from '../../services/PDFService';
 import { Card, GridSize } from '../../types';
 import './SetView.css';
 import { logger } from '../../utils/logger';
+import { minCardsForGrid } from '../../utils/gridRules';
 
 export const SetView = () => {
   const { setId } = useParams<{ setId: string }>();
@@ -83,8 +84,7 @@ export const SetView = () => {
   /** grid_size del set: 9 (3x3 Kids) o 16 (4x4 Classic). Desde DB (set) o tableros existentes. */
   const gridSize: GridSize = set?.grid_size ?? (boards.length > 0 ? (boards[0].gridSize ?? 16) : 16);
   const hasReliableGridSize = set?.grid_size != null || boards.length > 0;
-  /** Mínimo de cartas para poder generar tableros: 12 (Kids) o 16 (Classic). */
-  const minCardsForBoards = gridSize === 9 ? 12 : 16;
+  const minCardsForBoards = minCardsForGrid(gridSize);
   const hasEnoughCardsForBoards = cards.length >= minCardsForBoards;
 
   /** Tableros con cartas que usan las imágenes ya hidratadas (IndexedDB) para que se vean al instante. */

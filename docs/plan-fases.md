@@ -28,13 +28,13 @@ De las seis reglas que Carlos definió el 2026-10-06 y que el sitio todavía no 
 **Estado: 🔲 pendiente** · Seguimiento: [`fases/fase-1.md`](fases/fase-1.md)
 
 - **Por qué es la siguiente raíz:** son reglas ya decididas que el sitio incumple a la vista del usuario, y ninguna necesita construir nada nuevo por debajo: solo cambian límites y un paso del flujo de pago. No dependen de ninguna otra fase.
-- **Alcance:** que el sitio respete el mínimo de cartas en Clásico y el mínimo de compra, y que el saldo aparezca en cuanto el usuario vuelve de pagar.
+- **Alcance:** que el sitio respete los mínimos de cartas de los dos modos y el mínimo de compra, y que el saldo aparezca en cuanto el usuario vuelve de pagar.
 - **Piezas por construir:**
-  1. Mínimo de 20 cartas en Clásico también en la pantalla de tableros (C2).
+  1. Mínimo de 24 cartas en Clásico y de 15 en Kids, en la pantalla de cartas (C1) y en la de tableros (C2).
   2. Mínimo de compra de 5 tokens, en la página (U3) y en el servidor.
   3. Acreditar el pago al volver de Mercado Pago, sin esperar al aviso.
 - **Qué queda fuera:** reembolsos, registro de regalos y correos (fases 2 y 3).
-- **Definición de «hecho»:** con 16 cartas en Clásico no se pueden generar tableros; no se puede iniciar una compra de menos de 5 tokens; y al volver de un pago aprobado el saldo ya incluye los tokens comprados.
+- **Definición de «hecho»:** con 23 cartas en Clásico, o 14 en Kids, no se pueden generar tableros; no se puede iniciar una compra de menos de 5 tokens; y al volver de un pago aprobado el saldo ya incluye los tokens comprados.
 
 ## Fase 2 — Movimientos de tokens: reembolsos y regalos
 
