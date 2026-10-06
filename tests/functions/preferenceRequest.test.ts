@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { parsePreferenceRequest } from '../../supabase/functions/_shared/validation.ts';
+import {
+  MAX_CUSTOM_TOKENS, MIN_CUSTOM_TOKENS, parsePreferenceRequest,
+} from '../../supabase/functions/_shared/validation.ts';
+import {
+  MAX_CUSTOM_TOKENS as PAGE_MAX_CUSTOM_TOKENS, MIN_CUSTOM_TOKENS as PAGE_MIN_CUSTOM_TOKENS,
+} from '../../src/utils/purchaseRules';
 
 const PACK = '3f2b8c1e-5a4d-4e6f-9b7a-1c2d3e4f5a6b';
 
@@ -19,9 +24,22 @@ describe('parsePreferenceRequest', () => {
     });
   });
 
-  it('acepta los límites 1 y 500', () => {
-    expect(parsePreferenceRequest({ custom_tokens: 1 }).ok).toBe(true);
+  it('acepta los límites: 5 (mínimo de compra) y 500', () => {
+    expect(parsePreferenceRequest({ custom_tokens: 5 }).ok).toBe(true);
     expect(parsePreferenceRequest({ custom_tokens: 500 }).ok).toBe(true);
+  });
+
+  // contexto-negocio §8: el mínimo de compra es 5 tokens ($10.00); Mercado Pago no deja pagar menos.
+  it.each([1, 2, 3, 4])('rechaza %i tokens por estar bajo el mínimo de compra', (tokens) => {
+    expect(parsePreferenceRequest({ custom_tokens: tokens })).toEqual({
+      ok: false,
+      message: 'custom_tokens debe ser un entero entre 5 y 500.',
+    });
+  });
+
+  it('la página y el servidor usan el mismo mínimo y el mismo máximo', () => {
+    expect(PAGE_MIN_CUSTOM_TOKENS).toBe(MIN_CUSTOM_TOKENS);
+    expect(PAGE_MAX_CUSTOM_TOKENS).toBe(MAX_CUSTOM_TOKENS);
   });
 
   it('trata null como ausente', () => {

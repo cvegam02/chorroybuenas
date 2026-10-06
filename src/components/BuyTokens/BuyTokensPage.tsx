@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import { TokenPricingRepository, TokenPack, type PromoSummary } from '../../repositories/TokenPricingRepository';
 import { usePromoCode } from '../../hooks/usePromoCode';
+import { MAX_CUSTOM_TOKENS, MIN_CUSTOM_TOKENS } from '../../utils/purchaseRules';
 import { createPaymentPreference } from '../../services/PurchaseService';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
@@ -38,8 +39,8 @@ export const BuyTokensPage: React.FC = () => {
   const [buyLoading, setBuyLoading] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'success' | 'cancel' | 'pending' | null>(null);
 
-  const CUSTOM_MIN = 1;
-  const CUSTOM_MAX = 500;
+  const CUSTOM_MIN = MIN_CUSTOM_TOKENS;
+  const CUSTOM_MAX = MAX_CUSTOM_TOKENS;
 
   const showUsd = i18n.language?.startsWith('en') ?? false;
 
@@ -371,7 +372,7 @@ export const BuyTokensPage: React.FC = () => {
                 aria-describedby="buy-tokens-custom-hint"
               />
               <p id="buy-tokens-custom-hint" className="buy-tokens-page__custom-hint">
-                {t('buyTokens.customAmountMin')} · {t('buyTokens.customAmountMax')}
+                {t('buyTokens.customAmountMin', { min: CUSTOM_MIN })} · {t('buyTokens.customAmountMax', { max: CUSTOM_MAX })}
               </p>
               <p className="buy-tokens-page__custom-price-per-token">
                 {t('buyTokens.pricePerToken')}: {formatPriceMxn(pricePerTokenCents)}
