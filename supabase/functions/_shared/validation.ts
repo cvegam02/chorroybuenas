@@ -22,7 +22,8 @@ export function validateImageDataUri(
   return { ok: true, value: image };
 }
 
-export const MIN_CUSTOM_TOKENS = 1;
+/** Mínimo de compra: 5 tokens ($10.00 MXN). Mercado Pago no permite pagar montos menores. */
+export const MIN_CUSTOM_TOKENS = 5;
 export const MAX_CUSTOM_TOKENS = 500;
 const MAX_PROMO_CODE_LENGTH = 64;
 const MAX_APP_URL_LENGTH = 500;
