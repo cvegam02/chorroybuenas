@@ -39,6 +39,9 @@ jobs:
 
       - name: Unit tests
         run: npm run test:coverage
+
+      - name: Database tests
+        run: npm run test:db
       
       - name: Build
         run: npm run build
