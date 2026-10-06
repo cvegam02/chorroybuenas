@@ -126,6 +126,15 @@ export async function findApprovedPayment(
     preferenceId =
       asString((found.metadata as { preference_id?: unknown } | undefined)?.preference_id) ??
       asString(found.preference_id);
+    if (!preferenceId) {
+      // Los pagos de Checkout Pro no traen la preferencia, pero sí su orden: se toma de ahí.
+      // Sin esto solo la notificación de merchant_order podría acreditar.
+      const orderId = asString((found.order as { id?: unknown } | undefined)?.id);
+      if (orderId && MP_ID_RE.test(orderId)) {
+        const order = await deps.mpGet<MerchantOrder>(`/merchant_orders/${orderId}`);
+        preferenceId = asString(order?.preference_id);
+      }
+    }
   }
 
   if (!externalReference || !preferenceId) return { ok: false, reason: 'missing_reference' };
