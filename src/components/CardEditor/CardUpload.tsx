@@ -52,7 +52,7 @@ export const CardUpload = ({
     setWasEdited(false); // Reset edit flag when new image is loaded
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
 
     const normalizedTitle = normalizeTitle(title);
@@ -158,7 +158,7 @@ export const CardUpload = ({
   const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && title.trim() && imagePreview && !isUploading) {
       e.preventDefault();
-      handleSubmit(e as any);
+      handleSubmit(e);
     }
   };
 

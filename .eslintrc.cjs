@@ -10,7 +10,7 @@ module.exports = {
   ignorePatterns: ['dist', 'coverage', 'node_modules', '.eslintrc.cjs', 'supabase/functions/*/index.ts'],
   parser: '@typescript-eslint/parser',
   rules: {
-    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-explicit-any': 'error',
     'no-console': 'error',
   },
   overrides: [

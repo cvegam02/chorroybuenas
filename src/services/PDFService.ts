@@ -1,14 +1,4 @@
-import {
-  PDFDocument,
-  rgb,
-  StandardFonts,
-  type PDFFont,
-  pushGraphicsState,
-  popGraphicsState,
-  rectangle,
-  clip,
-  endPath,
-} from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, type PDFFont, pushGraphicsState, popGraphicsState, rectangle, clip, endPath, PDFImage, PDFPage } from 'pdf-lib';
 import { Board, Card } from '../types';
 import { loadCards } from '../utils/storage';
 import { blobToBase64, getImageBlob, cacheImageBlob } from '../utils/indexedDB';
@@ -235,7 +225,7 @@ const loadImageAsUint8Array = async (imageSrc: string): Promise<ImageData> => {
   };
 };
 
-type EmbedResult = { image: any; width: number; height: number };
+type EmbedResult = { image: PDFImage; width: number; height: number };
 
 const embedImageInPDF = async (
   pdfDoc: PDFDocument,
@@ -296,7 +286,7 @@ const embedImageInPDF = async (
 };
 
 const drawCardOnPage = async (
-  page: any,
+  page: PDFPage,
   card: Card,
   x: number,
   y: number,
@@ -434,9 +424,9 @@ const drawCardOnPage = async (
 
 // Cache logo bytes globally and embed per PDF document
 const logoBytesCache: { data: Uint8Array } = { data: new Uint8Array() };
-const logoImageCache = new WeakMap<PDFDocument, { image: any; width: number; height: number }>();
+const logoImageCache = new WeakMap<PDFDocument, EmbedResult>();
 
-const getLogoImage = async (pdfDoc: PDFDocument): Promise<{ image: any; width: number; height: number }> => {
+const getLogoImage = async (pdfDoc: PDFDocument): Promise<EmbedResult> => {
   const cached = logoImageCache.get(pdfDoc);
   if (cached) {
     return cached;
@@ -462,7 +452,7 @@ const getLogoImage = async (pdfDoc: PDFDocument): Promise<{ image: any; width: n
 };
 
 const drawBoardOnPage = async (
-  page: any,
+  page: PDFPage,
   board: Board,
   boardNumber: number,
   pdfDoc: PDFDocument,

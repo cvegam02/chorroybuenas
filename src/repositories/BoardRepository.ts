@@ -10,6 +10,18 @@ export interface BoardDB {
     created_at?: string;
 }
 
+/** Fila de board_cards con su carta, tal como la devuelve la consulta anidada de getBoards. */
+interface BoardCardRow {
+    position: number;
+    cards: {
+        id: string;
+        title: string;
+        image_path: string | null;
+        original_image_path: string | null;
+        is_ai_generated: boolean;
+    } | null;
+}
+
 export class BoardRepository {
     /**
      * Save a board and its card associations.
@@ -68,22 +80,26 @@ export class BoardRepository {
 
         // Reunir todas las rutas de imagen y obtener signed URLs en un solo batch (reutiliza cache)
         const allPaths = data.flatMap((board) =>
-            (board.board_cards as any[]).map((bc: any) => bc.cards?.image_path).filter(Boolean)
+            (board.board_cards as unknown as BoardCardRow[]).map((bc) => bc.cards?.image_path).filter(Boolean)
         ) as string[];
         const urlMap = allPaths.length > 0
             ? await CardRepository.getImageUrls([...new Set(allPaths)])
             : new Map<string, string>();
 
         return data.map((board) => {
-            const sortedBc = [...board.board_cards].sort((a: any, b: any) => a.position - b.position);
-            const cards = sortedBc.map((bc: any) => ({
-                id: bc.cards.id,
-                title: bc.cards.title,
-                image: bc.cards.image_path ? urlMap.get(bc.cards.image_path) : undefined,
-                imagePath: bc.cards.image_path ?? undefined,
-                originalImagePath: bc.cards.original_image_path ?? undefined,
-                isAiGenerated: bc.cards.is_ai_generated
-            }));
+            const rows = board.board_cards as unknown as BoardCardRow[];
+            // Una fila sin carta (carta borrada) se omite en lugar de romper el listado.
+            const cards = [...rows]
+                .sort((a, b) => a.position - b.position)
+                .flatMap((bc) => (bc.cards ? [bc.cards] : []))
+                .map((card) => ({
+                    id: card.id,
+                    title: card.title,
+                    image: card.image_path ? urlMap.get(card.image_path) : undefined,
+                    imagePath: card.image_path ?? undefined,
+                    originalImagePath: card.original_image_path ?? undefined,
+                    isAiGenerated: card.is_ai_generated
+                }));
 
             return {
                 id: board.id,

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { FaLock, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import './SetNewPasswordModal.css';
+import { getErrorMessage } from '../../utils/errors';
 
 export const SetNewPasswordModal: React.FC = () => {
     const { t } = useTranslation();
@@ -33,8 +34,8 @@ export const SetNewPasswordModal: React.FC = () => {
             setSuccess(true);
             setPassword('');
             setConfirmPassword('');
-        } catch (err: any) {
-            setError(err.message || t('common.auth.errors.authFailed'));
+        } catch (err: unknown) {
+            setError(getErrorMessage(err) || t('common.auth.errors.authFailed'));
         } finally {
             setIsLoading(false);
         }

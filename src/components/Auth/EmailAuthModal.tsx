@@ -5,6 +5,7 @@ import { FaEnvelope, FaLock, FaTimes, FaUserPlus, FaSignInAlt, FaUser, FaEye, Fa
 import { useAuth } from '../../contexts/AuthContext';
 import './EmailAuthModal.css';
 import { logger } from '../../utils/logger';
+import { getErrorMessage } from '../../utils/errors';
 
 interface EmailAuthModalProps {
     isOpen: boolean;
@@ -53,9 +54,9 @@ export const EmailAuthModal: React.FC<EmailAuthModalProps> = ({ isOpen, onClose,
         try {
             await resetPasswordForEmail(email.trim());
             setForgotPasswordSent(true);
-        } catch (err: any) {
+        } catch (err: unknown) {
             logger.error('Reset password error:', err);
-            setError(err.message || t('common.auth.errors.authFailed'));
+            setError(getErrorMessage(err) || t('common.auth.errors.authFailed'));
         } finally {
             setIsLoading(false);
         }
@@ -81,14 +82,15 @@ export const EmailAuthModal: React.FC<EmailAuthModalProps> = ({ isOpen, onClose,
                 });
                 setSignUpSuccess(true);
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             logger.error('Auth error:', err);
-            if (err.message?.includes('invalid_credentials')) {
+            const message = getErrorMessage(err);
+            if (message.includes('invalid_credentials')) {
                 setError(t('common.auth.errors.authFailed'));
-            } else if (err.message?.includes('User already registered')) {
+            } else if (message.includes('User already registered')) {
                 setError(t('common.auth.errors.emailTaken'));
             } else {
-                setError(err.message || t('common.auth.errors.authFailed'));
+                setError(message || t('common.auth.errors.authFailed'));
             }
         } finally {
             setIsLoading(false);
