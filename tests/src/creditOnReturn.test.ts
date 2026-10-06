@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { interpretCreditResponse, isPaymentId } from '../../src/services/creditOnReturn';
+import { interpretCreditResponse, isPaymentId, readReturnedPaymentId } from '../../src/services/creditOnReturn';
 
 // contexto-negocio §8: un pago aprobado acredita una sola vez; la página solo muestra
 // "acreditado" cuando el servidor lo confirma.
@@ -36,5 +36,32 @@ describe('isPaymentId', () => {
 
   it.each([null, '', 'abc', '12 34', '1/../x', '{payment_id}', '1'.repeat(21)])('rechaza %j', (value) => {
     expect(isPaymentId(value)).toBe(false);
+  });
+});
+
+// Al volver, la dirección trae primero nuestro marcador sin sustituir, payment_id={payment_id},
+// y después los datos reales que agrega Mercado Pago.
+describe('readReturnedPaymentId', () => {
+  const read = (query: string) => readReturnedPaymentId(new URLSearchParams(query));
+
+  it('toma el identificador real aunque antes venga el marcador sin sustituir', () => {
+    expect(read('success=1&payment_id=%7Bpayment_id%7D&collection_id=181780493347&collection_status=approved&payment_id=181780493347&status=approved'))
+      .toBe('181780493347');
+  });
+
+  it('usa collection_id si ningún payment_id es válido', () => {
+    expect(read('success=1&payment_id={payment_id}&collection_id=181780493347')).toBe('181780493347');
+  });
+
+  it('acepta una dirección con un solo payment_id numérico', () => {
+    expect(read('success=1&payment_id=42')).toBe('42');
+  });
+
+  it.each([
+    ['solo el marcador sin sustituir', 'success=1&payment_id=%7Bpayment_id%7D'],
+    ['sin identificador', 'success=1'],
+    ['identificadores que no son números', 'success=1&payment_id=abc&collection_id=null'],
+  ])('devuelve null: %s', (_name, query) => {
+    expect(read(query)).toBe(null);
   });
 });
