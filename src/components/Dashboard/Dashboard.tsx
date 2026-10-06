@@ -87,8 +87,10 @@ export const Dashboard = () => {
     document.title = t('dashboard.title');
   }, [t]);
 
+  const userId = user?.id;
+
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
 
     const load = async () => {
       setIsLoading(true);
@@ -97,9 +99,9 @@ export const Dashboard = () => {
           refreshSets(),
           refreshBalance(),
           AppConfigRepository.getInitialTokens().then(setInitialTokens),
-          TokenPricingRepository.getTotalTokensReceived(user.id).then(setTotalReceived),
-          TokenPricingRepository.getTotalTokensSpent(user.id).then(setTotalSpent),
-          TokenPricingRepository.getTokensSpentBySet(user.id).then(setTokensSpentBySet)
+          TokenPricingRepository.getTotalTokensReceived(userId).then(setTotalReceived),
+          TokenPricingRepository.getTotalTokensSpent(userId).then(setTotalSpent),
+          TokenPricingRepository.getTokensSpentBySet(userId).then(setTokensSpentBySet)
         ]);
       } catch (e) {
         console.error('Error loading dashboard:', e);
@@ -108,7 +110,7 @@ export const Dashboard = () => {
       }
     };
     load();
-  }, [user?.id, refreshSets, refreshBalance]);
+  }, [userId, refreshSets, refreshBalance]);
 
   useEffect(() => {
     if (!authLoading && !user) {

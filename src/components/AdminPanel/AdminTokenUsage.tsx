@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
@@ -90,7 +90,10 @@ export const AdminTokenUsage = () => {
   const [usageBySet, setUsageBySet] = useState<{ set_id: string; set_name: string | null; total_tokens: number }[]>([]);
   const [exchangeRateMxnUsd, setExchangeRateMxnUsd] = useState<number | null>(null);
 
-  const filterParams = filters.dateFrom || filters.dateTo ? { dateFrom: filters.dateFrom, dateTo: filters.dateTo } : undefined;
+  const filterParams = useMemo(
+    () => (filters.dateFrom || filters.dateTo ? { dateFrom: filters.dateFrom, dateTo: filters.dateTo } : undefined),
+    [filters.dateFrom, filters.dateTo]
+  );
 
   const load = useCallback(async () => {
     setIsLoading(true);
@@ -126,7 +129,7 @@ export const AdminTokenUsage = () => {
     setUsageBySet(bySet);
     setExchangeRateMxnUsd(mxnRate);
     setIsLoading(false);
-  }, [page, filters, isMobile]);
+  }, [page, filters, filterParams, isMobile]);
 
   useEffect(() => {
     load();

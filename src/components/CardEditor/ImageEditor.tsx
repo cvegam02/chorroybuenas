@@ -30,6 +30,8 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
   const initialZoomRef = useRef<number>(1);
 
   const blobUrlRef = useRef<string | null>(null);
+  // Siempre apunta al drawImage del render actual (el handler de resize vive más que un render).
+  const drawImageRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const img = new Image();
@@ -73,7 +75,7 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
         // Handle window resize
         resizeHandler = () => {
           updateSize();
-          setTimeout(() => drawImage(), 100);
+          setTimeout(() => drawImageRef.current(), 100);
         };
 
         window.addEventListener('resize', resizeHandler);
@@ -321,6 +323,7 @@ export const ImageEditor = ({ imageSrc, onCrop, onCancel }: ImageEditorProps) =>
     ctx.lineWidth = 2;
     ctx.strokeRect(0, 0, containerWidth, containerHeight);
   };
+  drawImageRef.current = drawImage;
 
   const handleZoomIn = () => {
     setZoom(prev => Math.min(prev + ZOOM_STEP, MAX_ZOOM));

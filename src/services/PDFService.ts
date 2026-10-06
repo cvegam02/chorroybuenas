@@ -592,7 +592,9 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
         const downloaded = await CardRepository.downloadImage(card.imagePath);
         try {
           await cacheImageBlob(card.id, downloaded);
-        } catch (_) {}
+        } catch (_) {
+          // La caché local es opcional: si falla, se sigue con la imagen descargada.
+        }
         const base64 = await blobToBase64(downloaded);
         base64Cache.set(card.id, base64);
         return base64;

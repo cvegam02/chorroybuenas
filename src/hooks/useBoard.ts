@@ -101,7 +101,6 @@ export const useBoard = () => {
 
       const generatedBoards: Board[] = [];
       const MAX_ATTEMPTS = 1000; // Maximum attempts to find a unique board
-      let totalAttempts = 0;
 
       for (let i = 0; i < count; i++) {
         let board: Board;
@@ -125,7 +124,6 @@ export const useBoard = () => {
             isUnique = true;
           } else {
             attempts++;
-            totalAttempts++;
           }
         }
 

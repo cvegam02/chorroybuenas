@@ -44,19 +44,20 @@ export const SetView = () => {
   }, [setId, setCurrentSetId]);
 
   // Si el set no está en la lista (ej. carga directa por URL), cargarlo individualmente
+  const userId = user?.id;
   useEffect(() => {
-    if (!setId || !user) return;
+    if (!setId || !userId) return;
     const s = sets.find(x => x.id === setId);
     if (s) {
       setFetchedSet(null);
       return;
     }
     let cancelled = false;
-    SetRepository.getSet(setId, user.id).then((data) => {
+    SetRepository.getSet(setId, userId).then((data) => {
       if (!cancelled) setFetchedSet(data ?? null);
     });
     return () => { cancelled = true; };
-  }, [setId, user?.id, sets]);
+  }, [setId, userId, sets]);
 
   useEffect(() => {
     if (user && setId) {

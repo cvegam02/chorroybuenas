@@ -11,7 +11,7 @@ interface DBInstance {
   db: IDBDatabase | null;
 }
 
-let dbInstance: DBInstance = { db: null };
+const dbInstance: DBInstance = { db: null };
 
 /**
  * Inicializa la base de datos IndexedDB

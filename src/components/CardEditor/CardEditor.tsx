@@ -84,6 +84,9 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
   const cardsToTransform = useMemo(() => cards.filter(c => !c.isAiGenerated), [cards]);
   const cardsToTransformIds = useMemo(() => new Set(cardsToTransform.map(c => c.id)), [cardsToTransform]);
   const isAIBatchProcessing = aiBatchStatus === 'processing';
+  // El reinicio al abrir el modal solo depende de que se abra; el estado del lote se lee por ref.
+  const isAIBatchProcessingRef = useRef(isAIBatchProcessing);
+  isAIBatchProcessingRef.current = isAIBatchProcessing;
   const noTokensForSingle = user && tokenBalance !== null && tokenBalance < 1;
   const noTokensForBulk = user && tokenBalance !== null && tokenBalance < cardsToTransform.length;
 
@@ -323,7 +326,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
   };
 
   useEffect(() => {
-    if (isAIModalOpen && aiBatchStatus !== 'processing') {
+    if (isAIModalOpen && !isAIBatchProcessingRef.current) {
       setAiBatchStatus('idle');
       setAiBatchCurrentIndex(0);
       setAiBatchTotalCount(0);
