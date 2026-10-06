@@ -42,7 +42,8 @@ select test.throws($$
   values ('00000000-0000-0000-0000-0000000000b2', '00000000-0000-0000-0000-00000000005e', 'Intrusa')
 $$, '42501', 'Beto no puede meter cartas en la lotería de Ana');
 
-update public.user_tokens set balance = 999;
+select test.throws($$ update public.user_tokens set balance = 999 $$, '42501',
+  'un usuario no puede hacer UPDATE de saldos');
 select test.throws($$
   insert into public.user_tokens (user_id, balance)
   values ('00000000-0000-0000-0000-0000000000b2', 999)
@@ -56,7 +57,7 @@ $$, 'Unauthorized', 'un usuario normal no puede regalarse tokens');
 select test.as_postgres();
 select test.is(
   (select balance from public.user_tokens where user_id = '00000000-0000-0000-0000-0000000000b2'),
-  7, 'el UPDATE de Beto no cambió ningún saldo');
+  7, 'el intento de Beto no cambió ningún saldo');
 
 -- Admin
 insert into public.admin_users (user_id) values ('00000000-0000-0000-0000-0000000000a1');

@@ -43,15 +43,23 @@ select test.is((select balance from public.user_tokens where user_id = '00000000
 
 -- El usuario no puede escribir su saldo
 select test.as_user('00000000-0000-0000-0000-000000000011');
-update public.user_tokens set balance = 999 where user_id = '00000000-0000-0000-0000-000000000011';
 select test.throws($$
   insert into public.user_tokens (user_id, balance)
   values ('00000000-0000-0000-0000-000000000011', 999)
   on conflict (user_id) do update set balance = 999
 $$, '42501', 'el usuario no puede hacer upsert de su saldo');
-delete from public.user_tokens where user_id = '00000000-0000-0000-0000-000000000011';
+select test.throws($$ delete from public.user_tokens where user_id = '00000000-0000-0000-0000-000000000011' $$,
+  '42501', 'el usuario no puede borrar su fila de saldo');
 select test.throws($$ select public.get_initial_tokens() $$,
   '42501', 'el usuario no puede ejecutar get_initial_tokens directamente');
+
+select test.is((select count(*)::int from public.user_tokens), 1, 'el usuario solo ve su propia fila de saldo');
+select test.throws($$ update public.user_tokens set balance = 1 $$, '42501',
+  'el usuario no tiene permiso de UPDATE sobre la tabla de saldos');
+
+select test.as_anon();
+select test.is((select count(*)::int from public.user_tokens), 0, 'un visitante no ve ningún saldo');
+select test.throws($$ delete from public.user_tokens $$, '42501', 'un visitante no puede borrar saldos');
 
 select test.as_postgres();
 select test.is((select balance from public.user_tokens where user_id = '00000000-0000-0000-0000-000000000011'),
