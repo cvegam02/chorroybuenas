@@ -51,21 +51,34 @@ select au.id, public.get_initial_tokens(), now()
 from auth.users au
 where not exists (select 1 from public.user_tokens ut where ut.user_id = au.id);
 
--- Quitar cualquier policy de user_tokens creada fuera de las migraciones (p. ej. desde el dashboard).
+-- Rehacer las policies de user_tokens desde cero. No se filtra por nombre: las bases creadas
+-- a mano tienen policies con otros nombres (p. ej. "Service role can manage credits", que era
+-- FOR ALL TO public USING (true) y dejaba a cualquiera leer y modificar todos los saldos).
 do $$
 declare
   r record;
 begin
   for r in
-    select policyname from pg_policies
+    select policyname, cmd, roles::text as roles, qual
+    from pg_policies
     where schemaname = 'public' and tablename = 'user_tokens'
-      and policyname not in (
-        'Users can see their own tokens',
-        'Service role can manage tokens',
-        'Admins can read all user_tokens'
-      )
   loop
-    raise notice 'Eliminando policy no esperada en user_tokens: %', r.policyname;
+    raise notice 'Reemplazando policy de user_tokens: % (% a %, using %)', r.policyname, r.cmd, r.roles, r.qual;
     execute format('drop policy %I on public.user_tokens', r.policyname);
   end loop;
 end $$;
+
+alter table public.user_tokens enable row level security;
+
+create policy "Users can see their own tokens" on public.user_tokens
+  for select using (auth.uid() = user_id);
+
+create policy "Admins can read all user_tokens" on public.user_tokens
+  for select using (public.is_admin());
+
+-- service_role ya ignora RLS; la policy solo deja explícito quién escribe.
+create policy "Service role can manage tokens" on public.user_tokens
+  for all to service_role using (true) with check (true);
+
+-- El navegador solo lee su saldo: quitar también los permisos de escritura de la tabla.
+revoke insert, update, delete, truncate on public.user_tokens from anon, authenticated;

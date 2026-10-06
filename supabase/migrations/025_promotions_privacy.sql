@@ -1,8 +1,20 @@
 -- Los códigos promocionales dejan de ser legibles con la anon key.
 -- La página de compra usa un resumen público (sin códigos) y valida cada código en el servidor.
 
-drop policy if exists "Anyone can read active promotions" on public.promotions;
-drop policy if exists "Admins can read promotions" on public.promotions;
+-- Quitar toda policy de lectura de promotions, se llame como se llame, antes de crear la de admins.
+do $$
+declare
+  r record;
+begin
+  for r in
+    select policyname from pg_policies
+    where schemaname = 'public' and tablename = 'promotions' and cmd in ('SELECT', 'ALL')
+  loop
+    raise notice 'Reemplazando policy de lectura de promotions: %', r.policyname;
+    execute format('drop policy %I on public.promotions', r.policyname);
+  end loop;
+end $$;
+
 create policy "Admins can read promotions" on public.promotions
   for select using (public.is_admin());
 
