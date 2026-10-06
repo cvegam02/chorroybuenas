@@ -85,41 +85,51 @@ Como desarrollador, quiero que `npm run lint` funcione y esté en verde, para qu
 
 ---
 
-## CYB-203 — CI que valida antes de desplegar
+## CYB-203 — Verificación automática antes de publicar
 
 - **Tipo:** Tarea técnica
 - **Prioridad:** Alta
-- **Estado:** En revisión — workflow actualizado (commit `fac09f0`); falta verlo correr en GitHub tras el primer push
+- **Estado:** En revisión — reescrita el 2026-10-06 al pasar el despliegue a Vercel (FEAT-13). Workflow `ci.yml` y comando de build de Vercel listos; falta verlos correr tras el primer push
 - **Findings:** H9, L4
 - **Plan:** Task 2, Step 7
 - **Depende de:** CYB-201, CYB-202
 
 ### Descripción
 
-Como dueño del proyecto, quiero que el sitio no se despliegue si el código no pasa typecheck, lint y tests, para no publicar a producción un cambio roto.
+Como dueño del proyecto, quiero que el sitio no se publique si el código no pasa typecheck, lint y tests, para no llevar a producción un cambio roto.
+
+El despliegue ya no lo hace GitHub Actions sino Vercel. La verificación queda en dos lugares: el build de Vercel corre typecheck, lint y tests unitarios antes de compilar, y GitHub Actions corre eso mismo más los tests de base de datos, que necesitan Docker.
 
 ### Criterios de aceptación
 
-- [x] El workflow `deploy.yml` corre typecheck, lint y tests con cobertura antes del build.
-- [ ] Si cualquiera de los tres falla, el job `deploy` no se ejecuta.
+- [x] El workflow `ci.yml` corre typecheck, lint, tests con cobertura, tests de base de datos y build en cada PR y en cada push a `main` y `dev`.
+- [x] El workflow no despliega nada ni usa secrets.
+- [x] El build de Vercel ejecuta `npm run verify` (typecheck, lint y tests unitarios) antes de `npm run build`.
 - [x] El workflow usa Node 20.
+- [ ] Si `npm run verify` falla en Vercel, el deployment queda en error y el sitio publicado no cambia.
+- [ ] La protección de rama de `main` exige el check `verify` de GitHub Actions para poder fusionar.
 
 ### Escenarios
 
 **Escenario 1: push sano a main**
 - Dado un commit que pasa todas las validaciones
-- Cuando se hace push a `main`
-- Entonces el workflow valida, compila y despliega a GitHub Pages
+- Cuando se hace merge a `main`
+- Entonces GitHub Actions termina en verde y Vercel publica en producción
 
-**Escenario 2: push con un test roto**
+**Escenario 2: commit con un test unitario roto**
 - Dado un commit con un test que falla
-- Cuando se hace push a `main`
-- Entonces el workflow se detiene en "Unit tests" y el sitio publicado no cambia
+- Cuando llega a `main`
+- Entonces el build de Vercel falla en `npm run verify` y el sitio publicado no cambia
 
-**Escenario 3: push con error de tipos**
-- Dado un commit con un error de TypeScript
-- Cuando se hace push a `main`
-- Entonces el workflow se detiene en "Typecheck" y no despliega
+**Escenario 3: PR con error de tipos**
+- Dado un PR con un error de TypeScript
+- Cuando se abre el PR
+- Entonces GitHub Actions falla en "Typecheck" y, con la protección de rama activa, no se puede fusionar
+
+**Escenario 4: PR que rompe una política RLS**
+- Dado un PR con una migración que deja a un usuario escribir su saldo
+- Cuando se abre el PR
+- Entonces GitHub Actions falla en "Database tests" (Vercel no corre estos tests)
 
 ---
 

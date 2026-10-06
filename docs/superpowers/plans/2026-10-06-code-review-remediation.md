@@ -76,6 +76,8 @@ Hallazgos nuevos encontrados al preparar el plan (se arreglan en el task indicad
 
 - **2026-10-06 — Task 15 (pasos locales).** El orden de despliegue y la tabla de secrets quedaron en `docs/ENTORNOS_DEV_PROD.md` (sección 10 nueva). `credit-payment-on-return` pasa a `verify_jwt = false` en `config.toml`, igual que las otras funciones que llama el navegador: valida el JWT ella misma y necesita responder al preflight. Los pasos 4 a 6 del Task 15 (despliegue en dev y prod) no se ejecutaron: modifican entornos reales y requieren confirmación de Carlos. Solo existe `.env` en la máquina (no hay `.env.production`) y no hay proyecto enlazado en el CLI: falta confirmar si dev y prod son proyectos distintos.
 
+- **2026-10-06 — El frontend se despliega con Vercel, no con GitHub Actions/Pages (decisión de Carlos).** Hay dos proyectos de Supabase: Production de Vercel (`main`) usa PROD, y Preview usa DEV, con la rama `dev` en `dev.chorroybuenas.com.mx`. Se agregó `vercel.json`, el workflow pasó a `ci.yml` (solo verifica) y se quitaron `public/CNAME`, `public/404.html` y el plugin `copy-404`. Esto reemplaza lo que el Task 2 Step 7 y el Task 15 decían sobre `deploy.yml`, GitHub Pages y ngrok. Guía: `docs/VERCEL_DEPLOY.md`; historias: `docs/features/FEAT-13-despliegue-en-vercel.md`. Costo si está mal: mientras no se haga el corte de DNS, un merge a `main` ya no actualiza el sitio de GitHub Pages.
+
 ## Global Constraints
 
 - Trabajar en la rama `fix/code-review-remediation` creada desde `main`; nunca commitear directo a `main`.

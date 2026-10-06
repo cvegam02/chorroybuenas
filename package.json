@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:db": "bash scripts/test-db.sh",
+    "verify": "npm run typecheck && npm run lint && npm run test:coverage",
     "preview": "vite preview",
     "deploy:functions": "dotenv -e .env -- npx supabase functions deploy create-payment-preference",
     "deploy:functions:all": "npx supabase functions deploy create-payment-preference && npx supabase functions deploy webhook-mercadopago && npx supabase functions deploy credit-payment-on-return && npx supabase functions deploy transform-loteria",
@@ -47,5 +48,8 @@
     "typescript": "^5.2.2",
     "vite": "^5.0.8",
     "vitest": "^2.1.9"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

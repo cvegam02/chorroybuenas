@@ -20,6 +20,7 @@ El detalle técnico de implementación (código, migraciones, tests) está en [`
 | FEAT-10 Avatar de perfil | [FEAT-10-avatar-de-perfil.md](FEAT-10-avatar-de-perfil.md) | Media | CYB-1001 a CYB-1002 | M7 |
 | FEAT-11 Mantenibilidad | [FEAT-11-mantenibilidad.md](FEAT-11-mantenibilidad.md) | Baja | CYB-1101 a CYB-1105 | L1, L2, L3 |
 | FEAT-12 Despliegue y verificación | [FEAT-12-despliegue-y-verificacion.md](FEAT-12-despliegue-y-verificacion.md) | Alta | CYB-1201 a CYB-1203 | — |
+| FEAT-13 Despliegue en Vercel | [FEAT-13-despliegue-en-vercel.md](FEAT-13-despliegue-en-vercel.md) | Alta | CYB-1301 a CYB-1304 | — |
 
 ## Orden sugerido
 
@@ -28,8 +29,9 @@ El detalle técnico de implementación (código, migraciones, tests) está en [`
 3. FEAT-03, FEAT-04, FEAT-05 (base de datos; lo que toca dinero).
 4. FEAT-06, FEAT-07, FEAT-08, FEAT-09 (edge functions y cliente).
 5. FEAT-10.
-6. FEAT-12 (despliegue de todo lo anterior).
-7. FEAT-11.
+6. FEAT-13 (Vercel: proyecto, entorno de dev y dominio).
+7. FEAT-12 (despliegue de todo lo anterior, primero en dev).
+8. FEAT-11.
 
 ## Formato de cada historia
 

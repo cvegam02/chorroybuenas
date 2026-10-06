@@ -4,7 +4,7 @@
 
 **Objetivo:** llevar los cambios a dev y a producción en un orden que no rompa compras ni cobros, y comprobar de punta a punta que funcionan.
 
-**Contexto:** los cambios tocan base de datos, secrets, edge functions y frontend. El orden importa: si el frontend nuevo llega antes que las funciones, o las funciones antes que las migraciones, hay errores visibles para el usuario. Todos los pasos de esta feature modifican entornos reales y requieren confirmación de Carlos.
+**Contexto:** el frontend se publica con Vercel (FEAT-13): `dev.chorroybuenas.com.mx` contra Supabase DEV y `chorroybuenas.com.mx` contra Supabase PROD. Los cambios tocan base de datos, secrets, edge functions y frontend. El orden importa: si el frontend nuevo llega antes que las funciones, o las funciones antes que las migraciones, hay errores visibles para el usuario. Todos los pasos de esta feature modifican entornos reales y requieren confirmación de Carlos.
 
 ---
 
@@ -52,7 +52,7 @@ Como desarrollador, quiero que los secrets nuevos estén documentados y que la c
 - **Prioridad:** Alta
 - **Estado:** Bloqueada — requiere la confirmación de Carlos para modificar el entorno de dev, y antes: revocar el token (CYB-101), confirmar cuál es el proyecto de dev y correr las consultas previas. La compuerta local (typecheck, lint, 248 tests, 86 aserciones de BD, build) está en verde.
 - **Plan:** Task 15, Steps 4–5
-- **Depende de:** CYB-1201, CYB-305, CYB-403 y todas las historias de FEAT-03 a FEAT-10
+- **Depende de:** CYB-1201, CYB-305, CYB-403, CYB-1302, CYB-1303 y todas las historias de FEAT-03 a FEAT-10
 - **Responsable:** Carlos confirma cada paso
 
 ### Descripción
@@ -118,7 +118,7 @@ Como dueño del proyecto, quiero validar todo el cambio en dev con pagos de prue
 - **Prioridad:** Alta
 - **Estado:** Bloqueada — depende de CYB-1202
 - **Plan:** Task 15, Step 6 y sección "Cierre"
-- **Depende de:** CYB-1202
+- **Depende de:** CYB-1202, CYB-1304
 - **Responsable:** Carlos confirma cada paso
 
 ### Descripción
@@ -129,10 +129,10 @@ Como dueño del proyecto, quiero publicar los cambios en producción sin interru
 
 - [ ] Se corrieron en prod las consultas previas de pagos duplicados y saldos negativos, y se corrigieron los casos encontrados.
 - [ ] Se anotó cuántos usuarios recibirán tokens iniciales por el backfill.
-- [ ] El orden fue: migraciones → secrets → edge functions → merge del PR (frontend).
+- [ ] El orden fue: migraciones → secrets → edge functions → merge a `main` (Vercel publica el frontend).
 - [ ] En prod no existe `MP_USE_SANDBOX_CHECKOUT` y `ALLOWED_ORIGINS` contiene el dominio con y sin `www`.
 - [ ] `MERCADOPAGO_WEBHOOK_SECRET` corresponde a la aplicación productiva de Mercado Pago.
-- [ ] El PR pasó typecheck, lint, tests y build en CI antes del merge.
+- [ ] El PR pasó typecheck, lint, tests y build en GitHub Actions antes del merge, y el deployment de Vercel quedó en Ready.
 - [ ] Se repitieron en prod las pruebas de registro, transformación, llamada directa sin saldo, RPC eliminada, CORS y códigos ocultos.
 - [ ] Se hizo una compra real mínima y se verificó una sola acreditación.
 - [ ] Los logs de las cuatro funciones se revisaron durante la primera hora.

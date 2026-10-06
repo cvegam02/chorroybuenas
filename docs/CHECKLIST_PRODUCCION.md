@@ -4,14 +4,17 @@ Usa esta lista para verificar que todo está listo para producción.
 
 ---
 
-## 1. GitHub (ya hecho según comentaste)
+## 1. Vercel
 
-- [ ] **Secrets** en Settings → Secrets and variables → Actions:
+Guía completa: [VERCEL_DEPLOY.md](VERCEL_DEPLOY.md).
+
+- [ ] **Variables de entorno** del entorno Production (Settings → Environment Variables):
   - `VITE_SUPABASE_URL` = URL del proyecto PROD (ej. `https://xxx.supabase.co`)
   - `VITE_SUPABASE_ANON_KEY` = anon key del proyecto PROD
   - `VITE_APP_URL` = `https://chorroybuenas.com.mx`
-- [ ] Merge a `main` para que se dispare el deploy (o workflow manual)
-- [ ] GitHub Pages: custom domain `chorroybuenas.com.mx` configurado (Settings → Pages → Custom domain)
+- [ ] Dominios `chorroybuenas.com.mx` y `www.chorroybuenas.com.mx` asignados a Production
+- [ ] Merge a `main` para que Vercel publique
+- [ ] GitHub Actions (`CI`) en verde en el commit que se publica
 
 ---
 
@@ -61,7 +64,7 @@ Usa esta lista para verificar que todo está listo para producción.
 
 | Acción | Cómo verificar |
 |--------|----------------|
-| Build | GitHub Actions → último workflow en verde |
+| Build | Vercel → último deployment de Production en estado Ready |
 | Deploy | Abrir `https://chorroybuenas.com.mx` |
 | Auth | Crear cuenta o iniciar sesión |
 | Imágenes | Subir una carta y ver que se guarda (Storage) |

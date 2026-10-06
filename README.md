@@ -37,31 +37,14 @@ npm run dev
 npm run build
 ```
 
-## Despliegue en GitHub Pages
+## Despliegue
 
-La aplicación está configurada para desplegarse automáticamente en GitHub Pages. Cada vez que hagas push a la rama `main`, GitHub Actions construirá y desplegará la aplicación automáticamente.
+El frontend se despliega en **Vercel**: cada push a `main` publica en producción (`https://chorroybuenas.com.mx`, contra el proyecto PROD de Supabase) y cada push a `dev` publica en `https://dev.chorroybuenas.com.mx` (contra el proyecto DEV).
 
-### Configuración inicial de GitHub Pages
+- Configuración de Vercel, variables por entorno y dominios: [docs/VERCEL_DEPLOY.md](docs/VERCEL_DEPLOY.md)
+- Migraciones, Edge Functions y secrets de Supabase: [docs/ENTORNOS_DEV_PROD.md](docs/ENTORNOS_DEV_PROD.md)
 
-1. Ve a la configuración de tu repositorio en GitHub
-2. Navega a **Settings** > **Pages**
-3. En **Source**, selecciona **GitHub Actions**
-4. Guarda los cambios
-
-### Dominio Personalizado
-
-La aplicación está configurada para usar el dominio personalizado **chorroybuenas.com.mx**.
-
-**Configuración del dominio:**
-- El archivo `public/CNAME` contiene el dominio personalizado
-- El base path está configurado como `/` (raíz) para el dominio personalizado
-- Asegúrate de configurar los registros DNS en GoDaddy según las instrucciones de GitHub Pages
-
-**Nota:** Puede tardar hasta 24 horas para que los cambios de DNS se propaguen completamente.
-
-La aplicación estará disponible en:
-- **Dominio personalizado:** `https://chorroybuenas.com.mx`
-- **GitHub Pages (alternativo):** `https://cvegam02.github.io/chorroybuenas/`
+GitHub Actions solo verifica el código (typecheck, lint y tests); no despliega.
 
 ### Optimización SEO
 

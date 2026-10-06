@@ -135,7 +135,7 @@ Como comprador, quiero que después de pagar siempre regrese al sitio de chorroy
 - [x] La URL de retorno enviada por el cliente solo se usa si su origen está en `ALLOWED_ORIGINS`.
 - [x] Se usa únicamente el origen; se descartan ruta y parámetros.
 - [x] Si no viene, no es una URL válida o no está permitida, se usa `APP_URL` o `https://chorroybuenas.com.mx`.
-- [ ] `ALLOWED_ORIGINS` está configurado en dev (localhost y ngrok) y en prod (dominio con y sin `www`).
+- [ ] `ALLOWED_ORIGINS` está configurado en dev (`dev.chorroybuenas.com.mx` y localhost) y en prod (dominio con y sin `www`).
 
 ### Escenarios
 
@@ -156,10 +156,10 @@ Como comprador, quiero que después de pagar siempre regrese al sitio de chorroy
 - Cuando el cliente envía `app_url: "javascript:alert(1)"`
 - Entonces se usa el sitio por defecto
 
-**Escenario 5: desarrollo con ngrok**
-- Dado que la URL de ngrok está en `ALLOWED_ORIGINS` de dev
+**Escenario 5: entorno de dev**
+- Dado que `https://dev.chorroybuenas.com.mx` está en `ALLOWED_ORIGINS` de dev
 - Cuando se compra desde esa URL
-- Entonces el retorno vuelve a ngrok
+- Entonces el retorno vuelve a `dev.chorroybuenas.com.mx`
 
 ---
 

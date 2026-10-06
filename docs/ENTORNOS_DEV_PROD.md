@@ -88,7 +88,7 @@ npx supabase link --project-ref <REF-DEV>
 npx supabase secrets set MERCADOPAGO_ACCESS_TOKEN=APP_USR-xxx-token-prueba
 npx supabase secrets set MERCADOPAGO_WEBHOOK_SECRET=<clave secreta de Webhooks, app de prueba>
 npx supabase secrets set MP_USE_SANDBOX_CHECKOUT=true
-npx supabase secrets set ALLOWED_ORIGINS=http://localhost:5173,https://tu-ngrok.ngrok-free.dev
+npx supabase secrets set ALLOWED_ORIGINS=https://dev.chorroybuenas.com.mx,http://localhost:5173
 npx supabase secrets set SERVICE_ROLE_KEY=<service_role_del_proyecto_dev>
 npx supabase secrets set REPLICATE_API_TOKEN=r8_xxx
 npx supabase secrets unset MP_USE_PRODUCTION_CHECKOUT
@@ -209,7 +209,7 @@ Así, cuando pagues con credenciales de prueba, MP notificará al webhook de dev
 | `MERCADOPAGO_ACCESS_TOKEN` | Secret Supabase | Token sandbox | Token producción |
 | `MERCADOPAGO_WEBHOOK_SECRET` | Secret Supabase | Clave de la app de prueba | Clave de la app productiva |
 | `MP_USE_SANDBOX_CHECKOUT` | Secret Supabase | `true` | No definir |
-| `ALLOWED_ORIGINS` | Secret Supabase | localhost y ngrok | Dominio con y sin `www` |
+| `ALLOWED_ORIGINS` | Secret Supabase | `dev.chorroybuenas.com.mx` y localhost | Dominio con y sin `www` |
 | `APP_URL` | Secret Supabase | Opcional | `https://chorroybuenas.com.mx` |
 | `SERVICE_ROLE_KEY` | Secret Supabase | Del proyecto dev | Del proyecto prod |
 | `REPLICATE_API_TOKEN` | Secret Supabase | Mismo (o distinto si quieres) | Mismo |
@@ -219,7 +219,7 @@ Así, cuando pagues con credenciales de prueba, MP notificará al webhook de dev
 ## 9. Seguridad
 
 - Nunca subas `.env` o `.env.production` al repo si contienen keys reales
-- Usa variables de entorno en la plataforma de deploy (Vercel, Netlify)
+- Las variables `VITE_*` de cada entorno se configuran en Vercel (ver `docs/VERCEL_DEPLOY.md`)
 - Mantén `SERVICE_ROLE_KEY` solo en Supabase Secrets, nunca en el frontend
 
 ---
@@ -232,7 +232,7 @@ Los cambios de base de datos, funciones y frontend dependen unos de otros. Despl
 2. **Migraciones**: `npx supabase db push`
 3. **Secrets**: los de la sección 4. Sin `ALLOWED_ORIGINS` el frontend no puede llamar a las funciones.
 4. **Edge Functions**: `npm run deploy:functions:all`
-5. **Frontend**: en DEV, `npm run dev`; en PROD, merge a `main` (GitHub Pages).
+5. **Frontend**: lo publica Vercel. En DEV, merge a `dev` (`dev.chorroybuenas.com.mx`) o `npm run dev` en local; en PROD, merge a `main`. Ver `docs/VERCEL_DEPLOY.md`.
 
 Por qué importa el orden:
 
