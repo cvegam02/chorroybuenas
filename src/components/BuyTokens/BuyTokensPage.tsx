@@ -9,6 +9,7 @@ import { usePromoCode } from '../../hooks/usePromoCode';
 import { MAX_CUSTOM_TOKENS, MIN_CUSTOM_TOKENS } from '../../utils/purchaseRules';
 import { createPaymentPreference, creditPaymentOnReturn } from '../../services/PurchaseService';
 import { TokenRepository } from '../../repositories/TokenRepository';
+import { readReturnedPaymentId } from '../../services/creditOnReturn';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
 import './BuyTokensPage.css';
@@ -56,7 +57,8 @@ export const BuyTokensPage: React.FC = () => {
     const success = searchParams.get('success');
     const cancel = searchParams.get('cancel');
     const pending = searchParams.get('pending');
-    const paymentId = searchParams.get('payment_id');
+    // No basta con get('payment_id'): el primero es nuestro marcador sin sustituir.
+    const paymentId = readReturnedPaymentId(searchParams);
 
     if (success === '1' && paymentId) {
       // Limpiar query params después de leerlos, para que recargar la página no repita el flujo
@@ -74,7 +76,8 @@ export const BuyTokensPage: React.FC = () => {
     } else if (cancel === '1') {
       setPaymentStatus('cancel');
       setSearchParams({}, { replace: true });
-    } else if (pending === '1' && paymentId) {
+    } else if (pending === '1' || success === '1') {
+      // Pago pendiente, o regreso de éxito sin identificador legible: los tokens llegan por el aviso.
       setPaymentStatus('pending');
       setSearchParams({}, { replace: true });
     }

@@ -9,6 +9,16 @@ export function isPaymentId(value: string | null | undefined): value is string {
 }
 
 /**
+ * Identificador del pago en la dirección de regreso de Mercado Pago.
+ * La dirección trae primero nuestro marcador sin sustituir (payment_id={payment_id}) y después
+ * los datos reales que agrega Mercado Pago (payment_id y collection_id): se toma el primero válido.
+ */
+export function readReturnedPaymentId(params: URLSearchParams): string | null {
+  const candidates = [...params.getAll('payment_id'), ...params.getAll('collection_id')];
+  return candidates.find(isPaymentId) ?? null;
+}
+
+/**
  * Lee la respuesta de la función credit-payment-on-return.
  * Solo es "acreditado" si el servidor lo confirma con 200 y credited: true. Cualquier otra
  * respuesta se trata como "en proceso": el aviso de Mercado Pago acreditará de todos modos,
