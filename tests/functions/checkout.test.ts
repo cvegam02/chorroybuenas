@@ -22,12 +22,22 @@ describe('resolveAppUrl', () => {
 });
 
 describe('modo de checkout', () => {
-  it('producción por default; sandbox solo con el flag en "true"', () => {
-    expect(resolveCheckoutMode(undefined)).toBe('production');
-    expect(resolveCheckoutMode('false')).toBe('production');
-    expect(resolveCheckoutMode('1')).toBe('production');
-    expect(resolveCheckoutMode('TRUE')).toBe('production');
-    expect(resolveCheckoutMode('true')).toBe('sandbox');
+  it('con token APP_USR usa el checkout normal; sandbox solo con el flag en "true"', () => {
+    expect(resolveCheckoutMode(undefined, 'APP_USR-123')).toBe('production');
+    expect(resolveCheckoutMode('false', 'APP_USR-123')).toBe('production');
+    expect(resolveCheckoutMode('1', 'APP_USR-123')).toBe('production');
+    expect(resolveCheckoutMode('TRUE', 'APP_USR-123')).toBe('production');
+    expect(resolveCheckoutMode('true', 'APP_USR-123')).toBe('sandbox');
+  });
+
+  it('con credenciales de prueba (token TEST-) usa siempre el checkout de sandbox', () => {
+    expect(resolveCheckoutMode(undefined, 'TEST-123')).toBe('sandbox');
+    expect(resolveCheckoutMode('false', 'TEST-123')).toBe('sandbox');
+  });
+
+  it('sin token conocido usa el checkout normal', () => {
+    expect(resolveCheckoutMode(undefined, '')).toBe('production');
+    expect(resolveCheckoutMode(undefined, undefined)).toBe('production');
   });
   it('elige el init_point según el modo', () => {
     const mp = { init_point: 'https://mp/prod', sandbox_init_point: 'https://mp/sandbox' };

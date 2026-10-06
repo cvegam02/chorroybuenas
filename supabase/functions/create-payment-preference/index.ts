@@ -93,7 +93,8 @@ Deno.serve(async (req) => {
       now: new Date(),
     });
 
-    const mode = resolveCheckoutMode(Deno.env.get('MP_USE_SANDBOX_CHECKOUT'));
+    const mode = resolveCheckoutMode(Deno.env.get('MP_USE_SANDBOX_CHECKOUT'), mpAccessToken);
+    console.log(`create-payment-preference: checkout ${mode}`);
     const preference = buildPreference({
       item: item.value,
       promotion,
