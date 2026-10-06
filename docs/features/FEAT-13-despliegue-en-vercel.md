@@ -108,7 +108,6 @@ La URL debe ser fija porque las Edge Functions solo aceptan orígenes de una lis
 - [ ] Existe la rama `dev` y Vercel publica cada push en `https://dev.chorroybuenas.com.mx`.
 - [ ] El secret `ALLOWED_ORIGINS` de Supabase DEV incluye `https://dev.chorroybuenas.com.mx` y `http://localhost:5173`.
 - [ ] En Supabase DEV → Authentication → URL Configuration, el Site URL es el dominio de dev y las Redirect URLs incluyen `https://dev.chorroybuenas.com.mx/**` y `http://localhost:5173/**`.
-- [ ] Supabase DEV tiene `MP_USE_SANDBOX_CHECKOUT=true`.
 - [ ] El inicio de sesión con Google funciona en el dominio de dev.
 
 ### Escenarios

@@ -95,6 +95,32 @@ describe('findApprovedPayment', () => {
     expect(r.ok && r.value.preferenceId).toBe('pref-2');
   });
 
+  it('si el pago no trae la preferencia, la obtiene de su orden', async () => {
+    const payment = { ...approvedPayment, metadata: {}, order: { id: 45033499031, type: 'mercadopago' } };
+    const { d, calls } = deps({
+      '/v1/payments/555': payment,
+      '/merchant_orders/45033499031': { preference_id: 'pref-de-la-orden', external_reference: USER },
+    });
+    const r = await findApprovedPayment(d, { topic: 'payment', id: '555' });
+    expect(r.ok && r.value.preferenceId).toBe('pref-de-la-orden');
+    expect(r.ok && r.value.paymentId).toBe('555');
+    expect(calls).toEqual(['/v1/payments/555', '/merchant_orders/45033499031']);
+  });
+
+  it('si el pago trae la preferencia no consulta la orden', async () => {
+    const { d, calls } = deps({ '/v1/payments/555': { ...approvedPayment, order: { id: 1 } } });
+    await findApprovedPayment(d, { topic: 'payment', id: '555' });
+    expect(calls).toEqual(['/v1/payments/555']);
+  });
+
+  it('pago sin preferencia y con una orden que no existe o no es válida', async () => {
+    const { d } = deps({ '/v1/payments/555': { ...approvedPayment, metadata: {}, order: { id: 777 } } });
+    expect(await findApprovedPayment(d, { topic: 'payment', id: '555' })).toEqual({ ok: false, reason: 'missing_reference' });
+    const { d: d2, calls } = deps({ '/v1/payments/555': { ...approvedPayment, metadata: {}, order: { id: '../x' } } });
+    expect(await findApprovedPayment(d2, { topic: 'payment', id: '555' })).toEqual({ ok: false, reason: 'missing_reference' });
+    expect(calls).toEqual(['/v1/payments/555']);
+  });
+
   it('pago pendiente: no hay nada que acreditar', async () => {
     const { d } = deps({ '/v1/payments/555': { ...approvedPayment, status: 'pending' } });
     expect(await findApprovedPayment(d, { topic: 'payment', id: '555' })).toEqual({ ok: false, reason: 'not_approved', status: 'pending' });
@@ -149,7 +175,18 @@ describe('findApprovedPayment', () => {
 
   it('merchant_order sin pago aprobado ni tras el reintento', async () => {
     const { d } = deps({ '/merchant_orders/987': { payments: [] } });
-    expect(await findApprovedPayment(d, { topic: 'merchant_order', id: '987' })).toEqual({ ok: false, reason: 'not_approved' });
+    expect(await findApprovedPayment(d, { topic: 'merchant_order', id: '987' }))
+      .toEqual({ ok: false, reason: 'not_approved', status: 'sin_pagos' });
+  });
+
+  it('merchant_order con pagos rechazados: informa estado y motivo de cada uno', async () => {
+    const order = { payments: [
+      { id: 1, status: 'rejected', status_detail: 'cc_rejected_high_risk' },
+      { id: 2, status: 'in_process' },
+    ] };
+    const { d } = deps({ '/merchant_orders/987': order });
+    expect(await findApprovedPayment(d, { topic: 'merchant_order', id: '987' }))
+      .toEqual({ ok: false, reason: 'not_approved', status: 'rejected/cc_rejected_high_risk, in_process/-' });
   });
 
   it('merchant_order inexistente', async () => {

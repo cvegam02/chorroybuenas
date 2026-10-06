@@ -81,6 +81,8 @@ Hallazgos nuevos encontrados al preparar el plan (se arreglan en el task indicad
 
 - **2026-10-06 — Despliegue en DEV.** Las bases no tienen historial de migraciones (`supabase_migrations.schema_migrations` no existe): `supabase db push` intentaría correr las 26 migraciones, así que las 022–025 se aplicaron una por una, cada una en su transacción, por la Management API, tras respaldar saldos, policies y funciones. Las funciones se desplegaron con `--use-api` (sin Docker, por espacio en disco). Antes de aplicar se corrigieron las migraciones 024 y 025 para no depender del nombre de las policies (PR #7). No se borró `MP_USE_PRODUCTION_CHECKOUT` de DEV hasta comprobar que el checkout de sandbox funciona. Pendiente: registrar el historial de migraciones en ambas bases para poder volver a usar `db push`.
 
+- **2026-10-06 — El checkout vuelve a comportarse como antes (corrige el Task 7/9).** En la prueba real en DEV, forzar `sandbox_init_point` hizo fallar el checkout de Mercado Pago. Ahora se usa `init_point` por defecto en todos los entornos y no se envía `payer`, que es lo que hacía en la práctica el código original; `MP_USE_SANDBOX_CHECKOUT=true` queda solo como opción explícita. Costo si está mal: ninguno respecto al comportamiento anterior a la remediación.
+
 ## Global Constraints
 
 - Trabajar en la rama `fix/code-review-remediation` creada desde `main`; nunca commitear directo a `main`.

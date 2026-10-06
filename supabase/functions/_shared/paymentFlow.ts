@@ -35,7 +35,7 @@ export type SkipReason =
 export type Outcome<T> = { ok: true; value: T } | { ok: false; reason: SkipReason; status?: string };
 
 interface MerchantOrder {
-  payments?: Array<{ id: number | string; status?: string }>;
+  payments?: Array<{ id: number | string; status?: string; status_detail?: string }>;
   external_reference?: string | null;
   preference_id?: string | null;
 }
@@ -105,7 +105,11 @@ export async function findApprovedPayment(
     }
     if (!order) return { ok: false, reason: 'payment_not_found' };
     const approved = (order.payments ?? []).find((p) => p.status === 'approved');
-    if (!approved) return { ok: false, reason: 'not_approved' };
+    if (!approved) {
+      // Estado y motivo de cada intento de pago, para poder diagnosticar un rechazo desde los logs.
+      const attempts = (order.payments ?? []).map((p) => `${p.status ?? '?'}/${p.status_detail ?? '-'}`);
+      return { ok: false, reason: 'not_approved', status: attempts.join(', ') || 'sin_pagos' };
+    }
     paymentId = String(approved.id);
     payment = approved as Record<string, unknown>;
     externalReference = asString(order.external_reference);
@@ -122,6 +126,15 @@ export async function findApprovedPayment(
     preferenceId =
       asString((found.metadata as { preference_id?: unknown } | undefined)?.preference_id) ??
       asString(found.preference_id);
+    if (!preferenceId) {
+      // Los pagos de Checkout Pro no traen la preferencia, pero sí su orden: se toma de ahí.
+      // Sin esto solo la notificación de merchant_order podría acreditar.
+      const orderId = asString((found.order as { id?: unknown } | undefined)?.id);
+      if (orderId && MP_ID_RE.test(orderId)) {
+        const order = await deps.mpGet<MerchantOrder>(`/merchant_orders/${orderId}`);
+        preferenceId = asString(order?.preference_id);
+      }
+    }
   }
 
   if (!externalReference || !preferenceId) return { ok: false, reason: 'missing_reference' };

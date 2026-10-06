@@ -69,46 +69,46 @@ Como dueño del negocio, quiero que la función rechace solicitudes de compra ma
 
 ---
 
-## CYB-602 — Modo sandbox o producción explícito
+## CYB-602 — Checkout de Mercado Pago igual en todos los entornos
 
 - **Tipo:** Bug
 - **Prioridad:** Media
-- **Estado:** En revisión — implementado y probado; faltan los secrets: `MP_USE_SANDBOX_CHECKOUT=true` en dev y eliminar `MP_USE_PRODUCTION_CHECKOUT` en ambos
+- **Estado:** En revisión — reescrita el 2026-10-06 tras la prueba en DEV: forzar el checkout de sandbox hizo fallar el pago con "Oh, no, algo salió mal". Falta que Carlos repita la compra de prueba en DEV
 - **Finding:** M1
 - **Plan:** Task 7 (`checkout.ts`), Task 9, Task 15
 - **Depende de:** CYB-201
 
 ### Descripción
 
-Como dueño del negocio, quiero que el checkout sea de producción salvo que yo indique lo contrario, para que un secret faltante no mande a clientes reales al sandbox.
+Como dueño del negocio, quiero que el checkout funcione igual en dev y en producción, y que un secret faltante no cambie a dónde se manda al comprador.
 
-Hoy `isTestMode` es verdadero siempre (los tokens de producción también empiezan con `APP_USR-`), por lo que nunca se envía el correo del comprador, y se prefiere el `sandbox_init_point` si no existe un secret.
+El código original decidía el modo con una condición que siempre era verdadera (`isTestMode`), así que en la práctica nunca enviaba el correo del comprador y usaba el checkout normal (`init_point`) cuando existía el secret `MP_USE_PRODUCTION_CHECKOUT`. Ese es el comportamiento que funcionaba en DEV y en PROD, y es el que se conserva: lo que se elimina es la condición engañosa y el secret.
 
 ### Criterios de aceptación
 
-- [x] El modo es producción por defecto.
-- [x] El modo es sandbox solo si `MP_USE_SANDBOX_CHECKOUT` vale exactamente `true`.
-- [x] En producción se usa `init_point` y se envía el correo del comprador a Mercado Pago.
-- [x] En sandbox se usa `sandbox_init_point` (o `init_point` si no viene) y no se envía el correo.
-- [ ] El secret `MP_USE_PRODUCTION_CHECKOUT` deja de usarse y se elimina de ambos entornos.
-- [ ] El entorno de dev tiene `MP_USE_SANDBOX_CHECKOUT=true`.
+- [x] Se usa `init_point` por defecto en todos los entornos; funciona con credenciales de prueba y de producción.
+- [x] `sandbox_init_point` solo se usa si `MP_USE_SANDBOX_CHECKOUT` vale exactamente `true`.
+- [x] No se envían datos del comprador (`payer`) a Mercado Pago, igual que antes.
+- [x] Ya no existe la condición `isTestMode` ni se lee `MP_USE_PRODUCTION_CHECKOUT`.
+- [ ] Ningún entorno define `MP_USE_SANDBOX_CHECKOUT`, y `MP_USE_PRODUCTION_CHECKOUT` se elimina de ambos.
+- [ ] Una compra con tarjeta de prueba se completa en DEV.
 
 ### Escenarios
 
-**Escenario 1: producción sin secret**
-- Dado que `MP_USE_SANDBOX_CHECKOUT` no está definido
+**Escenario 1: sin secrets de modo**
+- Dado que no existen `MP_USE_SANDBOX_CHECKOUT` ni `MP_USE_PRODUCTION_CHECKOUT`
 - Cuando un usuario inicia una compra
-- Entonces es redirigido al checkout de producción y la preferencia incluye su correo
+- Entonces es redirigido al `init_point` de la preferencia
 
-**Escenario 2: dev con sandbox**
+**Escenario 2: DEV con credenciales de prueba**
+- Dado el token de prueba de Mercado Pago en DEV
+- Cuando se paga con una tarjeta de prueba
+- Entonces el checkout carga, el pago se aprueba y se regresa al sitio de dev
+
+**Escenario 3: sandbox forzado**
 - Dado `MP_USE_SANDBOX_CHECKOUT=true`
 - Cuando un usuario inicia una compra
-- Entonces es redirigido al checkout de sandbox y la preferencia no incluye correo
-
-**Escenario 3: valor distinto de `true`**
-- Dado `MP_USE_SANDBOX_CHECKOUT=false` o `1`
-- Cuando un usuario inicia una compra
-- Entonces se usa producción
+- Entonces es redirigido al `sandbox_init_point`
 
 **Escenario 4: Mercado Pago no devuelve URL**
 - Dado que la respuesta de MP no trae `init_point`
