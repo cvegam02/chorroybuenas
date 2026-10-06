@@ -20,6 +20,7 @@ import {
 } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAvatarUrl } from '../../hooks/useAvatarUrl';
+import { useProfileEditing } from './useProfileEditing';
 import { useSetContext } from '../../contexts/SetContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import { SetRepository, LoteriaSet } from '../../repositories/SetRepository';
@@ -53,12 +54,20 @@ export const Dashboard = () => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isCreatingSet, setIsCreatingSet] = useState(false);
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [nameValue, setNameValue] = useState('');
-  const [isSavingName, setIsSavingName] = useState(false);
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const {
+    isEditingName,
+    setIsEditingName,
+    nameValue,
+    setNameValue,
+    isSavingName,
+    isUploadingAvatar,
+    avatarInputRef,
+    handleAvatarClick,
+    handleAvatarChange,
+    handleNameSave,
+    startNameEdit,
+  } = useProfileEditing({ updateProfile, uploadAvatar, t });
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
-  const avatarInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const sheetOpenedAtRef = useRef<number>(0);
 
@@ -151,43 +160,7 @@ export const Dashboard = () => {
     }
   };
 
-  const handleAvatarClick = () => avatarInputRef.current?.click();
-
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setIsUploadingAvatar(true);
-    try {
-      const avatarPath = await uploadAvatar(file);
-      await updateProfile({ avatarPath });
-    } catch (err) {
-      logger.error('Error uploading avatar:', err);
-      alert(t('dashboard.avatarUploadError'));
-    } finally {
-      setIsUploadingAvatar(false);
-      if (avatarInputRef.current) avatarInputRef.current.value = '';
-    }
-  };
-
-  const handleNameSave = async () => {
-    const trimmed = nameValue.trim();
-    if (!trimmed) return;
-    setIsSavingName(true);
-    try {
-      await updateProfile({ fullName: trimmed });
-      setIsEditingName(false);
-    } catch (err) {
-      logger.error('Error saving name:', err);
-      alert(t('dashboard.nameUpdateError'));
-    } finally {
-      setIsSavingName(false);
-    }
-  };
-
-  const handleNameEditStart = () => {
-    setNameValue(displayName);
-    setIsEditingName(true);
-  };
+  const handleNameEditStart = () => startNameEdit(displayName);
 
   return (
     <div className="dashboard">
