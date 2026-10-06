@@ -15,5 +15,5 @@
       "https://esm.sh/@supabase/supabase-js@2.39.3": ["node_modules/@supabase/supabase-js"]
     }
   },
-  "include": ["deno-shim.d.ts", "_shared/**/*.ts", "webhook-mercadopago/index.ts", "credit-payment-on-return/index.ts"]
+  "include": ["deno-shim.d.ts", "_shared/**/*.ts", "webhook-mercadopago/index.ts", "credit-payment-on-return/index.ts", "transform-loteria/index.ts"]
 }
