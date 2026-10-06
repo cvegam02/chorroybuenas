@@ -93,14 +93,13 @@ Deno.serve(async (req) => {
       now: new Date(),
     });
 
-    const mode = resolveCheckoutMode(Deno.env.get('MP_USE_SANDBOX_CHECKOUT'));
+    const mode = resolveCheckoutMode(Deno.env.get('MP_USE_SANDBOX_CHECKOUT'), mpAccessToken);
+    console.log(`create-payment-preference: checkout ${mode}`);
     const preference = buildPreference({
       item: item.value,
       promotion,
       userId: user.id,
-      userEmail: user.email ?? null,
       appUrl: resolveAppUrl(requestedAppUrl, allowedOrigins, Deno.env.get('APP_URL') || DEFAULT_APP_URL),
-      mode,
       notificationUrl: `${supabaseUrl}/functions/v1/webhook-mercadopago`,
     });
 

@@ -37,9 +37,7 @@ describe('buildPreference', () => {
     item: { packId: 'pack-1', baseTokens: 10, bonusTokens: 2, amountCents: 2000 },
     promotion: null,
     userId: 'user-1',
-    userEmail: 'ana@test.dev',
     appUrl: 'https://chorroybuenas.com.mx',
-    mode: 'production' as const,
     notificationUrl: 'https://x.supabase.co/functions/v1/webhook-mercadopago',
   };
 
@@ -77,10 +75,8 @@ describe('buildPreference', () => {
     });
   });
 
-  it('en producción envía el correo del comprador; en sandbox no', () => {
-    expect(buildPreference(base).payer).toEqual({ email: 'ana@test.dev' });
-    expect(buildPreference({ ...base, mode: 'sandbox' }).payer).toBeUndefined();
-    expect(buildPreference({ ...base, userEmail: null }).payer).toBeUndefined();
+  it('no envía datos del comprador: Mercado Pago los pide en su checkout', () => {
+    expect('payer' in buildPreference(base)).toBe(false);
   });
 
   it('convierte centavos a pesos sin perder decimales', () => {

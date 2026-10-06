@@ -1,4 +1,3 @@
-import type { CheckoutMode } from './checkout.ts';
 import type { PreferenceMetadata } from './credit.ts';
 import { computePromotionBonus, type SelectedPromotion } from './promotions.ts';
 import { fail, type ParseResult } from './validation.ts';
@@ -53,9 +52,7 @@ export function buildPreference(input: {
   item: PurchaseItem;
   promotion: SelectedPromotion | null;
   userId: string;
-  userEmail: string | null;
   appUrl: string;
-  mode: CheckoutMode;
   notificationUrl: string;
 }) {
   const { item, userId, appUrl } = input;
@@ -89,8 +86,8 @@ export function buildPreference(input: {
         currency_id: 'MXN',
       },
     ],
-    // En sandbox MP rechaza el pago si el payer es una cuenta real; solo se envía en producción.
-    payer: input.mode === 'production' && input.userEmail ? { email: input.userEmail } : undefined,
+    // No se envía payer: con credenciales de prueba MP rechaza el checkout si el correo es de una
+    // cuenta real, y en producción el comprador se identifica en el propio checkout.
     back_urls: {
       success: `${appUrl}/comprar-tokens?success=1&payment_id={payment_id}`,
       failure: `${appUrl}/comprar-tokens?cancel=1`,

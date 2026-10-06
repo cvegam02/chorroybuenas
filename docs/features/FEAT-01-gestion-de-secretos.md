@@ -12,7 +12,7 @@
 
 - **Tipo:** Bug de seguridad
 - **Prioridad:** Crítica
-- **Estado:** Por hacer — bloqueada: requiere que Carlos revoque el token en el dashboard
+- **Estado:** Hecho — el token viejo responde "Unauthorized" (verificado el 2026-10-06) y hay uno nuevo en `.env`. Pendiente de Carlos: revisar los logs del proyecto por el tiempo que estuvo expuesto
 - **Finding:** C1
 - **Plan:** Task 1, Steps 1–3
 - **Depende de:** nada

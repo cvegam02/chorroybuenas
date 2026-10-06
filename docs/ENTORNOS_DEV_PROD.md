@@ -81,13 +81,12 @@ Los tokens de Mercado Pago y Replicate y la configuración de las funciones se g
 ### Proyecto DEV
 - Token de **prueba/sandbox** de Mercado Pago
 - Los pagos no son reales
-- `MP_USE_SANDBOX_CHECKOUT=true`: sin este secret el checkout es el de producción
+- No definir `MP_USE_SANDBOX_CHECKOUT`: el checkout normal (`init_point`) funciona con las credenciales de prueba
 
 ```bash
 npx supabase link --project-ref <REF-DEV>
 npx supabase secrets set MERCADOPAGO_ACCESS_TOKEN=APP_USR-xxx-token-prueba
 npx supabase secrets set MERCADOPAGO_WEBHOOK_SECRET=<clave secreta de Webhooks, app de prueba>
-npx supabase secrets set MP_USE_SANDBOX_CHECKOUT=true
 npx supabase secrets set ALLOWED_ORIGINS=https://dev.chorroybuenas.com.mx,http://localhost:5173
 npx supabase secrets set SERVICE_ROLE_KEY=<service_role_del_proyecto_dev>
 npx supabase secrets set REPLICATE_API_TOKEN=r8_xxx
@@ -97,7 +96,7 @@ npx supabase secrets unset MP_USE_PRODUCTION_CHECKOUT
 ### Proyecto PROD
 - Token de **producción** de Mercado Pago
 - Los pagos son reales
-- **No** definir `MP_USE_SANDBOX_CHECKOUT`: producción es el comportamiento por defecto
+- **No** definir `MP_USE_SANDBOX_CHECKOUT`
 
 ```bash
 npx supabase link --project-ref <REF-PROD>
@@ -115,7 +114,7 @@ npx supabase secrets unset MP_USE_PRODUCTION_CHECKOUT
 | Secret | Para qué sirve | Si falta |
 |--------|----------------|----------|
 | `ALLOWED_ORIGINS` | Lista blanca de orígenes para CORS y para la URL de retorno del pago. Separados por coma, sin diagonal final | El navegador bloquea las respuestas de compra, retorno e IA |
-| `MP_USE_SANDBOX_CHECKOUT` | `true` usa el checkout de prueba y no envía el correo del comprador | Se usa el checkout de producción |
+| `MP_USE_SANDBOX_CHECKOUT` | `true` fuerza la URL `sandbox_init_point` (heredada). No usar salvo que Mercado Pago lo pida: con ella el checkout de DEV falló con "Oh, no, algo salió mal" | Se usa `init_point`, que funciona con credenciales de prueba y de producción |
 | `MERCADOPAGO_WEBHOOK_SECRET` | Verifica la firma `x-signature` de las notificaciones | Las notificaciones se aceptan sin verificar la firma (el pago se consulta siempre en la API de Mercado Pago) |
 | `APP_URL` | URL de retorno cuando la que envía el frontend no está en la lista blanca | Se usa `https://chorroybuenas.com.mx` |
 | `MP_USE_PRODUCTION_CHECKOUT` | **Ya no se usa.** Borrarlo | — |
@@ -208,7 +207,7 @@ Así, cuando pagues con credenciales de prueba, MP notificará al webhook de dev
 | `VITE_APP_URL` | Frontend (.env) | ngrok | chorroybuenas.com.mx |
 | `MERCADOPAGO_ACCESS_TOKEN` | Secret Supabase | Token sandbox | Token producción |
 | `MERCADOPAGO_WEBHOOK_SECRET` | Secret Supabase | Clave de la app de prueba | Clave de la app productiva |
-| `MP_USE_SANDBOX_CHECKOUT` | Secret Supabase | `true` | No definir |
+| `MP_USE_SANDBOX_CHECKOUT` | Secret Supabase | No definir | No definir |
 | `ALLOWED_ORIGINS` | Secret Supabase | `dev.chorroybuenas.com.mx` y localhost | Dominio con y sin `www` |
 | `APP_URL` | Secret Supabase | Opcional | `https://chorroybuenas.com.mx` |
 | `SERVICE_ROLE_KEY` | Secret Supabase | Del proyecto dev | Del proyecto prod |

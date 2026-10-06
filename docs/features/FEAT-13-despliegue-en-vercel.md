@@ -53,7 +53,7 @@ Como desarrollador, quiero que el repositorio tenga todo lo que Vercel necesita 
 
 - **Tipo:** Tarea técnica
 - **Prioridad:** Alta
-- **Estado:** Por hacer
+- **Estado:** En revisión — proyecto de Vercel conectado y publicando `main` como Production (`chorroybuenas.vercel.app` usa Supabase PROD). Falta confirmar que las variables de Preview apuntan a DEV
 - **Depende de:** CYB-1301
 - **Responsable:** Carlos (requiere su cuenta de Vercel)
 
@@ -92,7 +92,7 @@ Como dueño del proyecto, quiero un proyecto de Vercel conectado al repositorio,
 
 - **Tipo:** Historia
 - **Prioridad:** Alta
-- **Estado:** Por hacer
+- **Estado:** En curso — rama `dev` creada; `ALLOWED_ORIGINS` y las Redirect URLs de Supabase DEV ya incluyen `dev.chorroybuenas.com.mx`. Falta asignar el dominio a la rama en Vercel y crear el CNAME en GoDaddy
 - **Depende de:** CYB-1302
 - **Responsable:** Carlos (DNS y configuración de Supabase DEV)
 - **Decisión a confirmar:** rama `dev` con el dominio `dev.chorroybuenas.com.mx`
@@ -108,7 +108,6 @@ La URL debe ser fija porque las Edge Functions solo aceptan orígenes de una lis
 - [ ] Existe la rama `dev` y Vercel publica cada push en `https://dev.chorroybuenas.com.mx`.
 - [ ] El secret `ALLOWED_ORIGINS` de Supabase DEV incluye `https://dev.chorroybuenas.com.mx` y `http://localhost:5173`.
 - [ ] En Supabase DEV → Authentication → URL Configuration, el Site URL es el dominio de dev y las Redirect URLs incluyen `https://dev.chorroybuenas.com.mx/**` y `http://localhost:5173/**`.
-- [ ] Supabase DEV tiene `MP_USE_SANDBOX_CHECKOUT=true`.
 - [ ] El inicio de sesión con Google funciona en el dominio de dev.
 
 ### Escenarios
