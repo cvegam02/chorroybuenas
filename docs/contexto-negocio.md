@@ -46,8 +46,8 @@ Cuando dos reglas choquen, o haya que decidir algo que no está escrito, se elig
   - **Clásico:** tableros de 4 × 4 (16 cartas).
   - **Kids:** tableros de 3 × 3 (9 cartas).
 - **Mínimo de cartas para generar tableros:**
-  - Kids: **15 cartas. DEFINIDO** (2026-10-06; ese mismo día se había confirmado en 12 y se subió a 15). El sitio todavía pide 12: está por corregirse.
-  - Clásico: **24 cartas. DEFINIDO** (2026-10-06; ese mismo día se había fijado en 20 y se subió a 24). La pantalla de cartas todavía pide 20 y la de tableros acepta 16: están por corregirse.
+  - Kids: **15 cartas. DEFINIDO** (2026-10-06; ese mismo día se había confirmado en 12 y se subió a 15).
+  - Clásico: **24 cartas. DEFINIDO** (2026-10-06; ese mismo día se había fijado en 20 y se subió a 24).
 - **Tableros:** se generan al azar con las cartas de la lotería. No se generan dos tableros iguales. _(confirmado el 2026-10-06)_
 - **Cantidad sugerida de tableros:** en Clásico, la que hace que cada carta aparezca unas 8 veces en total; en Kids, un tablero por cada 3 cartas. El usuario puede cambiarla. _(confirmado el 2026-10-06)_
 - **Al iniciar sesión**, lo que el visitante tenía guardado en su navegador se pasa a su cuenta, dentro de una lotería por defecto. _(confirmado el 2026-10-06)_
@@ -92,7 +92,7 @@ Cuando dos reglas choquen, o haya que decidir algo que no está escrito, se elig
   | 50 tokens | 20 | $100.00 MXN |
 
 - **Cantidad libre:** se puede comprar cualquier cantidad entre el mínimo y 500 tokens, a $2.00 MXN por token, sin tokens de regalo. _(confirmado el 2026-10-06)_
-- **Mínimo de compra: 5 tokens ($10.00 MXN). DEFINIDO** (2026-10-06). El sitio todavía deja comprar desde 1 token: está por corregirse.
+- **Mínimo de compra: 5 tokens ($10.00 MXN). DEFINIDO** (2026-10-06).
 - El precio siempre lo calcula el servidor con los datos de la base. **DEFINIDO** (2026-10-06)
 - Un pago aprobado acredita los tokens **una sola vez**, sin importar cuántas veces lo notifique Mercado Pago. **DEFINIDO** (2026-10-06)
 - No se acredita si el monto pagado es menor al esperado. **DEFINIDO** (2026-10-06)
@@ -206,13 +206,12 @@ Ninguno al 2026-10-06. Todas las reglas de este documento están confirmadas o d
 
 ## 17. Reglas definidas que el sitio todavía no cumple
 
-Decididas el 2026-10-06 y pendientes de construir. Cada una se convierte en una feature en `docs/features/`.
+Decididas el 2026-10-06 y pendientes de construir. Se construyen en las fases 2 y 3 de `plan-fases.md`.
+
+Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en producción: mínimo de 24 cartas en Clásico, mínimo de 15 en Kids, y mínimo de compra de 5 tokens.
 
 | Regla | Dónde está | Qué hace hoy el sitio |
 |---|---|---|
-| Mínimo de 24 cartas en Clásico | §4 | La pantalla de cartas pide 20 y la de tableros acepta 16 |
-| Mínimo de 15 cartas en Kids | §4 | Las dos pantallas piden 12 |
-| Mínimo de compra de 5 tokens | §8 | Deja comprar desde 1 token |
 | Descontar tokens ante reembolso o contracargo | §8 | No descuenta nada |
 | Registrar cada regalo de tokens | §7 | Solo sube el saldo, sin registro |
 | Avisar por correo de pago pendiente acreditado | §13 | No avisa |

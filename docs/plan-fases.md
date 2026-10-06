@@ -25,7 +25,7 @@ De las seis reglas que Carlos definió el 2026-10-06 y que el sitio todavía no 
 
 ## Fase 1 — Reglas que el sitio contradice hoy
 
-**Estado: ✅ completa en dev (2026-10-06); falta llevarla a producción** · Seguimiento: [`fases/fase-1.md`](fases/fase-1.md)
+**Estado: ✅ completa y en producción (2026-10-06)** · Seguimiento: [`fases/fase-1.md`](fases/fase-1.md)
 
 - **Por qué es la siguiente raíz:** son reglas ya decididas que el sitio incumple a la vista del usuario, y ninguna necesita construir nada nuevo por debajo: solo cambian límites y un paso del flujo de pago. No dependen de ninguna otra fase.
 - **Alcance:** que el sitio respete los mínimos de cartas de los dos modos y el mínimo de compra, y que el saldo aparezca en cuanto el usuario vuelve de pagar.
