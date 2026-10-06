@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { FaCoins } from 'react-icons/fa';
@@ -6,7 +6,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import { TokenPricingRepository, TokenPack, type PromoSummary } from '../../repositories/TokenPricingRepository';
 import { usePromoCode } from '../../hooks/usePromoCode';
-import { createPaymentPreference } from '../../services/PurchaseService';
+import { MAX_CUSTOM_TOKENS, MIN_CUSTOM_TOKENS } from '../../utils/purchaseRules';
+import { createPaymentPreference, creditPaymentOnReturn } from '../../services/PurchaseService';
+import { TokenRepository } from '../../repositories/TokenRepository';
+import { readReturnedPaymentId } from '../../services/creditOnReturn';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
 import './BuyTokensPage.css';
@@ -36,10 +39,11 @@ export const BuyTokensPage: React.FC = () => {
   const [promoSummary, setPromoSummary] = useState<PromoSummary>({ firstPurchasePercent: 0, hasCodePromos: false });
   const codePromoPercent = usePromoCode(promoCode, !!user);
   const [buyLoading, setBuyLoading] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<'success' | 'cancel' | 'pending' | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<'crediting' | 'success' | 'cancel' | 'pending' | null>(null);
+  const handledPaymentRef = useRef<string | null>(null);
 
-  const CUSTOM_MIN = 1;
-  const CUSTOM_MAX = 500;
+  const CUSTOM_MIN = MIN_CUSTOM_TOKENS;
+  const CUSTOM_MAX = MAX_CUSTOM_TOKENS;
 
   const showUsd = i18n.language?.startsWith('en') ?? false;
 
@@ -53,21 +57,40 @@ export const BuyTokensPage: React.FC = () => {
     const success = searchParams.get('success');
     const cancel = searchParams.get('cancel');
     const pending = searchParams.get('pending');
-    const paymentId = searchParams.get('payment_id');
+    // No basta con get('payment_id'): el primero es nuestro marcador sin sustituir.
+    const paymentId = readReturnedPaymentId(searchParams);
 
     if (success === '1' && paymentId) {
-      setPaymentStatus('success');
-      refreshBalance();
-      // Limpiar query params después de procesar
+      // Limpiar query params después de leerlos, para que recargar la página no repita el flujo
       setSearchParams({}, { replace: true });
+      // El efecto puede dispararse dos veces con los mismos parámetros: un pago se procesa una vez.
+      if (handledPaymentRef.current === paymentId) return;
+      handledPaymentRef.current = paymentId;
+
+      setPaymentStatus('crediting');
+      // Acreditar ahora, sin esperar al aviso de Mercado Pago (contexto-negocio §8).
+      creditPaymentOnReturn(paymentId).then((outcome) => {
+        // 'processing': el servidor aún no confirma el pago; llegará por el aviso de Mercado Pago.
+        setPaymentStatus(outcome === 'credited' ? 'success' : 'pending');
+      });
     } else if (cancel === '1') {
       setPaymentStatus('cancel');
       setSearchParams({}, { replace: true });
-    } else if (pending === '1' && paymentId) {
+    } else if (pending === '1' || success === '1') {
+      // Pago pendiente, o regreso de éxito sin identificador legible: los tokens llegan por el aviso.
       setPaymentStatus('pending');
       setSearchParams({}, { replace: true });
     }
-  }, [searchParams, setSearchParams, refreshBalance]);
+  }, [searchParams, setSearchParams]);
+
+  // Al terminar de acreditar, volver a pedir el saldo al servidor. Va en su propio efecto porque,
+  // al regresar del pago, la sesión del usuario suele cargarse después de que arranca la acreditación.
+  const userId = user?.id;
+  useEffect(() => {
+    if (!userId || (paymentStatus !== 'success' && paymentStatus !== 'pending')) return;
+    TokenRepository.invalidateBalance(userId);
+    refreshBalance();
+  }, [paymentStatus, userId, refreshBalance]);
 
   useEffect(() => {
     let cancelled = false;
@@ -196,6 +219,14 @@ export const BuyTokensPage: React.FC = () => {
 
   return (
     <div className="buy-tokens-page">
+      {paymentStatus === 'crediting' && (
+        <div className="buy-tokens-page__payment-message buy-tokens-page__payment-message--pending" role="status">
+          <div>
+            <h3>{t('buyTokens.paymentCrediting.title')}</h3>
+            <p>{t('buyTokens.paymentCrediting.message')}</p>
+          </div>
+        </div>
+      )}
       {paymentStatus === 'success' && (
         <div className="buy-tokens-page__payment-message buy-tokens-page__payment-message--success">
           <FaCoins />
@@ -371,7 +402,7 @@ export const BuyTokensPage: React.FC = () => {
                 aria-describedby="buy-tokens-custom-hint"
               />
               <p id="buy-tokens-custom-hint" className="buy-tokens-page__custom-hint">
-                {t('buyTokens.customAmountMin')} · {t('buyTokens.customAmountMax')}
+                {t('buyTokens.customAmountMin', { min: CUSTOM_MIN })} · {t('buyTokens.customAmountMax', { max: CUSTOM_MAX })}
               </p>
               <p className="buy-tokens-page__custom-price-per-token">
                 {t('buyTokens.pricePerToken')}: {formatPriceMxn(pricePerTokenCents)}

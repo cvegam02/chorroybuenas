@@ -15,12 +15,14 @@ Lista de trabajo abierta después de la remediación del code review y del paso 
 
 ## Flujo de trabajo
 
-1. Rama desde `dev` → PR hacia `dev` (GitHub Actions corre typecheck, lint, tests y tests de base de datos).
-2. Merge a `dev` → Vercel publica en `dev.chorroybuenas.com.mx`. Probar ahí.
-3. Si el cambio toca migraciones o edge functions, desplegarlas primero en DEV y, tras probar, en PROD **antes** de fusionar a `main`.
-4. PR de `dev` a `main` → Vercel publica en producción.
+La regla completa está en [`CLAUDE.md`](../CLAUDE.md), sección «Ramas: feature → dev → main». En corto:
 
-Antes de cualquier PR, en local: `npm run verify && npm run test:db && npm run build`.
+1. Rama `feature/<nombre>` desde `dev`. Nunca se trabaja directo en `dev` ni en `main`.
+2. Cuando está funcional, PR hacia `dev` → Vercel publica en `dev.chorroybuenas.com.mx`. Probar ahí.
+3. Si el cambio toca migraciones o edge functions, desplegarlas primero en DEV y, tras probar, en PROD **antes** de fusionar a `main`.
+4. Con lo probado y confirmado por Carlos, PR de `dev` a `main` → Vercel publica en producción.
+
+Antes de cualquier PR, en local: `npm run verify && npm run test:db`.
 
 ## Pendientes de Carlos (manuales)
 
@@ -32,6 +34,8 @@ Antes de cualquier PR, en local: `npm run verify && npm run test:db && npm run b
 - [ ] **Probar en el navegador** lo que solo se verificó con typecheck y build: subir un avatar (y que se actualice sin recargar), login con Google en `www.chorroybuenas.com.mx`, un PDF de tableros y uno de carta comparados con los de antes, y la transformación por lote con una foto que dispare el filtro de contenido.
 
 ## Pendientes de código
+
+> Desde el 2026-10-06 el trabajo de código se sigue en [`plan-fases.md`](plan-fases.md) y [`fases/`](fases/). Los puntos 1 y 2 de esta lista son ahora la fase 1; el punto 3 es parte de la fase 2. Las reglas de negocio de cada uno están en [`contexto-negocio.md`](contexto-negocio.md).
 
 Cada uno entra por `dev`, con tests primero.
 

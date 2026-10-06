@@ -7,7 +7,6 @@ import { useSetContext } from '../contexts/SetContext';
 import { CardRepository } from '../repositories/CardRepository';
 import { logger } from '../utils/logger';
 
-const MIN_CARDS = 20;
 /** Tiempo (ms) que el botón "Generar con IA" permanece deshabilitado tras añadir una carta (evita race con Supabase) */
 const SYNC_COOLDOWN_MS = 2500;
 
@@ -592,8 +591,6 @@ export const useCards = () => {
     }
   };
 
-  const hasMinimumCards = cards.length >= MIN_CARDS;
-
   return {
     cards,
     isLoading,
@@ -603,9 +600,7 @@ export const useCards = () => {
     updateCard,
     updateCards,
     clearCards,
-    hasMinimumCards,
     cardCount: cards.length,
-    minCards: MIN_CARDS,
     isCardRecentlySynced,
     sets,
     currentSetId,

@@ -1,5 +1,7 @@
 # Features — Remediación del code review
 
+> **Histórico.** Las features `FEAT-01` a `FEAT-13` documentan la remediación del 2026-10-06, ya construida y publicada, en un formato anterior. No se editan ni se usan como plantilla. El trabajo nuevo sigue el formato descrito en [`CLAUDE.md`](../../CLAUDE.md): las fases van en [`docs/fases/`](../fases/) y el trabajo suelto en esta carpeta, un archivo por feature.
+
 Backlog en formato de historias de usuario, derivado del code review del 2026-10-06. Cada archivo es una feature (épica) y contiene sus historias.
 
 Lo que sigue abierto después del despliegue está en [`docs/PENDIENTES.md`](../PENDIENTES.md).
