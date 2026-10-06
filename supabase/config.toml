@@ -8,6 +8,14 @@ verify_jwt = false
 [functions.transform-loteria]
 verify_jwt = false
 
+# Las funciones que llama el navegador validan el JWT ellas mismas (auth.getUser) y deben
+# responder al preflight OPTIONS, que no lleva Authorization: por eso verify_jwt = false.
+[functions.create-payment-preference]
+verify_jwt = false
+
+[functions.credit-payment-on-return]
+verify_jwt = false
+
 # Plantilla de correo de confirmación (registro)
 # Para proyectos hosted: copia el contenido de supabase/templates/confirmation.html al Dashboard → Authentication → Email Templates
 [auth.email.template.confirmation]
