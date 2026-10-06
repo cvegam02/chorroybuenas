@@ -19,6 +19,7 @@ import {
   FaTimes as FaTimesIcon
 } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAvatarUrl } from '../../hooks/useAvatarUrl';
 import { useSetContext } from '../../contexts/SetContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import { SetRepository, LoteriaSet } from '../../repositories/SetRepository';
@@ -88,6 +89,7 @@ export const Dashboard = () => {
   }, [t]);
 
   const userId = user?.id;
+  const avatarUrl = useAvatarUrl(user);
 
   useEffect(() => {
     if (!userId) return;
@@ -155,8 +157,8 @@ export const Dashboard = () => {
     if (!file) return;
     setIsUploadingAvatar(true);
     try {
-      const avatarUrl = await uploadAvatar(file);
-      await updateProfile({ avatarUrl });
+      const avatarPath = await uploadAvatar(file);
+      await updateProfile({ avatarPath });
     } catch (err) {
       console.error('Error uploading avatar:', err);
       alert(t('dashboard.avatarUploadError'));
@@ -210,9 +212,9 @@ export const Dashboard = () => {
                 <div className="dashboard__hero-avatar-placeholder">
                   <div className="dashboard__spinner dashboard__spinner--small" />
                 </div>
-              ) : user.user_metadata?.avatar_url ? (
+              ) : avatarUrl ? (
                 <img
-                  src={user.user_metadata.avatar_url}
+                  src={avatarUrl}
                   alt=""
                   className="dashboard__hero-avatar"
                 />
