@@ -1,6 +1,6 @@
 # Fase 1 — Reglas que el sitio contradice hoy
 
-**Estado: 🚧 en curso** (A1 construida el 2026-10-06, falta la demo)
+**Estado: 🚧 en curso** (A1 hecha el 2026-10-06; faltan A2 y B1)
 
 **Contexto.** El 2026-10-06 Carlos definió reglas que el sitio todavía no cumple (`contexto-negocio.md` §17). Tres de ellas se arreglan sin construir nada nuevo por debajo: el mínimo de cartas en Clásico, el mínimo de compra, y que el saldo aparezca al volver de pagar. Las tres las ve el usuario hoy: puede generar tableros con menos cartas de las debidas, puede llegar a un pago que Mercado Pago no le deja completar, y puede ver "pago exitoso" con su saldo viejo.
 
@@ -39,24 +39,24 @@ Los textos nuevos van en español y en inglés.
 
 ## Grupo A — Límites
 
-### US A1 — Mínimos de cartas: 24 en Clásico y 15 en Kids   ·   Estado: 🚧 construida, falta la demo de Carlos
+### US A1 — Mínimos de cartas: 24 en Clásico y 15 en Kids   ·   Estado: ✅ hecha (2026-10-06)
 
 - **Historia** — Como persona que arma una lotería, quiero que el sitio me pida suficientes cartas antes de generar tableros (24 en Clásico, 15 en Kids), para que mis tableros salgan distintos entre sí y haya menos empates al jugar.
 - **Entrega demostrable** — Con menos de 24 cartas en Clásico, o menos de 15 en Kids, ni la pantalla de cartas ni la de tableros dejan generar, y las dos dicen cuántas faltan.
 - **Construcción (propuesta)** — Un solo lugar con los mínimos por modo (Clásico 24, Kids 15), usado por `src/components/CardEditor/CardEditor.tsx` y `src/components/BoardGenerator/BoardCountSelector.tsx` (hoy cada uno tiene su número en Clásico, 20 y 16, y los dos piden 12 en Kids). Sin cambios de servidor. Ampliada el 2026-10-06 (decisión 5): también `src/components/SetView/SetView.tsx`, el texto de inicio en los dos idiomas y quitar el valor sin uso de `src/hooks/useCards.ts`.
-- **Construido** — 2026-10-06, en la rama `feature/fase-1-reglas`. Los mínimos viven en un solo lugar, `src/utils/gridRules.ts` (Clásico 24, Kids 15), y lo usan las tres pantallas que antes tenían su propio número: cartas (C1), cantidad de tableros (C2) y lotería guardada (U2). El texto de inicio (P1) dice "Mínimo 24 cartas para empezar (15 en modo Kids)" en español y su equivalente en inglés. Se quitó de `useCards` el mínimo de 20 que nadie usaba. Verificado con revisión de tipos, lint y pruebas automáticas en verde (259, incluidas 3 nuevas que fijan los dos números). **No verificado:** ninguna pantalla se abrió en el navegador; falta que Carlos siga el guion de demo.
+- **Construido** — 2026-10-06, en la rama `feature/fase-1-reglas`. Los mínimos viven en un solo lugar, `src/utils/gridRules.ts` (Clásico 24, Kids 15), y lo usan las tres pantallas que antes tenían su propio número: cartas (C1), cantidad de tableros (C2) y lotería guardada (U2). El texto de inicio (P1) dice "Mínimo 24 cartas para empezar (15 en modo Kids)" en español y su equivalente en inglés. Se quitó de `useCards` el mínimo de 20 que nadie usaba. Verificado con revisión de tipos, lint y pruebas automáticas en verde (259, incluidas 3 nuevas que fijan los dos números). Carlos la probó en su máquina el 2026-10-06 y confirmó que funciona. Está en `dev`; todavía no en `main`.
 - **Depende de** — nada.
 - **Cómo se prueba (guion de demo)** — (1) Abre la página de inicio: en los pasos debería decir "Mínimo 24 cartas para empezar (15 en modo Kids)". (2) Sin iniciar sesión → Crear lotería → modo Clásico → sube 20 cartas. La pantalla de cartas debería decir que faltan 4 y no dejarte continuar. Sube 4 más → ahora sí deja pasar a tableros y generar. (3) Repite en modo Kids: con 12 cartas debería decir que faltan 3; con 15 deja generar. (4) Con sesión, abre desde Mi cuenta una lotería guardada en Clásico que tenga menos de 24 cartas: debería avisar que faltan cartas en vez de ofrecer generar tableros.
 - **Escenarios cubiertos**:
-  - [ ] Clásico con 24 cartas o más: genera tableros.
-  - [ ] Clásico con 20 a 23 cartas (lo que antes bastaba): no genera y dice cuántas faltan para 24.
+  - [x] Clásico con 24 cartas o más: genera tableros.
+  - [x] Clásico con 20 a 23 cartas (lo que antes bastaba): no genera y dice cuántas faltan para 24.
   - [ ] Clásico con menos de 20 cartas: no genera y dice cuántas faltan para 24.
-  - [ ] Kids con 15 cartas o más: genera tableros.
-  - [ ] Kids con 12 a 14 cartas (lo que antes bastaba): no genera y dice cuántas faltan para 15.
+  - [x] Kids con 15 cartas o más: genera tableros.
+  - [x] Kids con 12 a 14 cartas (lo que antes bastaba): no genera y dice cuántas faltan para 15.
   - [ ] Cambiar de Clásico a Kids, o al revés, con las cartas ya subidas: el mínimo y el mensaje cambian al del modo elegido.
   - [ ] Abrir directamente la dirección de la pantalla de tableros con menos cartas del mínimo: tampoco deja generar.
-  - [ ] La pantalla de una lotería guardada (U2) aplica el mismo mínimo que las otras dos.
-  - [ ] El texto de la página de inicio menciona 24 y 15, en español y en inglés.
+  - [x] La pantalla de una lotería guardada (U2) aplica el mismo mínimo que las otras dos.
+  - [x] El texto de la página de inicio menciona 24 y 15, en español y en inglés.
   - [ ] Una lotería guardada con menos cartas que el mínimo nuevo (Clásico con 20 a 23, Kids con 12 a 14): conserva sus tableros y su PDF, pero pide completar el mínimo para generar otros.
 
 ### US A2 — Mínimo de compra de 5 tokens   ·   Estado: 🔲 pendiente
