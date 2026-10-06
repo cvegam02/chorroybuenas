@@ -50,7 +50,7 @@ Como desarrollador, quiero que los secrets nuevos estén documentados y que la c
 
 - **Tipo:** Tarea técnica
 - **Prioridad:** Alta
-- **Estado:** En curso — backend desplegado en DEV el 2026-10-06 (migraciones 022–025, secrets y las 4 funciones) y verificado con la anon key real y con un usuario temporal. Falta que Carlos pruebe en el navegador una transformación de IA exitosa y una compra con tarjeta de prueba
+- **Estado:** Hecho — backend desplegado en DEV el 2026-10-06 y validado de punta a punta: transformación de IA (1 token cobrado) y pago de prueba aprobado de $20.00 MXN (una sola compra de 12 tokens pese a 4 notificaciones y 2 reenvíos)
 - **Plan:** Task 15, Steps 4–5
 - **Depende de:** CYB-1201, CYB-305, CYB-403, CYB-1302, CYB-1303 y todas las historias de FEAT-03 a FEAT-10
 - **Responsable:** Carlos confirma cada paso
@@ -116,7 +116,7 @@ Como dueño del proyecto, quiero validar todo el cambio en dev con pagos de prue
 
 - **Tipo:** Tarea técnica
 - **Prioridad:** Alta
-- **Estado:** Bloqueada — falta un access token con acceso al proyecto PROD (`bdruzgjboxalpywljemk`) y el visto bueno de Carlos tras probar en DEV. El frontend nuevo ya está en `main` y publicado en Vercel; el dominio sigue en GitHub Pages
+- **Estado:** Hecho — backend desplegado en PROD el 2026-10-06 21:46 UTC y validado con dinero real: una transformación de IA (1 token cobrado) y una compra de $10.00 MXN (5 tokens, una sola acreditación con 4 notificaciones). Lo que queda (desactivar GitHub Pages, borrar secrets de Actions) está en `docs/PENDIENTES.md`
 - **Plan:** Task 15, Step 6 y sección "Cierre"
 - **Depende de:** CYB-1202, CYB-1304
 - **Responsable:** Carlos confirma cada paso

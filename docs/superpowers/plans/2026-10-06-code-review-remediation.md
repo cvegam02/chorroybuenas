@@ -83,6 +83,8 @@ Hallazgos nuevos encontrados al preparar el plan (se arreglan en el task indicad
 
 - **2026-10-06 — El checkout vuelve a comportarse como antes (corrige el Task 7/9).** En la prueba real en DEV, forzar `sandbox_init_point` hizo fallar el checkout de Mercado Pago. Ahora se usa `init_point` por defecto en todos los entornos y no se envía `payer`, que es lo que hacía en la práctica el código original; `MP_USE_SANDBOX_CHECKOUT=true` queda solo como opción explícita. Costo si está mal: ninguno respecto al comportamiento anterior a la remediación.
 
+- **2026-10-06 — Despliegue en PROD (21:46 UTC).** PROD sí tenía historial de migraciones (000–021) y sus policies coincidían con el repo; el único hueco real era C4, cerrado antes con un `REVOKE`. Orden aplicado: secrets (`ALLOWED_ORIGINS`, `APP_URL`) → migraciones 022–025 por la Management API, registradas después en `supabase_migrations.schema_migrations` → las 4 funciones con `--use-api`. Duró 9 segundos. Resultado: 2 saldos existentes intactos (89 y 103), 7 usuarios sin fila recibieron 5 tokens (192 → 227 en circulación). Respaldos previos en `../respaldo-supabase-2026-10-06/` (fuera del repo). El DNS del dominio ya apuntaba a Vercel al terminar. No se configuró `MERCADOPAGO_WEBHOOK_SECRET` ni se borró `MP_USE_PRODUCTION_CHECKOUT` (ya no se lee). Pendiente: registrar el historial de migraciones también en DEV, que no tiene la tabla.
+
 ## Global Constraints
 
 - Trabajar en la rama `fix/code-review-remediation` creada desde `main`; nunca commitear directo a `main`.

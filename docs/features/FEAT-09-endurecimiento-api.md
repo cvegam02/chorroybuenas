@@ -12,7 +12,7 @@
 
 - **Tipo:** Bug de seguridad
 - **Prioridad:** Media
-- **Estado:** En revisión — implementado y probado (`cors.ts` en FEAT-03; guardas en `hardening.test.ts`); falta crear `ALLOWED_ORIGINS` y comprobar las cabeceras reales en dev
+- **Estado:** Hecho — desplegado en DEV y PROD el 2026-10-06; CORS y respuestas de error comprobados contra las funciones reales
 - **Finding:** M8
 - **Plan:** Task 7 (`cors.ts`), Tasks 9, 10, 11 y 15
 - **Depende de:** CYB-201
@@ -68,7 +68,7 @@ Como dueño del negocio, quiero que solo mi frontend pueda llamar a las funcione
 
 - **Tipo:** Bug de seguridad
 - **Prioridad:** Media
-- **Estado:** En revisión — implementado en las cuatro funciones y en `PurchaseService`, con guardas de regresión; falta comprobar una respuesta de error real en dev
+- **Estado:** Hecho — desplegado en DEV y PROD el 2026-10-06; CORS y respuestas de error comprobados contra las funciones reales
 - **Finding:** M5
 - **Plan:** Tasks 9, 10, 11 y 12 (`PurchaseService.ts`)
 - **Depende de:** nada
