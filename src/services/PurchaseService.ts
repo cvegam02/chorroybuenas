@@ -1,5 +1,6 @@
 import { supabase } from '../utils/supabaseClient';
 import { logger } from '../utils/logger';
+import { interpretCreditResponse, isPaymentId, type CreditOutcome } from './creditOnReturn';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
@@ -145,5 +146,33 @@ export async function createPaymentPreference(params: {
       error: 'NETWORK',
       message: 'Error de conexión. Verifica tu internet e intenta de nuevo.',
     };
+  }
+}
+
+/**
+ * Al volver de Mercado Pago con un pago aprobado, pide al servidor que lo acredite en ese momento,
+ * sin esperar al aviso de Mercado Pago. Es seguro llamarla siempre: un pago se acredita una sola vez.
+ * Nunca lanza: ante cualquier fallo devuelve 'processing' (el aviso acreditará de todos modos).
+ */
+export async function creditPaymentOnReturn(paymentId: string | null): Promise<CreditOutcome> {
+  if (!isPaymentId(paymentId)) return 'processing';
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) return 'processing';
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/credit-payment-on-return`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({ payment_id: paymentId }),
+    });
+    const body = await res.json().catch(() => null);
+    return interpretCreditResponse(res.status, body);
+  } catch (error) {
+    logger.error('No se pudo acreditar el pago al volver:', error);
+    return 'processing';
   }
 }
