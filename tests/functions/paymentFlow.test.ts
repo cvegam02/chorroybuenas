@@ -149,7 +149,18 @@ describe('findApprovedPayment', () => {
 
   it('merchant_order sin pago aprobado ni tras el reintento', async () => {
     const { d } = deps({ '/merchant_orders/987': { payments: [] } });
-    expect(await findApprovedPayment(d, { topic: 'merchant_order', id: '987' })).toEqual({ ok: false, reason: 'not_approved' });
+    expect(await findApprovedPayment(d, { topic: 'merchant_order', id: '987' }))
+      .toEqual({ ok: false, reason: 'not_approved', status: 'sin_pagos' });
+  });
+
+  it('merchant_order con pagos rechazados: informa estado y motivo de cada uno', async () => {
+    const order = { payments: [
+      { id: 1, status: 'rejected', status_detail: 'cc_rejected_high_risk' },
+      { id: 2, status: 'in_process' },
+    ] };
+    const { d } = deps({ '/merchant_orders/987': order });
+    expect(await findApprovedPayment(d, { topic: 'merchant_order', id: '987' }))
+      .toEqual({ ok: false, reason: 'not_approved', status: 'rejected/cc_rejected_high_risk, in_process/-' });
   });
 
   it('merchant_order inexistente', async () => {

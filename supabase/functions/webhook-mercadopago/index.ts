@@ -75,6 +75,9 @@ Deno.serve(async (req) => {
       if (found.reason === 'missing_reference') {
         console.error('webhook-mercadopago: pago aprobado sin external_reference o preference_id', notification.id);
       }
+      if (found.reason === 'not_approved') {
+        console.log(`webhook-mercadopago: ${notification.topic} ${notification.id} sin pago aprobado (${found.status})`);
+      }
       return ack();
     }
 
