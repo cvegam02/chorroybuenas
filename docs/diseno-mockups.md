@@ -99,6 +99,4 @@ Requiere ser administrador.
 
 Salen de `contexto-negocio.md` §17. Cuando se construyan, se agregan arriba con su código.
 
-- En A1.4 (Balances): historial de regalos de tokens (fecha, quién, a quién, cuánto, motivo). En construcción: fase 2, historia A1.
-- En M11: los regalos recibidos, como filas marcadas "Regalo". En construcción: fase 2, historia A2.
 - En U1 o M11: marca de "devuelta" en una compra reembolsada.
