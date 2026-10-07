@@ -1,6 +1,7 @@
 import { supabase } from '../utils/supabaseClient';
 import { logger } from '../utils/logger';
 import { SEASONAL_PDF_MIME_TYPE, type SeasonalLoteriaInput } from '../utils/seasonalLoteria';
+import type { CatalogLoteria, CatalogSeason } from '../utils/seasonalCatalog';
 import { PREVIEW_OUTPUT_EXTENSION, PREVIEW_OUTPUT_MIME_TYPE } from '../utils/seasonalPreview';
 
 /** Temporada del catálogo de loterías de temporada. */
@@ -80,6 +81,27 @@ function toSeasonalPdf(files: LoteriaRowWithFile['seasonal_loteria_files']): Sea
 export class SeasonalRepository {
   static readonly PDF_BUCKET = 'seasonal-pdfs';
   static readonly PREVIEW_BUCKET = 'seasonal-previews';
+
+  /**
+   * Lo que necesita el catálogo público: las temporadas y las loterías publicadas. Las fechas las
+   * filtra la base para el público y `groupCatalog` para todos. Devuelve null si la consulta falla.
+   */
+  static async getCatalog(): Promise<{ seasons: CatalogSeason[]; loterias: CatalogLoteria[] } | null> {
+    const [seasons, loterias] = await Promise.all([
+      supabase.from('seasons').select(SEASON_COLUMNS),
+      supabase.from('seasonal_loterias').select(LOTERIA_COLUMNS).eq('is_published', true),
+    ]);
+
+    const error = seasons.error ?? loterias.error;
+    if (error) {
+      logger.error('SeasonalRepository.getCatalog:', error.message);
+      return null;
+    }
+    return {
+      seasons: (seasons.data ?? []) as CatalogSeason[],
+      loterias: (loterias.data ?? []) as CatalogLoteria[],
+    };
+  }
 
   /** Todas las loterías de temporada, publicadas o no, con su PDF. Devuelve null si la consulta falla. */
   static async getAdminLoterias(): Promise<AdminSeasonalLoteria[] | null> {

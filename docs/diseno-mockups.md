@@ -23,9 +23,10 @@ El sitio tiene cuatro zonas. Toda pantalla nueva debe pertenecer a una de ellas.
 
 **Barra de navegación (arriba, en todas las pantallas):** _(por confirmar)_
 
-- Para todos: logo (lleva a Inicio), Crear lotería, De Temporada (por construir — 2026-10-06, FEAT-17), Beneficios, ¿Cómo se juega?, ¿Qué es la lotería?, selector de idioma (español / inglés).
-- Sin sesión: Iniciar sesión y Crear cuenta.
-- Con sesión: saldo de tokens, y un menú de usuario con Mis loterías, Crear nueva lotería, Comprar tokens, Mi cuenta, Administración (solo administradores) y Cerrar sesión. En computadora el menú es un panel con encabezado (foto, nombre, correo, saldo y botón «Comprar») que muestra hasta cinco loterías; si hay más, agrega «Ver todas mis loterías», que abre Mi cuenta (U1) en su lista de loterías (2026-10-06, FEAT-16).
+- Para todos: logo (lleva a Inicio), Crear lotería, Beneficios, ¿Cómo se juega?, ¿Qué es la lotería?, selector de idioma (español / inglés).
+- Sin sesión: Iniciar sesión y Crear cuenta, y el enlace «De Temporada» junto a «Crear lotería» (2026-10-06, FEAT-17).
+- «De Temporada» con sesión va dentro del menú de usuario, porque la barra solo muestra enlaces a quien no ha entrado (2026-10-06, FEAT-17).
+- Con sesión: saldo de tokens, y un menú de usuario con Mis loterías, Crear nueva lotería, Comprar tokens, Mi cuenta, De Temporada, Administración (solo administradores) y Cerrar sesión. En computadora el menú es un panel con encabezado (foto, nombre, correo, saldo y botón «Comprar») que muestra hasta cinco loterías; si hay más, agrega «Ver todas mis loterías», que abre Mi cuenta (U1) en su lista de loterías (2026-10-06, FEAT-16).
 
 **Pie de página:** en todas las pantallas. _(por confirmar)_
 
@@ -39,7 +40,7 @@ El sitio tiene cuatro zonas. Toda pantalla nueva debe pertenecer a una de ellas.
 | P2 | Beneficios | `/beneficios` | Por qué registrarse: guardar loterías, usar la IA, tokens. Lleva a crear cuenta. |
 | P3 | ¿Cómo se juega? | `/como-se-juega` | Reglas del juego de la lotería. Informativa. |
 | P4 | ¿Qué es la lotería? | `/que-es-la-loteria` | Historia y contexto de la lotería mexicana. Informativa. |
-| P5 | Catálogo «De Temporada» | `/temporada` | **Por construir (FEAT-17).** Loterías de temporada visibles, agrupadas por temporada: portada con marca de agua, nombre, modo, número de cartas y tableros, y precio. Tocar una abre P6. Visible sin sesión. |
+| P5 | Catálogo «De Temporada» | `/temporada` | Construida el 2026-10-06 (FEAT-17); «Ya es tuya» en la tarjeta llega con las compras. Loterías de temporada visibles, agrupadas por temporada: portada con marca de agua, nombre, modo, número de cartas y tableros, y precio. Tocar una abre P6. Visible sin sesión. |
 | P6 | Detalle de lotería de temporada | `/temporada/:id` | **Por construir (FEAT-17).** Portada, cartas de muestra ampliables, qué incluye, descripción y recuadro con precio y «Comprar» (pide sesión). Si ya se compró: «Descargar PDF». Muestra el resultado al volver de Mercado Pago (éxito, pendiente o cancelado). |
 
 ## Zona Crear

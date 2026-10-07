@@ -1,0 +1,220 @@
+/* P5 — Catálogo «De Temporada». Congruente con BuyTokensPage y BenefitsPage. */
+
+.seasonal-catalog {
+  min-height: 100vh;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-main);
+  padding-bottom: 80px;
+  font-family: var(--font-body);
+}
+
+.seasonal-catalog__header {
+  padding: 60px 24px 40px;
+  text-align: center;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.seasonal-catalog__title {
+  margin: 0 0 16px;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-primary-dark);
+}
+
+.seasonal-catalog__subtitle {
+  margin: 0 auto;
+  max-width: 600px;
+  font-size: 1.15rem;
+  color: var(--color-text-muted);
+}
+
+.seasonal-catalog__main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.seasonal-catalog__season {
+  margin-top: var(--spacing-xl);
+}
+
+.seasonal-catalog__season-title {
+  margin: 0 0 var(--spacing-md);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.seasonal-catalog__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--spacing-lg);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cargando: la cuadrícula va sola, sin título de temporada encima. */
+.seasonal-catalog__main > .seasonal-catalog__grid {
+  margin-top: var(--spacing-xl);
+}
+
+.seasonal-catalog__card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-sm);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+a.seasonal-catalog__card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary-lighter);
+  box-shadow: var(--shadow-md);
+}
+
+a.seasonal-catalog__card:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.seasonal-catalog__cover {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--color-bg-tertiary);
+}
+
+.seasonal-catalog__card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+}
+
+.seasonal-catalog__card-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.seasonal-catalog__card-summary {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.seasonal-catalog__card-price {
+  margin: var(--spacing-sm) 0 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.seasonal-catalog__card-price-usd {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.seasonal-catalog__skeleton-line {
+  height: 16px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-tertiary);
+}
+
+.seasonal-catalog__skeleton-line--short {
+  width: 60%;
+}
+
+.seasonal-catalog__card--skeleton {
+  animation: seasonal-catalog-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes seasonal-catalog-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.seasonal-catalog__notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-xl) var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.seasonal-catalog__notice p {
+  margin: 0;
+}
+
+.seasonal-catalog__button {
+  display: inline-block;
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.seasonal-catalog__button:hover {
+  background: var(--color-primary-dark);
+}
+
+.seasonal-catalog__button:focus-visible {
+  outline: 3px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
+
+.seasonal-catalog__disclaimer {
+  margin: var(--spacing-xl) 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .seasonal-catalog__header {
+    padding: 40px 16px 28px;
+  }
+
+  .seasonal-catalog__main {
+    padding: 0 16px;
+  }
+
+  .seasonal-catalog__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seasonal-catalog__card,
+  .seasonal-catalog__card--skeleton {
+    animation: none;
+    transition: none;
+  }
+}

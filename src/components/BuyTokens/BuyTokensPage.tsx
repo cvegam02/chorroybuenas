@@ -14,13 +14,8 @@ import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
 import './BuyTokensPage.css';
 import { logger } from '../../utils/logger';
+import { roundUsdFriendly } from '../../utils/usdReference';
 
-/** Redondea a valor amigable para USD (ej. 0.43 → 0.50). */
-function roundUsdFriendly(value: number): number {
-  if (value >= 1) return Math.round(value * 100) / 100;
-  if (value >= 0.1) return Math.ceil(value * 20) / 20;
-  return Math.ceil(value * 100) / 100;
-}
 
 export const BuyTokensPage: React.FC = () => {
   const { t, i18n } = useTranslation();

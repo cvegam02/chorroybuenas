@@ -1,6 +1,6 @@
 # FEAT-17 — Loterías de temporada (catálogo de pago)
 
-**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. Siguiente historia: B1.**
+**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. B1 hecha. Siguiente historia: B2. Al cerrar la sesión del 2026-10-06: A4, la regla de cartas y tableros y la B1 están en commits en la rama `feature/loterias-de-temporada`, sin subir. Las migraciones 027 a 030 están en dev y ninguna en producción.**
 
 **Contexto.** Hoy el sitio solo cobra por la transformación de fotos con IA. Carlos quiere una segunda cosa que vender: loterías ya hechas por él, por temporada (Halloween, Día de Muertos, Thanksgiving, Navidad…), en una sección nueva tipo catálogo. Cualquiera las ve; para descargarlas hay que pagar. Carlos las prepara fuera del sitio y las administra desde el panel: las sube, les pone precio y las publica.
 
@@ -12,7 +12,7 @@
 - Buscador o filtros en el catálogo.
 - Que el comprador edite la lotería, elija cuántos tableros o la mezcle con sus fotos.
 - Un bloque de temporada en la página de Inicio.
-- El menú de usuario de la barra (FEAT-16) no cambia.
+- El menú de usuario de la barra (FEAT-16) no cambia, salvo el renglón «De Temporada» (decisión 28).
 
 **Clasificación:** toca dinero, permisos y almacenamiento. Base de datos (tablas nuevas, reglas de acceso, dos espacios de archivos; migración 027 en adelante), edge functions de pago (crear el cobro, acreditar, volver del pago), tres pantallas nuevas (P5, P6, A1.7) y cambios en cuatro existentes (barra de navegación, U1, M11, A1.1). **Pruebas primero** en todo lo que sea cobro, entrega y permisos. Estimado: 7 a 9 sesiones.
 
@@ -54,6 +54,8 @@
 **Confirmado al probar A4 (2026-10-06):**
 
 27. Para publicar hacen falta también el número de cartas y el de tableros, porque el catálogo los muestra en cada tarjeta. Amplía la decisión 25. _(Descartada: dejarlos opcionales y que el catálogo omita lo que falte.)_
+
+28. Con sesión, el enlace «De Temporada» va dentro del menú de usuario, porque la barra solo muestra enlaces a quien no ha entrado. Ajusta la decisión 6 y lo dicho en «Fuera de esta feature» sobre el menú. _(Descartadas: mostrarlo como enlace en la barra junto al menú de usuario; las dos cosas.)_
 
 **Decidido al diseñar, por confirmar con Carlos al probarlo** (límites técnicos, no reglas de negocio):
 
@@ -238,19 +240,22 @@
 
 ## Grupo B — Catálogo público
 
-### US B1 — Ver el catálogo «De Temporada»   ·   Estado: ⬜ por hacer
+### US B1 — Ver el catálogo «De Temporada»   ·   Estado: ✅ hecha (2026-10-06)
 
 - **Historia** — Como visitante, quiero ver las loterías de temporada disponibles, agrupadas por temporada y con su precio, para saber qué puedo comprar.
 - **Entrega demostrable** — En la barra de arriba hay un enlace «De Temporada» que abre el catálogo con las loterías visibles, sin necesidad de iniciar sesión.
 - **Construcción (propuesta)** — Prueba primero, en `tests/src/`, de la función que agrupa por temporada, ordena y descarta temporadas vacías. Pantalla nueva en `src/components/Seasonal/`, ruta `/temporada` en `AppRouter.tsx`, enlace en `Navbar.tsx`. Lectura pública en `SeasonalRepository.ts`. Textos en los dos idiomas; dólares de referencia como en `BuyTokensPage.tsx`.
-- **Construido** —
+- **Construido** — 2026-10-06, en la rama `feature/loterias-de-temporada`, sin commit todavía. Prueba `tests/src/seasonalCatalog.test.ts` (11 pruebas: agrupar por temporada, orden, descartar temporadas vacías y loterías no visibles, texto en inglés con respaldo en español) y `src/utils/seasonalCatalog.ts`; esta vez la prueba y el código se escribieron juntos, sin ver fallar la prueba antes. Pantalla nueva `src/components/Seasonal/SeasonalCatalog.tsx` en la ruta `/temporada`, con sus estados de cargando (tarjetas grises), error con «Reintentar» y vacío con botón para crear la propia lotería. Lectura pública en `SeasonalRepository.getCatalog`. El cálculo de dólares de referencia se sacó de la pantalla de comprar tokens a `src/utils/usdReference.ts` para compartirlo. Textos en español e inglés. Enlace «De Temporada» en la barra, junto a «Crear Lotería», **solo para visitantes**. Sin migración. Revisión de tipos, lint y pruebas en verde (365).
+  - **Demo confirmada (2026-10-06).** Carlos probó el catálogo y el enlace del menú en su máquina, que usa la base de dev, y confirmó («me gusta así»). No se probó en `dev.chorroybuenas.com.mx`: el código sigue sin commit. No detalló qué pasos siguió ni si revisó la vista en teléfono, el inglés o el catálogo vacío. `diseno-mockups.md` se actualizó el mismo día con su confirmación: el enlace va en la barra sin sesión y en el menú de usuario con sesión, y P5 ya no dice «por construir».
+  - **Decidido con Carlos (2026-10-06, decisión 28):** la barra solo muestra enlaces a quien no tiene sesión, así que con sesión «De Temporada» va como un renglón del menú de usuario: en computadora después de «Mi cuenta», en teléfono después de «Comprar tokens». Construido el mismo día.
+  - Decidido al construir, por confirmar con Carlos: dentro de cada temporada las loterías van por nombre; las tarjetas ya enlazan al detalle (`/temporada/:id`), que no existe hasta B2; la nota de que el cobro es en pesos reutiliza el texto de la pantalla de comprar tokens; el catálogo se ve igual para un administrador que para cualquiera (no muestra borradores). «Ya es tuya» en la tarjeta llega con las compras (C1).
 - **Depende de** — A4 (para tener loterías publicadas).
 - **Cómo se prueba (guion de demo)** — Sin iniciar sesión, abre `dev.chorroybuenas.com.mx` → en la barra de arriba pulsa «De Temporada». Deberían verse las temporadas en el orden que definiste, cada una con sus loterías: portada con marca de agua, nombre, «Clásico · 54 cartas · 10 tableros» y precio. La lotería que dejaste en borrador no debe estar. Cambia el idioma a inglés: el precio muestra también dólares, y la temporada «Navidad» dice «Christmas». Despublica todas desde el panel y recarga: «Pronto habrá loterías de temporada» y un botón para crear tu lotería. Ábrelo desde el celular: una tarjeta por fila, y el enlace dentro del menú.
 - **Escenarios cubiertos**:
-  - [ ] Solo aparecen loterías publicadas y dentro de sus fechas. (Prueba de base de A1/A4.)
-  - [ ] Una temporada sin loterías visibles no se muestra. (Prueba automática.)
-  - [ ] Las temporadas salen en el orden definido. (Prueba automática.)
-  - [ ] En inglés se usa el texto en inglés si existe; si no, el español. (Prueba automática.)
+  - [x] Solo aparecen loterías publicadas y dentro de sus fechas. (Prueba de base de A1/A4 y prueba automática.)
+  - [x] Una temporada sin loterías visibles no se muestra. (Prueba automática.)
+  - [x] Las temporadas salen en el orden definido. (Prueba automática.)
+  - [x] En inglés se usa el texto en inglés si existe; si no, el español. (Prueba automática.)
   - [ ] Catálogo vacío, cargando y error. (Demo del vacío.)
   - [ ] Se ve igual con y sin sesión. (Demo.)
   - [ ] Se ve bien en teléfono. (Demo.)
