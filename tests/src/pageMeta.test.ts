@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { PUBLIC_PATHS, SITE_URL, resolvePageMeta, seasonalDetailMeta } from '../../src/utils/pageMeta';
+import { existsSync } from 'node:fs';
+import { DEFAULT_SHARE_IMAGE, PUBLIC_PATHS, SITE_URL, resolvePageMeta, seasonalDetailMeta } from '../../src/utils/pageMeta';
 
 const t = (key: string) => `[${key}]`;
 
@@ -39,6 +40,24 @@ describe('datos de cada página para buscadores (FEAT-21, US A1)', () => {
   it('si la lotería no tiene descripción, la ficha usa la del catálogo', () => {
     const meta = seasonalDetailMeta('abc-123', 'Lotería de Navidad', '', t);
     expect(meta.description).toBe(resolvePageMeta('/temporada', t).description);
+  });
+
+  it.each(['/como-se-juega', '/que-es-la-loteria', '/beneficios'])('%s se comparte con su propia imagen (US A5)', (path) => {
+    const { image } = resolvePageMeta(path, t);
+    expect(image.url).not.toBe(DEFAULT_SHARE_IMAGE.url);
+    expect(image.width).toBeGreaterThan(0);
+    expect(image.height).toBeGreaterThan(0);
+  });
+
+  it.each(['/', '/temporada', '/privacidad', '/temporada/abc-123'])('%s conserva la imagen general (US A5)', (path) => {
+    expect(resolvePageMeta(path, t).image).toEqual(DEFAULT_SHARE_IMAGE);
+  });
+
+  it('la imagen al compartir de cada página pública existe en el sitio', () => {
+    for (const path of PUBLIC_PATHS) {
+      const file = resolvePageMeta(path, t).image.url.replace(`${SITE_URL}/`, '');
+      expect(existsSync(new URL(`../../public/${file}`, import.meta.url))).toBe(true);
+    }
   });
 
   it.each(['/dashboard', '/admin', '/comprar-tokens', '/loteria/xyz', '/cards', '/board-count', '/preview', '/no-existe'])(

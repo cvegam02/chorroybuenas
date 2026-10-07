@@ -10,6 +10,7 @@ const META: PageMeta = {
   description: 'Reglas de la "lotería" & más',
   canonicalUrl: 'https://chorroybuenas.com.mx/como-se-juega',
   indexable: true,
+  image: { url: 'https://chorroybuenas.com.mx/comosejuega.png', width: 720, height: 459 },
 };
 
 describe('páginas pre-generadas (FEAT-21, US A4)', () => {
@@ -37,6 +38,15 @@ describe('páginas pre-generadas (FEAT-21, US A4)', () => {
     expect(html).toContain(`<meta property="twitter:title" content="${META.title}" />`);
     expect(html.match(/content="Reglas de la &quot;lotería&quot; &amp; más"/g)).toHaveLength(3);
     expect(html).not.toContain('https://chorroybuenas.com.mx/" />');
+  });
+
+  it('la imagen al compartir y su tamaño son los de la página (US A5)', () => {
+    const html = buildPrerenderedHtml(TEMPLATE, '/como-se-juega', META, '');
+    expect(html).toContain(`<meta property="og:image" content="${META.image.url}" />`);
+    expect(html).toContain(`<meta property="twitter:image" content="${META.image.url}" />`);
+    expect(html).toContain('<meta property="og:image:width" content="720" />');
+    expect(html).toContain('<meta property="og:image:height" content="459" />');
+    expect(html).not.toContain('og-image.jpg');
   });
 
   it('falla si la página base no trae el contenedor vacío', () => {

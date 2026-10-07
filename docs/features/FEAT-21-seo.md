@@ -81,3 +81,18 @@
   - [ ] Entrar directo a una página privada o de la zona Crear sigue funcionando.
   - [ ] Quien tiene el inglés elegido ve la página en inglés tras cargar.
   - [ ] La sesión iniciada se sigue reconociendo al entrar por una página pre-generada.
+
+## US A5 — Cada página se comparte con su propia imagen   ·   Estado: 🟡 construida el 2026-10-07 — falta la demo de Carlos en dev
+
+Agregada el 2026-10-07 a pedido de Carlos: es el detalle menor del alcance acordado (decisión 1) que faltaba. _(Descartadas: incluir también la portada de cada ficha de temporada; dejar la imagen general en todas.)_
+
+- **Historia** — Como dueño del sitio, quiero que «¿Cómo se juega?», «¿Qué es la lotería?» y «Beneficios» se compartan con su propia imagen, para que la vista previa del enlace corresponda a la página.
+- **Entrega demostrable** — Al compartir el enlace de una de esas tres páginas, la vista previa muestra la imagen de esa página. El inicio, temporada y privacidad conservan la imagen general.
+- **Construido** — 2026-10-07, en la rama `feature/seo`. La tabla de la US A1 (`src/utils/pageMeta.ts`) ahora lleva también la imagen de cada página con su tamaño, y tanto la página pre-generada como el cambio de página en el navegador la escriben. «¿Cómo se juega?» usa `comosejuega.png`, «¿Qué es la lotería?» usa `quees.jpg` y «Beneficios» usa `og-beneficios.jpg`, una copia ligera (156 KB) de `beneficios-antes-despues.png`, que pesa casi 7 MB y es demasiado para una vista previa. De paso se corrigió el tamaño declarado de la imagen general, que no coincidía con el real. Pruebas en `tests/src/pageMeta.test.ts` y `tests/src/prerender.test.ts`.
+- **Límite conocido** — la imagen de «¿Qué es la lotería?» es cuadrada y pequeña (500 × 500): algunas aplicaciones la mostrarán recortada o en miniatura. WhatsApp y Facebook guardan la vista previa de enlaces ya compartidos; un enlace viejo puede tardar en mostrar la imagen nueva.
+- **Depende de** — A1 y A4.
+- **Cómo se prueba (guion de demo)** — Abre `/como-se-juega` → pulsa Ctrl+U → busca `og:image` → debería verse la dirección de la imagen de esa página, no `og-image.jpg`. Repite con `/que-es-la-loteria` y `/beneficios`. En el inicio debería seguir `og-image.jpg`.
+- **Escenarios cubiertos**:
+  - [x] Las tres páginas declaran su propia imagen, con su tamaño. (Prueba automática.)
+  - [x] Las demás páginas conservan la imagen general. (Prueba automática.)
+  - [ ] Carlos lo vio en dev. (Demo.)

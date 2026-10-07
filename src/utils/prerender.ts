@@ -36,6 +36,10 @@ export function buildPrerenderedHtml(template: string, path: string, meta: PageM
     ['property="twitter:description"', 'content', meta.description],
     ['property="og:url"', 'content', meta.canonicalUrl],
     ['property="twitter:url"', 'content', meta.canonicalUrl],
+    ['property="og:image"', 'content', meta.image.url],
+    ['property="twitter:image"', 'content', meta.image.url],
+    ['property="og:image:width"', 'content', String(meta.image.width)],
+    ['property="og:image:height"', 'content', String(meta.image.height)],
     ['name="robots"', 'content', meta.indexable ? 'index, follow' : 'noindex, nofollow'],
   ];
   const withHead = head
