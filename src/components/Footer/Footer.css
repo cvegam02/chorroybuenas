@@ -120,6 +120,16 @@
     margin: 0;
 }
 
+.footer__legal-link {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    text-decoration: underline;
+}
+
+.footer__legal-link:hover {
+    color: var(--color-primary);
+}
+
 .footer__slogan {
     font-size: 0.8rem;
     font-style: italic;
