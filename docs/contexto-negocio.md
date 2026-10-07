@@ -77,7 +77,7 @@ Cuando dos reglas choquen, o haya que decidir algo que no está escrito, se elig
 - **Tokens de bienvenida:** cada cuenta nueva recibe una cantidad configurable por el administrador. Hoy son 5 en producción. **DEFINIDO** (2026-10-06)
 - El saldo nunca puede ser negativo. **DEFINIDO** (2026-10-06)
 - Un administrador puede regalar tokens a cualquier usuario. _(confirmado el 2026-10-06)_
-- Cada regalo de tokens queda registrado: quién lo dio, a quién, cuánto y cuándo. **DEFINIDO** (2026-10-06). Los regalos anteriores a este registro no se pueden recuperar: el historial empieza cuando se publica la fase 2.
+- Cada regalo de tokens queda registrado: quién lo dio, a quién, cuánto y cuándo. **DEFINIDO** (2026-10-06). Los regalos anteriores a este registro no se pueden recuperar: el historial empieza el 2026-10-06, al publicarse la fase 2.
 - Al regalar, el administrador puede escribir un motivo; es opcional. **DEFINIDO** (2026-10-06, fase 2)
 - El administrador consulta todos los regalos en una lista general, del más reciente al más antiguo, con fecha, quién regaló, a quién, cuánto y motivo. **DEFINIDO** (2026-10-06, fase 2)
 - El usuario ve los regalos que recibió en su historial, mezclados por fecha con sus compras: cantidad y fecha. No ve el motivo ni quién se los dio. **DEFINIDO** (2026-10-06, fase 2)
@@ -213,13 +213,12 @@ Ninguno al 2026-10-06. Todas las reglas de este documento están confirmadas o d
 
 ## 17. Reglas definidas que el sitio todavía no cumple
 
-Decididas el 2026-10-06 y pendientes de construir. El registro de regalos es la fase 2 de `plan-fases.md` y los correos la fase 3; el descuento por reembolso quedó apartado el 2026-10-06, sin fecha.
+Decididas el 2026-10-06 y pendientes de construir. Los correos son la fase 3 de `plan-fases.md`; el descuento por reembolso quedó apartado el 2026-10-06, sin fecha.
 
-Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en producción: mínimo de 24 cartas en Clásico, mínimo de 15 en Kids, y mínimo de compra de 5 tokens.
+Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en producción: mínimo de 24 cartas en Clásico, mínimo de 15 en Kids, y mínimo de compra de 5 tokens. Retirada el 2026-10-06, al publicarse la fase 2: registrar cada regalo de tokens.
 
 | Regla | Dónde está | Qué hace hoy el sitio |
 |---|---|---|
 | Descontar tokens ante reembolso o contracargo | §8 | No descuenta nada |
-| Registrar cada regalo de tokens, con motivo opcional, y mostrarlo al administrador y al usuario | §7 | Solo sube el saldo, sin registro (en construcción: fase 2) |
 | Avisar por correo de pago pendiente acreditado | §13 | No avisa |
 | Avisar por correo de tokens regalados | §13 | No avisa |
