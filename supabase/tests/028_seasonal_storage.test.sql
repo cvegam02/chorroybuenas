@@ -7,8 +7,8 @@ insert into auth.users (id, email) values
 insert into public.admin_users (user_id) values ('00000000-0000-0000-0000-000000000051');
 
 insert into public.seasons (id, name_es) values ('00000000-0000-0000-0000-0000000000c1', 'Navidad');
-insert into public.seasonal_loterias (id, season_id, name_es, price_cents, is_published) values
-  ('00000000-0000-0000-0000-0000000000d1', '00000000-0000-0000-0000-0000000000c1', 'Posadas', 4900, true);
+insert into public.seasonal_loterias (id, season_id, name_es, price_cents) values
+  ('00000000-0000-0000-0000-0000000000d1', '00000000-0000-0000-0000-0000000000c1', 'Posadas', 4900);
 
 -- Espacios de archivos
 select test.is((select public from storage.buckets where id = 'seasonal-pdfs'), false,

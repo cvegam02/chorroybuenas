@@ -2,6 +2,8 @@
  * Validación de la ficha y del PDF de una lotería de temporada (FEAT-17).
  * La base repite estos límites (supabase/migrations/027 y 028): ella es quien manda.
  */
+import { localInputToIso } from './seasonalPublishing';
+
 export const SEASONAL_NAME_MAX_LENGTH = 80;
 export const SEASONAL_DESCRIPTION_MAX_LENGTH = 600;
 export const SEASONAL_MIN_PRICE_CENTS = 1000;
@@ -27,6 +29,9 @@ export interface SeasonalLoteriaForm {
   cardCount: string;
   boardCount: string;
   price: string;
+  /** Fecha y hora de inicio y de fin, como las entrega un campo de fecha; vacías = sin límite. */
+  validFrom: string;
+  validUntil: string;
 }
 
 /** Lo que se guarda. Todo lo opcional queda en null mientras la lotería es un borrador. */
@@ -40,6 +45,8 @@ export interface SeasonalLoteriaInput {
   card_count: number | null;
   board_count: number | null;
   price_cents: number | null;
+  valid_from: string | null;
+  valid_until: string | null;
 }
 
 export type SeasonalFormErrors = Partial<Record<keyof SeasonalLoteriaForm, string>>;
@@ -84,24 +91,34 @@ function tooLong(text: string, max: number): string | undefined {
   return text.trim().length > max ? `Máximo ${max} caracteres.` : undefined;
 }
 
+function untilError(validFrom: string | null | undefined, validUntil: string | null): string | undefined {
+  if (!validFrom || !validUntil) return undefined;
+  return new Date(validUntil) <= new Date(validFrom)
+    ? 'La fecha de fin tiene que ser posterior a la de inicio.'
+    : undefined;
+}
+
 export function validateSeasonalLoteriaForm(form: SeasonalLoteriaForm): SeasonalFormResult {
   const priceCents = parsePriceToCents(form.price);
   const cardCount = parseCount(form.cardCount);
   const boardCount = parseCount(form.boardCount);
   const countMessage = 'Escribe un número entero mayor que cero.';
+  const validFrom = localInputToIso(form.validFrom);
+  const validUntil = localInputToIso(form.validUntil);
+  const dateMessage = 'Escribe una fecha válida.';
 
   const candidates: SeasonalFormErrors = {
     seasonId: form.seasonId === '' ? 'Elige una temporada.' : undefined,
     nameEs:
-      form.nameEs.trim() === ''
-        ? 'Escribe el nombre en español.'
-        : tooLong(form.nameEs, SEASONAL_NAME_MAX_LENGTH),
+      form.nameEs.trim() === '' ? 'Escribe el nombre en español.' : tooLong(form.nameEs, SEASONAL_NAME_MAX_LENGTH),
     nameEn: tooLong(form.nameEn, SEASONAL_NAME_MAX_LENGTH),
     descriptionEs: tooLong(form.descriptionEs, SEASONAL_DESCRIPTION_MAX_LENGTH),
     descriptionEn: tooLong(form.descriptionEn, SEASONAL_DESCRIPTION_MAX_LENGTH),
     cardCount: Number.isNaN(cardCount) ? countMessage : undefined,
     boardCount: Number.isNaN(boardCount) ? countMessage : undefined,
     price: priceError(priceCents),
+    validFrom: validFrom === undefined ? dateMessage : undefined,
+    validUntil: validUntil === undefined ? dateMessage : untilError(validFrom, validUntil),
   };
   const errors = Object.fromEntries(
     Object.entries(candidates).filter(([, message]) => message !== undefined),
@@ -121,6 +138,8 @@ export function validateSeasonalLoteriaForm(form: SeasonalLoteriaForm): Seasonal
       card_count: cardCount,
       board_count: boardCount,
       price_cents: priceCents,
+      valid_from: validFrom ?? null,
+      valid_until: validUntil ?? null,
     },
   };
 }

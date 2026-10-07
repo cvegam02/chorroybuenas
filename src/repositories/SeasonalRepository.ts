@@ -44,7 +44,7 @@ export interface AdminSeasonalLoteria extends SeasonalLoteriaInput {
 
 const SEASON_COLUMNS = 'id, name_es, name_en, sort_order';
 const LOTERIA_COLUMNS =
-  'id, season_id, name_es, name_en, description_es, description_en, grid_size, card_count, board_count, price_cents, is_published, cover_path, sample_paths';
+  'id, season_id, name_es, name_en, description_es, description_en, grid_size, card_count, board_count, price_cents, valid_from, valid_until, is_published, cover_path, sample_paths';
 
 interface SeasonRowWithCount extends Season {
   seasonal_loterias: { count: number }[] | null;
@@ -112,6 +112,31 @@ export class SeasonalRepository {
       return null;
     }
     return (data as { id: string }).id;
+  }
+
+  /** Publica o despublica. La base rechaza publicar una lotería incompleta. */
+  static async setPublished(id: string, isPublished: boolean): Promise<boolean> {
+    const { error } = await supabase
+      .from('seasonal_loterias')
+      .update({ is_published: isPublished, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) {
+      logger.error('SeasonalRepository.setPublished:', error.message);
+      return false;
+    }
+    return true;
+  }
+
+  /** Borra la ficha y, si la base lo permitió, sus archivos. */
+  static async deleteLoteria(loteria: AdminSeasonalLoteria): Promise<boolean> {
+    const { error } = await supabase.from('seasonal_loterias').delete().eq('id', loteria.id);
+    if (error) {
+      logger.error('SeasonalRepository.deleteLoteria:', error.message);
+      return false;
+    }
+    if (loteria.pdf) await this.removePdfObject(loteria.pdf.path);
+    await this.removePreviews([loteria.cover_path, ...loteria.sample_paths].filter((path): path is string => !!path));
+    return true;
   }
 
   /**

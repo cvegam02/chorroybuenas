@@ -1,6 +1,6 @@
 # FEAT-17 — Loterías de temporada (catálogo de pago)
 
-**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. Siguiente historia: A4.**
+**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. Siguiente historia: B1.**
 
 **Contexto.** Hoy el sitio solo cobra por la transformación de fotos con IA. Carlos quiere una segunda cosa que vender: loterías ya hechas por él, por temporada (Halloween, Día de Muertos, Thanksgiving, Navidad…), en una sección nueva tipo catálogo. Cualquiera las ve; para descargarlas hay que pagar. Carlos las prepara fuera del sitio y las administra desde el panel: las sube, les pone precio y las publica.
 
@@ -213,20 +213,23 @@
   - [x] Imagen de otro formato o de más de 5 MB: aviso junto al campo. (Prueba automática.)
   - [x] Solo un administrador puede subir o borrar portadas y muestras. (Prueba de base, en la de A2.)
 
-### US A4 — Publicar, programar, despublicar y borrar   ·   Estado: ⬜ por hacer
+### US A4 — Publicar, programar, despublicar y borrar   ·   Estado: ✅ hecha (2026-10-06)
 
 - **Historia** — Como administrador, quiero decidir cuándo se ve cada lotería y que el sitio no me deje publicar una a medias ni borrar una vendida, para no cometer errores con el catálogo.
 - **Entrega demostrable** — En la tabla cambio el interruptor «Publicada», pongo fechas, y veo el estado correcto (Borrador, Publicada, Programada, Fuera de fechas); el sitio me dice qué falta para publicar y no me deja borrar una lotería con ventas.
 - **Construcción (propuesta)** — Prueba primero, en `tests/src/`, de la función que decide el estado a partir de publicada, fechas y la fecha de hoy, y de la que lista qué falta para publicar. Prueba de base (en `027_seasonal_catalog.test.sql`) de que no se puede publicar incompleta ni borrar con ventas. Interruptor, estados y filtro por temporada en `AdminSeasonal.tsx`.
-- **Construido** —
+- **Construido** — 2026-10-06, en la rama `feature/loterias-de-temporada`, sin commit todavía. Se empezó por las pruebas: `tests/src/seasonalPublishing.test.ts` (estado según publicada y fechas, qué falta para publicar, fechas del formulario), cinco pruebas más en `tests/src/seasonalLoteria.test.ts` (fechas de la ficha) y la prueba de base `supabase/tests/029_seasonal_publish_rules.test.sql` (18 comprobaciones); fallaron y pasan con `src/utils/seasonalPublishing.ts` y la migración `029_seasonal_publish_rules.sql`. La migración agrega dos reglas a la base: no se puede publicar (ni dejar publicada) una lotería sin descripción, precio, PDF o portada, y no se le puede quitar el PDF a una publicada. En la tabla de loterías hay ahora interruptor «Publicada» (apagado y con «Falta: …» si está incompleta), los cuatro estados, columna de fechas, filtro por temporada y botón de borrar con confirmación, que borra también el PDF y las imágenes. El formulario tiene «Visible desde» y «Visible hasta» y lista arriba lo que falta para publicar. Las pruebas de base 027 y 028 se ajustaron porque publicaban loterías incompletas. Revisión de tipos, lint y pruebas en verde (354; 201 comprobaciones de base). La migración 029 se aplicó en la base de **dev** el 2026-10-06, tras revisar su estado real (una sola lotería, en borrador; ningún disparador; nada que respaldar). Comprobado después: los dos disparadores existen y publicar la lotería incompleta se rechaza. **No se ha aplicado en producción** (tampoco la 027 ni la 028).
+  - **Demo confirmada (2026-10-06).** Carlos probó la tabla y el formulario en su máquina, que usa la base de dev, y confirmó que funciona («todo se ve bien»). No se probó en `dev.chorroybuenas.com.mx`: el código sigue sin commit. No detalló qué pasos del guion siguió ni comentó la vista en teléfono; tampoco respondió si el número de cartas y de tableros deben ser obligatorios para publicar.
+  - Cambio respecto a la propuesta: la regla necesitó una migración propia, la 029; por eso la de compras (C1) pasa a ser la 030. La prueba de base quedó en su propio archivo en lugar de dentro del de la 027.
+  - Decidido al construir, por confirmar con Carlos: las fechas llevan también hora (como las promociones) y se escriben en la hora del navegador; a una lotería publicada no se le puede quitar descripción, precio, portada ni PDF desde el formulario: avisa que primero hay que despublicarla; el número de cartas y de tableros no son obligatorios para publicar (la regla 25 no los pide); la tabla conserva la columna «PDF»; el botón de borrar está siempre encendido hasta que existan las ventas (C1).
 - **Depende de** — A2 y A3. El escenario de «no se borra con ventas» se completa en la demo de C1.
 - **Cómo se prueba (guion de demo)** — Con una lotería sin portada, intenta publicarla: el interruptor no se mueve y dice «Falta: portada». Con la lotería completa de A3, publícala: el estado pasa a «Publicada». Ponle fecha de inicio mañana: pasa a «Programada». Ponle fecha de fin ayer: «Fuera de fechas». Quita las fechas y despublica: «Borrador». Borra una lotería sin ventas: pide confirmación y desaparece.
 - **Escenarios cubiertos**:
-  - [ ] Estado correcto según publicada y fechas, incluidos los días límite. (Prueba automática.)
-  - [ ] No se puede publicar sin nombre, descripción, precio, PDF o portada. (Prueba automática y prueba de base.)
-  - [ ] Fecha de fin anterior a la de inicio: se rechaza. (Prueba automática.)
-  - [ ] Una lotería con ventas no se puede borrar. (Prueba de base.)
-  - [ ] Una lotería sin ventas se borra, con confirmación, junto con sus archivos. (Demo.)
+  - [x] Estado correcto según publicada y fechas, incluidos los días límite. (Prueba automática.)
+  - [x] No se puede publicar sin nombre, descripción, precio, PDF o portada. (Prueba automática y prueba de base.)
+  - [x] Fecha de fin anterior a la de inicio: se rechaza. (Prueba automática y prueba de base.)
+  - [ ] Una lotería con ventas no se puede borrar. (Prueba de base; llega con las compras, en C1.)
+  - [x] Una lotería sin ventas se borra, con confirmación, junto con sus archivos. (Demo; la prueba de base cubre el registro del PDF.)
 
 ## Grupo B — Catálogo público
 
@@ -269,7 +272,7 @@
 
 - **Historia** — Como usuario registrado, quiero pagar una lotería de temporada con Mercado Pago y que quede registrada como mía, para poder descargarla.
 - **Entrega demostrable** — Con sesión, «Comprar» me lleva a Mercado Pago; al pagar con una tarjeta de prueba vuelvo al detalle con el aviso «¡Listo! Ya es tuya», y la lotería deja de ofrecer «Comprar».
-- **Construcción (propuesta)** — **Pruebas primero.** Base: `supabase/tests/029_seasonal_purchases.test.sql` (un pago se registra una sola vez; quién lee las compras; nadie escribe desde el navegador; la función de entrega solo la ejecuta el servidor). Funciones: pruebas en `tests/functions/` de la preferencia de temporada, de la decisión tokens / temporada al acreditar y del rechazo por monto menor. Migración `supabase/migrations/029_seasonal_purchases.sql` (tabla de compras y función de entrega idempotente). Edge function nueva `create-seasonal-preference`; `_shared/paymentFlow.ts` y `_shared/credit.ts` aprenden a distinguir el tipo de compra; `webhook-mercadopago` y `credit-payment-on-return` entregan la lotería cuando corresponde. Aviso de retorno en la pantalla de detalle. Desplegar migración y funciones en dev antes de la demo.
+- **Construcción (propuesta)** — **Pruebas primero.** Base: `supabase/tests/030_seasonal_purchases.test.sql` (un pago se registra una sola vez; quién lee las compras; nadie escribe desde el navegador; la función de entrega solo la ejecuta el servidor). Funciones: pruebas en `tests/functions/` de la preferencia de temporada, de la decisión tokens / temporada al acreditar y del rechazo por monto menor. Migración `supabase/migrations/030_seasonal_purchases.sql` (tabla de compras y función de entrega idempotente). Edge function nueva `create-seasonal-preference`; `_shared/paymentFlow.ts` y `_shared/credit.ts` aprenden a distinguir el tipo de compra; `webhook-mercadopago` y `credit-payment-on-return` entregan la lotería cuando corresponde. Aviso de retorno en la pantalla de detalle. Desplegar migración y funciones en dev antes de la demo.
 - **Construido** —
 - **Depende de** — B2.
 - **Cómo se prueba (guion de demo)** — En dev, con una cuenta normal → «De Temporada» → una lotería → «Comprar». Deberías llegar a Mercado Pago con el nombre de la lotería y su precio. Paga con la tarjeta de prueba aprobada. Vuelves al detalle con «¡Listo! Ya es tuya». Recarga: el recuadro dice «Ya es tuya» y no ofrece comprar. En el catálogo, su tarjeta dice «Ya es tuya». Repite con otra lotería y cancela el pago: vuelves con «No se completó el pago» y «Comprar» sigue ahí. En el panel, intenta borrar la lotería vendida: el botón está apagado con «Tiene ventas: solo se puede despublicar».
@@ -307,7 +310,7 @@
 
 - **Historia** — Como comprador que paga en efectivo o por transferencia, quiero ver que mi compra quedó registrada mientras se confirma, y recibir la lotería cuando Mercado Pago lo confirme, para no pagar dos veces ni quedarme con la duda.
 - **Entrega demostrable** — Tras elegir un pago pendiente vuelvo al detalle con «Tu pago está en proceso»; en Mi cuenta la lotería aparece con la etiqueta «Pago en proceso» y sin descarga; cuando el pago se aprueba, pasa a descargable.
-- **Construcción (propuesta)** — **Prueba primero**: en `tests/functions/`, que un pago pendiente se registra como pendiente y que al aprobarse pasa a aprobado sin duplicarse; en `029_seasonal_purchases.test.sql`, el paso de pendiente a aprobada. Hoy el flujo de pago descarta todo lo que no esté aprobado (`_shared/paymentFlow.ts`): hay que agregar el registro del pendiente solo para compras de temporada, sin cambiar lo que pasa con los tokens. Estados en el detalle y en la sección de Mi cuenta.
+- **Construcción (propuesta)** — **Prueba primero**: en `tests/functions/`, que un pago pendiente se registra como pendiente y que al aprobarse pasa a aprobado sin duplicarse; en `030_seasonal_purchases.test.sql`, el paso de pendiente a aprobada. Hoy el flujo de pago descarta todo lo que no esté aprobado (`_shared/paymentFlow.ts`): hay que agregar el registro del pendiente solo para compras de temporada, sin cambiar lo que pasa con los tokens. Estados en el detalle y en la sección de Mi cuenta.
 - **Construido** —
 - **Depende de** — C2.
 - **Cómo se prueba (guion de demo)** — En dev, compra una lotería eligiendo pago en efectivo (o la tarjeta de prueba que deja el pago pendiente). Vuelves al detalle con «Tu pago está en proceso…» y sin botón de comprar. En Mi cuenta aparece con «Pago en proceso», sin «Descargar PDF». Cuando el pago se apruebe (lo simulamos juntos en dev), recarga: ya tiene «Descargar PDF».

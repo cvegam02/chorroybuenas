@@ -18,6 +18,8 @@ const COMPLETE_FORM: SeasonalLoteriaForm = {
   cardCount: '54',
   boardCount: '10',
   price: '49',
+  validFrom: '',
+  validUntil: '',
 };
 
 describe('precio de una lotería de temporada (FEAT-17, decisión 15)', () => {
@@ -53,6 +55,8 @@ describe('formulario de lotería de temporada', () => {
       card_count: 54,
       board_count: 10,
       price_cents: 4900,
+      valid_from: null,
+      valid_until: null,
     });
   });
 
@@ -141,5 +145,41 @@ describe('peso de un archivo', () => {
     expect(formatFileSize(300 * 1024)).toBe('300 KB');
     expect(formatFileSize(1024 * 1024)).toBe('1.0 MB');
     expect(formatFileSize(12.34 * 1024 * 1024)).toBe('12.3 MB');
+  });
+});
+
+describe('fechas de una lotería de temporada (FEAT-17, decisión 5)', () => {
+  it('sin fechas se guarda sin inicio ni fin', () => {
+    const { input } = validateSeasonalLoteriaForm(COMPLETE_FORM);
+    expect(input?.valid_from).toBeNull();
+    expect(input?.valid_until).toBeNull();
+  });
+
+  it('guarda las fechas escritas', () => {
+    const { input } = validateSeasonalLoteriaForm({
+      ...COMPLETE_FORM,
+      validFrom: '2026-10-01T00:00',
+      validUntil: '2026-11-03T23:59',
+    });
+    expect(input?.valid_from).toBe(new Date(2026, 9, 1, 0, 0).toISOString());
+    expect(input?.valid_until).toBe(new Date(2026, 10, 3, 23, 59).toISOString());
+  });
+
+  it('una fecha de fin anterior o igual a la de inicio se rechaza', () => {
+    for (const validUntil of ['2026-09-30T00:00', '2026-10-01T00:00']) {
+      const result = validateSeasonalLoteriaForm({ ...COMPLETE_FORM, validFrom: '2026-10-01T00:00', validUntil });
+      expect(result.input).toBeNull();
+      expect(result.errors.validUntil).toBeDefined();
+    }
+  });
+
+  it('solo inicio o solo fin son válidos', () => {
+    expect(validateSeasonalLoteriaForm({ ...COMPLETE_FORM, validFrom: '2026-10-01T00:00' }).input).not.toBeNull();
+    expect(validateSeasonalLoteriaForm({ ...COMPLETE_FORM, validUntil: '2026-10-01T00:00' }).input).not.toBeNull();
+  });
+
+  it('lo que no es una fecha se rechaza', () => {
+    const result = validateSeasonalLoteriaForm({ ...COMPLETE_FORM, validFrom: 'mañana' });
+    expect(result.errors.validFrom).toBeDefined();
   });
 });

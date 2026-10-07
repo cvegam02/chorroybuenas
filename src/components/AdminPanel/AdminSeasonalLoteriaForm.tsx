@@ -11,12 +11,14 @@ import {
   SEASONAL_NAME_MAX_LENGTH,
   SEASONAL_PDF_MIME_TYPE,
   formatFileSize,
+  parsePriceToCents,
   validatePdfFile,
   validateSeasonalLoteriaForm,
   type SeasonalFormErrors,
   type SeasonalGridSize,
   type SeasonalLoteriaForm,
 } from '../../utils/seasonalLoteria';
+import { isoToLocalInput, missingToPublish } from '../../utils/seasonalPublishing';
 import { AdminSeasonalPreviews } from './AdminSeasonalPreviews';
 import { storedPreviewItem, uploadPendingPreviews, type PreviewItem } from './seasonalPreviewItems';
 import './AdminTokenPacks.css';
@@ -68,6 +70,8 @@ function toFormState(loteria: AdminSeasonalLoteria | null, seasons: readonly Sea
       cardCount: '',
       boardCount: '',
       price: '',
+      validFrom: '',
+      validUntil: '',
     };
   }
   return {
@@ -80,6 +84,8 @@ function toFormState(loteria: AdminSeasonalLoteria | null, seasons: readonly Sea
     cardCount: loteria.card_count?.toString() ?? '',
     boardCount: loteria.board_count?.toString() ?? '',
     price: centsToPriceText(loteria.price_cents),
+    validFrom: isoToLocalInput(loteria.valid_from),
+    validUntil: isoToLocalInput(loteria.valid_until),
   };
 }
 
@@ -124,6 +130,20 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, onClose }: AdminSea
     if (!rejection) setPdfFile(file);
   };
 
+  const shownPdf = pdfFile
+    ? { name: pdfFile.name, sizeBytes: pdfFile.size, note: 'Se subirá al guardar.' }
+    : loteria?.pdf
+      ? { name: loteria.pdf.name, sizeBytes: loteria.pdf.sizeBytes, note: null }
+      : null;
+  const missing = missingToPublish({
+    name_es: form.nameEs,
+    description_es: form.descriptionEs,
+    price_cents: parsePriceToCents(form.price),
+    hasPdf: shownPdf !== null,
+    hasCover: cover !== null,
+  });
+  const describedBy = (id: string, error?: string) => (error ? `${id}-error` : undefined);
+
   /** Sube las imágenes nuevas, guarda portada y orden de muestras, y borra las que ya no se usan. */
   const persistPreviews = async (id: string): Promise<boolean> => {
     const [uploadedCover = null] = cover ? await uploadPendingPreviews(id, [cover]) : [];
@@ -147,6 +167,10 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, onClose }: AdminSea
     const result = validateSeasonalLoteriaForm(form);
     setErrors(result.errors);
     if (!result.input) return;
+    if (loteria?.is_published && missing.length > 0) {
+      setSaveError(`Esta lotería está publicada y no puede quedarse sin ${missing.join(', ')}. Despublícala primero.`);
+      return;
+    }
 
     setIsSaving(true);
     setSaveError(null);
@@ -175,12 +199,6 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, onClose }: AdminSea
     onClose(true);
   };
 
-  const describedBy = (id: string, error?: string) => (error ? `${id}-error` : undefined);
-  const shownPdf = pdfFile
-    ? { name: pdfFile.name, sizeBytes: pdfFile.size, note: 'Se subirá al guardar.' }
-    : loteria?.pdf
-      ? { name: loteria.pdf.name, sizeBytes: loteria.pdf.sizeBytes, note: null }
-      : null;
 
   const content = (
     <div
@@ -201,6 +219,9 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, onClose }: AdminSea
           <p className="admin-packs__error" role="alert">
             {saveError}
           </p>
+        )}
+        {missing.length > 0 && (
+          <p className="admin-seasonal__meta">Para poder publicarla falta: {missing.join(', ')}.</p>
         )}
 
         <fieldset className="admin-seasonal-form__group" disabled={isSaving}>
@@ -309,7 +330,7 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, onClose }: AdminSea
         </fieldset>
 
         <fieldset className="admin-seasonal-form__group" disabled={isSaving}>
-          <legend>Precio</legend>
+          <legend>Precio y visibilidad</legend>
           <div className="admin-packs__new-row">
             <Field id="seasonal-price" label="Precio en pesos (mínimo $10.00)" error={errors.price}>
               <input
@@ -320,6 +341,24 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, onClose }: AdminSea
                 onChange={(e) => setField('price', e.target.value)}
                 placeholder="49"
                 aria-describedby={describedBy('seasonal-price', errors.price)}
+              />
+            </Field>
+            <Field id="seasonal-valid-from" label="Visible desde (opcional)" error={errors.validFrom}>
+              <input
+                id="seasonal-valid-from"
+                type="datetime-local"
+                value={form.validFrom}
+                onChange={(e) => setField('validFrom', e.target.value)}
+                aria-describedby={describedBy('seasonal-valid-from', errors.validFrom)}
+              />
+            </Field>
+            <Field id="seasonal-valid-until" label="Visible hasta (opcional)" error={errors.validUntil}>
+              <input
+                id="seasonal-valid-until"
+                type="datetime-local"
+                value={form.validUntil}
+                onChange={(e) => setField('validUntil', e.target.value)}
+                aria-describedby={describedBy('seasonal-valid-until', errors.validUntil)}
               />
             </Field>
           </div>

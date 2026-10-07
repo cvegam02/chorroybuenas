@@ -38,19 +38,21 @@ select test.is(
   (select is_published from public.seasonal_loterias where id = '00000000-0000-0000-0000-0000000000b1'),
   false, 'una lotería nueva nace sin publicar');
 select test.lives($$
-  insert into public.seasonal_loterias (id, season_id, name_es, price_cents, is_published)
-  values ('00000000-0000-0000-0000-0000000000b2', '00000000-0000-0000-0000-0000000000a1', 'Ofrenda', 4900, true)
-$$, 'un administrador guarda una lotería publicada');
+  insert into public.seasonal_loterias (id, season_id, name_es, description_es, price_cents, cover_path, valid_from, valid_until)
+  values
+    ('00000000-0000-0000-0000-0000000000b2', '00000000-0000-0000-0000-0000000000a1', 'Ofrenda', 'Lista', 4900, 'b2/portada.jpg', null, null),
+    ('00000000-0000-0000-0000-0000000000b3', '00000000-0000-0000-0000-0000000000a1', 'Programada', 'Lista', 4900, 'b3/portada.jpg', now() + interval '1 day', null),
+    ('00000000-0000-0000-0000-0000000000b4', '00000000-0000-0000-0000-0000000000a1', 'Vencida', 'Lista', 4900, 'b4/portada.jpg', null, now() - interval '1 day')
+$$, 'un administrador guarda loterías completas, con y sin fechas');
 select test.lives($$
-  insert into public.seasonal_loterias (id, season_id, name_es, is_published, valid_from)
-  values ('00000000-0000-0000-0000-0000000000b3', '00000000-0000-0000-0000-0000000000a1', 'Programada', true,
-          now() + interval '1 day')
-$$, 'un administrador programa una lotería a futuro');
+  insert into public.seasonal_loteria_files (loteria_id, pdf_path, pdf_name, pdf_size_bytes)
+  select id, id || '/1.pdf', 'loteria.pdf', 1024 from public.seasonal_loterias
+   where id <> '00000000-0000-0000-0000-0000000000b1'
+$$, 'un administrador registra sus PDF');
 select test.lives($$
-  insert into public.seasonal_loterias (id, season_id, name_es, is_published, valid_until)
-  values ('00000000-0000-0000-0000-0000000000b4', '00000000-0000-0000-0000-0000000000a1', 'Vencida', true,
-          now() - interval '1 day')
-$$, 'un administrador guarda una lotería cuya fecha de fin ya pasó');
+  update public.seasonal_loterias set is_published = true
+   where id <> '00000000-0000-0000-0000-0000000000b1'
+$$, 'un administrador publica las loterías completas, también las programadas y las vencidas');
 select test.is((select count(*)::int from public.seasonal_loterias), 4,
   'el administrador ve todas las loterías, visibles o no');
 select test.throws($$
