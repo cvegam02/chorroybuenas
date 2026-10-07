@@ -1,6 +1,6 @@
 # FEAT-22 — Decir en el inicio qué hace el sitio y qué contenido no se permite
 
-**Estado: 🟡 en `dev` desde el 2026-10-07 (PR #30; función `transform-loteria` desplegada en el Supabase de dev) — falta la demo de Carlos en dev, pasarla a producción (función y `main`) y responderle a Google.**
+**Estado: 🟡 en producción desde el 2026-10-07, a petición de Carlos («mándalo a prod») y sin demo previa en dev: función `transform-loteria` desplegada en el Supabase de producción y `dev` pasado a `main`. Entró a `dev` con el PR #30. Google ya aprobó la verificación de marca (2026-10-07). Faltan las demos de Carlos, ya sobre producción.**
 
 **Contexto.** Google rechazó la verificación de marca del inicio de sesión con Google (2026-10-07) con este aviso: «We were unable to confirm your app's compliance. Please update your home page to clearly outline your application's purpose and ensure it does not use Google APIs for AI NCII (AI-generated Non-Consensual Intimate Imagery), then retry». Al revisar el sitio:
 
@@ -68,13 +68,13 @@
   - [x] El sitio no manda modelo en sus peticiones. (Prueba automática.)
   - [x] Función desplegada en dev. (2026-10-07.)
   - [ ] Una foto normal y un lote se transforman en dev. (Demo.)
-  - [ ] Función desplegada en producción, con confirmación de Carlos. (Pendiente.)
+  - [x] Función desplegada en producción, con confirmación de Carlos. (2026-10-07.)
 
-## US A2 — Reenviar la verificación a Google   ·   Estado: ⬜ pendiente (la hace Carlos)
+## US A2 — Reenviar la verificación a Google   ·   Estado: ✅ resuelta el 2026-10-07 — Google aprobó la verificación sin necesidad de responderle
 
 - **Historia** — Como dueño del sitio, quiero responderle a Google que el inicio ya explica el propósito y la regla de contenido, para que apruebe la verificación de marca.
 - **Entrega demostrable** — La verificación reenviada, con el texto de respuesta de abajo.
-- **Construido** — pendiente.
+- **Construido** — 2026-10-07: Carlos reportó que el estado en Google ya dice «Se verificó la información de tu marca y se muestra a los usuarios». La aprobación llegó cuando FEAT-22 solo estaba en `dev`, así que no dependió del bloque nuevo del inicio; no hizo falta mandar el texto de respuesta.
 - **Depende de** — US A1, A3 y A4 publicadas en producción (sitio y función).
 - **Cómo se prueba (guion de demo)** — Con el bloque ya visible en `chorroybuenas.com.mx` → abre en Google Cloud la verificación de la aplicación → responde al aviso con el texto de abajo y reenvía → Google debería contestar por correo en unos días.
 - **Texto de respuesta para Google** (en inglés):
@@ -82,5 +82,4 @@
   > Hello, we have updated our home page (https://chorroybuenas.com.mx) to clearly describe the application's purpose. chorroybuenas.com.mx lets people create a custom Mexican Lotería (a traditional bingo-style card game) with their own pictures and download it as a printable PDF. Google is used only for Sign-In (name, email address and profile picture), with no additional scopes. We do not use any Google API to generate or edit images. The optional AI feature only redraws a user's own photo in the illustrated style of a traditional Lotería card. Nudity, sexual or intimate content, and photos of people without their consent are not allowed, and an automatic content filter blocks them. This policy is now stated on the home page. Thank you.
 
 - **Escenarios cubiertos**:
-  - [ ] Verificación reenviada. (Carlos.)
-  - [ ] Google aprobó la verificación. (Carlos.)
+  - [x] Google aprobó la verificación. (Reportado por Carlos el 2026-10-07; no hizo falta reenviarla con el texto.)
