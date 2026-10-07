@@ -18,7 +18,10 @@ import {
   FaBriefcase,
   FaSmile,
   FaBirthdayCake,
-  FaChild
+  FaChild,
+  FaMagic,
+  FaGoogle,
+  FaShieldAlt
 } from 'react-icons/fa';
 import './LandingPage.css';
 import logoImage from '../../img/logo.png';
@@ -80,6 +83,41 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             </span>
           </div>
         </Link>
+
+        {/* Qué es el sitio, para qué usa la IA y Google, y qué contenido no se permite */}
+        <section className="landing-page__about">
+          <div className="landing-page__section-header">
+            <h2 className="landing-page__section-title">{t('landing.about.title')}</h2>
+            <p className="landing-page__section-subtitle">{t('landing.about.description')}</p>
+          </div>
+          <div className="landing-page__about-grid">
+            <div className="landing-page__about-item">
+              <div className="landing-page__about-icon">
+                <FaMagic />
+              </div>
+              <h3>{t('landing.about.ai.title')}</h3>
+              <p>{t('landing.about.ai.description')}</p>
+            </div>
+            <div className="landing-page__about-item">
+              <div className="landing-page__about-icon">
+                <FaGoogle />
+              </div>
+              <h3>{t('landing.about.google.title')}</h3>
+              <p>{t('landing.about.google.description')}</p>
+            </div>
+            <div className="landing-page__about-item">
+              <div className="landing-page__about-icon">
+                <FaShieldAlt />
+              </div>
+              <h3>{t('landing.about.content.title')}</h3>
+              <p>{t('landing.about.content.description')}</p>
+            </div>
+          </div>
+          <p className="landing-page__about-privacy">
+            {t('landing.about.privacyPrefix')}{' '}
+            <Link to="/privacidad">{t('landing.about.privacyLink')}</Link>.
+          </p>
+        </section>
 
         {/* Features Section */}
         <section className="landing-page__features">

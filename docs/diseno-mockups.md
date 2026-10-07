@@ -36,7 +36,7 @@ El sitio tiene cuatro zonas. Toda pantalla nueva debe pertenecer a una de ellas.
 
 | Código | Pantalla | Ruta | Qué muestra y qué permite |
 |---|---|---|---|
-| P1 | Inicio | `/` | Presentación del producto, con el video y la llamada a crear una lotería. |
+| P1 | Inicio | `/` | Presentación del producto, con el video y la llamada a crear una lotería. Desde el 2026-10-07 (FEAT-22), debajo del banner de beneficios lleva el bloque «¿Qué es chorroybuenas?»: qué hace el sitio, para qué se usa la IA, para qué se usa Google y qué contenido no se permite, con enlace al aviso de privacidad. |
 | P2 | Beneficios | `/beneficios` | Por qué registrarse: guardar loterías, usar la IA, tokens. Lleva a crear cuenta. |
 | P3 | ¿Cómo se juega? | `/como-se-juega` | Reglas del juego de la lotería. Informativa. |
 | P4 | ¿Qué es la lotería? | `/que-es-la-loteria` | Historia y contexto de la lotería mexicana. Informativa. |

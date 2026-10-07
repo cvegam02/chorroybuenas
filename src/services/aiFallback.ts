@@ -1,9 +1,7 @@
 /** Una llamada a la edge function transform-loteria. Rechaza con un Error cuyo message es un código. */
-export type EdgeCall = (params: { model: 'gpt-image' | 'flux'; prompt_variant?: 0 | 1 | 2 }) => Promise<string>;
+export type EdgeCall = (params: { prompt_variant: 0 | 1 | 2 }) => Promise<string>;
 
 export interface FallbackOptions {
-  /** Probar FLUX antes que GPT-Image (VITE_REPLICATE_USE_FLUX). */
-  useFluxFirst: boolean;
   /** Llamado al reintentar con un prompt más permisivo (intento 2 o 3). */
   onSensitiveRetry?: (attempt: number, messageKey: string) => void;
   delay?: (ms: number) => Promise<void>;
@@ -13,8 +11,6 @@ const RETRY_DELAY_MS = 500;
 /** Cada intento cobra y reembolsa un token en el servidor: los reintentos tienen tope. */
 const MAX_NSFW_RETRIES = 2;
 const LAST_VARIANT = 2;
-/** Errores que ningún reintento ni cambio de modelo arregla. */
-const FATAL = new Set(['INSUFFICIENT_TOKENS', 'RATE_LIMITED', 'NOT_LOGGED_IN', 'AI_NOT_CONFIGURED', 'AI_TIMEOUT']);
 const SENSITIVE = new Set(['SENSITIVE_CONTENT_FILTER', 'SENSITIVE_PHOTO_NOT_SUPPORTED', 'NSFW_FILTER']);
 
 const messageOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
@@ -22,25 +18,18 @@ const defaultDelay = (ms: number) => new Promise<void>((resolve) => setTimeout(r
 
 /**
  * Estrategia de reintentos de la transformación:
- * GPT-Image con prompt 0 → 1 → 2 ante contenido sensible, y FLUX como último recurso.
+ * prompt 0 → 1 → 2 ante contenido sensible. Hay un solo modelo: una foto rechazada por el filtro
+ * de contenido se rinde con SENSITIVE_PHOTO_NOT_SUPPORTED.
  */
-export async function transformWithFallback(call: EdgeCall, opts: FallbackOptions): Promise<string> {
+export async function transformWithFallback(call: EdgeCall, opts: FallbackOptions = {}): Promise<string> {
   const delay = opts.delay ?? defaultDelay;
-
-  if (opts.useFluxFirst) {
-    try {
-      return await call({ model: 'flux' });
-    } catch (error) {
-      if (FATAL.has(messageOf(error))) throw error;
-    }
-  }
 
   let variant: 0 | 1 | 2 = 0;
   let nsfwRetries = 0;
 
   for (;;) {
     try {
-      return await call({ model: 'gpt-image', prompt_variant: variant });
+      return await call({ prompt_variant: variant });
     } catch (error) {
       const message = messageOf(error);
       if (message === 'NSFW_FILTER' && nsfwRetries < MAX_NSFW_RETRIES) {
@@ -49,18 +38,11 @@ export async function transformWithFallback(call: EdgeCall, opts: FallbackOption
         continue;
       }
       if (message !== 'SENSITIVE_CONTENT_FILTER') throw error;
-      if (variant === LAST_VARIANT) break;
+      if (variant === LAST_VARIANT) throw new Error('SENSITIVE_PHOTO_NOT_SUPPORTED');
       variant = (variant + 1) as 1 | 2;
       opts.onSensitiveRetry?.(variant, 'cardEditor.errors.aiSensitiveRetrying');
       await delay(RETRY_DELAY_MS);
     }
-  }
-
-  try {
-    return await call({ model: 'flux' });
-  } catch (error) {
-    if (FATAL.has(messageOf(error))) throw error;
-    throw new Error('SENSITIVE_PHOTO_NOT_SUPPORTED');
   }
 }
 

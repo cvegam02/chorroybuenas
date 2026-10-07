@@ -2,11 +2,7 @@ import type { Prediction } from './replicate.ts';
 import { fail, isUuid, validateImageDataUri, type ParseResult } from './validation.ts';
 
 const GPT_IMAGE_VERSION = '118f53498ea7319519229b2d5bd0d4a69e3d77eb60d6292d5db38125534dc1ca';
-const FLUX_VERSION = '0ce45202d83c6bd379dfe58f4c0c41e6cadf93ebbd9d938cc63cc0f2fcb729a5';
 const DEFAULT_PROMPT_STRENGTH = 0.5;
-const DEFAULT_FLUX_DENOISING = 0.65;
-const MIN_FLUX_DENOISING = 0.45;
-const MAX_FLUX_DENOISING = 0.72;
 const HIGH_FIDELITY_THRESHOLD = 0.4;
 
 const LOTERIA_PROMPT_TAIL = `
@@ -27,17 +23,17 @@ The result must be an original character.${LOTERIA_PROMPT_TAIL}`,
   2: `Create a symbolic illustration inspired by the theme and colors of the image.${LOTERIA_PROMPT_TAIL}`,
 };
 
-const FLUX_PROMPT = `Same subject, same pose and composition as the input image. Mexican Loteria card, Don Clemente Gallo vintage 1940s style, lithograph print. Bold thick black outlines, naive folk art, flat colors. Mexican pink, teal, sunflower yellow, solid flat fills. Visible ink texture, aged paper grain. Illustration only, no photorealism, no 3D, no text.`;
-
 export interface TransformRequest {
   image: string;
-  model: 'gpt-image' | 'flux';
   promptVariant: 0 | 1 | 2;
   strength: number;
   setId: string | null;
 }
 
-/** Solo la imagen es obligatoria; los demás parámetros se normalizan a su valor por defecto. */
+/**
+ * Solo la imagen es obligatoria; los demás parámetros se normalizan a su valor por defecto.
+ * El modelo no se elige desde el navegador: siempre se usa GPT-Image, que es el que aplica el filtro de contenido.
+ */
 export function parseTransformRequest(body: unknown): ParseResult<TransformRequest> {
   if (typeof body !== 'object' || body === null) return fail('Body JSON inválido.');
   const raw = body as Record<string, unknown>;
@@ -51,7 +47,6 @@ export function parseTransformRequest(body: unknown): ParseResult<TransformReque
     ok: true,
     value: {
       image: image.value,
-      model: raw.model === 'flux' ? 'flux' : 'gpt-image',
       promptVariant: variant === 1 || variant === 2 ? variant : 0,
       strength: typeof strength === 'number' && strength >= 0 && strength <= 1 ? strength : DEFAULT_PROMPT_STRENGTH,
       setId: isUuid(raw.set_id) ? raw.set_id : null,
@@ -59,23 +54,8 @@ export function parseTransformRequest(body: unknown): ParseResult<TransformReque
   };
 }
 
-/** Cuerpo de la predicción de Replicate para el modelo pedido. */
+/** Cuerpo de la predicción de Replicate. */
 export function buildPredictionBody(req: TransformRequest): { version: string; input: Record<string, unknown> } {
-  if (req.model === 'flux') {
-    const denoising = req.strength || DEFAULT_FLUX_DENOISING;
-    return {
-      version: FLUX_VERSION,
-      input: {
-        image: req.image,
-        positive_prompt: FLUX_PROMPT,
-        denoising: Math.min(MAX_FLUX_DENOISING, Math.max(MIN_FLUX_DENOISING, denoising)),
-        steps: 28,
-        scheduler: 'simple',
-        sampler_name: 'euler',
-        seed: 0,
-      },
-    };
-  }
   return {
     version: GPT_IMAGE_VERSION,
     input: {

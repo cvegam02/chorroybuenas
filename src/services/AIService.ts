@@ -4,8 +4,8 @@
  * Las llamadas a Replicate se realizan vía Edge Function (transform-loteria) para
  * mantener la API key en el servidor. El frontend solo envía la imagen y recibe el resultado.
  *
- * Modelo principal: GPT-Image-1.5. Fallback: FLUX img2img cuando GPT-Image devuelve SENSITIVE_CONTENT_FILTER.
- * VITE_REPLICATE_USE_FLUX=true para usar FLUX primero (preferencia de estilo, no secreto).
+ * Modelo único: GPT-Image-1.5, elegido en el servidor. No hay modelo alterno: una foto que su
+ * filtro de contenido rechaza no se transforma.
  */
 
 import { supabase } from '../utils/supabaseClient';
@@ -71,7 +71,7 @@ export class AIService {
     static getEstimation(count: number) {
         return {
             totalCost: count * this.COST_PER_IMAGE,
-            estimatedSeconds: count * 45, // GPT-Image / FLUX on Replicate ~45s per image
+            estimatedSeconds: count * 45, // GPT-Image on Replicate ~45s per image
         };
     }
 
@@ -86,7 +86,7 @@ export class AIService {
     private static async callEdgeFunction(
         accessToken: string,
         imageBase64: string,
-        params: { model: 'gpt-image' | 'flux'; prompt_variant?: 0 | 1 | 2; prompt_strength: number; set_id?: string }
+        params: { prompt_variant: 0 | 1 | 2; prompt_strength: number; set_id?: string }
     ): Promise<string> {
         const res = await fetch(`${SUPABASE_URL}/functions/v1/transform-loteria`, {
             method: 'POST',
@@ -95,7 +95,7 @@ export class AIService {
                 Authorization: `Bearer ${accessToken}`,
                 apikey: SUPABASE_ANON_KEY,
             },
-            body: JSON.stringify({ image: imageBase64, prompt_variant: 0, ...params }),
+            body: JSON.stringify({ image: imageBase64, ...params }),
         });
 
         const body = await res.json().catch(() => ({}));
@@ -131,10 +131,7 @@ export class AIService {
                     prompt_strength: strength,
                     set_id: setId,
                 }),
-                {
-                    useFluxFirst: import.meta.env.VITE_REPLICATE_USE_FLUX === 'true',
-                    onSensitiveRetry: callbacks?.onSensitiveRetry,
-                }
+                { onSensitiveRetry: callbacks?.onSensitiveRetry }
             );
         } finally {
             // El servidor cobró (o reembolsó) el token: que la UI vuelva a pedir el saldo.

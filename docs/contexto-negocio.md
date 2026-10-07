@@ -71,6 +71,8 @@ El principio habla de la lotería que cada quien hace con sus fotos. Las loterí
 - Requiere cuenta. Un visitante que la pide ve el aviso de iniciar sesión. **DEFINIDO** (2026-10-06)
 - Máximo 10 transformaciones por minuto por usuario. **DEFINIDO** (2026-10-06)
 - Se puede transformar una carta o todas las que falten de una lotería, en lote. Si el filtro de contenido rechaza una foto del lote, esa se omite y el lote continúa. _(confirmado el 2026-10-06)_
+- **Contenido no permitido:** no se aceptan ni se generan desnudos, contenido sexual o íntimo, ni fotos de personas sin su permiso. La regla se dice en la página de inicio. El bloqueo automático es el filtro de contenido del modelo de IA: una foto subida sin usar la IA no pasa por ningún filtro, y ahí la regla es norma de uso. _(decidido el 2026-10-07, FEAT-22)_
+- La IA usa un solo modelo, elegido en el servidor. Una foto que su filtro de contenido rechaza no se transforma ni se intenta con otro modelo; el token se devuelve. _(decidido el 2026-10-07, FEAT-22)_
 - El usuario puede revertir una carta transformada a su foto original, sin costo y sin recuperar el token. _(confirmado el 2026-10-06)_
 - Volver a transformar una carta ya transformada cuesta otro token: cada transformación se cobra. **DEFINIDO** (2026-10-06)
 
