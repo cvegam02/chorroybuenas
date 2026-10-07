@@ -58,12 +58,14 @@ describe('estado de una lotería de temporada (FEAT-17, decisión 5)', () => {
 const COMPLETE: PublishableLoteria = {
   name_es: 'Posadas',
   description_es: 'Lotería navideña',
+  card_count: 54,
+  board_count: 10,
   price_cents: 4900,
   hasPdf: true,
   hasCover: true,
 };
 
-describe('qué falta para publicar (FEAT-17, decisión 25)', () => {
+describe('qué falta para publicar (FEAT-17, decisiones 25 y 27)', () => {
   it('a una lotería completa no le falta nada', () => {
     expect(missingToPublish(COMPLETE)).toEqual([]);
   });
@@ -72,6 +74,8 @@ describe('qué falta para publicar (FEAT-17, decisión 25)', () => {
     expect(missingToPublish({ ...COMPLETE, name_es: '  ' })).toEqual(['nombre']);
     expect(missingToPublish({ ...COMPLETE, description_es: null })).toEqual(['descripción']);
     expect(missingToPublish({ ...COMPLETE, description_es: '   ' })).toEqual(['descripción']);
+    expect(missingToPublish({ ...COMPLETE, card_count: null })).toEqual(['número de cartas']);
+    expect(missingToPublish({ ...COMPLETE, board_count: null })).toEqual(['número de tableros']);
     expect(missingToPublish({ ...COMPLETE, price_cents: null })).toEqual(['precio']);
     expect(missingToPublish({ ...COMPLETE, hasPdf: false })).toEqual(['PDF']);
     expect(missingToPublish({ ...COMPLETE, hasCover: false })).toEqual(['portada']);
@@ -79,8 +83,16 @@ describe('qué falta para publicar (FEAT-17, decisión 25)', () => {
 
   it('lista todo lo que falta, en el orden del formulario', () => {
     expect(
-      missingToPublish({ name_es: '', description_es: null, price_cents: null, hasPdf: false, hasCover: false }),
-    ).toEqual(['nombre', 'descripción', 'precio', 'PDF', 'portada']);
+      missingToPublish({
+        name_es: '',
+        description_es: null,
+        card_count: null,
+        board_count: null,
+        price_cents: null,
+        hasPdf: false,
+        hasCover: false,
+      }),
+    ).toEqual(['nombre', 'descripción', 'número de cartas', 'número de tableros', 'precio', 'PDF', 'portada']);
   });
 });
 

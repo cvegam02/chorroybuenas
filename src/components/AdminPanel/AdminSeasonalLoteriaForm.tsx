@@ -138,6 +138,9 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, onClose }: AdminSea
   const missing = missingToPublish({
     name_es: form.nameEs,
     description_es: form.descriptionEs,
+    // Un número mal escrito cuenta como presente: de eso ya avisa la validación del campo.
+    card_count: form.cardCount.trim() === '' ? null : Number(form.cardCount),
+    board_count: form.boardCount.trim() === '' ? null : Number(form.boardCount),
     price_cents: parsePriceToCents(form.price),
     hasPdf: shownPdf !== null,
     hasCover: cover !== null,

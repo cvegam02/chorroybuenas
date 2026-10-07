@@ -38,11 +38,11 @@ select test.is(
   (select is_published from public.seasonal_loterias where id = '00000000-0000-0000-0000-0000000000b1'),
   false, 'una lotería nueva nace sin publicar');
 select test.lives($$
-  insert into public.seasonal_loterias (id, season_id, name_es, description_es, price_cents, cover_path, valid_from, valid_until)
+  insert into public.seasonal_loterias (id, season_id, name_es, description_es, price_cents, cover_path, card_count, board_count, valid_from, valid_until)
   values
-    ('00000000-0000-0000-0000-0000000000b2', '00000000-0000-0000-0000-0000000000a1', 'Ofrenda', 'Lista', 4900, 'b2/portada.jpg', null, null),
-    ('00000000-0000-0000-0000-0000000000b3', '00000000-0000-0000-0000-0000000000a1', 'Programada', 'Lista', 4900, 'b3/portada.jpg', now() + interval '1 day', null),
-    ('00000000-0000-0000-0000-0000000000b4', '00000000-0000-0000-0000-0000000000a1', 'Vencida', 'Lista', 4900, 'b4/portada.jpg', null, now() - interval '1 day')
+    ('00000000-0000-0000-0000-0000000000b2', '00000000-0000-0000-0000-0000000000a1', 'Ofrenda', 'Lista', 4900, 'b2/portada.jpg', 54, 10, null, null),
+    ('00000000-0000-0000-0000-0000000000b3', '00000000-0000-0000-0000-0000000000a1', 'Programada', 'Lista', 4900, 'b3/portada.jpg', 54, 10, now() + interval '1 day', null),
+    ('00000000-0000-0000-0000-0000000000b4', '00000000-0000-0000-0000-0000000000a1', 'Vencida', 'Lista', 4900, 'b4/portada.jpg', 54, 10, null, now() - interval '1 day')
 $$, 'un administrador guarda loterías completas, con y sin fechas');
 select test.lives($$
   insert into public.seasonal_loteria_files (loteria_id, pdf_path, pdf_name, pdf_size_bytes)

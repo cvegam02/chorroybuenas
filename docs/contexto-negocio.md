@@ -234,6 +234,7 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-06 | En las loterías de temporada el español es obligatorio y el inglés opcional; el precio en dólares es solo referencia. _(Descartadas: solo español; los dos obligatorios.)_ |
 | 2026-10-06 | El cobro de una lotería de temporada tiene las mismas garantías que el de tokens: precio puesto por el servidor, entrega una sola vez por pago, y sin entrega si el monto es menor. Los pagos pendientes entregan al confirmarse. |
 | 2026-10-06 | Una lotería de temporada con ventas no se borra, solo se despublica. No se puede publicar incompleta. Se puede reemplazar su PDF: los compradores descargan la versión nueva. |
+| 2026-10-06 | Para publicar una lotería de temporada hacen falta también el número de cartas y el de tableros, además de nombre, descripción, precio, PDF y portada (FEAT-17). |
 
 ## 16. Pendientes por definir
 
@@ -278,7 +279,7 @@ Definido con Carlos el 2026-10-06 (FEAT-17). Por construir.
 
 - Cada lotería tiene «publicada sí/no» y fechas opcionales de inicio y de fin. Es visible cuando está publicada y dentro de sus fechas.
 - El catálogo muestra solo las visibles, y solo las temporadas que tienen al menos una.
-- No se puede publicar una lotería a la que le falte nombre, descripción, precio, PDF o portada.
+- No se puede publicar una lotería a la que le falte nombre, descripción, número de cartas, número de tableros, precio, PDF o portada. _(El número de cartas y de tableros se agregaron el 2026-10-06, FEAT-17: el catálogo los muestra en cada tarjeta.)_
 - Una lotería con ventas no se borra: solo se despublica.
 
 **Precio y cobro.**

@@ -49,6 +49,8 @@ function missingFor(loteria: AdminSeasonalLoteria): string[] {
   return missingToPublish({
     name_es: loteria.name_es,
     description_es: loteria.description_es,
+    card_count: loteria.card_count,
+    board_count: loteria.board_count,
     price_cents: loteria.price_cents,
     hasPdf: loteria.pdf !== null,
     hasCover: !!loteria.cover_path,

@@ -1,6 +1,6 @@
 /**
  * Visibilidad de una lotería de temporada (FEAT-17): su estado, qué le falta para publicarse y
- * las fechas del formulario. La base repite estas reglas (supabase/migrations/027 y 029): ella manda.
+ * las fechas del formulario. La base repite estas reglas (supabase/migrations/027, 029 y 030): ella manda.
  */
 export type SeasonalStatus = 'draft' | 'published' | 'scheduled' | 'expired';
 
@@ -31,6 +31,8 @@ export function seasonalStatus(loteria: SeasonalVisibility, now: Date): Seasonal
 export interface PublishableLoteria {
   name_es: string;
   description_es: string | null;
+  card_count: number | null;
+  board_count: number | null;
   price_cents: number | null;
   hasPdf: boolean;
   hasCover: boolean;
@@ -41,6 +43,8 @@ export function missingToPublish(loteria: PublishableLoteria): string[] {
   const requirements: [string, boolean][] = [
     ['nombre', loteria.name_es.trim() !== ''],
     ['descripción', (loteria.description_es ?? '').trim() !== ''],
+    ['número de cartas', loteria.card_count !== null],
+    ['número de tableros', loteria.board_count !== null],
     ['precio', loteria.price_cents !== null],
     ['PDF', loteria.hasPdf],
     ['portada', loteria.hasCover],
