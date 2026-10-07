@@ -479,6 +479,177 @@
   border: none;
 }
 
+/* Menú de usuario en escritorio: panel con encabezado y opciones agrupadas */
+.navbar__user-dropdown--panel {
+  width: 340px;
+  max-width: 340px;
+  padding: 0;
+  overflow: hidden;
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-lg);
+  transform-origin: top right;
+  animation: navbarUserPanelIn 0.16s ease-out;
+}
+
+@keyframes navbarUserPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar__user-dropdown--panel {
+    animation: none;
+  }
+}
+
+.navbar__user-panel-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--color-bg-subtle);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.navbar__user-panel-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.navbar__user-info--large {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.navbar__user-info--large .navbar__user-icon {
+  font-size: 1.25rem;
+}
+
+.navbar__user-panel-names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.navbar__user-panel-name,
+.navbar__user-panel-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navbar__user-panel-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.navbar__user-panel-email {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.navbar__user-panel-tokens {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 8px 8px 14px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-primary-lighter);
+  border-radius: var(--radius-md);
+}
+
+.navbar__user-panel-balance {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.navbar__user-panel-balance svg {
+  color: var(--color-primary-light);
+}
+
+.navbar__user-panel-buy {
+  margin-left: auto;
+  padding: 8px 18px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.navbar__user-panel-buy:hover {
+  background: var(--color-primary-dark);
+}
+
+.navbar__user-panel-group {
+  padding: 8px;
+}
+
+.navbar__user-panel-group + .navbar__user-panel-group {
+  border-top: 1px solid var(--color-border);
+}
+
+.navbar__user-panel-group-title {
+  padding: 6px 12px 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.navbar__user-panel-set {
+  justify-content: space-between;
+}
+
+.navbar__user-panel-set-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navbar__user-panel-set-check {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+}
+
+.navbar__user-panel-all {
+  justify-content: space-between;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.navbar__user-panel-all svg {
+  font-size: 0.75rem;
+}
+
+.navbar__user-dropdown--panel button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
 .navbar__auth-guest {
   display: flex;
   align-items: center;

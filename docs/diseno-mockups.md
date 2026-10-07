@@ -25,7 +25,7 @@ El sitio tiene cuatro zonas. Toda pantalla nueva debe pertenecer a una de ellas.
 
 - Para todos: logo (lleva a Inicio), Crear lotería, Beneficios, ¿Cómo se juega?, ¿Qué es la lotería?, selector de idioma (español / inglés).
 - Sin sesión: Iniciar sesión y Crear cuenta.
-- Con sesión: saldo de tokens, y un menú de usuario con Mis loterías, Crear nueva lotería, Comprar tokens, Mi cuenta, Administración (solo administradores) y Cerrar sesión.
+- Con sesión: saldo de tokens, y un menú de usuario con Mis loterías, Crear nueva lotería, Comprar tokens, Mi cuenta, Administración (solo administradores) y Cerrar sesión. En computadora el menú es un panel con encabezado (foto, nombre, correo, saldo y botón «Comprar») que muestra hasta cinco loterías; si hay más, agrega «Ver todas mis loterías», que abre Mi cuenta (U1) en su lista de loterías (2026-10-06, FEAT-16).
 
 **Pie de página:** en todas las pantallas. _(por confirmar)_
 
