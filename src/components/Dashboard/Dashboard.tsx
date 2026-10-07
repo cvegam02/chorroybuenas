@@ -30,6 +30,7 @@ import { WarningModal } from '../ConfirmationModal/WarningModal';
 import { PurchaseHistoryModal } from './PurchaseHistoryModal';
 import { buildTokenHistory, sumGiftTokens, summarizeTokens, type TokenHistoryEntry } from '../../utils/tokenHistory';
 import { ChangePasswordModal } from './ChangePasswordModal';
+import { MySeasonalLoterias } from './MySeasonalLoterias';
 import './Dashboard.css';
 import { logger } from '../../utils/logger';
 
@@ -567,6 +568,8 @@ export const Dashboard = () => {
               )}
             </div>
           </section>
+
+          <MySeasonalLoterias />
         </div>
       </main>
 

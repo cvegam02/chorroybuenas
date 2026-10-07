@@ -44,6 +44,37 @@ export interface AdminSeasonalLoteria extends SeasonalLoteriaInput {
   pdf: SeasonalPdf | null;
 }
 
+/** Una lotería de temporada que compró la cuenta, para la lista de Mi cuenta. */
+export interface PurchasedSeasonalLoteria {
+  purchaseId: string;
+  purchasedAt: string;
+  loteriaId: string;
+  name_es: string;
+  name_en: string | null;
+  cover_path: string | null;
+  season_es: string;
+  season_en: string | null;
+}
+
+interface PurchaseRowWithLoteria {
+  id: string;
+  created_at: string;
+  loteria_id: string;
+  seasonal_loterias: PurchasedLoteriaRow | PurchasedLoteriaRow[] | null;
+}
+
+interface PurchasedLoteriaRow {
+  name_es: string;
+  name_en: string | null;
+  cover_path: string | null;
+  seasons: Pick<Season, 'name_es' | 'name_en'> | Pick<Season, 'name_es' | 'name_en'>[] | null;
+}
+
+/** Lo que dura el enlace temporal de descarga del PDF. */
+const PDF_LINK_SECONDS = 60;
+
+const firstOf = <T,>(value: T | T[] | null): T | null => (Array.isArray(value) ? value[0] ?? null : value);
+
 const SEASON_COLUMNS = 'id, name_es, name_en, sort_order';
 const LOTERIA_COLUMNS =
   'id, season_id, name_es, name_en, description_es, description_en, grid_size, card_count, board_count, price_cents, valid_from, valid_until, is_published, cover_path, sample_paths';
@@ -162,6 +193,70 @@ export class SeasonalRepository {
       return null;
     }
     return (data ?? []).map((row) => row.loteria_id as string);
+  }
+
+  /**
+   * Las loterías de temporada compradas por la cuenta con sesión abierta, de la más reciente a la más
+   * antigua. Incluye las que ya no están en el catálogo. Devuelve null si la consulta falla.
+   */
+  static async getPurchasedLoterias(): Promise<PurchasedSeasonalLoteria[] | null> {
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user.id;
+    if (!userId) return [];
+
+    const { data, error } = await supabase
+      .from('seasonal_purchases')
+      .select('id, created_at, loteria_id, seasonal_loterias(name_es, name_en, cover_path, seasons(name_es, name_en))')
+      .eq('user_id', userId)
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      logger.error('SeasonalRepository.getPurchasedLoterias:', error.message);
+      return null;
+    }
+    return ((data ?? []) as unknown as PurchaseRowWithLoteria[]).flatMap((row) => {
+      const loteria = firstOf(row.seasonal_loterias);
+      if (!loteria) return [];
+      const season = firstOf(loteria.seasons);
+      return [{
+        purchaseId: row.id,
+        purchasedAt: row.created_at,
+        loteriaId: row.loteria_id,
+        name_es: loteria.name_es,
+        name_en: loteria.name_en,
+        cover_path: loteria.cover_path,
+        season_es: season?.name_es ?? '',
+        season_en: season?.name_en ?? null,
+      }];
+    });
+  }
+
+  /**
+   * Enlace temporal para descargar el PDF de una lotería. La base solo lo entrega a quien tiene una
+   * compra aprobada (o a un administrador). Devuelve null si no se pudo obtener.
+   */
+  static async getPdfDownloadUrl(loteriaId: string): Promise<string | null> {
+    const { data: file, error: fileError } = await supabase
+      .from('seasonal_loteria_files')
+      .select('pdf_path, pdf_name')
+      .eq('loteria_id', loteriaId)
+      .maybeSingle();
+
+    if (fileError || !file) {
+      logger.error('SeasonalRepository.getPdfDownloadUrl: sin registro del PDF', fileError?.message);
+      return null;
+    }
+
+    const { data, error } = await supabase.storage
+      .from(SeasonalRepository.PDF_BUCKET)
+      .createSignedUrl(file.pdf_path as string, PDF_LINK_SECONDS, { download: file.pdf_name as string });
+
+    if (error || !data?.signedUrl) {
+      logger.error('SeasonalRepository.getPdfDownloadUrl:', error?.message);
+      return null;
+    }
+    return data.signedUrl;
   }
 
   /** Ventas por lotería, para el panel de administración. Devuelve null si la consulta falla. */

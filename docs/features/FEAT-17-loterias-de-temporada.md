@@ -1,6 +1,6 @@
 # FEAT-17 — Loterías de temporada (catálogo de pago)
 
-**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. B1 hecha. B2 hecha. C1 hecha. Siguiente historia: C2. A4, la regla de cartas y tableros, la B1 y la B2 están en commits en la rama `feature/loterias-de-temporada`, sin subir; la C1 está sin commit. Las migraciones 027 a 031 están en dev y ninguna en producción.**
+**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. B1 hecha. B2 hecha. C1 hecha. C2 hecha. Siguiente historia: C3. De A4 a C1 está en commits en la rama `feature/loterias-de-temporada`, sin subir; la C2 está sin commit. Las migraciones 027 a 032 están en dev y ninguna en producción.**
 
 **Contexto.** Hoy el sitio solo cobra por la transformación de fotos con IA. Carlos quiere una segunda cosa que vender: loterías ya hechas por él, por temporada (Halloween, Día de Muertos, Thanksgiving, Navidad…), en una sección nueva tipo catálogo. Cualquiera las ve; para descargarlas hay que pagar. Carlos las prepara fuera del sitio y las administra desde el panel: las sube, les pone precio y las publica.
 
@@ -305,19 +305,23 @@
   - [ ] Una compra de tokens se sigue acreditando igual que antes. (Pruebas existentes en verde; falta la demo comprando tokens.)
   - [x] Un usuario no ve compras de otros ni puede inventarse una. (Prueba de base.)
 
-### US C2 — Descargar lo que compré   ·   Estado: ⬜ por hacer
+### US C2 — Descargar lo que compré   ·   Estado: ✅ hecha (2026-10-06)
 
 - **Historia** — Como comprador, quiero descargar mi lotería desde el detalle y desde Mi cuenta las veces que quiera, para imprimirla cuando la necesite.
 - **Entrega demostrable** — En el detalle de una lotería comprada y en la sección «Mis loterías de temporada» de Mi cuenta hay un botón «Descargar PDF» que baja el archivo; quien no la compró no puede obtenerlo.
 - **Construcción (propuesta)** — **Prueba primero**, ampliando `028_seasonal_storage.test.sql`: con compra aprobada se puede leer el PDF; con compra pendiente, sin compra, con la compra de otra lotería o sin sesión, no. Regla de acceso del espacio de PDF ligada a las compras aprobadas. Pedido del enlace temporal en `SeasonalRepository.ts`. Sección nueva en `Dashboard.tsx` como componente aparte (ese archivo ya es grande). Botón en el detalle.
-- **Construido** —
+- **Construido** — 2026-10-06, en la rama `feature/loterias-de-temporada`, sin commit todavía. Se empezó por la prueba de base `supabase/tests/032_seasonal_download.test.sql` (17 comprobaciones; 253 en total): falló y pasa con la migración `032_seasonal_download.sql`. La migración agrega tres reglas de solo lectura para quien tiene una compra aprobada: lee el PDF vigente de esa lotería, conoce su ubicación y sigue viendo su ficha aunque ya no esté en el catálogo. Una compra pendiente o devuelta no da acceso, y la compra de una lotería no abre el PDF de otra. Botón «Descargar PDF» (`SeasonalDownloadButton.tsx`), que pide un enlace de 60 segundos y baja el archivo; está en el detalle de una lotería comprada y en la sección nueva «Mis loterías de temporada» de Mi cuenta (`MySeasonalLoterias.tsx`, componente aparte), debajo de las loterías guardadas: portada en chico, nombre, temporada, fecha de compra y el botón; vacía, muestra «Aún no tienes loterías de temporada» y «Ver el catálogo». Si la descarga falla, aviso con «Reintentar». Quien compró una lotería que después se despublica ya ve su detalle con el botón. Textos en español e inglés. Revisión de tipos, lint y pruebas en verde (417).
+  - **En dev (2026-10-06):** tras revisar las reglas de lectura que había (solo las de administradores y la pública), se aplicó la migración 032 y se comprobó que las tres reglas nuevas existen. No hubo funciones que desplegar. **No está en producción.**
+  - **Demo confirmada (2026-10-06).** Carlos lo probó en su máquina, que usa la base de dev, y confirmó («funciona perfectamente»). No se probó en `dev.chorroybuenas.com.mx`: el código sigue sin commit. No detalló qué pasos del guion siguió (despublicar y volver a descargar, la cuenta sin compras, reemplazar el PDF, el fallo de descarga, el inglés, la vista en teléfono) ni comentó las decisiones de abajo.
+  - Cambio respecto a la propuesta: la prueba de base quedó en su propio archivo (032) en lugar de ampliar la de la 028. No hay prueba automática de la interfaz.
+  - Decidido al construir, por confirmar con Carlos: el archivo se baja con el nombre con que Carlos lo subió; una lotería comprada ya no muestra su precio en el detalle; el aviso de pago aprobado dice «¡Listo! Ya es tuya. Descárgala aquí o desde Mi cuenta.» y el botón está en el recuadro, no dentro del aviso; en Mi cuenta el nombre de cada lotería enlaza a su detalle; las compras salen de la más reciente a la más antigua; solo se puede leer el PDF vigente (una versión anterior que quedara guardada no); la etiqueta «Pago en proceso» de la sección llega en C3.
 - **Depende de** — C1.
 - **Cómo se prueba (guion de demo)** — Con la cuenta que compró en C1 → Mi cuenta. Bajo tus loterías guardadas debería estar «Mis loterías de temporada» con la que compraste: portada, nombre, temporada, fecha y «Descargar PDF». Púlsalo: se descarga el PDF que subiste. Descárgala otra vez desde el detalle de la lotería. Despublícala desde el panel y recarga Mi cuenta: sigue ahí y se sigue descargando. Entra con otra cuenta que no compró nada: la sección dice «Aún no tienes loterías de temporada» con el enlace «Ver el catálogo».
 - **Escenarios cubiertos**:
-  - [ ] Con compra aprobada se descarga el PDF, sin límite de veces. (Prueba de base; demo.)
-  - [ ] Sin compra, con compra pendiente o sin sesión, no se puede obtener el PDF. (Prueba de base.)
-  - [ ] La compra de una lotería no da acceso al PDF de otra. (Prueba de base.)
-  - [ ] Una lotería despublicada o fuera de fechas sigue disponible para quien la compró. (Prueba de base; demo.)
+  - [x] Con compra aprobada se descarga el PDF, sin límite de veces. (Prueba de base del permiso; falta la demo de la descarga.)
+  - [x] Sin compra, con compra pendiente o sin sesión, no se puede obtener el PDF. (Prueba de base.)
+  - [x] La compra de una lotería no da acceso al PDF de otra. (Prueba de base.)
+  - [x] Una lotería despublicada o fuera de fechas sigue disponible para quien la compró. (Prueba de base; falta la demo.)
   - [ ] Si Carlos reemplaza el PDF, el comprador descarga la versión nueva. (Demo.)
   - [ ] Sección vacía con enlace al catálogo. (Demo.)
   - [ ] Fallo al descargar: aviso con «Reintentar». (Demo.)

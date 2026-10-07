@@ -1,0 +1,19 @@
+.seasonal-download {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.seasonal-download__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.seasonal-download__error {
+  margin: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-lightest);
+  font-size: 0.9rem;
+  font-weight: 700;
+}

@@ -12,6 +12,7 @@ import { readSeasonalReturn } from '../../utils/seasonalPurchase';
 import { formatUsdReference } from '../../utils/usdReference';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import { CardPreviewModal } from '../SetView/CardPreviewModal';
+import { SeasonalDownloadButton } from './SeasonalDownloadButton';
 import type { Card } from '../../types';
 import './SeasonalCatalog.css';
 import './SeasonalDetail.css';
@@ -31,6 +32,8 @@ export const SeasonalDetail = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [isOwned, setIsOwned] = useState(false);
+  /** Falso hasta saber si la cuenta tiene esta lotería: evita decir «no disponible» a quien la compró. */
+  const [ownedChecked, setOwnedChecked] = useState(false);
   const [notice, setNotice] = useState<ReturnNotice | null>(null);
   const [isStartingPayment, setIsStartingPayment] = useState(false);
   const [buyFailed, setBuyFailed] = useState(false);
@@ -67,6 +70,7 @@ export const SeasonalDetail = () => {
     const ids = await SeasonalRepository.getOwnedLoteriaIds();
     const owned = ids?.includes(id) ?? false;
     setIsOwned(owned);
+    setOwnedChecked(true);
     return owned;
   }, [id]);
 
@@ -157,8 +161,13 @@ export const SeasonalDetail = () => {
         </div>
       );
     }
+    const isVisible = result.status === 'found' && seasonalStatus(result.loteria, new Date()) === 'published';
+    if (result.status === 'found' && !isVisible && !ownedChecked) {
+      return <div className="seasonal-detail__skeleton" role="status" aria-label={t('common.loading')} />;
+    }
     // Un administrador recibe también los borradores: aquí se ve lo mismo que ve cualquiera.
-    if (result.status === 'missing' || seasonalStatus(result.loteria, new Date()) !== 'published') {
+    // Quien la compró la sigue viendo aunque ya no esté en el catálogo.
+    if (result.status === 'missing' || (!isVisible && !isOwned)) {
       return (
         <div className="seasonal-catalog__notice">
           <p>{t('seasonal.detail.unavailable')}</p>
@@ -245,7 +254,7 @@ export const SeasonalDetail = () => {
           </div>
 
           <aside className="seasonal-detail__buy">
-            {loteria.price_cents !== null && (
+            {!isOwned && loteria.price_cents !== null && (
               <p className="seasonal-detail__price">
                 {PRICE_FORMAT.format(loteria.price_cents / 100)} MXN
                 {showUsd && usdRate !== null && (
@@ -257,7 +266,10 @@ export const SeasonalDetail = () => {
               </p>
             )}
             {isOwned ? (
-              <p className="seasonal-detail__owned">{t('seasonal.detail.owned')}</p>
+              <>
+                <p className="seasonal-detail__owned">{t('seasonal.detail.owned')}</p>
+                <SeasonalDownloadButton loteriaId={loteria.id} loteriaName={name} />
+              </>
             ) : (
               <button
                 type="button"
@@ -274,7 +286,7 @@ export const SeasonalDetail = () => {
               </p>
             )}
             <p className="seasonal-detail__digital">{t('seasonal.detail.digitalNote')}</p>
-            {showUsd && <p className="seasonal-detail__digital">{t('buyTokens.disclaimerUsd')}</p>}
+            {showUsd && !isOwned && <p className="seasonal-detail__digital">{t('buyTokens.disclaimerUsd')}</p>}
           </aside>
         </div>
       </>
