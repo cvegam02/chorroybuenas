@@ -53,18 +53,20 @@
   - [ ] Primera visita con navegador en inglés: se ve en español.
   - [ ] El idioma elegido con el selector se recuerda.
 
-## US A3 — El sitemap lista todas las páginas públicas y se actualiza solo   ·   Estado: ⬜ por hacer
+## US A3 — El sitemap lista todas las páginas públicas y se actualiza solo   ·   Estado: 🟡 construida el 2026-10-07 — falta la demo de Carlos en dev
 
 - **Historia** — Como dueño del sitio, quiero que el sitemap incluya todas las páginas públicas y las loterías de temporada publicadas, para que Google las descubra sin que yo lo mantenga a mano.
 - **Entrega demostrable** — `/sitemap.xml` lista las páginas públicas fijas y cada lotería de temporada publicada, con la fecha de la última publicación del sitio.
-- **Construido** — pendiente.
+- **Construido** — 2026-10-07, en la rama `feature/seo`. El sitemap ya no es un archivo fijo (`public/sitemap.xml` se borró): se escribe en cada construcción del sitio, desde `vite.config.ts`, con las páginas públicas de la tabla de la US A1 más las loterías de temporada que el público puede ver en ese momento, leídas del catálogo con la clave pública. La lógica vive en `src/utils/sitemap.ts`; pruebas en `tests/src/sitemap.test.ts`. Comprobado contra la base de pruebas sin construir el sitio: salieron las seis páginas fijas y la lotería publicada.
+- **Límites conocidos** — en desarrollo local (`npm run dev`) `/sitemap.xml` no existe: solo se escribe al construir. El sitemap de `dev.chorroybuenas.com.mx` lista las loterías de la base de pruebas con el dominio de producción; no importa porque ese sitio pide sesión de Vercel y Google no lo lee. Una lotería programada entra al sitemap en la primera publicación posterior a su fecha de inicio, y una vencida sale en la siguiente.
 - **Depende de** — nada.
 - **Cómo se prueba (guion de demo)** — Abre `/sitemap.xml` → deberían aparecer inicio, cómo se juega, qué es la lotería, beneficios, temporada, privacidad y una entrada por cada lotería de temporada publicada, todas con fecha reciente.
 - **Escenarios cubiertos**:
-  - [ ] Están todas las páginas públicas fijas.
-  - [ ] Está cada lotería de temporada publicada; no aparecen las no publicadas.
-  - [ ] No aparece ninguna página privada.
-  - [ ] Si la base de datos no responde al construir, el sitio se publica igual con las páginas fijas.
+  - [x] Están todas las páginas públicas fijas. (Prueba automática.)
+  - [x] Está cada lotería de temporada publicada; no aparecen las no publicadas. (Prueba automática para las entradas; las no publicadas las filtra la regla de acceso de la base.)
+  - [x] No aparece ninguna página privada. (Prueba automática.)
+  - [x] Si la base de datos no responde al construir, el sitio se publica igual con las páginas fijas. (La falla de lectura tiene prueba automática; que la construcción siga adelante con un aviso, no.)
+  - [ ] Carlos lo vio en dev. (Demo.)
 
 ## US A4 — Las páginas públicas llegan ya escritas   ·   Estado: ⬜ por hacer
 
