@@ -7,8 +7,20 @@ export interface TokenGift {
   created_at: string;
 }
 
+/** Compra de una lotería de temporada, para el historial de quien la compró. */
+export interface SeasonalHistoryPurchase {
+  id: string;
+  name_es: string;
+  name_en: string | null;
+  amount_cents: number;
+  payment_provider: string;
+  status: string;
+  created_at: string;
+}
+
 export type TokenHistoryEntry =
   | { kind: 'purchase'; id: string; created_at: string; purchase: TokenPurchase }
+  | { kind: 'seasonal'; id: string; created_at: string; seasonal: SeasonalHistoryPurchase }
   | { kind: 'gift'; id: string; created_at: string; gift: TokenGift };
 
 /** Acepta tanto ISO como el formato de Postgres ("2026-10-06 18:00:00+00"). */
@@ -19,12 +31,15 @@ const toTime = (value: string): number => {
 };
 
 /**
- * Une compras y regalos en una sola lista, del más reciente al más antiguo.
- * En empate de fecha, la compra va primero. No modifica las listas recibidas.
+ * Une compras de tokens, compras de loterías de temporada y regalos en una sola lista, del más
+ * reciente al más antiguo. De las de temporada solo entran las aprobadas: una pendiente, repetida o
+ * devuelta no es una compra hecha. En empate de fecha van primero los tokens, luego la temporada y
+ * al final el regalo. No modifica las listas recibidas.
  */
 export const buildTokenHistory = (
   purchases: readonly TokenPurchase[],
   gifts: readonly TokenGift[],
+  seasonalPurchases: readonly SeasonalHistoryPurchase[] = [],
 ): TokenHistoryEntry[] => {
   const entries: TokenHistoryEntry[] = [
     ...purchases.map((purchase) => ({
@@ -33,6 +48,14 @@ export const buildTokenHistory = (
       created_at: purchase.created_at,
       purchase,
     })),
+    ...seasonalPurchases
+      .filter((seasonal) => seasonal.status === 'approved')
+      .map((seasonal) => ({
+        kind: 'seasonal' as const,
+        id: seasonal.id,
+        created_at: seasonal.created_at,
+        seasonal,
+      })),
     ...gifts.map(({ id, amount, created_at }) => ({
       kind: 'gift' as const,
       id,

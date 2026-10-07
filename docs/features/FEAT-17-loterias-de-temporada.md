@@ -1,6 +1,6 @@
 # FEAT-17 — Loterías de temporada (catálogo de pago)
 
-**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. B1 hecha. B2 hecha. C1 hecha. C2 hecha. C3 construida el 2026-10-06, **falta la demo de Carlos**. Siguiente historia tras la demo: C4. Todo, de A1 a C3, está en commits en la rama `feature/loterias-de-temporada`, subida el 2026-10-06 con el PR #18 hacia `dev` (abierto, sin fusionar). Las migraciones 027 a 033 están en dev y ninguna en producción.**
+**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. B1 hecha. B2 hecha. C1 hecha. C2 hecha. C4 hecha. C3 construida el 2026-10-06, **falta la demo de Carlos** (el pago en efectivo). El 2026-10-06 Carlos agregó la historia C5 (ingresos de temporada en el resumen del panel), construida ese día, **falta su demo**. Todo, de A1 a C5, está en commits en la rama `feature/loterias-de-temporada`, subida el 2026-10-06 con el PR #18 hacia `dev` (abierto, sin fusionar). Las migraciones 027 a 034 están en dev y ninguna en producción.**
 
 **Contexto.** Hoy el sitio solo cobra por la transformación de fotos con IA. Carlos quiere una segunda cosa que vender: loterías ya hechas por él, por temporada (Halloween, Día de Muertos, Thanksgiving, Navidad…), en una sección nueva tipo catálogo. Cualquiera las ve; para descargarlas hay que pagar. Carlos las prepara fuera del sitio y las administra desde el panel: las sube, les pone precio y las publica.
 
@@ -60,6 +60,10 @@
 **Confirmado al construir C3 (2026-10-06):**
 
 29. Un pago en proceso no tiene plazo: bloquea una nueva compra de esa lotería hasta que Mercado Pago avise que se aprobó, se rechazó o caducó. Si ese aviso nunca llega, se resuelve a mano. Carlos lo dejó así «por ahora». _(Descartada por ahora: un plazo de unos días tras el cual el pendiente deja de bloquear.)_
+
+**Confirmado al cerrar C4 (2026-10-06):**
+
+30. Los ingresos de las ventas de temporada entran en la tarjeta «Ingresos totales» de la pestaña Saldos: un solo total y, debajo, cuánto es de tokens y cuánto de temporada. Solo cuentan las compras aprobadas. Se agrega como historia C5 de esta feature. _(Descartadas: un solo total sin desglose; una tarjeta aparte «Ingresos de temporada»; hacerlo en una feature aparte.)_
 
 **Decidido al diseñar, por confirmar con Carlos al probarlo** (límites técnicos, no reglas de negocio):
 
@@ -351,20 +355,40 @@
   - [x] Un pago pendiente que se rechaza o caduca deja de bloquear una nueva compra. (Prueba automática.)
   - [x] Los pagos pendientes de tokens se comportan igual que antes. (Pruebas existentes en verde.)
 
-### US C4 — Las compras de temporada en los historiales   ·   Estado: ⬜ por hacer
+### US C4 — Las compras de temporada en los historiales   ·   Estado: ✅ hecha (2026-10-06)
 
 - **Historia** — Como usuario quiero ver mis compras de loterías de temporada en mi historial, y como administrador quiero verlas en la pestaña Compras distinguidas de las de tokens, para llevar la cuenta de lo que se vendió.
 - **Entrega demostrable** — El historial de Mi cuenta muestra las compras de temporada mezcladas por fecha con las de tokens y los regalos; la pestaña Compras del panel tiene columna y filtro «Tipo», y la tabla de loterías muestra cuántas ventas lleva cada una.
 - **Construcción (propuesta)** — Prueba primero ampliando `tests/src/tokenHistory.test.ts` (mezcla de tres tipos de fila). Prueba de base de la lista de compras del panel con los dos tipos y de que solo la ve un administrador. `src/utils/tokenHistory.ts`, `PurchaseHistoryModal.tsx`, `AdminPurchases.tsx`, y la función de base que alimenta esa pestaña.
-- **Construido** —
+- **Construido** — 2026-10-06, en la rama `feature/loterias-de-temporada`, sin commit todavía. Se empezó por las pruebas, y se vieron fallar antes de escribir el código: cinco casos nuevos en `tests/src/tokenHistory.test.ts` (mezcla de tokens, temporada y regalos) y la de base `supabase/tests/034_admin_all_purchases.test.sql` (18 comprobaciones; 294 en total). Migración `034_admin_all_purchases.sql`: dos funciones nuevas para la pestaña Compras, que listan y cuentan compras de tokens y de temporada juntas, con filtro por tipo; solo responden a un administrador. Las funciones anteriores se conservan, para no romper el sitio ya publicado. En Mi cuenta, el historial incluye las compras de temporada aprobadas, con «Lotería de temporada: nombre» donde las de tokens dicen el plan, su monto, y un guion en la columna de tokens (`tokenHistory.ts`, `PurchaseHistoryModal.tsx`). En el panel, la pestaña Compras tiene columna «Tipo» (Tokens o Lotería de temporada), filtro por tipo, y el nombre de la lotería en la columna de lo comprado (`AdminPurchases.tsx`, `AdminRepository.ts`). La columna «Ventas» de la pestaña «De Temporada» ya contaba desde C1. Textos del historial en español e inglés. Revisión de tipos, lint y pruebas en verde (462).
+  - **En dev (2026-10-06):** tras revisar su estado real (existían solo las funciones anteriores; 12 compras de tokens y 1 de temporada) se aplicó la migración 034, que solo agrega funciones y no toca datos. Comprobado después: existen las dos funciones nuevas y un visitante no puede ejecutarlas. **No está en producción.**
+  - **Demo confirmada (2026-10-06).** Carlos lo probó en su máquina, que usa la base de dev, y confirmó («funciona»). No se probó en `dev.chorroybuenas.com.mx`: el código sigue sin commit. No detalló qué pasos del guion siguió (historial de Mi cuenta, columna y filtro «Tipo» del panel, el inglés, la vista en teléfono) ni comentó las decisiones de abajo.
+  - Decidido al construir, por confirmar con Carlos: en la pestaña Compras la columna «Pack» pasa a llamarse «Compra», porque ahora también lleva nombres de loterías; el panel muestra las compras de temporada en todos sus estados (aprobada, pendiente, repetida), con la etiqueta «Repetido» y su opción en el filtro de estado, para que se vean los pagos que hay que devolver; el historial de Mi cuenta muestra solo las aprobadas (un pago repetido no aparece ahí); la compra de una cuenta borrada sale sin correo; si la función nueva falla, la pestaña cae a la lista de solo tokens, como ya hacía.
+  - Visto al construir (no se tocó): el resumen de ingresos de la pestaña Saldos suma solo compras de tokens; las ventas de temporada no entran en ese total.
 - **Depende de** — C1.
 - **Cómo se prueba (guion de demo)** — Con la cuenta que compró → Mi cuenta → historial: debería verse una fila con el nombre de la lotería, su monto y la fecha, entre tus compras de tokens. Con la cuenta de administrador → Administración → Compras: la compra aparece con Tipo «Lotería de temporada» y el nombre de la lotería; filtra por tipo y solo quedan esas. En la pestaña «De Temporada», la columna Ventas de esa lotería dice 1.
 - **Escenarios cubiertos**:
-  - [ ] Compras de tokens, de temporada y regalos se mezclan por fecha en el historial del usuario. (Prueba automática.)
-  - [ ] Las compras pendientes de temporada no aparecen como compras hechas. (Prueba automática.)
-  - [ ] El panel distingue y filtra por tipo. (Prueba de base; demo.)
-  - [ ] Solo un administrador ve las compras de todos. (Prueba de base.)
-  - [ ] El número de ventas de cada lotería cuenta solo compras aprobadas. (Prueba de base.)
+  - [x] Compras de tokens, de temporada y regalos se mezclan por fecha en el historial del usuario. (Prueba automática.)
+  - [x] Las compras pendientes de temporada no aparecen como compras hechas. (Prueba automática.)
+  - [x] El panel distingue y filtra por tipo. (Prueba de base; falta la demo.)
+  - [x] Solo un administrador ve las compras de todos. (Prueba de base.)
+  - [x] El número de ventas de cada lotería cuenta solo compras aprobadas. (Prueba automática de C1, `seasonalPurchase.test.ts`: el conteo se hace en el navegador, no en la base.)
+
+### US C5 — Los ingresos de temporada en el resumen del panel   ·   Estado: 🔨 construida (2026-10-06), falta la demo
+
+- **Historia** — Como administrador, quiero que el resumen de ingresos incluya lo vendido en loterías de temporada, para saber cuánto ha entrado en total y cuánto por cada cosa.
+- **Entrega demostrable** — En la pestaña Saldos, la tarjeta «Ingresos totales» suma tokens y temporada, y debajo dice cuánto es de cada uno y cuántas compras son.
+- **Construcción (propuesta)** — Prueba primero, en `tests/src/`, de la función que suma los dos tipos y descarta las compras de temporada no aprobadas. Función nueva en `src/utils/`; `AdminRepository.getPurchasesSummary` y la tarjeta de `AdminBalances.tsx`. Sin migración: un administrador ya puede leer las compras de temporada.
+- **Construido** — 2026-10-06, en la rama `feature/loterias-de-temporada`, sin commit todavía. Se empezó por la prueba `tests/src/adminRevenue.test.ts` (7 pruebas): falló y pasa con `src/utils/adminRevenue.ts`. `AdminRepository.getPurchasesSummary` lee ahora los dos tipos de compra, y la tarjeta «Ingresos totales» de la pestaña Saldos (`AdminBalances.tsx`) muestra el total, debajo «Tokens: … · Temporada: …» y el número de compras. Sin migración ni despliegue. Revisión de tipos, lint y pruebas en verde (469).
+  - **Falta la demo de Carlos.** La tarjeta no se ha visto con datos reales.
+  - Decidido al construir, por confirmar con Carlos: el número de compras de la tarjeta cuenta las de tokens más las de temporada aprobadas (ni pendientes ni repetidas); si no se puede leer alguno de los dos tipos, la tarjeta muestra un guion en lugar de un total incompleto (antes mostraba $0.00); como ya pasaba con los tokens, el resumen lee como máximo 10,000 compras de cada tipo.
+- **Depende de** — C1.
+- **Cómo se prueba (guion de demo)** — Con la cuenta de administrador → Administración → Saldos. La tarjeta «Ingresos totales» debería mostrar la suma de lo vendido en tokens más los $80.00 de «Haloween», y debajo «Tokens: … · Temporada: $80.00» y el número de compras.
+- **Escenarios cubiertos**:
+  - [x] El total suma compras de tokens y de temporada. (Prueba automática.)
+  - [x] Una compra de temporada pendiente, repetida o devuelta no cuenta como ingreso. (Prueba automática.)
+  - [x] Sin ventas de temporada, el total es el de tokens. (Prueba automática.)
+  - [ ] La tarjeta muestra el desglose. (Demo.)
 
 ## Apartado — Quitar el acceso ante un reembolso
 

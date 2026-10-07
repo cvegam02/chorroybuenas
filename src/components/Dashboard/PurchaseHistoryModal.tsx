@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { FaTimes } from 'react-icons/fa';
 import type { TokenPurchase } from '../../repositories/TokenPricingRepository';
-import type { TokenHistoryEntry } from '../../utils/tokenHistory';
+import { localizedText } from '../../utils/seasonalCatalog';
+import type { SeasonalHistoryPurchase, TokenHistoryEntry } from '../../utils/tokenHistory';
 import './PurchaseHistoryModal.css';
 
 interface PurchaseHistoryModalProps {
@@ -67,6 +68,32 @@ const PurchaseRow = ({ purchase: p }: { purchase: TokenPurchase }) => {
       </td>
       <td data-label={t('dashboard.purchaseHistory.colStatus')}>
         {formatStatus(p.payment_status, t)}
+      </td>
+    </tr>
+  );
+};
+
+/** Compra de una lotería de temporada: el nombre de la lotería va donde las de tokens dicen el plan. */
+const SeasonalRow = ({ seasonal: s }: { seasonal: SeasonalHistoryPurchase }) => {
+  const { t, i18n } = useTranslation();
+
+  return (
+    <tr className="purchase-history-modal__row">
+      <td className="purchase-history-modal__cell-date" data-label={t('dashboard.purchaseHistory.colDate')}>
+        {formatDate(s.created_at)}
+      </td>
+      <td data-label={t('dashboard.purchaseHistory.colPlan')}>
+        {t('dashboard.purchaseHistory.seasonal', { name: localizedText(s.name_es, s.name_en, i18n.language) })}
+      </td>
+      <td className="purchase-history-modal__cell-tokens" data-label={t('dashboard.purchaseHistory.colTokens')}>—</td>
+      <td className="purchase-history-modal__cell-amount" data-label={t('dashboard.purchaseHistory.colAmount')}>
+        {formatAmount(s.amount_cents)}
+      </td>
+      <td data-label={t('dashboard.purchaseHistory.colMethod')}>
+        {formatProvider(s.payment_provider)}
+      </td>
+      <td data-label={t('dashboard.purchaseHistory.colStatus')}>
+        {formatStatus(s.status, t)}
       </td>
     </tr>
   );
@@ -138,6 +165,8 @@ export const PurchaseHistoryModal = ({ isOpen, onClose, entries, isLoading }: Pu
                         <td data-label={t('dashboard.purchaseHistory.colMethod')}>—</td>
                         <td data-label={t('dashboard.purchaseHistory.colStatus')}>—</td>
                       </tr>
+                    ) : entry.kind === 'seasonal' ? (
+                      <SeasonalRow key={`seasonal-${entry.id}`} seasonal={entry.seasonal} />
                     ) : (
                       <PurchaseRow key={`purchase-${entry.id}`} purchase={entry.purchase} />
                     )

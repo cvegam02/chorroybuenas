@@ -7,6 +7,7 @@ import {
 } from '../../repositories/AdminRepository';
 import { TokenPricingRepository } from '../../repositories/TokenPricingRepository';
 import { AIService } from '../../services/AIService';
+import type { RevenueSummary } from '../../utils/adminRevenue';
 import './AdminBalances.css';
 
 const COST_PER_TOKEN_USD = AIService.COST_PER_IMAGE;
@@ -46,8 +47,7 @@ const formatDate = (iso: string) => {
 
 export const AdminBalances = () => {
   const [balances, setBalances] = useState<AdminUserBalanceWithInfo[]>([]);
-  const [totalRevenueCents, setTotalRevenueCents] = useState<number | null>(null);
-  const [totalPurchases, setTotalPurchases] = useState<number | null>(null);
+  const [revenue, setRevenue] = useState<RevenueSummary | null>(null);
   const [totalTokensUsed, setTotalTokensUsed] = useState<number | null>(null);
   const [exchangeRateMxnUsd, setExchangeRateMxnUsd] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,17 +56,15 @@ export const AdminBalances = () => {
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
-      const [balancesData, purchasesSummary, usageSummary, purchasesCount, mxnUsdRate, giftsData] = await Promise.all([
+      const [balancesData, purchasesSummary, usageSummary, mxnUsdRate, giftsData] = await Promise.all([
         AdminRepository.getBalancesWithUserInfo(200),
         AdminRepository.getPurchasesSummary(),
         AdminRepository.getTokenUsageSummary(),
-        AdminRepository.getPurchasesCount(),
         TokenPricingRepository.getExchangeRateMxnUsd(),
         AdminRepository.getTokenGifts(),
       ]);
       setBalances(balancesData);
-      setTotalRevenueCents(purchasesSummary.totalRevenueCents);
-      setTotalPurchases(purchasesCount);
+      setRevenue(purchasesSummary);
       setTotalTokensUsed(usageSummary);
       setExchangeRateMxnUsd(mxnUsdRate);
       setGifts(giftsData);
@@ -137,11 +135,18 @@ export const AdminBalances = () => {
         <div className="admin-stat-card admin-stat-card--green">
           <span className="admin-stat-card__label">Ingresos totales</span>
           <span className="admin-stat-card__value">
-            {totalRevenueCents != null ? formatPesos(totalRevenueCents) : '—'}
+            {revenue ? formatPesos(revenue.totalCents) : '—'}
           </span>
-          <span className="admin-stat-card__detail">
-            {totalPurchases != null ? `${totalPurchases} compra${totalPurchases !== 1 ? 's' : ''}` : ''}
-          </span>
+          {revenue && (
+            <>
+              <span className="admin-stat-card__detail">
+                Tokens: {formatPesos(revenue.tokensCents)} · Temporada: {formatPesos(revenue.seasonalCents)}
+              </span>
+              <span className="admin-stat-card__detail">
+                {revenue.totalCount} compra{revenue.totalCount !== 1 ? 's' : ''}
+              </span>
+            </>
+          )}
         </div>
         <div className="admin-stat-card admin-stat-card--primary">
           <span className="admin-stat-card__label">Tokens gastados (IA)</span>

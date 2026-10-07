@@ -4,6 +4,7 @@ import { SEASONAL_PDF_MIME_TYPE, type SeasonalLoteriaInput } from '../utils/seas
 import type { CatalogLoteria, CatalogSeason } from '../utils/seasonalCatalog';
 import { PREVIEW_OUTPUT_EXTENSION, PREVIEW_OUTPUT_MIME_TYPE } from '../utils/seasonalPreview';
 import { summarizeSales, type SeasonalSales } from '../utils/seasonalPurchase';
+import type { SeasonalHistoryPurchase } from '../utils/tokenHistory';
 
 /** Temporada del catálogo de loterías de temporada. */
 export interface Season {
@@ -252,6 +253,33 @@ export class SeasonalRepository {
         season_es: season?.name_es ?? '',
         season_en: season?.name_en ?? null,
       }];
+    });
+  }
+
+  /**
+   * Las compras de temporada de la cuenta con sesión abierta, para su historial. Trae todos los
+   * estados; quien arma el historial decide cuáles cuentan. Nunca lanza: ante un fallo devuelve [].
+   */
+  static async getPurchaseHistory(): Promise<SeasonalHistoryPurchase[]> {
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user.id;
+    if (!userId) return [];
+
+    const { data, error } = await supabase
+      .from('seasonal_purchases')
+      .select('id, created_at, amount_cents, payment_provider, status, seasonal_loterias(name_es, name_en)')
+      .eq('user_id', userId);
+
+    if (error) {
+      logger.error('SeasonalRepository.getPurchaseHistory:', error.message);
+      return [];
+    }
+    type Row = Omit<SeasonalHistoryPurchase, 'name_es' | 'name_en'> & {
+      seasonal_loterias: Pick<SeasonalHistoryPurchase, 'name_es' | 'name_en'> | Pick<SeasonalHistoryPurchase, 'name_es' | 'name_en'>[] | null;
+    };
+    return ((data ?? []) as unknown as Row[]).flatMap(({ seasonal_loterias, ...purchase }) => {
+      const loteria = firstOf(seasonal_loterias);
+      return loteria ? [{ ...purchase, name_es: loteria.name_es, name_en: loteria.name_en }] : [];
     });
   }
 

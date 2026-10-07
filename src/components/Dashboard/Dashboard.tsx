@@ -31,6 +31,7 @@ import { PurchaseHistoryModal } from './PurchaseHistoryModal';
 import { buildTokenHistory, sumGiftTokens, summarizeTokens, type TokenHistoryEntry } from '../../utils/tokenHistory';
 import { ChangePasswordModal } from './ChangePasswordModal';
 import { MySeasonalLoterias } from './MySeasonalLoterias';
+import { SeasonalRepository } from '../../repositories/SeasonalRepository';
 import './Dashboard.css';
 import { logger } from '../../utils/logger';
 
@@ -390,11 +391,12 @@ export const Dashboard = () => {
                 setIsPurchaseHistoryOpen(true);
                 setPurchaseHistoryLoading(true);
                 try {
-                  const [purchases, gifts] = await Promise.all([
+                  const [purchases, gifts, seasonalPurchases] = await Promise.all([
                     TokenPricingRepository.getPurchaseHistory(user.id),
                     TokenPricingRepository.getMyTokenGifts(),
+                    SeasonalRepository.getPurchaseHistory(),
                   ]);
-                  setPurchaseHistory(buildTokenHistory(purchases, gifts));
+                  setPurchaseHistory(buildTokenHistory(purchases, gifts, seasonalPurchases));
                 } finally {
                   setPurchaseHistoryLoading(false);
                 }

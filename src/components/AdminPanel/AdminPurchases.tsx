@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { AdminRepository, type AdminPurchase } from '../../repositories/AdminRepository';
+import { AdminRepository, type AdminSale } from '../../repositories/AdminRepository';
 import './AdminPurchases.css';
 
 const PAGE_SIZE = 20;
@@ -11,6 +11,8 @@ export interface PurchaseFilters {
   provider: string;
   dateFrom: string;
   dateTo: string;
+  /** '' para todos, 'tokens' o 'seasonal'. */
+  kind: string;
 }
 
 const INITIAL_FILTERS: PurchaseFilters = {
@@ -19,6 +21,7 @@ const INITIAL_FILTERS: PurchaseFilters = {
   provider: '',
   dateFrom: '',
   dateTo: '',
+  kind: '',
 };
 
 const formatDate = (iso: string) => {
@@ -51,21 +54,28 @@ const statusBadge = (status: string | null) => {
     approved: { label: 'Aprobado',  mod: 'approved' },
     pending:  { label: 'Pendiente', mod: 'pending'  },
     rejected: { label: 'Rechazado', mod: 'rejected' },
+    // Solo en loterías de temporada: segundo pago por una lotería que la cuenta ya tenía.
+    repeated: { label: 'Repetido',  mod: 'pending'  },
+    refunded: { label: 'Devuelto',  mod: 'rejected' },
   };
   const entry = map[status];
   if (!entry) return <span>{status}</span>;
   return <span className={`admin-badge admin-badge--${entry.mod}`}>{entry.label}</span>;
 };
 
-const formatPack = (p: AdminPurchase) => {
-  if (p.bonus_tokens > 0) {
+const isSeasonal = (p: AdminSale) => p.kind === 'seasonal';
+
+/** Qué se compró: el pack de tokens, o el nombre de la lotería de temporada. */
+const formatPack = (p: AdminSale) => {
+  if (isSeasonal(p)) return p.loteria_name || '—';
+  if ((p.bonus_tokens ?? 0) > 0) {
     return `${p.base_tokens} + ${p.bonus_tokens} bonus`;
   }
   return `${p.base_tokens} tokens`;
 };
 
 export const AdminPurchases = () => {
-  const [purchases, setPurchases] = useState<AdminPurchase[]>([]);
+  const [purchases, setPurchases] = useState<AdminSale[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -74,7 +84,7 @@ export const AdminPurchases = () => {
 
   const load = useCallback(async () => {
     setIsLoading(true);
-    const filterParams = filters.email || filters.status || filters.provider || filters.dateFrom || filters.dateTo
+    const filterParams = filters.email || filters.status || filters.provider || filters.dateFrom || filters.dateTo || filters.kind
       ? filters
       : undefined;
     const [data, count] = await Promise.all([
@@ -124,6 +134,16 @@ export const AdminPurchases = () => {
           />
           <select
             className="admin-purchases__filter-select"
+            aria-label="Tipo de compra"
+            value={filterInputs.kind}
+            onChange={(e) => setFilterInputs((f) => ({ ...f, kind: e.target.value }))}
+          >
+            <option value="">Todos los tipos</option>
+            <option value="tokens">Tokens</option>
+            <option value="seasonal">Lotería de temporada</option>
+          </select>
+          <select
+            className="admin-purchases__filter-select"
             value={filterInputs.status}
             onChange={(e) => setFilterInputs((f) => ({ ...f, status: e.target.value }))}
           >
@@ -131,6 +151,7 @@ export const AdminPurchases = () => {
             <option value="approved">Aprobado</option>
             <option value="pending">Pendiente</option>
             <option value="rejected">Rechazado</option>
+            <option value="repeated">Repetido</option>
           </select>
           <select
             className="admin-purchases__filter-select"
@@ -179,7 +200,8 @@ export const AdminPurchases = () => {
                 <tr>
                   <th>Fecha</th>
                   <th>Email</th>
-                  <th>Pack</th>
+                  <th>Tipo</th>
+                  <th>Compra</th>
                   <th>Tokens</th>
                   <th>Monto</th>
                   <th>Proveedor</th>
@@ -192,12 +214,13 @@ export const AdminPurchases = () => {
                     <td className="admin-purchases__cell-date" data-label="Fecha">
                       {formatDate(p.created_at)}
                     </td>
-                    <td className="admin-purchases__cell-email" data-label="Email" title={p.user_id}>
+                    <td className="admin-purchases__cell-email" data-label="Email" title={p.user_id ?? undefined}>
                       {p.email || '—'}
                     </td>
-                    <td data-label="Pack">{formatPack(p)}</td>
+                    <td data-label="Tipo">{isSeasonal(p) ? 'Lotería de temporada' : 'Tokens'}</td>
+                    <td data-label="Compra">{formatPack(p)}</td>
                     <td className="admin-purchases__cell-tokens" data-label="Tokens">
-                      {p.total_tokens}
+                      {p.total_tokens ?? '—'}
                     </td>
                     <td className="admin-purchases__cell-amount" data-label="Monto">
                       {formatAmount(p.amount_cents)}
