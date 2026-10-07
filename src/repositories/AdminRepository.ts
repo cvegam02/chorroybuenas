@@ -1,4 +1,6 @@
+import { logger } from '../utils/logger';
 import { supabase } from '../utils/supabaseClient';
+import { summarizeRevenue, type RevenueSummary } from '../utils/adminRevenue';
 
 export interface AdminPurchase {
   id: string;
@@ -13,6 +15,23 @@ export interface AdminPurchase {
   created_at: string;
   email?: string | null;
   full_name?: string | null;
+}
+
+/** Tipo de venta: tokens para la IA, o una lotería de temporada. */
+export type AdminSaleKind = 'tokens' | 'seasonal';
+
+/** Renglón de la pestaña Compras: una compra de tokens o de una lotería de temporada. */
+export interface AdminSale extends Omit<AdminPurchase, 'user_id' | 'base_tokens' | 'bonus_tokens' | 'total_tokens'> {
+  /** Nulo si la cuenta que compró ya se borró. */
+  user_id: string | null;
+  /** Ausente en la consulta de respaldo, que solo trae compras de tokens. */
+  kind?: AdminSaleKind;
+  /** Solo en las compras de temporada. */
+  loteria_name?: string | null;
+  /** Los tokens son nulos en las compras de temporada. */
+  base_tokens: number | null;
+  bonus_tokens: number | null;
+  total_tokens: number | null;
 }
 
 export interface AdminMPTransaction extends AdminPurchase {
@@ -97,8 +116,9 @@ export class AdminRepository {
       provider?: string;
       dateFrom?: string;
       dateTo?: string;
+      kind?: string;
     }
-  ): Promise<AdminPurchase[]> {
+  ): Promise<AdminSale[]> {
     const params: Record<string, unknown> = {
       p_limit: limit,
       p_offset: offset,
@@ -107,33 +127,39 @@ export class AdminRepository {
       p_provider: filters?.provider || null,
       p_date_from: filters?.dateFrom ? filters.dateFrom + 'T00:00:00Z' : null,
       p_date_to: filters?.dateTo ? filters.dateTo + 'T23:59:59Z' : null,
+      p_kind: filters?.kind || null,
     };
-    const { data, error } = await supabase.rpc('admin_get_purchases_with_users', params);
+    const { data, error } = await supabase.rpc('admin_get_all_purchases', params);
 
     if (error) {
+      logger.error('AdminRepository.getAllPurchases:', error.message);
       const fallback = await supabase
         .from('token_purchases')
         .select('id, user_id, pack_id, base_tokens, bonus_tokens, total_tokens, amount_cents, payment_provider, payment_status, created_at')
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
       if (fallback.error) return [];
-      return (fallback.data ?? []) as AdminPurchase[];
+      return (fallback.data ?? []) as AdminSale[];
     }
-    return (data ?? []) as AdminPurchase[];
+    return (data ?? []) as AdminSale[];
   }
 
   /**
-   * Resumen de compras: ingresos totales y cantidad.
+   * Resumen de ingresos: lo vendido en tokens y en loterías de temporada, y el total.
+   * Devuelve null si alguna de las dos consultas falla, para no mostrar un total incompleto.
    */
-  static async getPurchasesSummary(): Promise<{ totalRevenueCents: number; count: number }> {
-    const { data } = await supabase
-      .from('token_purchases')
-      .select('amount_cents')
-      .limit(10000);
+  static async getPurchasesSummary(): Promise<RevenueSummary | null> {
+    const [tokens, seasonal] = await Promise.all([
+      supabase.from('token_purchases').select('amount_cents').limit(10000),
+      supabase.from('seasonal_purchases').select('amount_cents, status').limit(10000),
+    ]);
 
-    const rows = data ?? [];
-    const totalRevenueCents = rows.reduce((s, r) => s + (r.amount_cents ?? 0), 0);
-    return { totalRevenueCents, count: rows.length };
+    const error = tokens.error ?? seasonal.error;
+    if (error) {
+      logger.error('AdminRepository.getPurchasesSummary:', error.message);
+      return null;
+    }
+    return summarizeRevenue(tokens.data ?? [], seasonal.data ?? []);
   }
 
   /**
@@ -158,23 +184,24 @@ export class AdminRepository {
     provider?: string;
     dateFrom?: string;
     dateTo?: string;
+    kind?: string;
   }): Promise<number> {
-    const hasFilters = filters && (filters.email?.trim() || filters.status || filters.provider || filters.dateFrom || filters.dateTo);
-    if (hasFilters) {
-      const { data, error } = await supabase.rpc('admin_get_purchases_count', {
-        p_email: filters?.email?.trim() || null,
-        p_status: filters?.status || null,
-        p_provider: filters?.provider || null,
-        p_date_from: filters?.dateFrom ? filters.dateFrom + 'T00:00:00Z' : null,
-        p_date_to: filters?.dateTo ? filters.dateTo + 'T23:59:59Z' : null,
-      });
-      if (error) return 0;
-      return (data as number) ?? 0;
-    }
-    const { count, error } = await supabase
+    const { data, error } = await supabase.rpc('admin_get_all_purchases_count', {
+      p_email: filters?.email?.trim() || null,
+      p_status: filters?.status || null,
+      p_provider: filters?.provider || null,
+      p_date_from: filters?.dateFrom ? filters.dateFrom + 'T00:00:00Z' : null,
+      p_date_to: filters?.dateTo ? filters.dateTo + 'T23:59:59Z' : null,
+      p_kind: filters?.kind || null,
+    });
+    if (!error) return (data as number) ?? 0;
+
+    // Respaldo: solo compras de tokens, sin filtros.
+    logger.error('AdminRepository.getPurchasesCount:', error.message);
+    const { count, error: fallbackError } = await supabase
       .from('token_purchases')
       .select('*', { count: 'exact', head: true });
-    if (error) return 0;
+    if (fallbackError) return 0;
     return count ?? 0;
   }
 
