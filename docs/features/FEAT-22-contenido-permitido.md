@@ -1,6 +1,6 @@
 # FEAT-22 — Decir en el inicio qué hace el sitio y qué contenido no se permite
 
-**Estado: 🟡 construida en la rama `feature/contenido-permitido` el 2026-10-07 — falta la demo de Carlos, publicarla y responderle a Google.**
+**Estado: 🟡 en `dev` desde el 2026-10-07 (PR #30; función `transform-loteria` desplegada en el Supabase de dev) — falta la demo de Carlos en dev, pasarla a producción (función y `main`) y responderle a Google.**
 
 **Contexto.** Google rechazó la verificación de marca del inicio de sesión con Google (2026-10-07) con este aviso: «We were unable to confirm your app's compliance. Please update your home page to clearly outline your application's purpose and ensure it does not use Google APIs for AI NCII (AI-generated Non-Consensual Intimate Imagery), then retry». Al revisar el sitio:
 
@@ -55,7 +55,7 @@
   - [ ] Una foto normal se sigue transformando. (Demo.)
   - [ ] Una foto rechazada muestra el mensaje y no cuesta tokens. (Demo.)
 
-## US A4 — El sitio usa un solo modelo de IA: se quita FLUX del sitio y del servidor   ·   Estado: 🟡 construida — falta desplegar la función en dev y la demo de Carlos
+## US A4 — El sitio usa un solo modelo de IA: se quita FLUX del sitio y del servidor   ·   Estado: 🟡 construida y desplegada en dev — falta la demo de Carlos
 
 - **Historia** — Como dueño del sitio, quiero que no exista ningún camino hacia el modelo con menos filtros, para que nadie pueda transformar una foto que el filtro de contenido rechazaría.
 - **Entrega demostrable** — La función del servidor ignora el modelo que pida el navegador y siempre usa el principal; el sitio ya no lee `VITE_REPLICATE_USE_FLUX` ni pide modelo.
@@ -66,7 +66,7 @@
 - **Escenarios cubiertos**:
   - [x] Una petición que pide FLUX se atiende con el modelo principal. (Prueba automática.)
   - [x] El sitio no manda modelo en sus peticiones. (Prueba automática.)
-  - [ ] Función desplegada en dev. (Pendiente.)
+  - [x] Función desplegada en dev. (2026-10-07.)
   - [ ] Una foto normal y un lote se transforman en dev. (Demo.)
   - [ ] Función desplegada en producción, con confirmación de Carlos. (Pendiente.)
 
