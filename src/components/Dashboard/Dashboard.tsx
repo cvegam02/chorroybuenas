@@ -24,10 +24,11 @@ import { useProfileEditing } from './useProfileEditing';
 import { useSetContext } from '../../contexts/SetContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import { SetRepository, LoteriaSet } from '../../repositories/SetRepository';
-import { TokenPricingRepository, type TokenPurchase } from '../../repositories/TokenPricingRepository';
+import { TokenPricingRepository } from '../../repositories/TokenPricingRepository';
 import { AppConfigRepository } from '../../repositories/AppConfigRepository';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
 import { PurchaseHistoryModal } from './PurchaseHistoryModal';
+import { buildTokenHistory, sumGiftTokens, summarizeTokens, type TokenHistoryEntry } from '../../utils/tokenHistory';
 import { ChangePasswordModal } from './ChangePasswordModal';
 import './Dashboard.css';
 import { logger } from '../../utils/logger';
@@ -41,9 +42,10 @@ export const Dashboard = () => {
   const [initialTokens, setInitialTokens] = useState<number>(0);
   const [totalReceived, setTotalReceived] = useState<number | null>(null);
   const [totalSpent, setTotalSpent] = useState<number | null>(null);
+  const [totalGifted, setTotalGifted] = useState<number>(0);
   const [tokensSpentBySet, setTokensSpentBySet] = useState<Record<string, number>>({});
   const [isPurchaseHistoryOpen, setIsPurchaseHistoryOpen] = useState(false);
-  const [purchaseHistory, setPurchaseHistory] = useState<TokenPurchase[]>([]);
+  const [purchaseHistory, setPurchaseHistory] = useState<TokenHistoryEntry[]>([]);
   const [purchaseHistoryLoading, setPurchaseHistoryLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [setToDelete, setSetToDelete] = useState<LoteriaSet | null>(null);
@@ -113,6 +115,7 @@ export const Dashboard = () => {
           AppConfigRepository.getInitialTokens().then(setInitialTokens),
           TokenPricingRepository.getTotalTokensReceived(userId).then(setTotalReceived),
           TokenPricingRepository.getTotalTokensSpent(userId).then(setTotalSpent),
+          TokenPricingRepository.getMyTokenGifts().then((gifts) => setTotalGifted(sumGiftTokens(gifts))),
           TokenPricingRepository.getTokensSpentBySet(userId).then(setTokensSpentBySet)
         ]);
       } catch (e) {
@@ -139,11 +142,13 @@ export const Dashboard = () => {
     );
   }
 
-  const tokensFromPurchases = totalReceived ?? 0;
-  const totalEverReceived = initialTokens + tokensFromPurchases;
-  const spentFromDb = totalSpent ?? 0;
-  const spentFromFormula = Math.max(0, totalEverReceived - (balance ?? 0));
-  const tokensSpent = Math.max(spentFromDb, spentFromFormula);
+  const { received: totalEverReceived, spent: tokensSpent } = summarizeTokens({
+    initial: initialTokens,
+    purchased: totalReceived ?? 0,
+    gifted: totalGifted,
+    spentRecorded: totalSpent ?? 0,
+    balance: balance ?? null,
+  });
   const displayName = user.user_metadata?.full_name?.trim() || user.email?.split('@')[0] || t('dashboard.user');
 
   const handleRenameSave = async () => {
@@ -371,8 +376,11 @@ export const Dashboard = () => {
                 setIsPurchaseHistoryOpen(true);
                 setPurchaseHistoryLoading(true);
                 try {
-                  const history = await TokenPricingRepository.getPurchaseHistory(user.id);
-                  setPurchaseHistory(history);
+                  const [purchases, gifts] = await Promise.all([
+                    TokenPricingRepository.getPurchaseHistory(user.id),
+                    TokenPricingRepository.getMyTokenGifts(),
+                  ]);
+                  setPurchaseHistory(buildTokenHistory(purchases, gifts));
                 } finally {
                   setPurchaseHistoryLoading(false);
                 }
@@ -673,7 +681,7 @@ export const Dashboard = () => {
       <PurchaseHistoryModal
         isOpen={isPurchaseHistoryOpen}
         onClose={() => setIsPurchaseHistoryOpen(false)}
-        purchases={purchaseHistory}
+        entries={purchaseHistory}
         isLoading={purchaseHistoryLoading}
       />
 

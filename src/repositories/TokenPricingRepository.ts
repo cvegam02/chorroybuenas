@@ -1,4 +1,6 @@
 import { supabase } from '../utils/supabaseClient';
+import { logger } from '../utils/logger';
+import type { TokenGift } from '../utils/tokenHistory';
 
 export interface TokenPack {
   id: string;
@@ -196,6 +198,21 @@ export class TokenPricingRepository {
 
     if (error) return [];
     return (data ?? []) as TokenPurchase[];
+  }
+
+  /**
+   * Regalos de tokens recibidos por el usuario con sesión (más recientes primero).
+   * El servidor solo devuelve cantidad y fecha. Si falla, devuelve una lista vacía
+   * para que el historial siga mostrando las compras.
+   */
+  static async getMyTokenGifts(): Promise<TokenGift[]> {
+    const { data, error } = await supabase.rpc('get_my_token_gifts');
+
+    if (error) {
+      logger.warn('No se pudieron cargar los regalos de tokens', error.message);
+      return [];
+    }
+    return (data ?? []) as TokenGift[];
   }
 
   /**
