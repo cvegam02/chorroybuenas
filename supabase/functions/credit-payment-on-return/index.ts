@@ -1,7 +1,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { buildCorsHeaders, parseAllowedOrigins } from '../_shared/cors.ts';
 import { createMpGet } from '../_shared/mpClient.ts';
-import { creditPayment, findApprovedPayment, type PaymentDeps } from '../_shared/paymentFlow.ts';
+import {
+  creditPayment, findApprovedPayment, trackUnapprovedSeasonal, type PaymentDeps,
+} from '../_shared/paymentFlow.ts';
 
 Deno.serve(async (req) => {
   const headers = buildCorsHeaders(req.headers.get('Origin'), parseAllowedOrigins(Deno.env.get('ALLOWED_ORIGINS')));
@@ -62,11 +64,34 @@ Deno.serve(async (req) => {
         }
         return data;
       },
+      recordPendingSeasonal: async (params) => {
+        const { data, error } = await admin.rpc('record_pending_seasonal_purchase', params);
+        if (error) throw new Error(`record_pending_seasonal_purchase: ${error.message}`);
+        return String(data);
+      },
+      releasePendingSeasonal: async (paymentId) => {
+        const { data, error } = await admin.rpc('release_pending_seasonal_purchase', {
+          p_payment_provider: 'mercadopago',
+          p_payment_id: paymentId,
+        });
+        if (error) throw new Error(`release_pending_seasonal_purchase: ${error.message}`);
+        return data === true;
+      },
     };
 
     const found = await findApprovedPayment(deps, { topic: 'payment', id: paymentId });
     if (!found.ok) {
-      return reply(200, { credited: false, reason: found.reason, status: found.status });
+      // Pago en efectivo o transferencia de una lotería de temporada: se anota como «en proceso»
+      // de una vez, sin esperar al aviso de Mercado Pago. Solo si el pago es de esta cuenta.
+      const tracking = found.reason === 'not_approved'
+        ? await trackUnapprovedSeasonal(deps, { paymentId, ownerId: user.id })
+        : null;
+      return reply(200, {
+        credited: false,
+        reason: found.reason,
+        status: found.status,
+        seasonal_pending: tracking?.tracked === 'pending',
+      });
     }
     if (found.value.externalReference !== user.id) {
       return reply(403, { error: 'FORBIDDEN', message: 'Este pago no corresponde a tu cuenta.' });

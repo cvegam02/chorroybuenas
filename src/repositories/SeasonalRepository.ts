@@ -47,6 +47,8 @@ export interface AdminSeasonalLoteria extends SeasonalLoteriaInput {
 /** Una lotería de temporada que compró la cuenta, para la lista de Mi cuenta. */
 export interface PurchasedSeasonalLoteria {
   purchaseId: string;
+  /** `pending`: pago en efectivo o transferencia que Mercado Pago aún no confirma; no se puede descargar. */
+  status: SeasonalOwnership;
   purchasedAt: string;
   loteriaId: string;
   name_es: string;
@@ -56,8 +58,12 @@ export interface PurchasedSeasonalLoteria {
   season_en: string | null;
 }
 
+/** Lo que la cuenta tiene de una lotería: ya es suya, o tiene un pago en proceso. */
+export type SeasonalOwnership = 'approved' | 'pending';
+
 interface PurchaseRowWithLoteria {
   id: string;
+  status: SeasonalOwnership;
   created_at: string;
   loteria_id: string;
   seasonal_loterias: PurchasedLoteriaRow | PurchasedLoteriaRow[] | null;
@@ -177,27 +183,43 @@ export class SeasonalRepository {
    * Sin sesión devuelve una lista vacía; devuelve null si la consulta falla.
    */
   static async getOwnedLoteriaIds(): Promise<string[] | null> {
+    const ownership = await SeasonalRepository.getMyOwnership();
+    if (!ownership) return null;
+    return [...ownership].filter(([, status]) => status === 'approved').map(([loteriaId]) => loteriaId);
+  }
+
+  /**
+   * Por lotería, lo que tiene la cuenta con sesión abierta: comprada, o con un pago en proceso.
+   * Sin sesión devuelve un mapa vacío; devuelve null si la consulta falla.
+   */
+  static async getMyOwnership(): Promise<Map<string, SeasonalOwnership> | null> {
     const { data: { session } } = await supabase.auth.getSession();
     const userId = session?.user.id;
-    if (!userId) return [];
+    if (!userId) return new Map();
 
     // Se filtra por dueño aunque la base ya lo haga: un administrador puede leer las compras de todos.
     const { data, error } = await supabase
       .from('seasonal_purchases')
-      .select('loteria_id')
+      .select('loteria_id, status')
       .eq('user_id', userId)
-      .eq('status', 'approved');
+      .in('status', ['approved', 'pending']);
 
     if (error) {
-      logger.error('SeasonalRepository.getOwnedLoteriaIds:', error.message);
+      logger.error('SeasonalRepository.getMyOwnership:', error.message);
       return null;
     }
-    return (data ?? []).map((row) => row.loteria_id as string);
+    const ownership = new Map<string, SeasonalOwnership>();
+    for (const row of (data ?? []) as { loteria_id: string; status: SeasonalOwnership }[]) {
+      // Si hay de las dos, manda la comprada.
+      if (ownership.get(row.loteria_id) !== 'approved') ownership.set(row.loteria_id, row.status);
+    }
+    return ownership;
   }
 
   /**
-   * Las loterías de temporada compradas por la cuenta con sesión abierta, de la más reciente a la más
-   * antigua. Incluye las que ya no están en el catálogo. Devuelve null si la consulta falla.
+   * Las loterías de temporada compradas por la cuenta con sesión abierta, y las que tienen un pago en
+   * proceso, de la más reciente a la más antigua. Incluye las que ya no están en el catálogo.
+   * Devuelve null si la consulta falla.
    */
   static async getPurchasedLoterias(): Promise<PurchasedSeasonalLoteria[] | null> {
     const { data: { session } } = await supabase.auth.getSession();
@@ -206,9 +228,9 @@ export class SeasonalRepository {
 
     const { data, error } = await supabase
       .from('seasonal_purchases')
-      .select('id, created_at, loteria_id, seasonal_loterias(name_es, name_en, cover_path, seasons(name_es, name_en))')
+      .select('id, status, created_at, loteria_id, seasonal_loterias(name_es, name_en, cover_path, seasons(name_es, name_en))')
       .eq('user_id', userId)
-      .eq('status', 'approved')
+      .in('status', ['approved', 'pending'])
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -221,6 +243,7 @@ export class SeasonalRepository {
       const season = firstOf(loteria.seasons);
       return [{
         purchaseId: row.id,
+        status: row.status,
         purchasedAt: row.created_at,
         loteriaId: row.loteria_id,
         name_es: loteria.name_es,

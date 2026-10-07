@@ -14,11 +14,12 @@ describe('readSeasonalReturn', () => {
   });
 
   it('pago aprobado sin identificador válido: se trata como en proceso', () => {
-    expect(readSeasonalReturn(params('success=1&payment_id={payment_id}'))).toEqual({ kind: 'pending' });
+    expect(readSeasonalReturn(params('success=1&payment_id={payment_id}'))).toEqual({ kind: 'pending', paymentId: null });
   });
 
   it('pago pendiente', () => {
-    expect(readSeasonalReturn(params('pending=1&payment_id=123'))).toEqual({ kind: 'pending' });
+    expect(readSeasonalReturn(params('pending=1&payment_id={payment_id}&payment_id=123')))
+      .toEqual({ kind: 'pending', paymentId: '123' });
   });
 
   it('pago cancelado', () => {

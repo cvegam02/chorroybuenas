@@ -170,6 +170,14 @@
   text-align: center;
 }
 
+.seasonal-detail__pending {
+  margin: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-light);
+  font-weight: 700;
+}
+
 .seasonal-detail__buy-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;

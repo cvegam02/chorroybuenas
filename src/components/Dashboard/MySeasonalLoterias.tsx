@@ -80,10 +80,16 @@ export const MySeasonalLoterias = () => {
                 <span className="my-seasonal__meta">
                   {localizedText(purchase.season_es, purchase.season_en, language)}
                   {' · '}
-                  {t('dashboard.seasonal.boughtOn', { date: dateFormat.format(new Date(purchase.purchasedAt)) })}
+                  {t(purchase.status === 'pending' ? 'dashboard.seasonal.startedOn' : 'dashboard.seasonal.boughtOn', {
+                    date: dateFormat.format(new Date(purchase.purchasedAt)),
+                  })}
                 </span>
               </div>
-              <SeasonalDownloadButton loteriaId={purchase.loteriaId} loteriaName={name} />
+              {purchase.status === 'pending' ? (
+                <span className="my-seasonal__pending">{t('dashboard.seasonal.pending')}</span>
+              ) : (
+                <SeasonalDownloadButton loteriaId={purchase.loteriaId} loteriaName={name} />
+              )}
             </li>
           );
         })}

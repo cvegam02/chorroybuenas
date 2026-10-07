@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
-  creditPayment, findApprovedPayment, parseNotification, type PaymentDeps,
+  creditPayment, findApprovedPayment, parseNotification, trackUnapprovedSeasonal, type PaymentDeps,
 } from '../../supabase/functions/_shared/paymentFlow.ts';
 
 const USER = 'user-1';
@@ -29,6 +29,8 @@ function deps(routes: Record<string, unknown | Error | unknown[]>, over: Partial
     countPurchases: vi.fn(async () => 0),
     credit: vi.fn(async () => 12),
     deliverSeasonal: vi.fn(async () => 'approved' as const),
+    recordPendingSeasonal: vi.fn(async () => 'pending'),
+    releasePendingSeasonal: vi.fn(async () => true),
     sleep: vi.fn(async () => {}),
     ...over,
   };
@@ -298,5 +300,100 @@ describe('creditPayment: lotería de temporada', () => {
       { deliverSeasonal: vi.fn(async () => { throw new Error('rpc falló'); }) },
     );
     await expect(creditPayment(d, found)).rejects.toThrow('rpc falló');
+  });
+});
+
+describe('trackUnapprovedSeasonal', () => {
+  const BUYER = '11111111-1111-4111-8111-111111111111';
+  const LOTERIA = '22222222-2222-4222-8222-222222222222';
+  const seasonal = { kind: 'seasonal', user_id: BUYER, loteria_id: LOTERIA, amount_cents: 4900 };
+  const payment = (status: string, over: Record<string, unknown> = {}) => ({
+    id: 888, status, external_reference: BUYER, metadata: { preference_id: 'pref-s' }, ...over,
+  });
+  const routes = (status: string, metadata: Record<string, unknown> = seasonal) => ({
+    '/v1/payments/888': payment(status),
+    '/checkout/preferences/pref-s': { metadata },
+  });
+  const untouched = (d: PaymentDeps) => {
+    expect(d.recordPendingSeasonal).not.toHaveBeenCalled();
+    expect(d.releasePendingSeasonal).not.toHaveBeenCalled();
+    expect(d.deliverSeasonal).not.toHaveBeenCalled();
+    expect(d.credit).not.toHaveBeenCalled();
+  };
+
+  it('un pago pendiente de temporada queda registrado como pendiente', async () => {
+    const { d } = deps(routes('pending'));
+    expect(await trackUnapprovedSeasonal(d, { paymentId: '888' })).toEqual({ tracked: 'pending', loteriaId: LOTERIA });
+    expect(d.recordPendingSeasonal).toHaveBeenCalledWith(expect.objectContaining({
+      p_user_id: BUYER, p_loteria_id: LOTERIA, p_amount_cents: 4900, p_payment_id: '888',
+    }));
+    expect(d.deliverSeasonal).not.toHaveBeenCalled();
+    expect(d.credit).not.toHaveBeenCalled();
+  });
+
+  it('si la preferencia no viene en el pago, la toma de su orden', async () => {
+    const { d } = deps({
+      '/v1/payments/888': payment('in_process', { metadata: {}, order: { id: 42 } }),
+      '/merchant_orders/42': { preference_id: 'pref-s' },
+      '/checkout/preferences/pref-s': { metadata: seasonal },
+    });
+    expect(await trackUnapprovedSeasonal(d, { paymentId: '888' })).toEqual({ tracked: 'pending', loteriaId: LOTERIA });
+  });
+
+  it.each(['rejected', 'cancelled'])('un pago de temporada %s libera el pendiente', async (status) => {
+    const { d } = deps(routes(status));
+    expect(await trackUnapprovedSeasonal(d, { paymentId: '888' })).toEqual({ tracked: 'released', loteriaId: LOTERIA });
+    expect(d.releasePendingSeasonal).toHaveBeenCalledWith('888');
+    expect(d.recordPendingSeasonal).not.toHaveBeenCalled();
+  });
+
+  it('un pago pendiente de tokens no registra nada: se comporta igual que antes', async () => {
+    const { d } = deps(routes('pending', metadata));
+    expect(await trackUnapprovedSeasonal(d, { paymentId: '888' })).toEqual({ tracked: 'none' });
+    untouched(d);
+  });
+
+  it('un pago rechazado de tokens no libera nada', async () => {
+    const { d } = deps(routes('rejected', metadata));
+    expect(await trackUnapprovedSeasonal(d, { paymentId: '888' })).toEqual({ tracked: 'none' });
+    untouched(d);
+  });
+
+  it.each([
+    ['pago inexistente', {}],
+    ['pago ya aprobado (lo entrega el flujo de aprobados)', routes('approved')],
+    ['pago devuelto', routes('refunded')],
+    ['pago sin external_reference', { ...routes('pending'), '/v1/payments/888': payment('pending', { external_reference: null }) }],
+    ['pago sin preferencia', { '/v1/payments/888': payment('pending', { metadata: {} }) }],
+    ['preferencia inexistente', { '/v1/payments/888': payment('pending') }],
+    ['metadata de temporada inválida', routes('pending', { ...seasonal, loteria_id: 'rota' })],
+  ])('no registra nada: %s', async (_name, r) => {
+    const { d } = deps(r);
+    expect(await trackUnapprovedSeasonal(d, { paymentId: '888' })).toEqual({ tracked: 'none' });
+    untouched(d);
+  });
+
+  it('identificador de pago inválido: ni siquiera consulta a Mercado Pago', async () => {
+    const { d, calls } = deps(routes('pending'));
+    expect(await trackUnapprovedSeasonal(d, { paymentId: 'abc' })).toEqual({ tracked: 'none' });
+    expect(calls).toEqual([]);
+  });
+
+  it('al volver del pago, no registra el pendiente de otra cuenta', async () => {
+    const { d } = deps(routes('pending'));
+    const result = await trackUnapprovedSeasonal(d, { paymentId: '888', ownerId: '33333333-3333-4333-8333-333333333333' });
+    expect(result).toEqual({ tracked: 'none' });
+    untouched(d);
+  });
+
+  it('al volver del pago, registra el pendiente de la propia cuenta', async () => {
+    const { d } = deps(routes('pending'));
+    expect(await trackUnapprovedSeasonal(d, { paymentId: '888', ownerId: BUYER }))
+      .toEqual({ tracked: 'pending', loteriaId: LOTERIA });
+  });
+
+  it('si falla el registro, el error se propaga (para que Mercado Pago reintente)', async () => {
+    const { d } = deps(routes('pending'), { recordPendingSeasonal: vi.fn(async () => { throw new Error('rpc falló'); }) });
+    await expect(trackUnapprovedSeasonal(d, { paymentId: '888' })).rejects.toThrow('rpc falló');
   });
 });

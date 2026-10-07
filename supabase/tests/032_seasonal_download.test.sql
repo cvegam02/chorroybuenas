@@ -44,8 +44,8 @@ select test.is(
   'quien compró conoce la ubicación del PDF de su lotería, y de ninguna otra');
 select test.is(
   (select array_agg(name_es order by name_es) from public.seasonal_loterias),
-  array['Comprada'],
-  'quien compró sigue viendo la ficha de su lotería aunque no esté visible');
+  array['Comprada', 'Pendiente'],
+  'quien compró o tiene un pago en proceso sigue viendo la ficha de esa lotería aunque no esté visible');
 
 select test.throws($$
   insert into storage.objects (bucket_id, name) values ('seasonal-pdfs', '00000000-0000-0000-0000-000000000b91/3.pdf')

@@ -1,6 +1,6 @@
 # FEAT-17 — Loterías de temporada (catálogo de pago)
 
-**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. B1 hecha. B2 hecha. C1 hecha. C2 hecha. Siguiente historia: C3. De A4 a C1 está en commits en la rama `feature/loterias-de-temporada`, sin subir; la C2 está sin commit. Las migraciones 027 a 032 están en dev y ninguna en producción.**
+**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. B1 hecha. B2 hecha. C1 hecha. C2 hecha. C3 construida el 2026-10-06, **falta la demo de Carlos**. Siguiente historia tras la demo: C4. De A4 a C2 está en commits en la rama `feature/loterias-de-temporada`, sin subir; la C3 está sin commit. Las migraciones 027 a 033 están en dev y ninguna en producción.**
 
 **Contexto.** Hoy el sitio solo cobra por la transformación de fotos con IA. Carlos quiere una segunda cosa que vender: loterías ya hechas por él, por temporada (Halloween, Día de Muertos, Thanksgiving, Navidad…), en una sección nueva tipo catálogo. Cualquiera las ve; para descargarlas hay que pagar. Carlos las prepara fuera del sitio y las administra desde el panel: las sube, les pone precio y las publica.
 
@@ -56,6 +56,10 @@
 27. Para publicar hacen falta también el número de cartas y el de tableros, porque el catálogo los muestra en cada tarjeta. Amplía la decisión 25. _(Descartada: dejarlos opcionales y que el catálogo omita lo que falte.)_
 
 28. Con sesión, el enlace «De Temporada» va dentro del menú de usuario, porque la barra solo muestra enlaces a quien no ha entrado. Ajusta la decisión 6 y lo dicho en «Fuera de esta feature» sobre el menú. _(Descartadas: mostrarlo como enlace en la barra junto al menú de usuario; las dos cosas.)_
+
+**Confirmado al construir C3 (2026-10-06):**
+
+29. Un pago en proceso no tiene plazo: bloquea una nueva compra de esa lotería hasta que Mercado Pago avise que se aprobó, se rechazó o caducó. Si ese aviso nunca llega, se resuelve a mano. Carlos lo dejó así «por ahora». _(Descartada por ahora: un plazo de unos días tras el cual el pendiente deja de bloquear.)_
 
 **Decidido al diseñar, por confirmar con Carlos al probarlo** (límites técnicos, no reglas de negocio):
 
@@ -326,21 +330,26 @@
   - [ ] Sección vacía con enlace al catálogo. (Demo.)
   - [ ] Fallo al descargar: aviso con «Reintentar». (Demo.)
 
-### US C3 — Pago en efectivo o transferencia   ·   Estado: ⬜ por hacer
+### US C3 — Pago en efectivo o transferencia   ·   Estado: 🔨 construida (2026-10-06), falta la demo
 
 - **Historia** — Como comprador que paga en efectivo o por transferencia, quiero ver que mi compra quedó registrada mientras se confirma, y recibir la lotería cuando Mercado Pago lo confirme, para no pagar dos veces ni quedarme con la duda.
 - **Entrega demostrable** — Tras elegir un pago pendiente vuelvo al detalle con «Tu pago está en proceso»; en Mi cuenta la lotería aparece con la etiqueta «Pago en proceso» y sin descarga; cuando el pago se aprueba, pasa a descargable.
 - **Construcción (propuesta)** — **Prueba primero**: en `tests/functions/`, que un pago pendiente se registra como pendiente y que al aprobarse pasa a aprobado sin duplicarse; en `031_seasonal_purchases.test.sql`, el paso de pendiente a aprobada. Hoy el flujo de pago descarta todo lo que no esté aprobado (`_shared/paymentFlow.ts`): hay que agregar el registro del pendiente solo para compras de temporada, sin cambiar lo que pasa con los tokens. Estados en el detalle y en la sección de Mi cuenta.
-- **Construido** —
+- **Construido** — 2026-10-06, en la rama `feature/loterias-de-temporada`, sin commit todavía. Se empezó por las pruebas, y se vieron fallar antes de escribir el código: la de base `supabase/tests/033_seasonal_pending.test.sql` (23 comprobaciones; 276 en total) y, en funciones, casos nuevos en `tests/functions/seasonal.test.ts` y `tests/functions/paymentFlow.test.ts`. Migración `033_seasonal_pending.sql`: una función que anota un pago en proceso (una sola vez por pago, y sin desaprobar nunca una compra ya aprobada), otra que quita esa nota cuando el pago se rechaza o caduca, y la función de entrega ahora convierte en aprobada la misma fila que estaba pendiente; las tres las ejecuta solo el servidor. Además, quien tiene un pago en proceso puede ver la ficha de esa lotería aunque salga del catálogo (el PDF sigue exigiendo compra aprobada). En el servidor, `trackUnapprovedSeasonal` (`_shared/paymentFlow.ts`) atiende los pagos no aprobados de temporada; lo usan `webhook-mercadopago` y `credit-payment-on-return`, y `create-seasonal-preference` rechaza un cobro nuevo si ya hay un pago en proceso por esa lotería. En el detalle, al volver con un pago pendiente se ve «Tu pago está en proceso; aparecerá en tu cuenta cuando se confirme» y el recuadro deja de ofrecer «Comprar»; en Mi cuenta la lotería aparece con la etiqueta «Pago en proceso», sin botón de descarga. Textos en español e inglés. Revisión de tipos, lint y pruebas en verde (455).
+  - **En dev (2026-10-06):** tras revisar su estado real (una sola compra, aprobada; ninguna pendiente; solo existía la función de entrega) se aplicó la migración 033 y se desplegaron `create-seasonal-preference`, `credit-payment-on-return` y `webhook-mercadopago`. Comprobado después: existen las tres funciones, ni un usuario ni un visitante pueden ejecutarlas, y la compra que había sigue aprobada. **Nada de esto está en producción.**
+  - **Falta la demo de Carlos.** No se ha hecho ningún pago pendiente de prueba: ni el registro del pendiente, ni su paso a aprobado, ni su liberación se han visto funcionar con Mercado Pago.
+  - Cambios a pruebas existentes: `032_seasonal_download.test.sql` espera ahora que quien tiene un pago en proceso vea la ficha de esa lotería; en `tests/src/seasonalPurchase.test.ts`, el regreso «pendiente» lleva también el identificador del pago.
+  - **Limitación conocida (decisión 29):** si Mercado Pago nunca avisa que un pago en proceso se rechazó o caducó, esa cuenta no puede volver a intentar la compra de esa lotería. Carlos decidió dejarlo así por ahora; se resolvería borrando la fila a mano.
+  - Decidido al construir, por confirmar con Carlos: un pendiente rechazado o caducado se borra (no queda en ningún historial); cuentan como «en proceso» los estados pendiente, en revisión y autorizado de Mercado Pago, y como «ya no va» los rechazados y cancelados; los pagos devueltos no se tocan (son del apartado de reembolsos); solo se atienden los avisos de tipo «pago», no los de «orden»; una lotería con un pago en proceso tampoco se puede borrar desde el panel; en Mi cuenta el renglón pendiente dice «Pago iniciado el…» en lugar de «Comprada el…»; el catálogo no marca las loterías con pago en proceso (muestra su precio).
 - **Depende de** — C2.
 - **Cómo se prueba (guion de demo)** — En dev, compra una lotería eligiendo pago en efectivo (o la tarjeta de prueba que deja el pago pendiente). Vuelves al detalle con «Tu pago está en proceso…» y sin botón de comprar. En Mi cuenta aparece con «Pago en proceso», sin «Descargar PDF». Cuando el pago se apruebe (lo simulamos juntos en dev), recarga: ya tiene «Descargar PDF».
 - **Escenarios cubiertos**:
-  - [ ] Un pago pendiente queda registrado como pendiente. (Prueba automática.)
-  - [ ] Con un pago pendiente no se puede iniciar otro cobro por la misma lotería. (Prueba automática.)
-  - [ ] Al aprobarse, la compra pasa a aprobada y no se duplica. (Prueba de base.)
-  - [ ] Un pago pendiente no da acceso al PDF. (Prueba de base de C2.)
-  - [ ] Un pago pendiente que se rechaza o caduca deja de bloquear una nueva compra. (Prueba automática.)
-  - [ ] Los pagos pendientes de tokens se comportan igual que antes. (Pruebas existentes en verde.)
+  - [x] Un pago pendiente queda registrado como pendiente. (Prueba automática.)
+  - [x] Con un pago pendiente no se puede iniciar otro cobro por la misma lotería. (Prueba automática.)
+  - [x] Al aprobarse, la compra pasa a aprobada y no se duplica. (Prueba de base.)
+  - [x] Un pago pendiente no da acceso al PDF. (Prueba de base de C2.)
+  - [x] Un pago pendiente que se rechaza o caduca deja de bloquear una nueva compra. (Prueba automática.)
+  - [x] Los pagos pendientes de tokens se comportan igual que antes. (Pruebas existentes en verde.)
 
 ### US C4 — Las compras de temporada en los historiales   ·   Estado: ⬜ por hacer
 

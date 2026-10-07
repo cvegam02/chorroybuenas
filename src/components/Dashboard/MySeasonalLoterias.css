@@ -56,6 +56,16 @@
   color: var(--color-text-muted);
 }
 
+.my-seasonal__pending {
+  flex-shrink: 0;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-full);
+  background: var(--color-accent-light);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 @media (max-width: 600px) {
   .my-seasonal__row {
     flex-wrap: wrap;

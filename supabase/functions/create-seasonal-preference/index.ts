@@ -2,11 +2,18 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { pickInitPoint, resolveAppUrl, resolveCheckoutMode } from '../_shared/checkout.ts';
 import { buildCorsHeaders, parseAllowedOrigins } from '../_shared/cors.ts';
 import {
-  buildSeasonalPreference, checkSeasonalPurchase, parseSeasonalPreferenceRequest, type SeasonalLoteriaRow,
+  buildSeasonalPreference, checkSeasonalPurchase, parseSeasonalPreferenceRequest,
+  type SeasonalLoteriaRow, type SeasonalPurchaseError,
 } from '../_shared/seasonal.ts';
 
 const MERCADOPAGO_API_BASE = 'https://api.mercadopago.com';
 const DEFAULT_APP_URL = 'https://chorroybuenas.com.mx';
+
+const PURCHASE_ERROR_MESSAGES: Record<SeasonalPurchaseError, string> = {
+  ALREADY_OWNED: 'Ya tienes esta lotería.',
+  PAYMENT_PENDING: 'Ya tienes un pago en proceso por esta lotería.',
+  NOT_AVAILABLE: 'Esta lotería ya no está disponible.',
+};
 
 Deno.serve(async (req) => {
   const allowedOrigins = parseAllowedOrigins(Deno.env.get('ALLOWED_ORIGINS'));
@@ -52,24 +59,23 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (loteriaError) throw new Error(`seasonal_loterias: ${loteriaError.message}`);
 
-    const { count: ownedCount, error: ownedError } = await admin
+    const { data: purchases, error: purchasesError } = await admin
       .from('seasonal_purchases')
-      .select('*', { count: 'exact', head: true })
+      .select('status')
       .eq('user_id', user.id)
       .eq('loteria_id', loteriaId)
-      .eq('status', 'approved');
-    if (ownedError) throw new Error(`seasonal_purchases: ${ownedError.message}`);
+      .in('status', ['approved', 'pending']);
+    if (purchasesError) throw new Error(`seasonal_purchases: ${purchasesError.message}`);
+    const statuses = (purchases ?? []).map((p) => p.status as string);
 
     const checked = checkSeasonalPurchase({
       loteria: (loteria ?? null) as SeasonalLoteriaRow | null,
-      alreadyOwned: (ownedCount ?? 0) > 0,
+      alreadyOwned: statuses.includes('approved'),
+      hasPending: statuses.includes('pending'),
       now: new Date(),
     });
     if (!checked.ok) {
-      const message = checked.error === 'ALREADY_OWNED'
-        ? 'Ya tienes esta lotería.'
-        : 'Esta lotería ya no está disponible.';
-      return reply(409, { error: checked.error, message });
+      return reply(409, { error: checked.error, message: PURCHASE_ERROR_MESSAGES[checked.error] });
     }
 
     const mode = resolveCheckoutMode(Deno.env.get('MP_USE_SANDBOX_CHECKOUT'), mpAccessToken);

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  buildSeasonalDelivery, buildSeasonalPreference, checkSeasonalPurchase, parseSeasonalPreferenceRequest,
+  buildSeasonalDelivery, buildSeasonalPending, buildSeasonalPreference, checkSeasonalPurchase,
+  classifyUnapprovedStatus, parseSeasonalPreferenceRequest,
   type SeasonalLoteriaRow,
 } from '../../supabase/functions/_shared/seasonal.ts';
 
@@ -35,8 +36,8 @@ describe('parseSeasonalPreferenceRequest', () => {
 });
 
 describe('checkSeasonalPurchase', () => {
-  const check = (row: SeasonalLoteriaRow | null, alreadyOwned = false) =>
-    checkSeasonalPurchase({ loteria: row, alreadyOwned, now: NOW });
+  const check = (row: SeasonalLoteriaRow | null, alreadyOwned = false, hasPending = false) =>
+    checkSeasonalPurchase({ loteria: row, alreadyOwned, hasPending, now: NOW });
 
   it('lotería visible que la cuenta no tiene: se puede cobrar', () => {
     expect(check(loteria())).toEqual({ ok: true, value: { loteriaId: LOTERIA, name: 'Día de Muertos', amountCents: 4900 } });
@@ -64,6 +65,23 @@ describe('checkSeasonalPurchase', () => {
 
   it('si ya la tiene y además dejó de estar visible, avisa que ya es suya', () => {
     expect(check(loteria({ is_published: false }), true)).toEqual({ ok: false, error: 'ALREADY_OWNED' });
+  });
+});
+
+describe('checkSeasonalPurchase: pago en proceso', () => {
+  const check = (row: SeasonalLoteriaRow | null, alreadyOwned: boolean, hasPending: boolean) =>
+    checkSeasonalPurchase({ loteria: row, alreadyOwned, hasPending, now: NOW });
+
+  it('con un pago en proceso no se puede iniciar otro cobro por la misma lotería', () => {
+    expect(check(loteria(), false, true)).toEqual({ ok: false, error: 'PAYMENT_PENDING' });
+  });
+
+  it('avisa del pago en proceso aunque la lotería haya dejado de estar visible', () => {
+    expect(check(loteria({ is_published: false }), false, true)).toEqual({ ok: false, error: 'PAYMENT_PENDING' });
+  });
+
+  it('si ya es suya, eso pesa más que un pago en proceso', () => {
+    expect(check(loteria(), true, true)).toEqual({ ok: false, error: 'ALREADY_OWNED' });
   });
 });
 
@@ -133,5 +151,42 @@ describe('buildSeasonalDelivery', () => {
 
   it('no entrega si quien pagó no es una cuenta válida', () => {
     expect(build({ transaction_amount: 49 }, { ...metadata, user_id: 'x' }, 'x')).toBeNull();
+  });
+});
+
+describe('classifyUnapprovedStatus', () => {
+  it.each(['pending', 'in_process', 'authorized'])('%s: el pago sigue en proceso', (status) => {
+    expect(classifyUnapprovedStatus(status)).toBe('pending');
+  });
+
+  it.each(['rejected', 'cancelled'])('%s: el pago ya no va a completarse', (status) => {
+    expect(classifyUnapprovedStatus(status)).toBe('released');
+  });
+
+  it.each(['approved', 'refunded', 'charged_back', 'in_mediation', 'otro', undefined, null, 5])(
+    '%s: no se registra nada', (status) => {
+      expect(classifyUnapprovedStatus(status)).toBeNull();
+    });
+});
+
+describe('buildSeasonalPending', () => {
+  const metadata = { kind: 'seasonal', user_id: USER, loteria_id: LOTERIA, amount_cents: 4900 };
+  const build = (meta: Record<string, unknown> = metadata, userId = USER) =>
+    buildSeasonalPending({ userId, paymentId: '555', payment: { status: 'pending' }, metadata: meta });
+
+  it('registra el pendiente con el precio con que inició el pago, aunque todavía no haya monto pagado', () => {
+    expect(build()).toEqual({
+      p_user_id: USER, p_loteria_id: LOTERIA, p_amount_cents: 4900,
+      p_payment_provider: 'mercadopago', p_payment_id: '555', p_payment_metadata: { status: 'pending' },
+    });
+  });
+
+  it.each([
+    ['metadata de tokens', { base_tokens: 10, amount_cents: 2000 }],
+    ['lotería que no es uuid', { ...metadata, loteria_id: 'abc' }],
+    ['monto menor al mínimo', { ...metadata, amount_cents: 500 }],
+    ['pago de otra cuenta', { ...metadata, user_id: '33333333-3333-4333-8333-333333333333' }],
+  ])('no registra: %s', (_name, meta) => {
+    expect(build(meta)).toBeNull();
   });
 });

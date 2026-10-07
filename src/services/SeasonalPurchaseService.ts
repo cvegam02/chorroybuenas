@@ -4,13 +4,14 @@ import { logger } from '../utils/logger';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
 
-export type SeasonalPreferenceError = 'NOT_LOGGED_IN' | 'ALREADY_OWNED' | 'NOT_AVAILABLE' | 'FAILED';
+export type SeasonalPreferenceError =
+  | 'NOT_LOGGED_IN' | 'ALREADY_OWNED' | 'PAYMENT_PENDING' | 'NOT_AVAILABLE' | 'FAILED';
 
 export type SeasonalPreferenceResult =
   | { success: true; init_point: string }
   | { success: false; error: SeasonalPreferenceError };
 
-const KNOWN_ERRORS: readonly string[] = ['NOT_LOGGED_IN', 'ALREADY_OWNED', 'NOT_AVAILABLE'];
+const KNOWN_ERRORS: readonly string[] = ['NOT_LOGGED_IN', 'ALREADY_OWNED', 'PAYMENT_PENDING', 'NOT_AVAILABLE'];
 
 /**
  * Pide al servidor el cobro de una lotería de temporada. Solo se manda cuál lotería: el precio lo pone

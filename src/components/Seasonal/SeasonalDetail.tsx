@@ -32,6 +32,8 @@ export const SeasonalDetail = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [isOwned, setIsOwned] = useState(false);
+  /** Pago en efectivo o transferencia que Mercado Pago aún no confirma. */
+  const [isPending, setIsPending] = useState(false);
   /** Falso hasta saber si la cuenta tiene esta lotería: evita decir «no disponible» a quien la compró. */
   const [ownedChecked, setOwnedChecked] = useState(false);
   const [notice, setNotice] = useState<ReturnNotice | null>(null);
@@ -65,13 +67,16 @@ export const SeasonalDetail = () => {
 
   const closeSample = useCallback(() => setOpenSample(null), []);
 
-  /** Pregunta a la base si la cuenta ya tiene esta lotería. Si no se puede saber, se ofrece comprar. */
+  /**
+   * Pregunta a la base si la cuenta ya tiene esta lotería o un pago en proceso por ella.
+   * Si no se puede saber, se ofrece comprar: el servidor no cobra dos veces.
+   */
   const refreshOwned = useCallback(async (): Promise<boolean> => {
-    const ids = await SeasonalRepository.getOwnedLoteriaIds();
-    const owned = ids?.includes(id) ?? false;
-    setIsOwned(owned);
+    const ownership = (await SeasonalRepository.getMyOwnership())?.get(id) ?? null;
+    setIsOwned(ownership === 'approved');
+    setIsPending(ownership === 'pending');
     setOwnedChecked(true);
-    return owned;
+    return ownership === 'approved';
   }, [id]);
 
   useEffect(() => {
@@ -86,8 +91,14 @@ export const SeasonalDetail = () => {
     returnHandled.current = true;
     setSearchParams({}, { replace: true });
 
-    if (returned.kind !== 'approved') {
-      setNotice(returned.kind);
+    if (returned.kind === 'cancel') {
+      setNotice('cancel');
+      return;
+    }
+    if (returned.kind === 'pending') {
+      setNotice('pending');
+      // Se le avisa al servidor para que anote el pago en proceso sin esperar a Mercado Pago.
+      if (returned.paymentId) creditPaymentOnReturn(returned.paymentId).then(() => refreshOwned());
       return;
     }
     setNotice('confirming');
@@ -112,6 +123,7 @@ export const SeasonalDetail = () => {
     setIsStartingPayment(false);
     if (result.error === 'NOT_LOGGED_IN') setIsAuthOpen(true);
     else if (result.error === 'ALREADY_OWNED') setIsOwned(true);
+    else if (result.error === 'PAYMENT_PENDING') setIsPending(true);
     else if (result.error === 'NOT_AVAILABLE') load();
     else setBuyFailed(true);
   };
@@ -166,8 +178,8 @@ export const SeasonalDetail = () => {
       return <div className="seasonal-detail__skeleton" role="status" aria-label={t('common.loading')} />;
     }
     // Un administrador recibe también los borradores: aquí se ve lo mismo que ve cualquiera.
-    // Quien la compró la sigue viendo aunque ya no esté en el catálogo.
-    if (result.status === 'missing' || (!isVisible && !isOwned)) {
+    // Quien la compró, o tiene un pago en proceso, la sigue viendo aunque ya no esté en el catálogo.
+    if (result.status === 'missing' || (!isVisible && !isOwned && !isPending)) {
       return (
         <div className="seasonal-catalog__notice">
           <p>{t('seasonal.detail.unavailable')}</p>
@@ -270,6 +282,10 @@ export const SeasonalDetail = () => {
                 <p className="seasonal-detail__owned">{t('seasonal.detail.owned')}</p>
                 <SeasonalDownloadButton loteriaId={loteria.id} loteriaName={name} />
               </>
+            ) : isPending ? (
+              <p className="seasonal-detail__pending" role="status">
+                {t('seasonal.detail.notice.pending')}
+              </p>
             ) : (
               <button
                 type="button"
