@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { FaEnvelope, FaLock, FaTimes, FaUserPlus, FaSignInAlt, FaUser, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaTimes, FaUserPlus, FaSignInAlt, FaUser, FaEye, FaEyeSlash, FaGoogle } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import './EmailAuthModal.css';
 import { logger } from '../../utils/logger';
@@ -16,7 +16,7 @@ interface EmailAuthModalProps {
 
 export const EmailAuthModal: React.FC<EmailAuthModalProps> = ({ isOpen, onClose, initialMode = 'login' }) => {
     const { t } = useTranslation();
-    const { signInWithEmail, signUpWithEmail, resetPasswordForEmail } = useAuth();
+    const { signInWithEmail, signUpWithEmail, signInWithGoogle, resetPasswordForEmail } = useAuth();
     const [isLogin, setIsLogin] = useState(initialMode === 'login');
     const [isForgotPassword, setIsForgotPassword] = useState(false);
     const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
@@ -98,6 +98,19 @@ export const EmailAuthModal: React.FC<EmailAuthModalProps> = ({ isOpen, onClose,
         }
     };
 
+    const handleGoogleSignIn = async () => {
+        setError(null);
+        setIsLoading(true);
+        try {
+            // Si sale bien, el navegador se va a Google: no hay nada más que hacer aquí.
+            await signInWithGoogle();
+        } catch (err: unknown) {
+            logger.error('Google auth error:', err);
+            setError(t('common.auth.errors.googleFailed'));
+            setIsLoading(false);
+        }
+    };
+
     const modalContent = (
         <div className="email-auth-modal" onClick={(e) => e.target === e.currentTarget && onClose()}>
             <div className="email-auth-modal__content">
@@ -120,6 +133,23 @@ export const EmailAuthModal: React.FC<EmailAuthModalProps> = ({ isOpen, onClose,
                             : (isLogin ? t('common.auth.welcomeBack') : t('common.auth.joinToSave'))}
                     </p>
                 </div>
+
+                {!isForgotPassword && !signUpSuccess && (
+                    <div className="email-auth-modal__social">
+                        <button
+                            type="button"
+                            className="email-auth-modal__google-btn"
+                            onClick={handleGoogleSignIn}
+                            disabled={isLoading}
+                        >
+                            <FaGoogle />
+                            {isLogin ? t('common.auth.loginGoogle') : t('common.auth.signUpGoogle')}
+                        </button>
+                        <div className="email-auth-modal__divider">
+                            <span>{t('common.auth.orWithEmail')}</span>
+                        </div>
+                    </div>
+                )}
 
                 {isForgotPassword ? (
                     forgotPasswordSent ? (

@@ -126,11 +126,16 @@
     box-shadow: var(--shadow-sm);
 }
 
-.email-auth-modal__google-btn:hover {
+.email-auth-modal__google-btn:hover:not(:disabled) {
     background: var(--color-bg-subtle);
     border-color: var(--color-primary-light);
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
+}
+
+.email-auth-modal__google-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 .email-auth-modal__google-btn svg {
