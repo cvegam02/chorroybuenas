@@ -42,6 +42,7 @@ El sitio tiene cuatro zonas. Toda pantalla nueva debe pertenecer a una de ellas.
 | P4 | ¿Qué es la lotería? | `/que-es-la-loteria` | Historia y contexto de la lotería mexicana. Informativa. |
 | P5 | Catálogo «De Temporada» | `/temporada` | Construida el 2026-10-06 (FEAT-17); «Ya es tuya» en la tarjeta llega con las compras. Loterías de temporada visibles, agrupadas por temporada: portada con marca de agua, nombre, modo, número de cartas y tableros, y precio. Tocar una abre P6. Visible sin sesión. |
 | P6 | Detalle de lotería de temporada | `/temporada/:id` | Construida el 2026-10-06 (FEAT-17); el cobro, «Descargar PDF» y el aviso al volver de Mercado Pago llegan con las compras. Portada, cartas de muestra ampliables, qué incluye, descripción y recuadro con precio y «Comprar» (pide sesión). Si ya se compró: «Descargar PDF». Muestra el resultado al volver de Mercado Pago (éxito, pendiente o cancelado). |
+| P7 | Aviso de privacidad | `/privacidad` | Construida el 2026-10-06 (FEAT-20). Texto legal en nueve apartados: responsable, datos que se recaban, para qué se usan, uso sin cuenta, con quién se comparten, cookies, conservación, derechos y cambios al aviso. Solo en español. Informativa; se llega desde el enlace «Aviso de privacidad» del pie de página. |
 
 ## Zona Crear
 

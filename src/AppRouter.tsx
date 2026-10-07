@@ -9,6 +9,7 @@ import { ConfirmationModal } from './components/ConfirmationModal/ConfirmationMo
 import { WarningModal } from './components/ConfirmationModal/WarningModal';
 import { HowToPlay } from './components/HowToPlay/HowToPlay';
 import { AboutLoteria } from './components/AboutLoteria/AboutLoteria';
+import { PrivacyNotice } from './components/PrivacyNotice/PrivacyNotice';
 import BenefitsPage from './components/BenefitsPage/BenefitsPage';
 import { SetView } from './components/SetView/SetView';
 import { BuyTokensPage } from './components/BuyTokens/BuyTokensPage';
@@ -263,6 +264,10 @@ function AppContent() {
         <Route
           path="/como-se-juega"
           element={<HowToPlay />}
+        />
+        <Route
+          path="/privacidad"
+          element={<PrivacyNotice />}
         />
         <Route
           path="/que-es-la-loteria"
