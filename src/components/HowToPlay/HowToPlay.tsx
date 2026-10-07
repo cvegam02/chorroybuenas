@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './HowToPlay.css';
@@ -6,14 +5,6 @@ import comosejuegaImage from '../../img/comosejuega.png';
 
 export const HowToPlay = () => {
   const { t } = useTranslation();
-
-  useEffect(() => {
-    document.title = t('howToPlay.title');
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', t('howToPlay.metaDescription'));
-    }
-  }, [t]);
 
   return (
     <div className="how-to-play">

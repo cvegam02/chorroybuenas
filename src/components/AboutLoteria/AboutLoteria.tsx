@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './AboutLoteria.css';
@@ -6,14 +5,6 @@ import queesImage from '../../img/quees.jpg';
 
 export const AboutLoteria = () => {
   const { t } = useTranslation();
-
-  useEffect(() => {
-    document.title = t('about.title');
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', t('about.metaDescription'));
-    }
-  }, [t]);
 
   return (
     <div className="about-loteria">

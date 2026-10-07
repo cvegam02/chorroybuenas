@@ -14,8 +14,7 @@ const BenefitsPage: React.FC = () => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        document.title = `${t('landing.benefitsPage.title')} | Lotería Personalizada`;
-    }, [t]);
+    }, []);
 
     if (user && !isLoading) {
         // If already logged in, no need to show this page as a "why register" pitch

@@ -15,11 +15,6 @@ export const PrivacyNotice = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = `${PAGE_TITLE} - chorroybuenas.com.mx`;
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', PRIVACY_INTRO);
-    }
   }, []);
 
   return (
