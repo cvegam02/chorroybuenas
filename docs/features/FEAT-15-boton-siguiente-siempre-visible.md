@@ -1,6 +1,6 @@
 # FEAT-15 — El botón «Siguiente: Generar Tableros» siempre visible en Cartas
 
-**Estado: 🟡 construida y probada por Carlos en local («funciona bien», 2026-10-06); falta pasarla a dev**
+**Estado: ✅ hecha — probada por Carlos en dev («ya funciona», 2026-10-06). Falta pasarla a producción (`main`)**
 
 **Contexto.** En la pantalla de Cartas (C1), el botón «Siguiente: Generar Tableros» solo aparecía cuando ya había el mínimo de cartas del modo elegido. Con menos cartas no se veía, así que no quedaba claro cuál era el paso siguiente. Carlos lo señaló el 2026-10-06.
 
@@ -13,7 +13,7 @@
 1. **El botón se ve siempre; si no hay el mínimo de cartas, aparece deshabilitado.** _(Descartado: lo que había, ocultarlo hasta llegar al mínimo.)_
 2. **Se registra como feature suelta**, en la rama `feature/boton-siguiente-cartas`. _(Descartado: agregarla como historia a FEAT-14, que ya está fusionada en dev.)_
 
-**Decidido al construir, por confirmar con Carlos:** deshabilitado, el botón conserva su color y se ve atenuado, igual que los demás botones deshabilitados de esa pantalla; no se agrega ningún texto nuevo, porque la pantalla ya dice cuántas cartas faltan.
+**Decidido al construir, aceptado por Carlos al probarlo en local y en dev (2026-10-06):** deshabilitado, el botón conserva su color y se ve atenuado, igual que los demás botones deshabilitados de esa pantalla; no se agrega ningún texto nuevo, porque la pantalla ya dice cuántas cartas faltan.
 
 ## Diseño
 
@@ -25,15 +25,15 @@
 
 ## Grupo A — Botón de paso siguiente
 
-### US A1 — Ver el botón «Siguiente» aunque falten cartas   ·   Estado: 🟡 probada por Carlos en local, falta la demo en dev (2026-10-06)
+### US A1 — Ver el botón «Siguiente» aunque falten cartas   ·   Estado: ✅ hecha, demo confirmada por Carlos en dev (2026-10-06)
 
 - **Historia** — Como persona que arma su lotería, quiero ver siempre el botón «Siguiente: Generar Tableros» en la pantalla de Cartas, para saber cuál es el paso siguiente aunque todavía no pueda darlo.
 - **Entrega demostrable** — En Cartas, con menos cartas que el mínimo, el botón se ve atenuado y no hace nada; al completar el mínimo se activa y lleva a Cantidad de tableros.
-- **Construido** — 2026-10-06, en la rama `feature/boton-siguiente-cartas`. El botón ya no depende del mínimo para dibujarse (en sus dos lugares: panel lateral y debajo de la lista); se deshabilita cuando faltan cartas, con el aspecto atenuado de los demás botones de la pantalla. Sin pruebas automáticas nuevas: no toca dinero ni permisos y el proyecto no tiene pruebas de componentes.
+- **Construido** — 2026-10-06, en la rama `feature/boton-siguiente-cartas`, fusionada en `dev` con el PR #15. El botón ya no depende del mínimo para dibujarse (en sus dos lugares: panel lateral y debajo de la lista); se deshabilita cuando faltan cartas, con el aspecto atenuado de los demás botones de la pantalla. Sin pruebas automáticas nuevas: no toca dinero ni permisos y el proyecto no tiene pruebas de componentes.
 - **Depende de** — nada.
 - **Cómo se prueba (guion de demo)** — En `dev.chorroybuenas.com.mx` → Crear → Cartas, con una lotería nueva sin cartas → debería verse el botón «Siguiente: Generar Tableros» atenuado → haz clic → no debería pasar nada → sube cartas hasta completar el mínimo que indica la pantalla → el botón debería ponerse en su color normal → haz clic → deberías llegar a Cantidad de tableros. Repite el inicio desde el celular: el botón atenuado debería verse debajo de la lista de cartas.
 - **Escenarios cubiertos**:
-  - [ ] Sin cartas o con menos del mínimo, el botón se ve atenuado y no avanza. (Demo.)
-  - [ ] Al completar el mínimo, el botón se activa y lleva a Cantidad de tableros. (Demo.)
-  - [ ] Si se borra una carta y vuelve a faltar, o se cambia de Kids a Clásico sin tener suficientes, el botón se desactiva otra vez. (Demo.)
-  - [ ] Se ve en computadora (panel lateral) y en teléfono (debajo de la lista). (Demo.)
+  - [x] Sin cartas o con menos del mínimo, el botón se ve atenuado y no avanza. (Demo.)
+  - [x] Al completar el mínimo, el botón se activa y lleva a Cantidad de tableros. (Demo.)
+  - [x] Si se borra una carta y vuelve a faltar, o se cambia de Kids a Clásico sin tener suficientes, el botón se desactiva otra vez. (Demo.)
+  - [x] Se ve en computadora (panel lateral) y en teléfono (debajo de la lista). (Demo.)
