@@ -1,6 +1,6 @@
 # Configurar Replicate (IA Lotería) vía Edge Function
 
-La transformación de imágenes a estilo Lotería usa Replicate (GPT-Image-1.5 / FLUX). La API key se guarda como **secret en Supabase** para no exponerla en el frontend.
+La transformación de imágenes a estilo Lotería usa Replicate (GPT-Image-1.5). La API key se guarda como **secret en Supabase** para no exponerla en el frontend.
 
 ## 1. Obtener token de Replicate
 
@@ -39,6 +39,5 @@ Al transformar una imagen en la app, la Edge Function `transform-loteria` recibi
 
 | Variable | Descripción |
 |---------|-------------|
-| `VITE_REPLICATE_USE_FLUX` | `true` para usar FLUX img2img primero (menos filtros). Por defecto: GPT-Image. |
 
 Estas variables **no** contienen secretos; son preferencias de modelo.
