@@ -5,7 +5,7 @@ Sitio web para crear una lotería mexicana personalizada con fotos propias y des
 ## Documentación de referencia (leer antes de tocar reglas de negocio)
 
 - [`docs/contexto-negocio.md`](docs/contexto-negocio.md) — documento maestro de reglas de negocio: propósito, roles, loterías y tableros, IA, tokens, compras, promociones, administración, permisos y avisos. **Las decisiones marcadas como definidas no se reabren sin que el usuario lo pida explícitamente** — están listadas en la sección «Decisiones definidas» (§15) de ese documento. La §17 lista las reglas ya definidas que el sitio todavía no cumple.
-- [`docs/casos-de-uso.md`](docs/casos-de-uso.md) — 23 casos de uso formales en 5 bloques; complementa el documento de negocio sin introducir reglas nuevas.
+- [`docs/casos-de-uso.md`](docs/casos-de-uso.md) — 28 casos de uso formales en 6 bloques; complementa el documento de negocio sin introducir reglas nuevas.
 - [`docs/diseno-mockups.md`](docs/diseno-mockups.md) — índice de pantallas con su código, estructura de navegación y fuente viva del diseño (el sitio ya construido).
 
 Antes de empezar cualquier tarea, leer las partes de estos documentos que la tarea toca, y el archivo de la fase o feature activa. Si una tarea nueva parece contradecir algo del documento de negocio, señalarlo y pedir confirmación antes de cambiarlo — no reinterpretar en silencio.
@@ -57,6 +57,7 @@ Estas reglas mandan sobre las reglas globales del usuario cuando se contradigan 
 - **Sesiones cortas:** una o dos User Stories por sesión. El archivo de la fase guarda el estado para continuar después.
 - **Poca información a la vez:** presentar una pantalla o una decisión por turno, en lenguaje llano.
 - **Al entregar un cambio visual**, describirlo como recorrido: «abre X → mira Y → debería verse Z», sin nombres de clases, commits ni jerga.
+- **Ahorrar tokens** (pedido por el usuario el 2026-10-06): leer solo los archivos o fragmentos que la tarea necesita, no volver a leer lo ya visto, no repetir en el chat lo que ya está escrito en un documento, y dar respuestas y resúmenes cortos. Si una tarea va a gastar mucho (leer muchos archivos, una búsqueda amplia), avisarlo antes.
 - **Sin ceremonia extra:** no lanzar agentes de planeación o de revisión, no buscar proyectos de referencia en GitHub ni agregar pasadas de investigación que el usuario no pidió. Esto sustituye lo que piden las reglas globales.
 - **Pruebas primero en lo que toca dinero:** todo cambio en saldos, cobros, pagos, promociones o permisos se empieza escribiendo la prueba que falla (en `tests/` para el código, en `supabase/tests/` para la base) y luego el código que la hace pasar. Es la única regla global que se conserva: fue lo que encontró los errores reales. En lo demás, las pruebas se escriben cuando la historia lo pida.
 - **Las bases reales pueden no coincidir con las migraciones del repo.** Antes de migrar un entorno, revisar su estado real (permisos, reglas de acceso, columnas) y respaldar lo que se va a tocar.
