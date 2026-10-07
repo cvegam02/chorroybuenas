@@ -1,6 +1,6 @@
 # FEAT-19 — Registrarse e iniciar sesión con Google
 
-**Estado: 🔨 en curso — construida; PR abierto hacia `dev`. Falta la demo de Carlos ahí.**
+**Estado: ✅ hecha — dada por hecha por Carlos el 2026-10-07 («marca todo como completado»). Entró a `dev` con el PR #21. En producción desde el 2026-10-06, con confirmación de Carlos: `dev` pasó a `main` con el PR #23 y Vercel lo publicó en `chorroybuenas.com.mx`. Google está activado en el Supabase de producción (lo configuró Carlos; comprobado ese día: activado, con Site URL y direcciones de regreso del dominio).**
 
 **Contexto.** Carlos pidió (2026-10-06) que los usuarios puedan registrarse con Google. Las reglas de negocio ya lo contemplaban (`contexto-negocio.md` §roles, casos de uso de registro e inicio de sesión, pantalla M1), y el sitio ya sabía hablar con Google, pero la ventana «Iniciar sesión / Crear cuenta» no tenía ningún botón que lo usara: solo ofrecía correo y contraseña. Los estilos y los textos del botón también seguían en el sitio, sin usarse.
 
@@ -19,7 +19,7 @@
 - El botón va **arriba** del formulario, seguido de la línea «o con correo electrónico», y no debajo como se propuso en el chat: así estaba diseñado originalmente (los estilos y ese texto ya existían en el sitio con esa disposición).
 - El botón dice «Iniciar sesión con Google» o «Registrarse con Google» según la pestaña (textos que ya existían), en vez de «Continuar con Google».
 
-## US A1 — Entrar o registrarse con Google desde la ventana de inicio de sesión   ·   Estado: 🔨 construida, falta la demo de Carlos en dev
+## US A1 — Entrar o registrarse con Google desde la ventana de inicio de sesión   ·   Estado: ✅ hecha — dada por hecha por Carlos el 2026-10-07 («marca todo como completado»)
 
 - **Historia** — Como persona que quiere usar el sitio, quiero entrar o crear mi cuenta con Google, para no tener que inventar ni recordar otra contraseña.
 - **Entrega demostrable** — La ventana «Iniciar sesión / Crear cuenta» muestra un botón de Google que lleva a elegir cuenta y regresa al panel con la sesión iniciada.
@@ -31,7 +31,7 @@
   3. Cierra sesión. Pulsa el botón con una cuenta de Google cuyo correo ya tenga cuenta con contraseña en dev → deberías entrar a esa misma cuenta, con sus loterías y su saldo de antes, sin tokens de bienvenida nuevos.
   4. Entra a «¿Olvidaste tu contraseña?» → el botón de Google no debería verse.
 - **Escenarios cubiertos**:
-  - [ ] El botón aparece al iniciar sesión y al crear cuenta, y no al recuperar contraseña. (Demo.)
-  - [ ] Una cuenta nueva de Google queda registrada y recibe sus tokens de bienvenida. (Demo.)
-  - [ ] Un correo que ya tenía cuenta con contraseña entra a la misma cuenta. (Demo.)
-  - [ ] Entrar con correo y contraseña sigue funcionando igual. (Demo.)
+  - [x] El botón aparece al iniciar sesión y al crear cuenta, y no al recuperar contraseña. (Demo.)
+  - [x] Una cuenta nueva de Google queda registrada y recibe sus tokens de bienvenida. (Demo.)
+  - [x] Un correo que ya tenía cuenta con contraseña entra a la misma cuenta. (Demo.)
+  - [x] Entrar con correo y contraseña sigue funcionando igual. (Demo.)

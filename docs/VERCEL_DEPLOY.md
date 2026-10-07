@@ -6,7 +6,7 @@ El frontend se despliega en Vercel. Cada entorno de Vercel apunta a un proyecto 
 |---|---|---|---|
 | **Production** | Push o merge a `main` | PROD | `chorroybuenas.com.mx` |
 | **Preview** | Push a la rama `dev` | DEV | `dev.chorroybuenas.com.mx` |
-| **Preview** | Cualquier otra rama o PR | DEV | URL generada por Vercel (ver "Límites") |
+| — | Cualquier otra rama o PR | — | No se construye (ver "Límites") |
 
 Vercel solo construye y publica el frontend. Las migraciones y las Edge Functions se siguen desplegando a Supabase con su CLI: ver `docs/ENTORNOS_DEV_PROD.md`, sección 10.
 
@@ -88,5 +88,7 @@ Hacerlo en este orden para que el sitio no se caiga:
 
 ## Límites
 
-- **Otras ramas y PR:** sus deployments de Preview usan Supabase DEV, pero su URL cambia en cada rama y no está en `ALLOWED_ORIGINS`, así que ahí no funcionan la compra de tokens ni la IA. Para probar esas funciones, usar `dev.chorroybuenas.com.mx`.
+- **Otras ramas y PR:** desde el 2026-10-07 Vercel no las construye. Carlos puso en **Settings → Build and Deployment → Ignored Build Step** un comando que solo deja pasar `main` y `dev`:
+  `if [ "$VERCEL_GIT_COMMIT_REF" = "main" ] || [ "$VERCEL_GIT_COMMIT_REF" = "dev" ]; then exit 1; else exit 0; fi`
+  (salir con 1 construye; salir con 0 cancela). Un push a otra rama aparece en Vercel como «Canceled» y su PR no tiene enlace de vista previa. Todo se prueba en `dev.chorroybuenas.com.mx`. Antes sí se construían, pero su URL cambiaba en cada rama y no estaba en `ALLOWED_ORIGINS`, así que ahí no funcionaban la compra de tokens ni la IA.
 - **Tests de base de datos:** necesitan Docker y no corren en el build de Vercel; los corre GitHub Actions. Para que un PR no se pueda fusionar si fallan, activar la protección de rama en GitHub con el check `verify` como requerido.
