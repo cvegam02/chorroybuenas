@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { FaGift } from 'react-icons/fa';
-import { AdminRepository, type AdminUserBalanceWithInfo } from '../../repositories/AdminRepository';
+import {
+  AdminRepository,
+  type AdminTokenGift,
+  type AdminUserBalanceWithInfo,
+} from '../../repositories/AdminRepository';
 import { TokenPricingRepository } from '../../repositories/TokenPricingRepository';
 import { AIService } from '../../services/AIService';
 import './AdminBalances.css';
@@ -25,6 +29,10 @@ const formatUsd = (usd: number) => {
   }).format(usd);
 };
 
+const GIFT_REASON_MAX_LENGTH = 200;
+
+const formatPerson = (name: string | null, email: string | null) => name || email || '—';
+
 const formatDate = (iso: string) => {
   const d = new Date(iso);
   return d.toLocaleDateString(undefined, {
@@ -43,22 +51,25 @@ export const AdminBalances = () => {
   const [totalTokensUsed, setTotalTokensUsed] = useState<number | null>(null);
   const [exchangeRateMxnUsd, setExchangeRateMxnUsd] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [gifts, setGifts] = useState<AdminTokenGift[] | null>([]);
 
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
-      const [balancesData, purchasesSummary, usageSummary, purchasesCount, mxnUsdRate] = await Promise.all([
+      const [balancesData, purchasesSummary, usageSummary, purchasesCount, mxnUsdRate, giftsData] = await Promise.all([
         AdminRepository.getBalancesWithUserInfo(200),
         AdminRepository.getPurchasesSummary(),
         AdminRepository.getTokenUsageSummary(),
         AdminRepository.getPurchasesCount(),
         TokenPricingRepository.getExchangeRateMxnUsd(),
+        AdminRepository.getTokenGifts(),
       ]);
       setBalances(balancesData);
       setTotalRevenueCents(purchasesSummary.totalRevenueCents);
       setTotalPurchases(purchasesCount);
       setTotalTokensUsed(usageSummary);
       setExchangeRateMxnUsd(mxnUsdRate);
+      setGifts(giftsData);
       setIsLoading(false);
     };
     load();
@@ -66,6 +77,7 @@ export const AdminBalances = () => {
 
   const [giftTarget, setGiftTarget] = useState<AdminUserBalanceWithInfo | null>(null);
   const [giftAmount, setGiftAmount] = useState('10');
+  const [giftReason, setGiftReason] = useState('');
   const [isGifting, setIsGifting] = useState(false);
   const [giftError, setGiftError] = useState<string | null>(null);
 
@@ -78,7 +90,7 @@ export const AdminBalances = () => {
     }
     setIsGifting(true);
     setGiftError(null);
-    const newBalance = await AdminRepository.giftTokens(giftTarget.user_id, amount);
+    const newBalance = await AdminRepository.giftTokens(giftTarget.user_id, amount, giftReason);
     setIsGifting(false);
     if (newBalance != null) {
       setBalances((prev) =>
@@ -88,6 +100,8 @@ export const AdminBalances = () => {
       );
       setGiftTarget(null);
       setGiftAmount('10');
+      setGiftReason('');
+      setGifts(await AdminRepository.getTokenGifts());
     } else {
       setGiftError('Error al regalar tokens');
     }
@@ -187,6 +201,7 @@ export const AdminBalances = () => {
                         onClick={() => {
                           setGiftTarget(b);
                           setGiftAmount('10');
+                          setGiftReason('');
                           setGiftError(null);
                         }}
                         title="Regalar tokens"
@@ -194,6 +209,48 @@ export const AdminBalances = () => {
                         <FaGift /> Regalar
                       </button>
                     </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="admin-balances__table-section">
+        <h3 className="admin-balances__table-title">Historial de regalos</h3>
+        {gifts === null ? (
+          <p className="admin-balances__empty">No se pudo cargar el historial de regalos.</p>
+        ) : gifts.length === 0 ? (
+          <p className="admin-balances__empty">Todavía no se ha regalado ningún token.</p>
+        ) : (
+          <div className="admin-balances__table-wrapper">
+            <table className="admin-balances__table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Regaló</th>
+                  <th>Para</th>
+                  <th>Tokens</th>
+                  <th>Motivo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {gifts.map((g) => (
+                  <tr key={g.id} className="admin-balances__row">
+                    <td className="admin-balances__cell-date" data-label="Fecha">
+                      {formatDate(g.created_at)}
+                    </td>
+                    <td data-label="Regaló" title={g.admin_email ?? undefined}>
+                      {formatPerson(g.admin_name, g.admin_email)}
+                    </td>
+                    <td className="admin-balances__cell-name" data-label="Para" title={g.recipient_email ?? undefined}>
+                      {formatPerson(g.recipient_name, g.recipient_email)}
+                    </td>
+                    <td className="admin-balances__cell-balance" data-label="Tokens">
+                      {g.amount}
+                    </td>
+                    <td data-label="Motivo">{g.reason || '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -210,12 +267,24 @@ export const AdminBalances = () => {
               A: {giftTarget.full_name || '—'} ({giftTarget.email || giftTarget.user_id})
             </p>
             <div className="admin-balances__gift-field">
-              <label>Cantidad de tokens</label>
+              <label htmlFor="admin-gift-amount">Cantidad de tokens</label>
               <input
+                id="admin-gift-amount"
                 type="number"
                 min={1}
                 value={giftAmount}
                 onChange={(e) => setGiftAmount(e.target.value)}
+              />
+            </div>
+            <div className="admin-balances__gift-field">
+              <label htmlFor="admin-gift-reason">Motivo (opcional)</label>
+              <input
+                id="admin-gift-reason"
+                type="text"
+                maxLength={GIFT_REASON_MAX_LENGTH}
+                placeholder="Por ejemplo: compensación por un error"
+                value={giftReason}
+                onChange={(e) => setGiftReason(e.target.value)}
               />
             </div>
             {giftError && <p className="admin-balances__gift-error">{giftError}</p>}
