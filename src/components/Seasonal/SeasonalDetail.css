@@ -1,0 +1,230 @@
+/* P6 — Detalle de una lotería de temporada. Comparte botón, aviso y esqueleto con el catálogo (P5). */
+
+.seasonal-detail {
+  min-height: 100vh;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-main);
+  padding-bottom: 80px;
+  font-family: var(--font-body);
+}
+
+.seasonal-detail__main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--spacing-lg) 24px 0;
+}
+
+.seasonal-detail__back {
+  display: inline-block;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  text-decoration: none;
+}
+
+.seasonal-detail__back:hover {
+  text-decoration: underline;
+}
+
+.seasonal-detail__back:focus-visible,
+.seasonal-detail__sample:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.seasonal-detail__header {
+  margin: var(--spacing-lg) 0;
+}
+
+.seasonal-detail__season {
+  margin: 0 0 var(--spacing-xs);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.seasonal-detail__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-primary-dark);
+}
+
+.seasonal-detail__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: var(--spacing-xl);
+  align-items: start;
+}
+
+.seasonal-detail__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.seasonal-detail__cover {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-tertiary);
+}
+
+.seasonal-detail__heading {
+  margin: 0 0 var(--spacing-md);
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.seasonal-detail__samples {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: var(--spacing-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.seasonal-detail__sample {
+  display: block;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  cursor: zoom-in;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.seasonal-detail__sample:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.seasonal-detail__sample img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+.seasonal-detail__note {
+  margin: var(--spacing-md) 0 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.seasonal-detail__includes {
+  margin: 0;
+  padding-left: 1.25rem;
+  line-height: 1.8;
+}
+
+.seasonal-detail__description {
+  margin: 0;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.seasonal-detail__buy {
+  position: sticky;
+  top: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.seasonal-detail__price {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+}
+
+.seasonal-detail__price-usd {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.seasonal-detail__buy-button {
+  width: 100%;
+  text-align: center;
+}
+
+.seasonal-detail__coming-soon {
+  margin: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+  font-weight: 700;
+}
+
+.seasonal-detail__digital {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.seasonal-detail__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  animation: seasonal-catalog-pulse 1.4s ease-in-out infinite;
+}
+
+.seasonal-detail__skeleton .seasonal-detail__cover {
+  aspect-ratio: 4 / 3;
+  max-width: 640px;
+  border: none;
+}
+
+@media (max-width: 800px) {
+  .seasonal-detail {
+    /* Deja libre el alto del recuadro de compra, que va pegado abajo. */
+    padding-bottom: 220px;
+  }
+
+  .seasonal-detail__main {
+    padding: var(--spacing-md) 16px 0;
+  }
+
+  .seasonal-detail__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .seasonal-detail__buy {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 900;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) 16px;
+    border-width: 1px 0 0;
+    border-radius: 0;
+  }
+
+  .seasonal-detail__price {
+    font-size: 1.35rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seasonal-detail__sample,
+  .seasonal-detail__skeleton {
+    animation: none;
+    transition: none;
+  }
+}

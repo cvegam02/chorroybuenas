@@ -41,7 +41,7 @@ El sitio tiene cuatro zonas. Toda pantalla nueva debe pertenecer a una de ellas.
 | P3 | ¿Cómo se juega? | `/como-se-juega` | Reglas del juego de la lotería. Informativa. |
 | P4 | ¿Qué es la lotería? | `/que-es-la-loteria` | Historia y contexto de la lotería mexicana. Informativa. |
 | P5 | Catálogo «De Temporada» | `/temporada` | Construida el 2026-10-06 (FEAT-17); «Ya es tuya» en la tarjeta llega con las compras. Loterías de temporada visibles, agrupadas por temporada: portada con marca de agua, nombre, modo, número de cartas y tableros, y precio. Tocar una abre P6. Visible sin sesión. |
-| P6 | Detalle de lotería de temporada | `/temporada/:id` | **Por construir (FEAT-17).** Portada, cartas de muestra ampliables, qué incluye, descripción y recuadro con precio y «Comprar» (pide sesión). Si ya se compró: «Descargar PDF». Muestra el resultado al volver de Mercado Pago (éxito, pendiente o cancelado). |
+| P6 | Detalle de lotería de temporada | `/temporada/:id` | Construida el 2026-10-06 (FEAT-17); el cobro, «Descargar PDF» y el aviso al volver de Mercado Pago llegan con las compras. Portada, cartas de muestra ampliables, qué incluye, descripción y recuadro con precio y «Comprar» (pide sesión). Si ya se compró: «Descargar PDF». Muestra el resultado al volver de Mercado Pago (éxito, pendiente o cancelado). |
 
 ## Zona Crear
 
@@ -93,7 +93,7 @@ Requiere ser administrador.
 | M7 | Progreso de subida | C1 | Barra de avance al guardar imágenes. |
 | M8 | Transformación con IA en lote | C1 | Cuántas cartas, cuántos tokens, avance y resultado. |
 | M9 | Tablero ampliado | C3 | Ver un tablero en grande y pasar al siguiente. |
-| M10 | Vista previa de carta | U2; C1 (solo en teléfono, desde el menú de la carta — 2026-10-06, FEAT-14); P6, para las cartas de muestra (por construir, FEAT-17) | Ver una carta en grande. _(por confirmar en U2)_ |
+| M10 | Vista previa de carta | U2; C1 (solo en teléfono, desde el menú de la carta — 2026-10-06, FEAT-14); P6, para las cartas de muestra (2026-10-06, FEAT-17) | Ver una carta en grande. _(por confirmar en U2)_ |
 | M11 | Historial de compras y regalos | U1 | Lista de compras del usuario y, mezclados por fecha, los regalos de tokens que recibió. Por construir (FEAT-17): también sus compras de loterías de temporada. |
 | M12 | Confirmación y advertencia | Varias | Confirmar acciones que no se deshacen (borrar, vaciar) y avisar de errores. |
 

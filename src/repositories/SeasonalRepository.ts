@@ -78,6 +78,18 @@ function toSeasonalPdf(files: LoteriaRowWithFile['seasonal_loteria_files']): Sea
   return file ? { path: file.pdf_path, name: file.pdf_name, sizeBytes: file.pdf_size_bytes } : null;
 }
 
+interface LoteriaRowWithSeason extends CatalogLoteria {
+  // Igual que arriba: la temporada puede llegar como objeto o como lista de un elemento.
+  seasons: CatalogSeason | CatalogSeason[] | null;
+}
+
+export type SeasonalDetailResult =
+  | { status: 'found'; loteria: CatalogLoteria; season: CatalogSeason }
+  | { status: 'missing' }
+  | { status: 'error' };
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export class SeasonalRepository {
   static readonly PDF_BUCKET = 'seasonal-pdfs';
   static readonly PREVIEW_BUCKET = 'seasonal-previews';
@@ -101,6 +113,31 @@ export class SeasonalRepository {
       seasons: (seasons.data ?? []) as CatalogSeason[],
       loterias: (loterias.data ?? []) as CatalogLoteria[],
     };
+  }
+
+  /**
+   * La ficha pública de una lotería con su temporada. `missing` cubre tanto la que no existe como la
+   * que la base no deja ver; decidir si está visible hoy le toca a quien la muestra.
+   */
+  static async getLoteriaDetail(id: string): Promise<SeasonalDetailResult> {
+    if (!UUID_PATTERN.test(id)) return { status: 'missing' };
+
+    const { data, error } = await supabase
+      .from('seasonal_loterias')
+      .select(`${LOTERIA_COLUMNS}, seasons(${SEASON_COLUMNS})`)
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) {
+      logger.error('SeasonalRepository.getLoteriaDetail:', error.message);
+      return { status: 'error' };
+    }
+    if (!data) return { status: 'missing' };
+
+    const { seasons, ...loteria } = data as unknown as LoteriaRowWithSeason;
+    const season = Array.isArray(seasons) ? seasons[0] : seasons;
+    if (!season) return { status: 'missing' };
+    return { status: 'found', loteria, season };
   }
 
   /** Todas las loterías de temporada, publicadas o no, con su PDF. Devuelve null si la consulta falla. */

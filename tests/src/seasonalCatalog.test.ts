@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   groupCatalog,
   localizedText,
+  showsSampleNote,
   type CatalogLoteria,
   type CatalogSeason,
 } from '../../src/utils/seasonalCatalog';
@@ -118,5 +119,23 @@ describe('textos en dos idiomas (FEAT-17, decisión 10)', () => {
 
   it('un texto que no existe en ningún idioma queda vacío', () => {
     expect(localizedText(null, null, 'en')).toBe('');
+  });
+});
+
+describe('showsSampleNote', () => {
+  it('avisa cuando las muestras son menos que las cartas', () => {
+    expect(showsSampleNote(6, 54)).toBe(true);
+  });
+
+  it('no avisa cuando se muestran todas las cartas', () => {
+    expect(showsSampleNote(54, 54)).toBe(false);
+  });
+
+  it('no avisa cuando no hay muestras', () => {
+    expect(showsSampleNote(0, 54)).toBe(false);
+  });
+
+  it('no avisa cuando no se sabe cuántas cartas tiene', () => {
+    expect(showsSampleNote(6, null)).toBe(false);
   });
 });

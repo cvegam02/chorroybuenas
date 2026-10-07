@@ -60,3 +60,8 @@ export function localizedText(es: string | null, en: string | null, language: st
   if (language?.startsWith('en') && english !== '') return english;
   return es ?? '';
 }
+
+/** La nota «Estas son algunas de las N cartas» solo aplica si hay muestras y son menos que las cartas. */
+export function showsSampleNote(sampleCount: number, cardCount: number | null): boolean {
+  return cardCount !== null && sampleCount > 0 && sampleCount < cardCount;
+}

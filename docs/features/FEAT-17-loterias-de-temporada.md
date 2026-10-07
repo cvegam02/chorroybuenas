@@ -1,6 +1,6 @@
 # FEAT-17 — Loterías de temporada (catálogo de pago)
 
-**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. B1 hecha. Siguiente historia: B2. Al cerrar la sesión del 2026-10-06: A4, la regla de cartas y tableros y la B1 están en commits en la rama `feature/loterias-de-temporada`, sin subir. Las migraciones 027 a 030 están en dev y ninguna en producción.**
+**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. B1 hecha. B2 hecha. Siguiente historia: C1. Al cerrar la sesión del 2026-10-06: A4, la regla de cartas y tableros, la B1 y la B2 están en commits en la rama `feature/loterias-de-temporada`, sin subir. Las migraciones 027 a 030 están en dev y ninguna en producción.**
 
 **Contexto.** Hoy el sitio solo cobra por la transformación de fotos con IA. Carlos quiere una segunda cosa que vender: loterías ya hechas por él, por temporada (Halloween, Día de Muertos, Thanksgiving, Navidad…), en una sección nueva tipo catálogo. Cualquiera las ve; para descargarlas hay que pagar. Carlos las prepara fuera del sitio y las administra desde el panel: las sube, les pone precio y las publica.
 
@@ -260,17 +260,19 @@
   - [ ] Se ve igual con y sin sesión. (Demo.)
   - [ ] Se ve bien en teléfono. (Demo.)
 
-### US B2 — Ver el detalle de una lotería   ·   Estado: ⬜ por hacer
+### US B2 — Ver el detalle de una lotería   ·   Estado: ✅ hecha (2026-10-06)
 
 - **Historia** — Como visitante, quiero ver la portada, las cartas de muestra y qué incluye una lotería antes de pagarla, para decidir si la compro.
 - **Entrega demostrable** — Al tocar una tarjeta del catálogo se abre el detalle con portada, muestras ampliables, qué incluye, descripción y el recuadro con precio y botón «Comprar»; sin sesión, el botón pide iniciar sesión y me regresa a la misma pantalla.
 - **Construcción (propuesta)** — Pantalla nueva en `src/components/Seasonal/`, ruta `/temporada/:id`. Reutiliza `CardPreviewModal` (M10) y `EmailAuthModal` (M1). En esta historia, «Comprar» con sesión todavía no cobra: muestra un aviso de «disponible pronto», que se sustituye en C1.
-- **Construido** —
+- **Construido** — 2026-10-06, en la rama `feature/loterias-de-temporada`, sin commit todavía. Se empezó por la prueba: cuatro casos nuevos en `tests/src/seasonalCatalog.test.ts` para la nota «Estas son algunas de las N cartas»; fallaron y pasan con `showsSampleNote` en `src/utils/seasonalCatalog.ts`. Pantalla nueva `src/components/Seasonal/SeasonalDetail.tsx` en la ruta `/temporada/:id`, con sus estados de cargando, error con «Reintentar» y «ya no está disponible» con botón al catálogo. Lectura en `SeasonalRepository.getLoteriaDetail`. Las muestras se amplían con la ventana M10 y «Comprar» sin sesión abre M1; ninguna de las dos se modificó. Textos en español e inglés. Sin migración. Revisión de tipos, lint y pruebas en verde (369).
+  - **Demo confirmada (2026-10-06).** Carlos probó el detalle en su máquina, que usa la base de dev, y confirmó que funciona («todo funciona»). No se probó en `dev.chorroybuenas.com.mx`: el código sigue sin commit. No detalló qué pasos del guion siguió ni comentó la vista en teléfono, el inglés ni las decisiones de abajo. `diseno-mockups.md` se actualizó el mismo día con su confirmación: P6 y la mención de M10 ya no dicen «por construir».
+  - Decidido al construir, por confirmar con Carlos: con sesión, «Comprar» muestra «La compra estará disponible pronto» dentro del recuadro, hasta C1; un administrador que abre la dirección de un borrador ve «ya no está disponible», igual que cualquiera; una dirección mal escrita se trata como lotería inexistente; en la ventana ampliada cada muestra se titula «Carta de muestra 1», «2»…; el recuadro de compra pasa a ir pegado abajo cuando la pantalla mide menos de 800 px de ancho; en inglés el recuadro repite la nota de que el cobro es en pesos; si la lotería no tiene muestras, esa sección no aparece. La ventana de iniciar sesión solo ofrece correo y contraseña, y por eso al entrar se sigue en la misma lotería.
 - **Depende de** — B1.
 - **Cómo se prueba (guion de demo)** — En el catálogo, toca una lotería. Debería verse la portada grande, las muestras, la nota «Estas son algunas de las 54 cartas», «Qué incluye», la descripción y el recuadro con el precio, «Comprar» y la línea de descarga digital. Toca una muestra: se ve más grande, con marca de agua; ciérrala con Escape. Sin sesión, pulsa «Comprar»: se abre la ventana de iniciar sesión; al entrar, sigues en la misma lotería. Abre la dirección de una lotería en borrador: «Esta lotería ya no está disponible» y un botón al catálogo. En el celular, el recuadro de compra queda pegado abajo.
 - **Escenarios cubiertos**:
   - [ ] Detalle completo de una lotería visible, con y sin sesión. (Demo.)
-  - [ ] La nota de «algunas de las N cartas» solo sale si las muestras son menos que las cartas. (Prueba automática.)
+  - [x] La nota de «algunas de las N cartas» solo sale si las muestras son menos que las cartas. (Prueba automática.)
   - [ ] Lotería no visible o inexistente: mensaje de no disponible. (Demo.)
   - [ ] «Comprar» sin sesión abre el inicio de sesión y regresa a la misma pantalla. (Demo.)
   - [ ] Teclado, Escape y textos alternativos. (Demo.)
