@@ -68,15 +68,16 @@
   - [x] Si la base de datos no responde al construir, el sitio se publica igual con las páginas fijas. (La falla de lectura tiene prueba automática; que la construcción siga adelante con un aviso, no.)
   - [ ] Carlos lo vio en dev. (Demo.)
 
-## US A4 — Las páginas públicas llegan ya escritas   ·   Estado: ⬜ por hacer
+## US A4 — Las páginas públicas llegan ya escritas   ·   Estado: 🟡 construida el 2026-10-07 — falta la demo de Carlos en dev
 
 - **Historia** — Como dueño del sitio, quiero que las páginas públicas lleguen a Google con su texto ya escrito, para que las lea completas y rápido sin depender de que ejecute el código del sitio.
 - **Entrega demostrable** — El código fuente de cada página pública contiene su texto, y la página se comporta igual que hoy para quien la visita.
-- **Construido** — pendiente.
+- **Construido** — 2026-10-07, en la rama `feature/seo`. Al construir el sitio, un paso nuevo en `vite.config.ts` dibuja las seis páginas públicas en español sin abrir un navegador (`src/entry-server.tsx`) y escribe cada una en su propio archivo, con su texto y con su título, descripción, dirección oficial y datos para compartir ya puestos (`src/utils/prerender.ts`; pruebas en `tests/src/prerender.test.ts`). Con esto la vista previa al compartir un enlace de esas seis páginas ya muestra los datos de la página (el límite que quedó anotado en la US A1). Al abrir, el sitio reutiliza ese texto en vez de volver a dibujarlo (`src/main.tsx`). Las demás direcciones (panel, administración, zona Crear, ficha de cada lotería) reciben una página sin texto, `shell.html`, y funcionan como antes: `vercel.json` ahora las manda ahí en vez de a `index.html`, que pasó a ser el inicio ya escrito. Comprobado construyendo en local: las seis páginas traen su texto, su título y su dirección oficial, y todas las imágenes que mencionan existen.
+- **Límites conocidos** — `/temporada` llega con su título y subtítulo, pero la lista de loterías se sigue cargando en el navegador (así no hay que volver a publicar cuando cambia el catálogo). Quien tiene el inglés elegido ve un instante la página en español antes de que cambie a inglés. Quien entra al inicio con sesión iniciada ve un instante el inicio antes de pasar a su panel, igual que hoy. En el CI de GitHub (sin variables `VITE_*`) las páginas no se pre-generan: solo se comprueba que el sitio compila. Falta confirmar en dev que Vercel sirve `/como-se-juega` desde su archivo propio sin redirigir; si no lo hiciera, la página se vería igual que hoy (sin texto en el código fuente), no rota.
 - **Depende de** — A1 y A2.
 - **Cómo se prueba (guion de demo)** — Abre `/como-se-juega` → pulsa Ctrl+U (ver código fuente) → busca una frase del texto de la página → debería aparecer. Repite con el inicio y `/temporada`. Navega por el sitio con sesión iniciada y sin ella → todo debería verse y funcionar como antes, sin parpadeos ni textos que cambien al cargar.
 - **Escenarios cubiertos**:
-  - [ ] El código fuente de las seis páginas pre-generadas contiene su texto en español.
+  - [x] El código fuente de las seis páginas pre-generadas contiene su texto en español. (Comprobado en la construcción local; falta verlo en dev.)
   - [ ] Entrar directo a una página privada o de la zona Crear sigue funcionando.
   - [ ] Quien tiene el inglés elegido ve la página en inglés tras cargar.
   - [ ] La sesión iniciada se sigue reconociendo al entrar por una página pre-generada.

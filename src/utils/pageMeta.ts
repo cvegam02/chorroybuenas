@@ -54,7 +54,7 @@ export const PUBLIC_PATHS = Object.keys(PUBLIC_PAGES);
 
 const SEASONAL_DETAIL_PATH = /^\/temporada\/[^/]+$/;
 
-const normalizePath = (pathname: string) => (pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname) || '/';
+export const normalizePath = (pathname: string) => (pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname) || '/';
 
 const canonicalFor = (path: string) => `${SITE_URL}${path}`;
 
