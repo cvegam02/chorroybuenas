@@ -46,8 +46,8 @@ Cuando dos reglas choquen, o haya que decidir algo que no está escrito, se elig
   - **Clásico:** tableros de 4 × 4 (16 cartas).
   - **Kids:** tableros de 3 × 3 (9 cartas).
 - **Mínimo de cartas para generar tableros:**
-  - Kids: **15 cartas. DEFINIDO** (2026-10-06; ese mismo día se había confirmado en 12 y se subió a 15). El sitio todavía pide 12: está por corregirse.
-  - Clásico: **24 cartas. DEFINIDO** (2026-10-06; ese mismo día se había fijado en 20 y se subió a 24). La pantalla de cartas todavía pide 20 y la de tableros acepta 16: están por corregirse.
+  - Kids: **15 cartas. DEFINIDO** (2026-10-06; ese mismo día se había confirmado en 12 y se subió a 15).
+  - Clásico: **24 cartas. DEFINIDO** (2026-10-06; ese mismo día se había fijado en 20 y se subió a 24).
 - **Tableros:** se generan al azar con las cartas de la lotería. No se generan dos tableros iguales. _(confirmado el 2026-10-06)_
 - **Cantidad sugerida de tableros:** en Clásico, la que hace que cada carta aparezca unas 8 veces en total; en Kids, un tablero por cada 3 cartas. El usuario puede cambiarla. _(confirmado el 2026-10-06)_
 - **Al iniciar sesión**, lo que el visitante tenía guardado en su navegador se pasa a su cuenta, dentro de una lotería por defecto. _(confirmado el 2026-10-06)_
@@ -77,7 +77,10 @@ Cuando dos reglas choquen, o haya que decidir algo que no está escrito, se elig
 - **Tokens de bienvenida:** cada cuenta nueva recibe una cantidad configurable por el administrador. Hoy son 5 en producción. **DEFINIDO** (2026-10-06)
 - El saldo nunca puede ser negativo. **DEFINIDO** (2026-10-06)
 - Un administrador puede regalar tokens a cualquier usuario. _(confirmado el 2026-10-06)_
-- Cada regalo de tokens queda registrado: quién lo dio, a quién, cuánto y cuándo. **DEFINIDO** (2026-10-06). Hoy no se guarda: está por construirse.
+- Cada regalo de tokens queda registrado: quién lo dio, a quién, cuánto y cuándo. **DEFINIDO** (2026-10-06). Los regalos anteriores a este registro no se pueden recuperar: el historial empieza el 2026-10-06, al publicarse la fase 2.
+- Al regalar, el administrador puede escribir un motivo; es opcional. **DEFINIDO** (2026-10-06, fase 2)
+- El administrador consulta todos los regalos en una lista general, del más reciente al más antiguo, con fecha, quién regaló, a quién, cuánto y motivo. **DEFINIDO** (2026-10-06, fase 2)
+- El usuario ve los regalos que recibió en su historial, mezclados por fecha con sus compras: cantidad y fecha. No ve el motivo ni quién se los dio. **DEFINIDO** (2026-10-06, fase 2)
 
 ## 8. Compra de tokens
 
@@ -92,7 +95,7 @@ Cuando dos reglas choquen, o haya que decidir algo que no está escrito, se elig
   | 50 tokens | 20 | $100.00 MXN |
 
 - **Cantidad libre:** se puede comprar cualquier cantidad entre el mínimo y 500 tokens, a $2.00 MXN por token, sin tokens de regalo. _(confirmado el 2026-10-06)_
-- **Mínimo de compra: 5 tokens ($10.00 MXN). DEFINIDO** (2026-10-06). El sitio todavía deja comprar desde 1 token: está por corregirse.
+- **Mínimo de compra: 5 tokens ($10.00 MXN). DEFINIDO** (2026-10-06).
 - El precio siempre lo calcula el servidor con los datos de la base. **DEFINIDO** (2026-10-06)
 - Un pago aprobado acredita los tokens **una sola vez**, sin importar cuántas veces lo notifique Mercado Pago. **DEFINIDO** (2026-10-06)
 - No se acredita si el monto pagado es menor al esperado. **DEFINIDO** (2026-10-06)
@@ -192,6 +195,10 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-06 | Cada usuario puede usar un mismo código una sola vez. _(Descartadas: sin límite mientras esté vigente; número de usos configurable.)_ |
 | 2026-10-06 | Si una compra califica para primera compra y trae código, se aplica solo el código; no se suman. _(Descartada: sumar los dos bonos.)_ |
 | 2026-10-06 | Cada regalo de tokens de un administrador queda registrado (quién, a quién, cuánto, cuándo). _(Descartada: que solo suba el saldo, sin registro.)_ |
+| 2026-10-06 | El motivo de un regalo de tokens es opcional. _(Descartadas: motivo obligatorio; no guardar motivo. Origen: fase 2.)_ |
+| 2026-10-06 | El usuario ve los regalos que recibió, sin el motivo ni quién se los dio. _(Descartadas: que el historial sea solo para administradores; que el usuario vea también el motivo. Origen: fase 2.)_ |
+| 2026-10-06 | Los regalos se muestran al usuario dentro de su historial de compras, mezclados por fecha. _(Descartada: una lista aparte de "tokens regalados". Origen: fase 2.)_ |
+| 2026-10-06 | En el panel de administración los regalos se consultan en una lista general. _(Descartadas: historial por usuario; las dos vistas. Origen: fase 2.)_ |
 | 2026-10-06 | Se avisa al usuario cuando un pago pendiente se acredita y cuando un administrador le regala tokens. _(Descartados: aviso de pago devuelto; no avisar de nada más.)_ |
 | 2026-10-06 | Los avisos de pago pendiente acreditado y de tokens regalados llegan por correo. _(Descartadas: solo dentro del sitio; ambos medios.)_ |
 | 2026-10-06 | Cada transformación de IA cuesta 1 token, también al repetir sobre la misma carta. _(Descartada: un reintento gratis por carta.)_ |
@@ -206,14 +213,12 @@ Ninguno al 2026-10-06. Todas las reglas de este documento están confirmadas o d
 
 ## 17. Reglas definidas que el sitio todavía no cumple
 
-Decididas el 2026-10-06 y pendientes de construir. Cada una se convierte en una feature en `docs/features/`.
+Decididas el 2026-10-06 y pendientes de construir. Los correos son la fase 3 de `plan-fases.md`; el descuento por reembolso quedó apartado el 2026-10-06, sin fecha.
+
+Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en producción: mínimo de 24 cartas en Clásico, mínimo de 15 en Kids, y mínimo de compra de 5 tokens. Retirada el 2026-10-06, al publicarse la fase 2: registrar cada regalo de tokens.
 
 | Regla | Dónde está | Qué hace hoy el sitio |
 |---|---|---|
-| Mínimo de 24 cartas en Clásico | §4 | La pantalla de cartas pide 20 y la de tableros acepta 16 |
-| Mínimo de 15 cartas en Kids | §4 | Las dos pantallas piden 12 |
-| Mínimo de compra de 5 tokens | §8 | Deja comprar desde 1 token |
 | Descontar tokens ante reembolso o contracargo | §8 | No descuenta nada |
-| Registrar cada regalo de tokens | §7 | Solo sube el saldo, sin registro |
 | Avisar por correo de pago pendiente acreditado | §13 | No avisa |
 | Avisar por correo de tokens regalados | §13 | No avisa |

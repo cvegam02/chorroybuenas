@@ -72,7 +72,7 @@ Requiere ser administrador.
 | A1.1 | — Compras | | Todas las compras, con filtros. |
 | A1.2 | — Promociones | | Crear, editar, activar y borrar promociones. |
 | A1.3 | — Packs de tokens | | Paquetes, precio por token y tokens de bienvenida. _(por confirmar dónde está cada control)_ |
-| A1.4 | — Balances | | Saldos de todos los usuarios y regalo de tokens. |
+| A1.4 | — Balances | | Saldos de todos los usuarios, regalo de tokens (con motivo opcional) e historial general de regalos. |
 | A1.5 | — Uso de IA | | Uso por día, por usuario y por lotería, con costo estimado. |
 | A1.6 | — Transacciones MP | | Transacciones de Mercado Pago, con filtros. |
 
@@ -90,7 +90,7 @@ Requiere ser administrador.
 | M8 | Transformación con IA en lote | C1 | Cuántas cartas, cuántos tokens, avance y resultado. |
 | M9 | Tablero ampliado | C3 | Ver un tablero en grande y pasar al siguiente. |
 | M10 | Vista previa de carta | U2 | Ver una carta en grande. _(por confirmar)_ |
-| M11 | Historial de compras | U1 | Lista de compras del usuario. |
+| M11 | Historial de compras y regalos | U1 | Lista de compras del usuario y, mezclados por fecha, los regalos de tokens que recibió. |
 | M12 | Confirmación y advertencia | Varias | Confirmar acciones que no se deshacen (borrar, vaciar) y avisar de errores. |
 
 ---
@@ -99,5 +99,4 @@ Requiere ser administrador.
 
 Salen de `contexto-negocio.md` §17. Cuando se construyan, se agregan arriba con su código.
 
-- En A1.4 (Balances): historial de regalos de tokens (quién, a quién, cuánto, cuándo).
 - En U1 o M11: marca de "devuelta" en una compra reembolsada.

@@ -1,6 +1,6 @@
 # Fase 1 — Reglas que el sitio contradice hoy
 
-**Estado: ✅ completa en dev (2026-10-06)** — las tres historias están hechas y probadas en `dev`. Falta llevarla a producción: publicar la función de compra en el Supabase de producción y pasar `dev` a `main`, con confirmación de Carlos.
+**Estado: ✅ completa (2026-10-06)** — las tres historias están hechas, probadas por Carlos en `dev` y publicadas en producción ese mismo día: la función de compra se publicó en el Supabase de producción a las 23:40 UTC y `dev` pasó a `main` enseguida (PR #13). Comprobado en producción: el servidor rechaza 1 y 4 tokens y acepta 5 y el paquete; el sitio sirve la versión nueva. **Falta:** una compra real en producción para ver "Acreditando tu compra…" con dinero real.
 
 **Contexto.** El 2026-10-06 Carlos definió reglas que el sitio todavía no cumple (`contexto-negocio.md` §17). Tres de ellas se arreglan sin construir nada nuevo por debajo: el mínimo de cartas en Clásico, el mínimo de compra, y que el saldo aparezca al volver de pagar. Las tres las ve el usuario hoy: puede generar tableros con menos cartas de las debidas, puede llegar a un pago que Mercado Pago no le deja completar, y puede ver "pago exitoso" con su saldo viejo.
 
