@@ -45,6 +45,19 @@ export interface AdminUserBalanceWithInfo extends AdminUserBalance {
   full_name: string | null;
 }
 
+export interface AdminTokenGift {
+  id: string;
+  created_at: string;
+  amount: number;
+  reason: string | null;
+  admin_id: string | null;
+  admin_email: string | null;
+  admin_name: string | null;
+  recipient_id: string;
+  recipient_email: string | null;
+  recipient_name: string | null;
+}
+
 export interface AdminPromotion {
   id: string;
   code: string | null;
@@ -376,17 +389,29 @@ export class AdminRepository {
   }
 
   /**
-   * Regalar tokens a un usuario (admin).
+   * Regalar tokens a un usuario (admin). El regalo queda registrado con el motivo, si se da.
    * Retorna el nuevo balance o null si falla.
    */
-  static async giftTokens(userId: string, amount: number): Promise<number | null> {
+  static async giftTokens(userId: string, amount: number, reason?: string): Promise<number | null> {
     const { data, error } = await supabase.rpc('admin_gift_tokens', {
       p_user_id: userId,
       p_amount: amount,
+      p_reason: reason?.trim() || null,
     });
 
     if (error) return null;
     return data as number;
+  }
+
+  /**
+   * Lista general de regalos de tokens (admin), más recientes primero.
+   * Retorna null si falla, para distinguirlo de una lista vacía.
+   */
+  static async getTokenGifts(limit = 200): Promise<AdminTokenGift[] | null> {
+    const { data, error } = await supabase.rpc('admin_get_token_gifts', { p_limit: limit });
+
+    if (error) return null;
+    return (data ?? []) as AdminTokenGift[];
   }
 
   /**

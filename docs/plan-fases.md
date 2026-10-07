@@ -36,14 +36,14 @@ De las seis reglas que Carlos definió el 2026-10-06 y que el sitio todavía no 
 - **Qué queda fuera:** reembolsos, registro de regalos y correos (fases 2 y 3).
 - **Definición de «hecho»:** con 23 cartas en Clásico, o 14 en Kids, no se pueden generar tableros; no se puede iniciar una compra de menos de 5 tokens; y al volver de un pago aprobado el saldo ya incluye los tokens comprados.
 
-## Fase 2 — Movimientos de tokens: reembolsos y regalos
+## Fase 2 — Registro de regalos de tokens
 
-**Estado: 🔲 por definir al cerrar la fase 1**
+**Estado: 🔨 en construcción (abierta el 2026-10-06)** · Seguimiento: [`fases/fase-2.md`](fases/fase-2.md)
 
-- **Por qué va después:** las dos reglas necesitan lo mismo por debajo, que hoy no existe: guardar cada movimiento de saldo que no es una compra ni un uso de IA (una devolución, un regalo). La fase 3 depende de esto, porque no se puede avisar de un regalo que no queda registrado.
-- **Alcance previsto:** descontar los tokens de una compra devuelta o revertida, dejando el saldo en 0 como mínimo y la compra marcada como devuelta; registrar cada regalo de tokens (quién, a quién, cuánto, cuándo) y mostrar ese historial en el panel de administración.
-- **Qué queda fuera:** los correos (fase 3).
-- **Definición de «hecho»:** al devolver un pago de prueba, el saldo baja y la compra aparece como devuelta; al regalar tokens, el regalo aparece en un historial.
+- **Por qué va después de la fase 1:** necesita algo que no existía por debajo: guardar cada regalo. La fase 3 depende de esto, porque no se puede avisar de un regalo que no queda registrado.
+- **Alcance:** registrar cada regalo de tokens (quién, a quién, cuánto, cuándo y un motivo opcional), mostrar la lista general en el panel de administración y mostrarle al usuario sus regalos dentro de su historial de compras.
+- **Qué queda fuera:** los correos (fase 3) y los reembolsos (apartados, ver abajo).
+- **Definición de «hecho»:** al regalar tokens, el regalo aparece en la lista del panel con su motivo, y el usuario lo ve en su historial como una fila "Regalo".
 
 ## Fase 3 — Avisos por correo
 
@@ -53,6 +53,12 @@ De las seis reglas que Carlos definió el 2026-10-06 y que el sitio todavía no 
 - **Alcance previsto:** correo al usuario cuando un pago pendiente (efectivo o transferencia) se acredita, y cuando un administrador le regala tokens.
 - **Por decidir al abrirla:** con qué servicio se envían los correos, y el texto de cada uno.
 - **Definición de «hecho»:** al regalar tokens a una cuenta de prueba, llega el correo; al confirmarse un pago pendiente de prueba, llega el correo.
+
+## Apartado — Descuento de tokens por reembolso
+
+**Estado: ⏸ apartado por Carlos el 2026-10-06, sin fecha**
+
+Formaba parte de la fase 2. La regla sigue definida (`contexto-negocio.md` §8): al devolverse o revertirse un pago, se descuentan los tokens de esa compra, dejando el saldo en 0 como mínimo y la compra marcada como devuelta. Hoy el sitio no descuenta nada. Se define y se construye cuando Carlos lo pida.
 
 ---
 

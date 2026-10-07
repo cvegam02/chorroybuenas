@@ -187,7 +187,7 @@ Creado el 2026-10-06.
 ### 17. Ver el historial y el saldo
 - **Actor(es)**: Usuario registrado.
 - **Precondiciones**: Sesión iniciada.
-- **Flujo principal**: (1) En su panel ve su saldo, cuántos tokens ha recibido y gastado, y en qué loterías. (2) Abre su historial de compras.
+- **Flujo principal**: (1) En su panel ve su saldo, cuántos tokens ha recibido y gastado, y en qué loterías. (2) Abre su historial, donde están sus compras y, mezclados por fecha, los regalos de tokens que recibió: cantidad y fecha, sin motivo ni quién los dio (§7; regalos por construir, fase 2).
 - **Excepciones**: Ninguna.
 - **Resultado**: El usuario conoce su saldo y sus movimientos. Solo ve los suyos (§3, §12).
 - **Estados afectados**: Ninguno.
@@ -231,17 +231,17 @@ Creado el 2026-10-06.
 ### 21. Regalar tokens 🔧
 - **Actor(es)**: Administrador.
 - **Precondiciones**: Sesión iniciada como administrador; el usuario destino existe.
-- **Flujo principal**: (1) Busca al usuario en la lista de saldos. (2) Indica cuántos tokens regalar. (3) El saldo del usuario sube (§7).
+- **Flujo principal**: (1) Busca al usuario en la lista de saldos. (2) Indica cuántos tokens regalar y, si quiere, un motivo. (3) El saldo del usuario sube y el regalo aparece en el historial de regalos (§7).
 - **Excepciones**: Cantidad de 0 o negativa: se rechaza. Quien no es administrador no puede regalar (§3).
 - **Resultado**: El usuario tiene más tokens.
 - **Estados afectados**: Saldo (§11).
 - **Notificaciones**: Correo al usuario avisando que recibió tokens (§13; por construir).
-- **Auditoría**: Se registra quién regaló, a quién, cuánto y cuándo (§7; por construir).
+- **Auditoría**: Se registra quién regaló, a quién, cuánto, cuándo y el motivo si se escribió (§7; por construir, fase 2).
 
 ### 22. Consultar compras, saldos y uso de la IA
 - **Actor(es)**: Administrador.
 - **Precondiciones**: Sesión iniciada como administrador.
-- **Flujo principal**: (1) Ve las compras y las transacciones de Mercado Pago, con filtros. (2) Ve los saldos de todos los usuarios. (3) Ve el uso de la IA por día, por usuario y por lotería, con su costo estimado (§10).
+- **Flujo principal**: (1) Ve las compras y las transacciones de Mercado Pago, con filtros. (2) Ve los saldos de todos los usuarios y la lista general de regalos de tokens, del más reciente al más antiguo (§7; por construir, fase 2). (3) Ve el uso de la IA por día, por usuario y por lotería, con su costo estimado (§10).
 - **Excepciones**: Ninguna.
 - **Resultado**: El administrador conoce el estado del negocio.
 - **Estados afectados**: Ninguno.
