@@ -16,6 +16,9 @@ verify_jwt = false
 [functions.credit-payment-on-return]
 verify_jwt = false
 
+[functions.create-seasonal-preference]
+verify_jwt = false
+
 # Plantilla de correo de confirmación (registro)
 # Para proyectos hosted: copia el contenido de supabase/templates/confirmation.html al Dashboard → Authentication → Email Templates
 [auth.email.template.confirmation]

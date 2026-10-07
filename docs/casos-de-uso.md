@@ -4,9 +4,9 @@ Complementa a [`contexto-negocio.md`](contexto-negocio.md) sin introducir reglas
 
 Los casos marcados con 🔧 describen una regla ya definida que el sitio todavía no cumple (ver §17 del contexto): el caso dice cómo debe funcionar, no cómo funciona hoy.
 
-Son 23 casos en 5 bloques. Formato de cada caso: actor, precondiciones, flujo principal, excepciones, resultado, estados afectados, notificaciones y auditoría. No se usa "Tareas generadas": el producto no tiene tablero de tareas.
+Son 28 casos en 6 bloques. Formato de cada caso: actor, precondiciones, flujo principal, excepciones, resultado, estados afectados, notificaciones y auditoría. No se usa "Tareas generadas": el producto no tiene tablero de tareas.
 
-Creado el 2026-10-06.
+Creado el 2026-10-06. El bloque 6 (loterías de temporada) se agregó ese mismo día (FEAT-17).
 
 ---
 
@@ -241,7 +241,7 @@ Creado el 2026-10-06.
 ### 22. Consultar compras, saldos y uso de la IA
 - **Actor(es)**: Administrador.
 - **Precondiciones**: Sesión iniciada como administrador.
-- **Flujo principal**: (1) Ve las compras y las transacciones de Mercado Pago, con filtros. (2) Ve los saldos de todos los usuarios y la lista general de regalos de tokens, del más reciente al más antiguo (§7). (3) Ve el uso de la IA por día, por usuario y por lotería, con su costo estimado (§10).
+- **Flujo principal**: (1) Ve las compras —de tokens y de loterías de temporada, distinguidas por tipo (§18)— y las transacciones de Mercado Pago, con filtros. (2) Ve los saldos de todos los usuarios y la lista general de regalos de tokens, del más reciente al más antiguo (§7). (3) Ve el uso de la IA por día, por usuario y por lotería, con su costo estimado (§10).
 - **Excepciones**: Ninguna.
 - **Resultado**: El administrador conoce el estado del negocio.
 - **Estados afectados**: Ninguno.
@@ -255,5 +255,61 @@ Creado el 2026-10-06.
 - **Excepciones**: Un valor negativo se trata como 0.
 - **Resultado**: Las cuentas creadas a partir de ese momento reciben la cantidad nueva. Las ya existentes no cambian.
 - **Estados afectados**: Configuración (§11).
+- **Notificaciones**: Ninguna.
+- **Auditoría**: No.
+
+---
+
+## Bloque 6 — Loterías de temporada
+
+Todos los casos de este bloque están por construir (§17, §18).
+
+### 24. Ver el catálogo de temporada 🔧
+- **Actor(es)**: Visitante o usuario registrado.
+- **Precondiciones**: Ninguna.
+- **Flujo principal**: (1) Abre «De Temporada». (2) Ve las loterías visibles agrupadas por temporada, con portada, modo, número de cartas y de tableros, y precio. (3) Abre una y ve su portada, sus cartas de muestra con marca de agua, qué incluye y su descripción (§18).
+- **Excepciones**: No hay loterías visibles: se le avisa y se le ofrece crear su propia lotería. La lotería ya no es visible: se le avisa que ya no está disponible, salvo que la haya comprado.
+- **Resultado**: La persona sabe qué puede comprar.
+- **Estados afectados**: Ninguno.
+- **Notificaciones**: Ninguna.
+- **Auditoría**: No.
+
+### 25. Comprar una lotería de temporada 🔧
+- **Actor(es)**: Usuario registrado.
+- **Precondiciones**: Sesión iniciada; la lotería es visible; la cuenta no la tiene ni tiene un pago en proceso por ella.
+- **Flujo principal**: (1) En el detalle de la lotería pulsa «Comprar». (2) Es enviado al pago de Mercado Pago, con el precio que pone el servidor. (3) Paga. (4) Vuelve al sitio y ve el resultado. (5) Con el pago aprobado, la lotería queda en su cuenta (§18).
+- **Excepciones**: Sin sesión: se le pide iniciar sesión y vuelve a la misma lotería. Pago cancelado o rechazado: no recibe nada y puede intentarlo de nuevo. Pago pendiente: la lotería aparece como «pago en proceso» y se entrega al confirmarse. Monto pagado menor al precio: no se entrega. Notificación repetida de Mercado Pago: no se registra dos veces.
+- **Resultado**: La cuenta tiene una compra aprobada de esa lotería.
+- **Estados afectados**: Compra de temporada (§11).
+- **Notificaciones**: Ninguna (§13).
+- **Auditoría**: La compra queda registrada con su pago y su monto.
+
+### 26. Descargar una lotería de temporada comprada 🔧
+- **Actor(es)**: Usuario registrado.
+- **Precondiciones**: Tener una compra aprobada de esa lotería.
+- **Flujo principal**: (1) En Mi cuenta, o en el detalle de la lotería, pulsa «Descargar PDF». (2) Recibe el archivo. Puede repetirlo las veces que quiera (§18).
+- **Excepciones**: Sin compra, o con el pago aún en proceso: no puede obtener el archivo. La lotería ya no es visible: la descarga sigue disponible para quien la compró.
+- **Resultado**: El comprador tiene su PDF.
+- **Estados afectados**: Ninguno.
+- **Notificaciones**: Ninguna.
+- **Auditoría**: No.
+
+### 27. Gestionar temporadas 🔧
+- **Actor(es)**: Administrador.
+- **Precondiciones**: Sesión iniciada como administrador.
+- **Flujo principal**: (1) Ve las temporadas. (2) Crea una con su nombre en español, su nombre en inglés si quiere, y su orden. (3) La edita, cambia su orden o la borra (§18).
+- **Excepciones**: Una temporada con loterías no se puede borrar. Quien no es administrador no puede crear ni cambiar temporadas (§12).
+- **Resultado**: La temporada queda creada, cambiada o eliminada.
+- **Estados afectados**: Temporada (§11).
+- **Notificaciones**: Ninguna.
+- **Auditoría**: No.
+
+### 28. Gestionar loterías de temporada 🔧
+- **Actor(es)**: Administrador.
+- **Precondiciones**: Sesión iniciada como administrador; existe al menos una temporada.
+- **Flujo principal**: (1) Crea una lotería con su ficha y su precio. (2) Sube el PDF, la portada y las cartas de muestra; el sitio protege las imágenes. (3) La guarda como borrador. (4) La publica, con fechas si quiere. (5) Después puede editarla, reemplazar sus archivos, despublicarla o borrarla (§18).
+- **Excepciones**: Precio menor a $10.00 MXN: se rechaza. Lotería incompleta: no se puede publicar. Lotería con ventas: no se puede borrar, solo despublicar. Reemplazar el PDF de una lotería vendida: se le avisa que los compradores descargarán la versión nueva.
+- **Resultado**: La lotería queda creada, cambiada, publicada, retirada o eliminada.
+- **Estados afectados**: Lotería de temporada (§11).
 - **Notificaciones**: Ninguna.
 - **Auditoría**: No.

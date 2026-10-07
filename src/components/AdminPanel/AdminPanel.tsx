@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FaCog, FaArrowLeft, FaTicketAlt, FaShoppingCart,
-  FaBoxOpen, FaWallet, FaChartLine, FaCreditCard, FaBars, FaTimes
+  FaBoxOpen, FaWallet, FaChartLine, FaCreditCard, FaCalendarAlt, FaBars, FaTimes
 } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import { AdminPurchases } from './AdminPurchases';
@@ -11,9 +11,10 @@ import { AdminTokenPacks } from './AdminTokenPacks';
 import { AdminBalances } from './AdminBalances';
 import { AdminTokenUsage } from './AdminTokenUsage';
 import { AdminMPTransactions } from './AdminMPTransactions';
+import { AdminSeasonal } from './AdminSeasonal';
 import './AdminPanel.css';
 
-type AdminTab = 'compras' | 'promociones' | 'packs' | 'balances' | 'uso-ia' | 'mp';
+type AdminTab = 'compras' | 'promociones' | 'packs' | 'balances' | 'uso-ia' | 'mp' | 'temporada';
 
 const TABS: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
   { id: 'compras',     label: 'Compras',           icon: <FaShoppingCart /> },
@@ -22,6 +23,7 @@ const TABS: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
   { id: 'balances',    label: 'Balances',           icon: <FaWallet /> },
   { id: 'uso-ia',      label: 'Uso de IA',          icon: <FaChartLine /> },
   { id: 'mp',          label: 'Transacciones MP',   icon: <FaCreditCard /> },
+  { id: 'temporada',   label: 'De Temporada',       icon: <FaCalendarAlt /> },
 ];
 
 export const AdminPanel = () => {
@@ -144,6 +146,7 @@ export const AdminPanel = () => {
           {activeTab === 'balances'    && <AdminBalances />}
           {activeTab === 'uso-ia'      && <AdminTokenUsage />}
           {activeTab === 'mp'          && <AdminMPTransactions />}
+          {activeTab === 'temporada'   && <AdminSeasonal />}
         </div>
       </main>
     </div>

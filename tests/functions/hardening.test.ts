@@ -10,10 +10,12 @@ const handlers = readdirSync(functionsDir, { withFileTypes: true })
   .filter((entry) => entry.isDirectory() && entry.name !== '_shared')
   .map((entry) => ({ name: entry.name, source: readFileSync(join(functionsDir, entry.name, 'index.ts'), 'utf8') }));
 
-const BROWSER_FUNCTIONS = ['create-payment-preference', 'credit-payment-on-return', 'transform-loteria'];
+const BROWSER_FUNCTIONS = [
+  'create-payment-preference', 'create-seasonal-preference', 'credit-payment-on-return', 'transform-loteria',
+];
 
 describe('edge functions: endurecimiento', () => {
-  it('se revisan las cuatro funciones', () => {
+  it('se revisan las cinco funciones', () => {
     expect(handlers.map((h) => h.name).sort()).toEqual([...BROWSER_FUNCTIONS, 'webhook-mercadopago'].sort());
   });
 

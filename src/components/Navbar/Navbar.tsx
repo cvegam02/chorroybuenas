@@ -11,7 +11,7 @@ import logoImage from '../../img/logo.png';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { UserMenuPanel } from './UserMenuPanel';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { FaCoins } from 'react-icons/fa';
+import { FaCalendarAlt, FaCoins } from 'react-icons/fa';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import './Navbar.css';
 import { logger } from '../../utils/logger';
@@ -243,6 +243,19 @@ export const Navbar = () => {
                     <FaCoins />
                     <span>{t('navbar.buyTokens')}</span>
                   </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="navbar__user-dropdown-item"
+                    onClick={() => {
+                      navigate('/temporada');
+                      setUserMenuOpen(false);
+                      closeMenu();
+                    }}
+                  >
+                    <FaCalendarAlt />
+                    <span>{t('navbar.seasonal')}</span>
+                  </button>
                   {isAdmin && (
                     <button
                       type="button"
@@ -329,6 +342,15 @@ export const Navbar = () => {
                 onClick={closeMenu}
               >
                 {t('navbar.create')}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/temporada"
+                className={`navbar__link ${location.pathname.startsWith('/temporada') ? 'navbar__link--active' : ''}`}
+                onClick={closeMenu}
+              >
+                {t('navbar.seasonal')}
               </Link>
             </li>
             <li>

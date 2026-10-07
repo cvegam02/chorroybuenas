@@ -312,6 +312,11 @@
 
 /* ─── Mobile ──────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  /* La barra va arriba y el contenido debajo: en fila, la barra quedaba como columna a la izquierda. */
+  .admin-panel {
+    flex-direction: column;
+  }
+
   .admin-panel__topbar {
     display: flex;
     align-items: center;
