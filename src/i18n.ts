@@ -21,9 +21,22 @@ i18n
     .init({
         resources,
         fallbackLng: 'es',
+        // El sitio abre en español; el inglés solo si se eligió con el selector (FEAT-21).
+        detection: {
+            order: ['localStorage'],
+            caches: ['localStorage']
+        },
         interpolation: {
             escapeValue: false // react already safes from xss
         }
     });
+
+const syncDocumentLanguage = (language: string) => {
+    document.documentElement.lang = language.startsWith('en') ? 'en' : 'es';
+};
+if (typeof document !== 'undefined') {
+    syncDocumentLanguage(i18n.language ?? 'es');
+    i18n.on('languageChanged', syncDocumentLanguage);
+}
 
 export default i18n;
