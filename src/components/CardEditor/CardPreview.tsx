@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { FaMagic, FaUndo, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaMagic, FaUndo, FaEdit, FaTrash, FaSearchPlus } from 'react-icons/fa';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Card } from '../../types';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
+import { CardPreviewModal } from '../SetView/CardPreviewModal';
 import './CardPreview.css';
 
 type PendingAction = 'regenerate' | 'delete' | 'revert' | null;
@@ -28,6 +29,7 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+  const [showLargeView, setShowLargeView] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia('(hover: none)');
@@ -63,6 +65,17 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
         onClick={(e) => e.stopPropagation()}
         role="menu"
       >
+        {card.image && (
+          <button
+            type="button"
+            className="card-preview__actions-menu-item"
+            onClick={() => handleMenuAction(() => setShowLargeView(true))}
+            role="menuitem"
+          >
+            <FaSearchPlus />
+            <span>{t('cardEditor.cardActions.view')}</span>
+          </button>
+        )}
         {onClick && !disabledDuringBatch && (
           <button
             type="button"
@@ -196,6 +209,11 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
         )}
       </div>
       {actionsMenu}
+      <CardPreviewModal
+        card={card}
+        isOpen={showLargeView}
+        onClose={() => setShowLargeView(false)}
+      />
       {pendingAction === 'regenerate' && onTransform && (
         <WarningModal
           isOpen
