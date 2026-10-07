@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { FaLock, FaTimes } from 'react-icons/fa';
+import { FaLock, FaTimes, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import './SetNewPasswordModal.css';
 import { getErrorMessage } from '../../utils/errors';
@@ -11,6 +11,8 @@ export const SetNewPasswordModal: React.FC = () => {
     const { recoverySession, updatePassword, clearRecovery } = useAuth();
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
@@ -66,11 +68,11 @@ export const SetNewPasswordModal: React.FC = () => {
                         {error && <div className="set-password-modal__error">{error}</div>}
                         <div className="set-password-modal__input-group">
                             <label htmlFor="new-password">{t('common.auth.newPassword')}</label>
-                            <div className="set-password-modal__input-wrapper">
+                            <div className="set-password-modal__input-wrapper set-password-modal__input-wrapper--password">
                                 <FaLock className="set-password-modal__input-icon" />
                                 <input
                                     id="new-password"
-                                    type="password"
+                                    type={showPassword ? 'text' : 'password'}
                                     required
                                     autoComplete="new-password"
                                     value={password}
@@ -79,15 +81,24 @@ export const SetNewPasswordModal: React.FC = () => {
                                     disabled={isLoading}
                                     minLength={6}
                                 />
+                                <button
+                                    type="button"
+                                    className="set-password-modal__password-toggle"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    aria-label={showPassword ? t('common.auth.hidePassword') : t('common.auth.showPassword')}
+                                    tabIndex={-1}
+                                >
+                                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                </button>
                             </div>
                         </div>
                         <div className="set-password-modal__input-group">
                             <label htmlFor="confirm-new-password">{t('common.auth.confirmPassword')}</label>
-                            <div className="set-password-modal__input-wrapper">
+                            <div className="set-password-modal__input-wrapper set-password-modal__input-wrapper--password">
                                 <FaLock className="set-password-modal__input-icon" />
                                 <input
                                     id="confirm-new-password"
-                                    type="password"
+                                    type={showConfirmPassword ? 'text' : 'password'}
                                     required
                                     autoComplete="new-password"
                                     value={confirmPassword}
@@ -96,6 +107,15 @@ export const SetNewPasswordModal: React.FC = () => {
                                     disabled={isLoading}
                                     minLength={6}
                                 />
+                                <button
+                                    type="button"
+                                    className="set-password-modal__password-toggle"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    aria-label={showConfirmPassword ? t('common.auth.hidePassword') : t('common.auth.showPassword')}
+                                    tabIndex={-1}
+                                >
+                                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                                </button>
                             </div>
                         </div>
                         <button type="submit" className="set-password-modal__submit" disabled={isLoading}>

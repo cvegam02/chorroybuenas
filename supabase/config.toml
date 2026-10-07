@@ -24,3 +24,9 @@ verify_jwt = false
 [auth.email.template.confirmation]
 subject = "Confirma tu cuenta - Loteria Personalizada"
 content_path = "./supabase/templates/confirmation.html"
+
+# Plantilla de correo de recuperación de contraseña
+# Para proyectos hosted: se aplica igual que la de confirmación (Dashboard → Authentication → Email Templates → Reset Password)
+[auth.email.template.recovery]
+subject = "Recupera tu contraseña - chorroybuenas.com.mx"
+content_path = "./supabase/templates/recovery.html"
