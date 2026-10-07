@@ -46,7 +46,7 @@ Recorrido en tres pasos. No requiere cuenta (principio central, `contexto-negoci
 
 | Código | Pantalla | Ruta | Qué muestra y qué permite |
 |---|---|---|---|
-| C1 | Cartas | `/cards` | Lista de cartas de la lotería. Agregar una carta o varias, editarlas, borrarlas, elegir el modo (Clásico o Kids), ver cuántas faltan para el mínimo, transformar con IA (una o todas) y renombrar la lotería. Botón para pasar al paso siguiente. |
+| C1 | Cartas | `/cards` | Lista de cartas de la lotería. Agregar una carta o varias, editarlas, borrarlas, ver una en grande (en teléfono, desde el menú de la carta), elegir el modo (Clásico o Kids), ver cuántas faltan para el mínimo, transformar con IA (una o todas) y renombrar la lotería. Botón para pasar al paso siguiente. |
 | C2 | Cantidad de tableros | `/board-count` | Cuántos tableros generar, con la cantidad sugerida. Avisa si faltan cartas. |
 | C3 | Vista previa | `/preview` | Los tableros generados, uno por uno, y la descarga del PDF. |
 
@@ -89,7 +89,7 @@ Requiere ser administrador.
 | M7 | Progreso de subida | C1 | Barra de avance al guardar imágenes. |
 | M8 | Transformación con IA en lote | C1 | Cuántas cartas, cuántos tokens, avance y resultado. |
 | M9 | Tablero ampliado | C3 | Ver un tablero en grande y pasar al siguiente. |
-| M10 | Vista previa de carta | U2 | Ver una carta en grande. _(por confirmar)_ |
+| M10 | Vista previa de carta | U2; C1 (solo en teléfono, desde el menú de la carta — 2026-10-06, FEAT-14) | Ver una carta en grande. _(por confirmar en U2)_ |
 | M11 | Historial de compras y regalos | U1 | Lista de compras del usuario y, mezclados por fecha, los regalos de tokens que recibió. |
 | M12 | Confirmación y advertencia | Varias | Confirmar acciones que no se deshacen (borrar, vaciar) y avisar de errores. |
 

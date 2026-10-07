@@ -714,8 +714,13 @@
   border: none;
 }
 
-.card-editor__next-button--enabled:hover {
+.card-editor__next-button--enabled:hover:not(:disabled) {
   filter: brightness(1.08);
+}
+
+.card-editor__next-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .card-editor__cancel-process-button {
