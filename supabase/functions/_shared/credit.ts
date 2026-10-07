@@ -1,5 +1,7 @@
 /** Metadata que create-payment-preference guarda en la preferencia de Mercado Pago. */
 export interface PreferenceMetadata {
+  /** Tipo de compra. Ausente en las preferencias de tokens: sin marca, se trata como tokens. */
+  kind?: string;
   user_id?: string;
   pack_id?: string | null;
   base_tokens?: number;

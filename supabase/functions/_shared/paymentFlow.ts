@@ -1,4 +1,5 @@
 import { buildCreditParams, type CreditParams, type PreferenceMetadata } from './credit.ts';
+import { buildSeasonalDelivery, type SeasonalDeliveryParams } from './seasonal.ts';
 
 /** Acceso a Mercado Pago y a la base, inyectado para poder probar el flujo sin red. */
 export interface PaymentDeps {
@@ -8,6 +9,8 @@ export interface PaymentDeps {
   countPurchases: (userId: string) => Promise<number>;
   /** RPC add_tokens_after_purchase (idempotente). Devuelve el saldo. Lanza si falla. */
   credit: (params: CreditParams) => Promise<number>;
+  /** RPC deliver_seasonal_purchase (idempotente). Devuelve el estado de la compra. Lanza si falla. */
+  deliverSeasonal: (params: SeasonalDeliveryParams) => Promise<SeasonalDeliveryStatus>;
   sleep: (ms: number) => Promise<void>;
 }
 
@@ -24,6 +27,14 @@ export interface ApprovedPayment {
   externalReference: string;
   preferenceId: string;
 }
+
+/** approved: la lotería quedó entregada. repeated: la cuenta ya la tenía; el pago se guarda para devolverlo. */
+export type SeasonalDeliveryStatus = 'approved' | 'repeated';
+
+/** Qué se hizo con un pago aprobado, según la marca de tipo de su preferencia. */
+export type Credited =
+  | { kind: 'tokens'; balance: number }
+  | { kind: 'seasonal'; loteriaId: string; status: SeasonalDeliveryStatus };
 
 export type SkipReason =
   | 'ignored'
@@ -43,6 +54,8 @@ interface MerchantOrder {
 const ORDER_RETRY_DELAY_MS = 3000;
 const MP_ID_RE = /^\d{1,20}$/;
 const PREFERENCE_ID_RE = /^[\w-]{1,100}$/;
+const SEASONAL_KIND = 'seasonal';
+const TOKENS_KIND = 'tokens';
 
 const asString = (v: unknown): string | null =>
   typeof v === 'string' && v.length > 0 ? v : typeof v === 'number' ? String(v) : null;
@@ -142,10 +155,11 @@ export async function findApprovedPayment(
 }
 
 /**
- * Acredita un pago aprobado usando la metadata de la preferencia que creó nuestro servidor.
- * La acreditación es idempotente: repetirla devuelve el saldo sin volver a sumar.
+ * Acredita un pago aprobado usando la metadata de la preferencia que creó nuestro servidor:
+ * entrega la lotería si la preferencia está marcada como de temporada; si no lleva marca, suma tokens.
+ * Es idempotente: repetirla devuelve el saldo (o el estado de la compra) sin volver a acreditar.
  */
-export async function creditPayment(deps: PaymentDeps, approved: ApprovedPayment): Promise<Outcome<number>> {
+export async function creditPayment(deps: PaymentDeps, approved: ApprovedPayment): Promise<Outcome<Credited>> {
   if (!PREFERENCE_ID_RE.test(approved.preferenceId)) return { ok: false, reason: 'invalid_metadata' };
 
   const preference = await deps.mpGet<{ metadata?: PreferenceMetadata }>(
@@ -153,6 +167,22 @@ export async function creditPayment(deps: PaymentDeps, approved: ApprovedPayment
   );
   const metadata = preference?.metadata;
   if (typeof metadata !== 'object' || metadata === null) return { ok: false, reason: 'invalid_metadata' };
+
+  if (metadata.kind === SEASONAL_KIND) {
+    const delivery = buildSeasonalDelivery({
+      userId: approved.externalReference,
+      paymentId: approved.paymentId,
+      payment: approved.payment,
+      metadata: metadata as Record<string, unknown>,
+    });
+    if (!delivery) return { ok: false, reason: 'invalid_metadata' };
+    const status = await deps.deliverSeasonal(delivery);
+    return { ok: true, value: { kind: 'seasonal', loteriaId: delivery.p_loteria_id, status } };
+  }
+  // Las preferencias sin marca son compras de tokens (incluye pagos en curso anteriores a la marca).
+  if (metadata.kind !== undefined && metadata.kind !== null && metadata.kind !== TOKENS_KIND) {
+    return { ok: false, reason: 'invalid_metadata' };
+  }
 
   const previousPurchases = await deps.countPurchases(approved.externalReference);
   const params = buildCreditParams({
@@ -165,5 +195,5 @@ export async function creditPayment(deps: PaymentDeps, approved: ApprovedPayment
   });
   if (!params) return { ok: false, reason: 'invalid_metadata' };
 
-  return { ok: true, value: await deps.credit(params) };
+  return { ok: true, value: { kind: 'tokens', balance: await deps.credit(params) } };
 }

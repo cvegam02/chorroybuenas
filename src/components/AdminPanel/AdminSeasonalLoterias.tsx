@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { FaPencilAlt, FaPlus, FaTrash } from 'react-icons/fa';
 import { SeasonalRepository, type AdminSeasonalLoteria, type Season } from '../../repositories/SeasonalRepository';
 import { formatFileSize } from '../../utils/seasonalLoteria';
+import type { SeasonalSales } from '../../utils/seasonalPurchase';
 import {
   SEASONAL_STATUS_LABELS,
   missingToPublish,
@@ -19,6 +20,8 @@ interface AdminSeasonalLoteriasProps {
   /** Se llama cuando cambia el número de loterías de alguna temporada. */
   onChanged: () => void;
 }
+
+const HAS_SALES_HINT = 'Tiene ventas: solo se puede despublicar';
 
 /** 'new' mientras se crea una lotería; la lotería mientras se edita; null con la ventana cerrada. */
 type FormTarget = 'new' | AdminSeasonalLoteria | null;
@@ -66,12 +69,18 @@ export const AdminSeasonalLoterias = ({ seasons, onChanged }: AdminSeasonalLoter
   const [deleteTarget, setDeleteTarget] = useState<AdminSeasonalLoteria | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [sales, setSales] = useState<Map<string, SeasonalSales>>(new Map());
 
   const load = useCallback(async () => {
     setIsLoading(true);
-    const data = await SeasonalRepository.getAdminLoterias();
-    setLoadFailed(data === null);
+    const [data, salesData] = await Promise.all([
+      SeasonalRepository.getAdminLoterias(),
+      SeasonalRepository.getAdminSales(),
+    ]);
+    // Sin el dato de ventas no se puede saber qué loterías se pueden borrar: se trata como fallo de carga.
+    setLoadFailed(data === null || salesData === null);
     setLoterias(data ?? []);
+    setSales(salesData ?? new Map());
     setIsLoading(false);
   }, []);
 
@@ -167,6 +176,9 @@ export const AdminSeasonalLoterias = ({ seasons, onChanged }: AdminSeasonalLoter
               const missing = missingFor(loteria);
               const cannotPublish = !loteria.is_published && missing.length > 0;
               const isBusy = busyId === loteria.id;
+              const loteriaSales = sales.get(loteria.id);
+              // Cualquier pago registrado (también uno repetido) impide borrarla en la base.
+              const hasSales = (loteriaSales?.total ?? 0) > 0;
               return (
                 <tr key={loteria.id}>
                   <td data-label="Portada">
@@ -193,8 +205,7 @@ export const AdminSeasonalLoterias = ({ seasons, onChanged }: AdminSeasonalLoter
                   </td>
                   <td data-label="Fechas">{formatDates(loteria)}</td>
                   <td data-label="PDF">{loteria.pdf ? formatFileSize(loteria.pdf.sizeBytes) : 'Sin PDF'}</td>
-                  {/* Las ventas se cuentan a partir de la historia C1 (compras). */}
-                  <td data-label="Ventas">0</td>
+                  <td data-label="Ventas">{loteriaSales?.approved ?? 0}</td>
                   <td data-label="Acciones">
                     <div className="admin-seasonal__actions">
                       <div className="admin-seasonal__publish">
@@ -225,17 +236,22 @@ export const AdminSeasonalLoterias = ({ seasons, onChanged }: AdminSeasonalLoter
                       >
                         <FaPencilAlt />
                       </button>
-                      {/* El bloqueo «Tiene ventas» llega con la historia C1 (compras). */}
                       <button
                         type="button"
                         className="admin-packs__action-btn"
                         onClick={() => setDeleteTarget(loteria)}
-                        disabled={isBusy}
-                        title="Borrar"
+                        disabled={isBusy || hasSales}
+                        title={hasSales ? HAS_SALES_HINT : 'Borrar'}
                         aria-label={`Borrar ${loteria.name_es}`}
+                        aria-describedby={hasSales ? `seasonal-sales-${loteria.id}` : undefined}
                       >
                         <FaTrash />
                       </button>
+                      {hasSales && (
+                        <span className="admin-seasonal__meta" id={`seasonal-sales-${loteria.id}`}>
+                          {HAS_SALES_HINT}
+                        </span>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -287,6 +303,7 @@ export const AdminSeasonalLoterias = ({ seasons, onChanged }: AdminSeasonalLoter
         <AdminSeasonalLoteriaForm
           seasons={seasons}
           loteria={formTarget === 'new' ? null : formTarget}
+          hasSales={formTarget !== 'new' && (sales.get(formTarget.id)?.approved ?? 0) > 0}
           onClose={handleFormClose}
         />
       )}

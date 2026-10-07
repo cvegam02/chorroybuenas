@@ -1,11 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { SeasonalRepository, type SeasonalDetailResult } from '../../repositories/SeasonalRepository';
 import { TokenPricingRepository } from '../../repositories/TokenPricingRepository';
+import { creditPaymentOnReturn } from '../../services/PurchaseService';
+import { createSeasonalPreference } from '../../services/SeasonalPurchaseService';
 import { localizedText, showsSampleNote } from '../../utils/seasonalCatalog';
 import { seasonalStatus } from '../../utils/seasonalPublishing';
+import { readSeasonalReturn } from '../../utils/seasonalPurchase';
 import { formatUsdReference } from '../../utils/usdReference';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import { CardPreviewModal } from '../SetView/CardPreviewModal';
@@ -15,6 +18,9 @@ import './SeasonalDetail.css';
 
 const PRICE_FORMAT = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
 
+/** Aviso al volver de Mercado Pago. `confirming` mientras el servidor registra el pago aprobado. */
+type ReturnNotice = 'confirming' | 'success' | 'pending' | 'cancel';
+
 export const SeasonalDetail = () => {
   const { id = '' } = useParams<{ id: string }>();
   const { t, i18n } = useTranslation();
@@ -23,7 +29,13 @@ export const SeasonalDetail = () => {
   const [usdRate, setUsdRate] = useState<number | null>(null);
   const [openSample, setOpenSample] = useState<Card | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [showComingSoon, setShowComingSoon] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isOwned, setIsOwned] = useState(false);
+  const [notice, setNotice] = useState<ReturnNotice | null>(null);
+  const [isStartingPayment, setIsStartingPayment] = useState(false);
+  const [buyFailed, setBuyFailed] = useState(false);
+  const returnHandled = useRef(false);
+  const userId = user?.id ?? null;
 
   const language = i18n.language;
   const showUsd = language?.startsWith('en') ?? false;
@@ -50,13 +62,73 @@ export const SeasonalDetail = () => {
 
   const closeSample = useCallback(() => setOpenSample(null), []);
 
-  // La compra real llega en la historia C1; por ahora solo se pide sesión.
-  const handleBuy = () => {
+  /** Pregunta a la base si la cuenta ya tiene esta lotería. Si no se puede saber, se ofrece comprar. */
+  const refreshOwned = useCallback(async (): Promise<boolean> => {
+    const ids = await SeasonalRepository.getOwnedLoteriaIds();
+    const owned = ids?.includes(id) ?? false;
+    setIsOwned(owned);
+    return owned;
+  }, [id]);
+
+  useEffect(() => {
+    refreshOwned();
+  }, [refreshOwned, userId]);
+
+  // Regreso de Mercado Pago: se lee una sola vez y se limpia la dirección.
+  useEffect(() => {
+    if (returnHandled.current) return;
+    const returned = readSeasonalReturn(searchParams);
+    if (!returned) return;
+    returnHandled.current = true;
+    setSearchParams({}, { replace: true });
+
+    if (returned.kind !== 'approved') {
+      setNotice(returned.kind);
+      return;
+    }
+    setNotice('confirming');
+    // Solo se dice «ya es tuya» si la base lo confirma; si no, el aviso de Mercado Pago la entregará.
+    creditPaymentOnReturn(returned.paymentId)
+      .then(() => refreshOwned())
+      .then((owned) => setNotice(owned ? 'success' : 'pending'));
+  }, [searchParams, setSearchParams, refreshOwned]);
+
+  const handleBuy = async () => {
     if (!user) {
       setIsAuthOpen(true);
       return;
     }
-    setShowComingSoon(true);
+    setBuyFailed(false);
+    setIsStartingPayment(true);
+    const result = await createSeasonalPreference(id);
+    if (result.success) {
+      window.location.href = result.init_point;
+      return;
+    }
+    setIsStartingPayment(false);
+    if (result.error === 'NOT_LOGGED_IN') setIsAuthOpen(true);
+    else if (result.error === 'ALREADY_OWNED') setIsOwned(true);
+    else if (result.error === 'NOT_AVAILABLE') load();
+    else setBuyFailed(true);
+  };
+
+  const renderNotice = () => {
+    if (notice === null) return null;
+    if (notice === 'confirming') {
+      return (
+        <div className="seasonal-detail__notice" role="status">
+          <p>{t('seasonal.detail.confirming')}</p>
+        </div>
+      );
+    }
+    return (
+      <div className={`seasonal-detail__notice seasonal-detail__notice--${notice}`} role="status">
+        <p>{t(`seasonal.detail.notice.${notice}`)}</p>
+        <button type="button" className="seasonal-detail__notice-close" onClick={() => setNotice(null)}>
+          {t('common.close')}
+        </button>
+      </div>
+    );
   };
 
   const backLink = (
@@ -184,12 +256,21 @@ export const SeasonalDetail = () => {
                 )}
               </p>
             )}
-            <button type="button" className="seasonal-catalog__button seasonal-detail__buy-button" onClick={handleBuy}>
-              {t('seasonal.detail.buy')}
-            </button>
-            {showComingSoon && (
-              <p className="seasonal-detail__coming-soon" role="status">
-                {t('seasonal.detail.comingSoon')}
+            {isOwned ? (
+              <p className="seasonal-detail__owned">{t('seasonal.detail.owned')}</p>
+            ) : (
+              <button
+                type="button"
+                className="seasonal-catalog__button seasonal-detail__buy-button"
+                onClick={handleBuy}
+                disabled={isStartingPayment || notice === 'confirming'}
+              >
+                {t(isStartingPayment ? 'seasonal.detail.buying' : 'seasonal.detail.buy')}
+              </button>
+            )}
+            {buyFailed && (
+              <p className="seasonal-detail__buy-error" role="alert">
+                {t('seasonal.detail.buyError')}
               </p>
             )}
             <p className="seasonal-detail__digital">{t('seasonal.detail.digitalNote')}</p>
@@ -204,6 +285,7 @@ export const SeasonalDetail = () => {
     <div className="seasonal-detail">
       <main className="seasonal-detail__main">
         {backLink}
+        {renderNotice()}
         {renderBody()}
       </main>
       <CardPreviewModal card={openSample} isOpen={openSample !== null} onClose={closeSample} />

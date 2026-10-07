@@ -28,6 +28,8 @@ interface AdminSeasonalLoteriaFormProps {
   seasons: readonly Season[];
   /** La lotería que se edita, o null para crear una nueva. */
   loteria: AdminSeasonalLoteria | null;
+  /** Con ventas, reemplazar el PDF cambia lo que descargan quienes ya compraron. */
+  hasSales: boolean;
   /** `changed` avisa si se guardó algo, para que la tabla se vuelva a cargar. */
   onClose: (changed: boolean) => void;
 }
@@ -89,7 +91,7 @@ function toFormState(loteria: AdminSeasonalLoteria | null, seasons: readonly Sea
   };
 }
 
-export const AdminSeasonalLoteriaForm = ({ seasons, loteria, onClose }: AdminSeasonalLoteriaFormProps) => {
+export const AdminSeasonalLoteriaForm = ({ seasons, loteria, hasSales, onClose }: AdminSeasonalLoteriaFormProps) => {
   const [form, setForm] = useState<SeasonalLoteriaForm>(() => toFormState(loteria, seasons));
   const [errors, setErrors] = useState<SeasonalFormErrors>({});
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -382,6 +384,11 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, onClose }: AdminSea
                 </>
               ) : (
                 <span className="admin-seasonal__meta">Todavía no tiene PDF (hasta 50 MB).</span>
+              )}
+              {hasSales && shownPdf && (
+                <span className="admin-seasonal__meta">
+                  Ya tiene ventas: si reemplazas el PDF, quienes la compraron descargarán la versión nueva.
+                </span>
               )}
             </div>
             <button

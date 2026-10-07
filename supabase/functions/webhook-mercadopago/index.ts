@@ -68,6 +68,14 @@ Deno.serve(async (req) => {
         if (error) throw new Error(`add_tokens_after_purchase: ${error.message}`);
         return data as number;
       },
+      deliverSeasonal: async (params) => {
+        const { data, error } = await supabase.rpc('deliver_seasonal_purchase', params);
+        if (error) throw new Error(`deliver_seasonal_purchase: ${error.message}`);
+        if (data !== 'approved' && data !== 'repeated') {
+          throw new Error(`deliver_seasonal_purchase: estado inesperado (${String(data)})`);
+        }
+        return data;
+      },
     };
 
     const found = await findApprovedPayment(deps, notification);
@@ -84,6 +92,9 @@ Deno.serve(async (req) => {
     const credited = await creditPayment(deps, found.value);
     if (!credited.ok) {
       console.error('webhook-mercadopago: metadata o monto inválido, no se acredita el pago', found.value.paymentId);
+    } else if (credited.value.kind === 'seasonal' && credited.value.status === 'repeated') {
+      // La cuenta ya tenía esa lotería: el pago queda guardado para devolverlo a mano.
+      console.error('webhook-mercadopago: pago repetido de una lotería de temporada', found.value.paymentId);
     }
     return ack();
   } catch (err) {

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../contexts/AuthContext';
 import { SeasonalRepository } from '../../repositories/SeasonalRepository';
 import { TokenPricingRepository } from '../../repositories/TokenPricingRepository';
 import { groupCatalog, localizedText, type CatalogLoteria, type CatalogSeason } from '../../utils/seasonalCatalog';
@@ -17,10 +18,13 @@ const SKELETON_CARDS = [0, 1, 2];
 
 export const SeasonalCatalog = () => {
   const { t, i18n } = useTranslation();
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
   const [data, setData] = useState<CatalogData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
   const [usdRate, setUsdRate] = useState<number | null>(null);
+  const [ownedIds, setOwnedIds] = useState<string[]>([]);
 
   const language = i18n.language;
   const showUsd = language?.startsWith('en') ?? false;
@@ -36,6 +40,17 @@ export const SeasonalCatalog = () => {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Si no se puede saber qué compró la cuenta, las tarjetas muestran el precio; el servidor no cobra dos veces.
+  useEffect(() => {
+    let cancelled = false;
+    SeasonalRepository.getOwnedLoteriaIds().then((ids) => {
+      if (!cancelled) setOwnedIds(ids ?? []);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   useEffect(() => {
     if (!showUsd) return;
@@ -76,7 +91,9 @@ export const SeasonalCatalog = () => {
           <div className="seasonal-catalog__card-body">
             <h3 className="seasonal-catalog__card-name">{name}</h3>
             <p className="seasonal-catalog__card-summary">{summary}</p>
-            {loteria.price_cents !== null && (
+            {ownedIds.includes(loteria.id) ? (
+              <p className="seasonal-catalog__card-owned">{t('seasonal.detail.owned')}</p>
+            ) : loteria.price_cents !== null && (
               <p className="seasonal-catalog__card-price">
                 {PRICE_FORMAT.format(loteria.price_cents / 100)} MXN
                 {showUsd && usdRate !== null && (

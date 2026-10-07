@@ -54,6 +54,14 @@ Deno.serve(async (req) => {
         if (error) throw new Error(`add_tokens_after_purchase: ${error.message}`);
         return data as number;
       },
+      deliverSeasonal: async (params) => {
+        const { data, error } = await admin.rpc('deliver_seasonal_purchase', params);
+        if (error) throw new Error(`deliver_seasonal_purchase: ${error.message}`);
+        if (data !== 'approved' && data !== 'repeated') {
+          throw new Error(`deliver_seasonal_purchase: estado inesperado (${String(data)})`);
+        }
+        return data;
+      },
     };
 
     const found = await findApprovedPayment(deps, { topic: 'payment', id: paymentId });
@@ -68,7 +76,15 @@ Deno.serve(async (req) => {
     const credited = await creditPayment(deps, found.value);
     if (!credited.ok) return reply(200, { credited: false, reason: credited.reason });
 
-    return reply(200, { credited: true, new_balance: credited.value });
+    if (credited.value.kind === 'seasonal') {
+      return reply(200, {
+        credited: true,
+        kind: 'seasonal',
+        loteria_id: credited.value.loteriaId,
+        status: credited.value.status,
+      });
+    }
+    return reply(200, { credited: true, new_balance: credited.value.balance });
   } catch (err) {
     console.error('credit-payment-on-return:', err);
     return reply(500, { error: 'INTERNAL', message: 'No se pudo acreditar el pago. Intenta de nuevo en unos minutos.' });

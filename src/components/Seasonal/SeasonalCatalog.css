@@ -122,6 +122,13 @@ a.seasonal-catalog__card:focus-visible {
   color: var(--color-primary-dark);
 }
 
+.seasonal-catalog__card-owned {
+  margin: var(--spacing-sm) 0 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-secondary-dark);
+}
+
 .seasonal-catalog__card-price-usd {
   font-size: 0.85rem;
   font-weight: 500;

@@ -1,6 +1,6 @@
 # FEAT-17 — Loterías de temporada (catálogo de pago)
 
-**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. B1 hecha. B2 hecha. Siguiente historia: C1. Al cerrar la sesión del 2026-10-06: A4, la regla de cartas y tableros, la B1 y la B2 están en commits en la rama `feature/loterias-de-temporada`, sin subir. Las migraciones 027 a 030 están en dev y ninguna en producción.**
+**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. B1 hecha. B2 hecha. C1 hecha. Siguiente historia: C2. A4, la regla de cartas y tableros, la B1 y la B2 están en commits en la rama `feature/loterias-de-temporada`, sin subir; la C1 está sin commit. Las migraciones 027 a 031 están en dev y ninguna en producción.**
 
 **Contexto.** Hoy el sitio solo cobra por la transformación de fotos con IA. Carlos quiere una segunda cosa que vender: loterías ya hechas por él, por temporada (Halloween, Día de Muertos, Thanksgiving, Navidad…), en una sección nueva tipo catálogo. Cualquiera las ve; para descargarlas hay que pagar. Carlos las prepara fuera del sitio y las administra desde el panel: las sube, les pone precio y las publica.
 
@@ -235,7 +235,7 @@
   - [x] Estado correcto según publicada y fechas, incluidos los días límite. (Prueba automática.)
   - [x] No se puede publicar sin nombre, descripción, número de cartas, número de tableros, precio, PDF o portada. (Prueba automática y prueba de base.)
   - [x] Fecha de fin anterior a la de inicio: se rechaza. (Prueba automática y prueba de base.)
-  - [ ] Una lotería con ventas no se puede borrar. (Prueba de base; llega con las compras, en C1.)
+  - [x] Una lotería con ventas no se puede borrar. (Prueba de base, en la de C1.)
   - [x] Una lotería sin ventas se borra, con confirmación, junto con sus archivos. (Demo; la prueba de base cubre el registro del PDF.)
 
 ## Grupo B — Catálogo público
@@ -280,26 +280,30 @@
 
 ## Grupo C — Compra y entrega
 
-### US C1 — Comprar una lotería y que quede en mi cuenta   ·   Estado: ⬜ por hacer
+### US C1 — Comprar una lotería y que quede en mi cuenta   ·   Estado: ✅ hecha (2026-10-06)
 
 - **Historia** — Como usuario registrado, quiero pagar una lotería de temporada con Mercado Pago y que quede registrada como mía, para poder descargarla.
 - **Entrega demostrable** — Con sesión, «Comprar» me lleva a Mercado Pago; al pagar con una tarjeta de prueba vuelvo al detalle con el aviso «¡Listo! Ya es tuya», y la lotería deja de ofrecer «Comprar».
 - **Construcción (propuesta)** — **Pruebas primero.** Base: `supabase/tests/031_seasonal_purchases.test.sql` (un pago se registra una sola vez; quién lee las compras; nadie escribe desde el navegador; la función de entrega solo la ejecuta el servidor). Funciones: pruebas en `tests/functions/` de la preferencia de temporada, de la decisión tokens / temporada al acreditar y del rechazo por monto menor. Migración `supabase/migrations/031_seasonal_purchases.sql` (tabla de compras y función de entrega idempotente). Edge function nueva `create-seasonal-preference`; `_shared/paymentFlow.ts` y `_shared/credit.ts` aprenden a distinguir el tipo de compra; `webhook-mercadopago` y `credit-payment-on-return` entregan la lotería cuando corresponde. Aviso de retorno en la pantalla de detalle. Desplegar migración y funciones en dev antes de la demo.
-- **Construido** —
+- **Construido** — 2026-10-06, en la rama `feature/loterias-de-temporada`, sin commit todavía. Se empezó por las pruebas, y se vieron fallar antes de escribir el código: la de base `supabase/tests/031_seasonal_purchases.test.sql` (28 comprobaciones; 236 en total) y las de funciones `tests/functions/seasonal.test.ts` más seis casos nuevos en `tests/functions/paymentFlow.test.ts`. Migración `031_seasonal_purchases.sql`: tabla de compras de temporada (la lee su dueño y los administradores; desde el navegador no escribe nadie, ni un administrador) y la función de entrega `deliver_seasonal_purchase`, que solo ejecuta el servidor y registra cada pago una sola vez. Lógica nueva en `supabase/functions/_shared/seasonal.ts`; función nueva `create-seasonal-preference`; `_shared/paymentFlow.ts` mira la marca de la preferencia y entrega la lotería o suma tokens, y `webhook-mercadopago` y `credit-payment-on-return` ya entregan loterías. En el detalle, «Comprar» lleva a Mercado Pago y al volver se muestra el aviso (aprobado, en proceso o no completado); la lotería comprada dice «Ya es tuya» en el detalle y en su tarjeta del catálogo. En el panel, la columna «Ventas» ya cuenta, borrar queda apagado con «Tiene ventas: solo se puede despublicar», y al reemplazar el PDF de una lotería vendida se avisa que los compradores descargarán la versión nueva (pendiente que venía de A2). Textos en español e inglés. Revisión de tipos, lint y pruebas en verde (417).
+  - **En dev (2026-10-06):** tras revisar su estado real (no existían ni la tabla ni la función; nada que respaldar) se aplicó la migración 031 y se desplegaron `create-seasonal-preference`, `credit-payment-on-return` y `webhook-mercadopago`. Comprobado después: la tabla tiene sus 2 reglas de acceso activas, un visitante no la lee, un usuario no puede insertar ni ejecutar la función de entrega, y el cobro responde «inicia sesión» a quien no trae sesión. **Nada de esto está en producción** (tampoco las migraciones 027 a 030).
+  - **Demo confirmada (2026-10-06).** Carlos compró una lotería en su máquina, que usa la base de dev, y confirmó que funcionó («ya la pude comprar»). Comprobado después en la base de dev: una sola compra, de «Haloween», aprobada, por $80.00, igual a su precio. No se probó en `dev.chorroybuenas.com.mx`: el código sigue sin commit. No dijo si probó cancelar un pago, el botón de borrar apagado en el panel, comprar tokens, el inglés ni la vista en teléfono, ni comentó las decisiones de abajo.
+  - Cambio a una prueba existente: en `paymentFlow.test.ts`, la acreditación de tokens devuelve ahora «tokens, saldo 12» donde antes devolvía solo «12»; lo que se acredita no cambió. `hardening.test.ts` incluye la función nueva en su lista.
+  - Decidido al construir, por confirmar con Carlos: el pago repetido se guarda con un estado propio, «repetida», además de pendiente, aprobada y devuelta; una lotería con cualquier pago registrado (también uno repetido) no se puede borrar, aunque «Ventas» cuenta solo las aprobadas; si Mercado Pago no informa el monto pagado, no se entrega (con los tokens ese caso sí se acredita); todavía no hay botón «Descargar PDF» y el aviso de pago aprobado dice solo «¡Listo! Ya es tuya», sin la nota de Mi cuenta: las dos cosas llegan en C2; «pago en proceso» es por ahora solo el aviso al volver, y no impide iniciar otro cobro hasta C3; quien compró una lotería que después se despublica sigue viendo «ya no está disponible» hasta C2; si no se puede consultar qué compró la cuenta, se muestra el precio y «Comprar» (el servidor no cobra dos veces).
 - **Depende de** — B2.
 - **Cómo se prueba (guion de demo)** — En dev, con una cuenta normal → «De Temporada» → una lotería → «Comprar». Deberías llegar a Mercado Pago con el nombre de la lotería y su precio. Paga con la tarjeta de prueba aprobada. Vuelves al detalle con «¡Listo! Ya es tuya». Recarga: el recuadro dice «Ya es tuya» y no ofrece comprar. En el catálogo, su tarjeta dice «Ya es tuya». Repite con otra lotería y cancela el pago: vuelves con «No se completó el pago» y «Comprar» sigue ahí. En el panel, intenta borrar la lotería vendida: el botón está apagado con «Tiene ventas: solo se puede despublicar».
 - **Escenarios cubiertos**:
-  - [ ] Pago aprobado: la compra queda registrada a nombre de quien pagó, con el monto. (Prueba de base.)
-  - [ ] La misma notificación repetida no registra dos compras. (Prueba de base.)
-  - [ ] Monto pagado menor al precio: no se entrega. (Prueba automática.)
-  - [ ] Sin sesión no se puede iniciar el cobro. (Prueba automática.)
-  - [ ] El precio sale de la base; lo que mande el navegador se ignora. (Prueba automática.)
-  - [ ] No se puede iniciar el cobro de una lotería que la cuenta ya tiene. (Prueba automática.)
-  - [ ] No se puede iniciar el cobro de una lotería no visible. (Prueba automática.)
-  - [ ] Si el precio cambia o la lotería se despublica con el pago en curso, quien pagó la recibe al precio con que inició. (Prueba automática.)
-  - [ ] Un segundo pago aprobado por la misma lotería y cuenta queda guardado como repetido, sin romper nada. (Prueba de base.)
-  - [ ] Una compra de tokens se sigue acreditando igual que antes. (Pruebas existentes en verde; demo comprando tokens.)
-  - [ ] Un usuario no ve compras de otros ni puede inventarse una. (Prueba de base.)
+  - [x] Pago aprobado: la compra queda registrada a nombre de quien pagó, con el monto. (Prueba de base.)
+  - [x] La misma notificación repetida no registra dos compras. (Prueba de base.)
+  - [x] Monto pagado menor al precio: no se entrega. (Prueba automática.)
+  - [x] Sin sesión no se puede iniciar el cobro. (Comprobado con una llamada real a la función en dev; las pruebas automáticas no ejecutan esa parte.)
+  - [x] El precio sale de la base; lo que mande el navegador se ignora. (Prueba automática.)
+  - [x] No se puede iniciar el cobro de una lotería que la cuenta ya tiene. (Prueba automática.)
+  - [x] No se puede iniciar el cobro de una lotería no visible. (Prueba automática.)
+  - [x] Si el precio cambia o la lotería se despublica con el pago en curso, quien pagó la recibe al precio con que inició. (Prueba automática.)
+  - [x] Un segundo pago aprobado por la misma lotería y cuenta queda guardado como repetido, sin romper nada. (Prueba de base.)
+  - [ ] Una compra de tokens se sigue acreditando igual que antes. (Pruebas existentes en verde; falta la demo comprando tokens.)
+  - [x] Un usuario no ve compras de otros ni puede inventarse una. (Prueba de base.)
 
 ### US C2 — Descargar lo que compré   ·   Estado: ⬜ por hacer
 

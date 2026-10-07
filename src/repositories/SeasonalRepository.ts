@@ -3,6 +3,7 @@ import { logger } from '../utils/logger';
 import { SEASONAL_PDF_MIME_TYPE, type SeasonalLoteriaInput } from '../utils/seasonalLoteria';
 import type { CatalogLoteria, CatalogSeason } from '../utils/seasonalCatalog';
 import { PREVIEW_OUTPUT_EXTENSION, PREVIEW_OUTPUT_MIME_TYPE } from '../utils/seasonalPreview';
+import { summarizeSales, type SeasonalSales } from '../utils/seasonalPurchase';
 
 /** Temporada del catálogo de loterías de temporada. */
 export interface Season {
@@ -138,6 +139,39 @@ export class SeasonalRepository {
     const season = Array.isArray(seasons) ? seasons[0] : seasons;
     if (!season) return { status: 'missing' };
     return { status: 'found', loteria, season };
+  }
+
+  /**
+   * Las loterías de temporada que ya compró la cuenta con sesión abierta (solo compras aprobadas).
+   * Sin sesión devuelve una lista vacía; devuelve null si la consulta falla.
+   */
+  static async getOwnedLoteriaIds(): Promise<string[] | null> {
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user.id;
+    if (!userId) return [];
+
+    // Se filtra por dueño aunque la base ya lo haga: un administrador puede leer las compras de todos.
+    const { data, error } = await supabase
+      .from('seasonal_purchases')
+      .select('loteria_id')
+      .eq('user_id', userId)
+      .eq('status', 'approved');
+
+    if (error) {
+      logger.error('SeasonalRepository.getOwnedLoteriaIds:', error.message);
+      return null;
+    }
+    return (data ?? []).map((row) => row.loteria_id as string);
+  }
+
+  /** Ventas por lotería, para el panel de administración. Devuelve null si la consulta falla. */
+  static async getAdminSales(): Promise<Map<string, SeasonalSales> | null> {
+    const { data, error } = await supabase.from('seasonal_purchases').select('loteria_id, status');
+    if (error) {
+      logger.error('SeasonalRepository.getAdminSales:', error.message);
+      return null;
+    }
+    return summarizeSales((data ?? []) as { loteria_id: string; status: string }[]);
   }
 
   /** Todas las loterías de temporada, publicadas o no, con su PDF. Devuelve null si la consulta falla. */

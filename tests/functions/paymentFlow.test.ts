@@ -28,6 +28,7 @@ function deps(routes: Record<string, unknown | Error | unknown[]>, over: Partial
     },
     countPurchases: vi.fn(async () => 0),
     credit: vi.fn(async () => 12),
+    deliverSeasonal: vi.fn(async () => 'approved' as const),
     sleep: vi.fn(async () => {}),
     ...over,
   };
@@ -200,7 +201,8 @@ describe('creditPayment', () => {
 
   it('acredita con los tokens de la preferencia y devuelve el saldo', async () => {
     const { d } = deps({ '/checkout/preferences/pref-1': { metadata } });
-    expect(await creditPayment(d, found)).toEqual({ ok: true, value: 12 });
+    expect(await creditPayment(d, found)).toEqual({ ok: true, value: { kind: 'tokens', balance: 12 } });
+    expect(d.deliverSeasonal).not.toHaveBeenCalled();
     expect(d.credit).toHaveBeenCalledWith(expect.objectContaining({
       p_user_id: USER, p_payment_id: '555', p_tokens_to_add: 12, p_amount_cents: 2000,
     }));
@@ -233,6 +235,68 @@ describe('creditPayment', () => {
 
   it('si falla la acreditación, el error se propaga', async () => {
     const { d } = deps({ '/checkout/preferences/pref-1': { metadata } }, { credit: vi.fn(async () => { throw new Error('rpc falló'); }) });
+    await expect(creditPayment(d, found)).rejects.toThrow('rpc falló');
+  });
+});
+
+describe('creditPayment: lotería de temporada', () => {
+  const BUYER = '11111111-1111-4111-8111-111111111111';
+  const LOTERIA = '22222222-2222-4222-8222-222222222222';
+  const seasonal = { kind: 'seasonal', user_id: BUYER, loteria_id: LOTERIA, amount_cents: 4900 };
+  const found = {
+    paymentId: '777', payment: { id: 777, status: 'approved', transaction_amount: 49 },
+    externalReference: BUYER, preferenceId: 'pref-s',
+  };
+
+  it('una preferencia de temporada entrega la lotería y no suma tokens', async () => {
+    const { d } = deps({ '/checkout/preferences/pref-s': { metadata: seasonal } });
+    expect(await creditPayment(d, found)).toEqual({
+      ok: true, value: { kind: 'seasonal', loteriaId: LOTERIA, status: 'approved' },
+    });
+    expect(d.deliverSeasonal).toHaveBeenCalledWith(expect.objectContaining({
+      p_user_id: BUYER, p_loteria_id: LOTERIA, p_amount_cents: 4900, p_payment_id: '777',
+    }));
+    expect(d.credit).not.toHaveBeenCalled();
+    expect(d.countPurchases).not.toHaveBeenCalled();
+  });
+
+  it('informa cuando el pago quedó guardado como repetido', async () => {
+    const { d } = deps(
+      { '/checkout/preferences/pref-s': { metadata: seasonal } },
+      { deliverSeasonal: vi.fn(async () => 'repeated' as const) },
+    );
+    expect(await creditPayment(d, found)).toEqual({
+      ok: true, value: { kind: 'seasonal', loteriaId: LOTERIA, status: 'repeated' },
+    });
+  });
+
+  it('monto pagado menor al precio: no entrega ni suma tokens', async () => {
+    const { d } = deps({ '/checkout/preferences/pref-s': { metadata: seasonal } });
+    const underpaid = { ...found, payment: { ...found.payment, transaction_amount: 10 } };
+    expect(await creditPayment(d, underpaid)).toEqual({ ok: false, reason: 'invalid_metadata' });
+    expect(d.deliverSeasonal).not.toHaveBeenCalled();
+    expect(d.credit).not.toHaveBeenCalled();
+  });
+
+  it('una preferencia de temporada nunca se acredita como tokens, aunque traiga tokens en la metadata', async () => {
+    const mixed = { ...seasonal, loteria_id: 'rota', base_tokens: 10, bonus_tokens: 2 };
+    const { d } = deps({ '/checkout/preferences/pref-s': { metadata: mixed } });
+    expect(await creditPayment(d, found)).toEqual({ ok: false, reason: 'invalid_metadata' });
+    expect(d.credit).not.toHaveBeenCalled();
+  });
+
+  it('un tipo de compra desconocido no se acredita', async () => {
+    const { d } = deps({ '/checkout/preferences/pref-s': { metadata: { kind: 'otra', base_tokens: 10, amount_cents: 2000 } } });
+    expect(await creditPayment(d, found)).toEqual({ ok: false, reason: 'invalid_metadata' });
+    expect(d.credit).not.toHaveBeenCalled();
+    expect(d.deliverSeasonal).not.toHaveBeenCalled();
+  });
+
+  it('si falla la entrega, el error se propaga (para que Mercado Pago reintente)', async () => {
+    const { d } = deps(
+      { '/checkout/preferences/pref-s': { metadata: seasonal } },
+      { deliverSeasonal: vi.fn(async () => { throw new Error('rpc falló'); }) },
+    );
     await expect(creditPayment(d, found)).rejects.toThrow('rpc falló');
   });
 });
