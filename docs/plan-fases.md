@@ -38,7 +38,7 @@ De las seis reglas que Carlos definió el 2026-10-06 y que el sitio todavía no 
 
 ## Fase 2 — Registro de regalos de tokens
 
-**Estado: 🔨 en construcción (abierta el 2026-10-06)** · Seguimiento: [`fases/fase-2.md`](fases/fase-2.md)
+**Estado: ✅ completa en dev (2026-10-06); falta llevarla a producción** · Seguimiento: [`fases/fase-2.md`](fases/fase-2.md)
 
 - **Por qué va después de la fase 1:** necesita algo que no existía por debajo: guardar cada regalo. La fase 3 depende de esto, porque no se puede avisar de un regalo que no queda registrado.
 - **Alcance:** registrar cada regalo de tokens (quién, a quién, cuánto, cuándo y un motivo opcional), mostrar la lista general en el panel de administración y mostrarle al usuario sus regalos dentro de su historial de compras.

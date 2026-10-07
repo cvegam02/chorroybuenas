@@ -1,12 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { FaTimes } from 'react-icons/fa';
 import type { TokenPurchase } from '../../repositories/TokenPricingRepository';
+import type { TokenHistoryEntry } from '../../utils/tokenHistory';
 import './PurchaseHistoryModal.css';
 
 interface PurchaseHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  purchases: TokenPurchase[];
+  entries: TokenHistoryEntry[];
   isLoading: boolean;
 }
 
@@ -42,7 +43,36 @@ const formatStatus = (status: string | null, t: (key: string) => string) => {
   return status;
 };
 
-export const PurchaseHistoryModal = ({ isOpen, onClose, purchases, isLoading }: PurchaseHistoryModalProps) => {
+const PurchaseRow = ({ purchase: p }: { purchase: TokenPurchase }) => {
+  const { t } = useTranslation();
+
+  return (
+    <tr className="purchase-history-modal__row">
+      <td className="purchase-history-modal__cell-date" data-label={t('dashboard.purchaseHistory.colDate')}>
+        {formatDate(p.created_at)}
+      </td>
+      <td data-label={t('dashboard.purchaseHistory.colPlan')}>
+        {p.bonus_tokens > 0
+          ? t('dashboard.purchaseHistory.planTokens', { base: p.base_tokens, bonus: p.bonus_tokens })
+          : t('dashboard.purchaseHistory.planCustom', { count: p.base_tokens })}
+      </td>
+      <td className="purchase-history-modal__cell-tokens" data-label={t('dashboard.purchaseHistory.colTokens')}>
+        {p.total_tokens}
+      </td>
+      <td className="purchase-history-modal__cell-amount" data-label={t('dashboard.purchaseHistory.colAmount')}>
+        {formatAmount(p.amount_cents)}
+      </td>
+      <td data-label={t('dashboard.purchaseHistory.colMethod')}>
+        {formatProvider(p.payment_provider)}
+      </td>
+      <td data-label={t('dashboard.purchaseHistory.colStatus')}>
+        {formatStatus(p.payment_status, t)}
+      </td>
+    </tr>
+  );
+};
+
+export const PurchaseHistoryModal = ({ isOpen, onClose, entries, isLoading }: PurchaseHistoryModalProps) => {
   const { t } = useTranslation();
 
   if (!isOpen) return null;
@@ -76,7 +106,7 @@ export const PurchaseHistoryModal = ({ isOpen, onClose, purchases, isLoading }: 
               <div className="purchase-history-modal__spinner" />
               <span>{t('common.loading')}</span>
             </div>
-          ) : purchases.length === 0 ? (
+          ) : entries.length === 0 ? (
             <p className="purchase-history-modal__empty">{t('dashboard.purchaseHistory.empty')}</p>
           ) : (
             <div className="purchase-history-modal__table-wrapper">
@@ -92,30 +122,26 @@ export const PurchaseHistoryModal = ({ isOpen, onClose, purchases, isLoading }: 
                   </tr>
                 </thead>
                 <tbody>
-                  {purchases.map((p) => (
-                    <tr key={p.id} className="purchase-history-modal__row">
-                      <td className="purchase-history-modal__cell-date" data-label={t('dashboard.purchaseHistory.colDate')}>
-                        {formatDate(p.created_at)}
-                      </td>
-                      <td data-label={t('dashboard.purchaseHistory.colPlan')}>
-                        {p.bonus_tokens > 0
-                          ? t('dashboard.purchaseHistory.planTokens', { base: p.base_tokens, bonus: p.bonus_tokens })
-                          : t('dashboard.purchaseHistory.planCustom', { count: p.base_tokens })}
-                      </td>
-                      <td className="purchase-history-modal__cell-tokens" data-label={t('dashboard.purchaseHistory.colTokens')}>
-                        {p.total_tokens}
-                      </td>
-                      <td className="purchase-history-modal__cell-amount" data-label={t('dashboard.purchaseHistory.colAmount')}>
-                        {formatAmount(p.amount_cents)}
-                      </td>
-                      <td data-label={t('dashboard.purchaseHistory.colMethod')}>
-                        {formatProvider(p.payment_provider)}
-                      </td>
-                      <td data-label={t('dashboard.purchaseHistory.colStatus')}>
-                        {formatStatus(p.payment_status, t)}
-                      </td>
-                    </tr>
-                  ))}
+                  {entries.map((entry) =>
+                    entry.kind === 'gift' ? (
+                      <tr key={`gift-${entry.id}`} className="purchase-history-modal__row">
+                        <td className="purchase-history-modal__cell-date" data-label={t('dashboard.purchaseHistory.colDate')}>
+                          {formatDate(entry.created_at)}
+                        </td>
+                        <td data-label={t('dashboard.purchaseHistory.colPlan')}>
+                          {t('dashboard.purchaseHistory.gift')}
+                        </td>
+                        <td className="purchase-history-modal__cell-tokens" data-label={t('dashboard.purchaseHistory.colTokens')}>
+                          {entry.gift.amount}
+                        </td>
+                        <td className="purchase-history-modal__cell-amount" data-label={t('dashboard.purchaseHistory.colAmount')}>—</td>
+                        <td data-label={t('dashboard.purchaseHistory.colMethod')}>—</td>
+                        <td data-label={t('dashboard.purchaseHistory.colStatus')}>—</td>
+                      </tr>
+                    ) : (
+                      <PurchaseRow key={`purchase-${entry.id}`} purchase={entry.purchase} />
+                    )
+                  )}
                 </tbody>
               </table>
             </div>
