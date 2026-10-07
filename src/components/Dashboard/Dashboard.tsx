@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   FaUser,
@@ -33,9 +33,14 @@ import { ChangePasswordModal } from './ChangePasswordModal';
 import './Dashboard.css';
 import { logger } from '../../utils/logger';
 
+// El menú de usuario (UserMenuPanel) enlaza a esta sección con el mismo ancla
+const LOTERIAS_SECTION_ID = 'mis-loterias';
+
 export const Dashboard = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const loteriasSectionRef = useRef<HTMLElement>(null);
   const { user, isLoading: authLoading, updateProfile, uploadAvatar } = useAuth();
   const { sets, setSets, setCurrentSetId, refreshSets } = useSetContext();
   const { balance, refreshBalance } = useTokenBalance();
@@ -72,6 +77,14 @@ export const Dashboard = () => {
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const sheetOpenedAtRef = useRef<number>(0);
+
+  // «Ver todas mis loterías» del menú de usuario llega con este ancla
+  const hasUser = Boolean(user);
+  useEffect(() => {
+    if (hasUser && location.hash === `#${LOTERIAS_SECTION_ID}`) {
+      loteriasSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [hasUser, location.hash, location.key]);
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 768px)');
@@ -391,7 +404,7 @@ export const Dashboard = () => {
           </section>
 
           {/* Loterias Section */}
-          <section className="dashboard__loterias">
+          <section className="dashboard__loterias" id={LOTERIAS_SECTION_ID} ref={loteriasSectionRef}>
             <h2 className="dashboard__section-title">
               <FaThList />
               {t('dashboard.myLoteriasTitle')}

@@ -9,10 +9,15 @@ import { useTokenBalance } from '../../contexts/TokenContext';
 import { SetRepository } from '../../repositories/SetRepository';
 import logoImage from '../../img/logo.png';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { UserMenuPanel } from './UserMenuPanel';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { FaCoins } from 'react-icons/fa';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import './Navbar.css';
 import { logger } from '../../utils/logger';
+
+// Mismo corte en que Navbar.css pasa a la versión compacta
+const DESKTOP_QUERY = '(min-width: 1201px)';
 
 export const Navbar = () => {
   const location = useLocation();
@@ -28,6 +33,7 @@ export const Navbar = () => {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [emailModalMode, setEmailModalMode] = useState<'login' | 'signup'>('login');
   const [isLoteriasSectionOpen, setIsLoteriasSectionOpen] = useState(true);
+  const isDesktop = useMediaQuery(DESKTOP_QUERY);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -35,8 +41,15 @@ export const Navbar = () => {
         setUserMenuOpen(false);
       }
     };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setUserMenuOpen(false);
+    };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, []);
 
   const { t } = useTranslation();
@@ -127,7 +140,33 @@ export const Navbar = () => {
                   <FaChevronDown className={`navbar__user-chevron ${userMenuOpen ? 'navbar__user-chevron--open' : ''}`} />
                 </div>
               </button>
-              {userMenuOpen && (
+              {userMenuOpen && isDesktop && (
+                <UserMenuPanel
+                  name={user.user_metadata?.full_name?.trim() || ''}
+                  email={user.email || ''}
+                  avatarUrl={avatarUrl}
+                  balance={balance}
+                  sets={sets}
+                  currentSetId={currentSetId}
+                  isAdmin={isAdmin}
+                  isCreatingSet={isCreatingSet}
+                  onGoTo={(path) => {
+                    navigate(path);
+                    setUserMenuOpen(false);
+                  }}
+                  onCreateSet={handleCreateNewLoteria}
+                  onSelectSet={(setId) => {
+                    setCurrentSetId(setId);
+                    navigate(`/loteria/${setId}`);
+                    setUserMenuOpen(false);
+                  }}
+                  onSignOut={() => {
+                    signOut();
+                    setUserMenuOpen(false);
+                  }}
+                />
+              )}
+              {userMenuOpen && !isDesktop && (
                 <div className="navbar__user-dropdown" role="menu">
                   <button
                     type="button"
