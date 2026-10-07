@@ -402,12 +402,14 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
             </div>
 
         <div className="card-editor__actions">
-          {hasMinimumCards && (
-            <button onClick={onNext} className="card-editor__next-button card-editor__next-button--enabled">
-              <span>{t('cardEditor.actions.nextStep')}</span>
-              <FaArrowRight />
-            </button>
-          )}
+          <button
+            onClick={onNext}
+            disabled={!hasMinimumCards}
+            className="card-editor__next-button card-editor__next-button--enabled"
+          >
+            <span>{t('cardEditor.actions.nextStep')}</span>
+            <FaArrowRight />
+          </button>
         </div>
 
         <div className="card-editor__sidebar-actions">
@@ -514,14 +516,16 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
           </button>
         </div>
 
-        {hasMinimumCards && (
-          <div className="card-editor__main-next">
-            <button onClick={onNext} className="card-editor__next-button card-editor__next-button--enabled">
-              <span>{t('cardEditor.actions.nextStep')}</span>
-              <FaArrowRight />
-            </button>
-          </div>
-        )}
+        <div className="card-editor__main-next">
+          <button
+            onClick={onNext}
+            disabled={!hasMinimumCards}
+            className="card-editor__next-button card-editor__next-button--enabled"
+          >
+            <span>{t('cardEditor.actions.nextStep')}</span>
+            <FaArrowRight />
+          </button>
+        </div>
       </main>
 
       <CardUploadModal

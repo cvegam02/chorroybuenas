@@ -1,4 +1,7 @@
 import { buildCreditParams, type CreditParams, type PreferenceMetadata } from './credit.ts';
+import {
+  buildSeasonalDelivery, buildSeasonalPending, classifyUnapprovedStatus, type SeasonalDeliveryParams,
+} from './seasonal.ts';
 
 /** Acceso a Mercado Pago y a la base, inyectado para poder probar el flujo sin red. */
 export interface PaymentDeps {
@@ -8,6 +11,12 @@ export interface PaymentDeps {
   countPurchases: (userId: string) => Promise<number>;
   /** RPC add_tokens_after_purchase (idempotente). Devuelve el saldo. Lanza si falla. */
   credit: (params: CreditParams) => Promise<number>;
+  /** RPC deliver_seasonal_purchase (idempotente). Devuelve el estado de la compra. Lanza si falla. */
+  deliverSeasonal: (params: SeasonalDeliveryParams) => Promise<SeasonalDeliveryStatus>;
+  /** RPC record_pending_seasonal_purchase (idempotente). Devuelve el estado de la compra. Lanza si falla. */
+  recordPendingSeasonal: (params: SeasonalDeliveryParams) => Promise<string>;
+  /** RPC release_pending_seasonal_purchase. Devuelve si había un pendiente que quitar. Lanza si falla. */
+  releasePendingSeasonal: (paymentId: string) => Promise<boolean>;
   sleep: (ms: number) => Promise<void>;
 }
 
@@ -24,6 +33,14 @@ export interface ApprovedPayment {
   externalReference: string;
   preferenceId: string;
 }
+
+/** approved: la lotería quedó entregada. repeated: la cuenta ya la tenía; el pago se guarda para devolverlo. */
+export type SeasonalDeliveryStatus = 'approved' | 'repeated';
+
+/** Qué se hizo con un pago aprobado, según la marca de tipo de su preferencia. */
+export type Credited =
+  | { kind: 'tokens'; balance: number }
+  | { kind: 'seasonal'; loteriaId: string; status: SeasonalDeliveryStatus };
 
 export type SkipReason =
   | 'ignored'
@@ -43,6 +60,8 @@ interface MerchantOrder {
 const ORDER_RETRY_DELAY_MS = 3000;
 const MP_ID_RE = /^\d{1,20}$/;
 const PREFERENCE_ID_RE = /^[\w-]{1,100}$/;
+const SEASONAL_KIND = 'seasonal';
+const TOKENS_KIND = 'tokens';
 
 const asString = (v: unknown): string | null =>
   typeof v === 'string' && v.length > 0 ? v : typeof v === 'number' ? String(v) : null;
@@ -76,6 +95,20 @@ export function parseNotification(input: {
   const id = bodyDataId ?? asString(body.id) ?? query.get('data.id') ?? query.get('id') ?? resourceId;
 
   return { topic, id, signedDataId: query.get('data.id') ?? bodyDataId };
+}
+
+/** Preferencia de un pago: la que trae el propio pago o, si no, la de su orden. */
+async function resolvePreferenceId(deps: PaymentDeps, payment: Record<string, unknown>): Promise<string | null> {
+  const own =
+    asString((payment.metadata as { preference_id?: unknown } | undefined)?.preference_id) ??
+    asString(payment.preference_id);
+  if (own) return own;
+  // Los pagos de Checkout Pro no traen la preferencia, pero sí su orden: se toma de ahí.
+  // Sin esto solo la notificación de merchant_order podría acreditar.
+  const orderId = asString((payment.order as { id?: unknown } | undefined)?.id);
+  if (!orderId || !MP_ID_RE.test(orderId)) return null;
+  const order = await deps.mpGet<MerchantOrder>(`/merchant_orders/${orderId}`);
+  return asString(order?.preference_id);
 }
 
 /**
@@ -123,18 +156,7 @@ export async function findApprovedPayment(
     paymentId = id;
     payment = found;
     externalReference = asString(found.external_reference);
-    preferenceId =
-      asString((found.metadata as { preference_id?: unknown } | undefined)?.preference_id) ??
-      asString(found.preference_id);
-    if (!preferenceId) {
-      // Los pagos de Checkout Pro no traen la preferencia, pero sí su orden: se toma de ahí.
-      // Sin esto solo la notificación de merchant_order podría acreditar.
-      const orderId = asString((found.order as { id?: unknown } | undefined)?.id);
-      if (orderId && MP_ID_RE.test(orderId)) {
-        const order = await deps.mpGet<MerchantOrder>(`/merchant_orders/${orderId}`);
-        preferenceId = asString(order?.preference_id);
-      }
-    }
+    preferenceId = await resolvePreferenceId(deps, found);
   }
 
   if (!externalReference || !preferenceId) return { ok: false, reason: 'missing_reference' };
@@ -142,10 +164,11 @@ export async function findApprovedPayment(
 }
 
 /**
- * Acredita un pago aprobado usando la metadata de la preferencia que creó nuestro servidor.
- * La acreditación es idempotente: repetirla devuelve el saldo sin volver a sumar.
+ * Acredita un pago aprobado usando la metadata de la preferencia que creó nuestro servidor:
+ * entrega la lotería si la preferencia está marcada como de temporada; si no lleva marca, suma tokens.
+ * Es idempotente: repetirla devuelve el saldo (o el estado de la compra) sin volver a acreditar.
  */
-export async function creditPayment(deps: PaymentDeps, approved: ApprovedPayment): Promise<Outcome<number>> {
+export async function creditPayment(deps: PaymentDeps, approved: ApprovedPayment): Promise<Outcome<Credited>> {
   if (!PREFERENCE_ID_RE.test(approved.preferenceId)) return { ok: false, reason: 'invalid_metadata' };
 
   const preference = await deps.mpGet<{ metadata?: PreferenceMetadata }>(
@@ -153,6 +176,22 @@ export async function creditPayment(deps: PaymentDeps, approved: ApprovedPayment
   );
   const metadata = preference?.metadata;
   if (typeof metadata !== 'object' || metadata === null) return { ok: false, reason: 'invalid_metadata' };
+
+  if (metadata.kind === SEASONAL_KIND) {
+    const delivery = buildSeasonalDelivery({
+      userId: approved.externalReference,
+      paymentId: approved.paymentId,
+      payment: approved.payment,
+      metadata: metadata as Record<string, unknown>,
+    });
+    if (!delivery) return { ok: false, reason: 'invalid_metadata' };
+    const status = await deps.deliverSeasonal(delivery);
+    return { ok: true, value: { kind: 'seasonal', loteriaId: delivery.p_loteria_id, status } };
+  }
+  // Las preferencias sin marca son compras de tokens (incluye pagos en curso anteriores a la marca).
+  if (metadata.kind !== undefined && metadata.kind !== null && metadata.kind !== TOKENS_KIND) {
+    return { ok: false, reason: 'invalid_metadata' };
+  }
 
   const previousPurchases = await deps.countPurchases(approved.externalReference);
   const params = buildCreditParams({
@@ -165,5 +204,50 @@ export async function creditPayment(deps: PaymentDeps, approved: ApprovedPayment
   });
   if (!params) return { ok: false, reason: 'invalid_metadata' };
 
-  return { ok: true, value: await deps.credit(params) };
+  return { ok: true, value: { kind: 'tokens', balance: await deps.credit(params) } };
+}
+
+export type UnapprovedTracking =
+  | { tracked: 'pending'; loteriaId: string }
+  | { tracked: 'released'; loteriaId: string }
+  | { tracked: 'none' };
+
+/**
+ * Para un pago que no está aprobado: si es de una lotería de temporada, lo registra como «en proceso»
+ * (efectivo o transferencia) o, si se rechazó o caducó, quita ese registro para que no bloquee una
+ * nueva compra. Los pagos de tokens no se tocan. Con `ownerId` solo se atiende el pago de esa cuenta.
+ */
+export async function trackUnapprovedSeasonal(
+  deps: PaymentDeps,
+  input: { paymentId: string | null; ownerId?: string },
+): Promise<UnapprovedTracking> {
+  const none: UnapprovedTracking = { tracked: 'none' };
+  const { paymentId } = input;
+  if (!paymentId || !MP_ID_RE.test(paymentId)) return none;
+
+  const payment = await deps.mpGet<Record<string, unknown>>(`/v1/payments/${paymentId}`);
+  if (!payment) return none;
+  const action = classifyUnapprovedStatus(payment.status);
+  if (!action) return none;
+
+  const userId = asString(payment.external_reference);
+  if (!userId || (input.ownerId !== undefined && input.ownerId !== userId)) return none;
+
+  const preferenceId = await resolvePreferenceId(deps, payment);
+  if (!preferenceId || !PREFERENCE_ID_RE.test(preferenceId)) return none;
+  const preference = await deps.mpGet<{ metadata?: PreferenceMetadata }>(`/checkout/preferences/${preferenceId}`);
+  const metadata = preference?.metadata;
+  if (typeof metadata !== 'object' || metadata === null) return none;
+
+  const params = buildSeasonalPending({
+    userId, paymentId, payment, metadata: metadata as Record<string, unknown>,
+  });
+  if (!params) return none;
+
+  if (action === 'released') {
+    await deps.releasePendingSeasonal(paymentId);
+    return { tracked: 'released', loteriaId: params.p_loteria_id };
+  }
+  await deps.recordPendingSeasonal(params);
+  return { tracked: 'pending', loteriaId: params.p_loteria_id };
 }

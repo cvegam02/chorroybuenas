@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildTokenHistory, type TokenGift } from '../../src/utils/tokenHistory';
+import { buildTokenHistory, type SeasonalHistoryPurchase, type TokenGift } from '../../src/utils/tokenHistory';
 import type { TokenPurchase } from '../../src/repositories/TokenPricingRepository';
 
 const purchase = (id: string, createdAt: string): TokenPurchase => ({
@@ -80,5 +80,62 @@ describe('historial de compras y regalos (contexto-negocio §7)', () => {
 
     expect(entry.kind).toBe('gift');
     expect(Object.keys(entry.kind === 'gift' ? entry.gift : {}).sort()).toEqual(['amount', 'created_at', 'id']);
+  });
+});
+
+const seasonal = (id: string, createdAt: string, status = 'approved'): SeasonalHistoryPurchase => ({
+  id,
+  name_es: 'Día de Muertos',
+  name_en: 'Day of the Dead',
+  amount_cents: 4900,
+  payment_provider: 'mercadopago',
+  status,
+  created_at: createdAt,
+});
+
+describe('historial con compras de loterías de temporada (FEAT-17, C4)', () => {
+  it('mezcla compras de tokens, de temporada y regalos por fecha', () => {
+    const history = buildTokenHistory(
+      [purchase('tokens', '2026-10-03T10:00:00Z')],
+      [gift('regalo', '2026-10-05T10:00:00Z')],
+      [seasonal('temporada-nueva', '2026-10-06T10:00:00Z'), seasonal('temporada-vieja', '2026-10-01T10:00:00Z')],
+    );
+
+    expect(history.map((entry) => entry.id)).toEqual(['temporada-nueva', 'regalo', 'tokens', 'temporada-vieja']);
+    expect(history.map((entry) => entry.kind)).toEqual(['seasonal', 'gift', 'purchase', 'seasonal']);
+  });
+
+  it('la compra de temporada conserva el nombre de la lotería y lo que se pagó', () => {
+    const [entry] = buildTokenHistory([], [], [seasonal('s1', '2026-10-06T10:00:00Z')]);
+
+    expect(entry).toEqual({
+      kind: 'seasonal',
+      id: 's1',
+      created_at: '2026-10-06T10:00:00Z',
+      seasonal: seasonal('s1', '2026-10-06T10:00:00Z'),
+    });
+  });
+
+  it.each(['pending', 'repeated', 'refunded'])(
+    'una compra de temporada %s no aparece como compra hecha', (status) => {
+      const history = buildTokenHistory([], [], [
+        seasonal('hecha', '2026-10-06T10:00:00Z'),
+        seasonal('otra', '2026-10-05T10:00:00Z', status),
+      ]);
+
+      expect(history.map((entry) => entry.id)).toEqual(['hecha']);
+    });
+
+  it('en empate de fecha: tokens, luego temporada, luego regalo', () => {
+    const at = '2026-10-06T10:00:00Z';
+    const history = buildTokenHistory([purchase('t', at)], [gift('r', at)], [seasonal('s', at)]);
+
+    expect(history.map((entry) => entry.kind)).toEqual(['purchase', 'seasonal', 'gift']);
+  });
+
+  it('sin el tercer argumento se comporta igual que antes', () => {
+    const history = buildTokenHistory([purchase('t', '2026-10-06T10:00:00Z')], []);
+
+    expect(history.map((entry) => entry.kind)).toEqual(['purchase']);
   });
 });

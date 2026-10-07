@@ -18,7 +18,7 @@ Sitio web para crear una **lotería mexicana personalizada**: la persona sube su
 
 Está pensado para reuniones familiares y de amigos (cumpleaños, fiestas, eventos), no para uso comercial masivo. _(confirmado el 2026-10-06)_
 
-El negocio cobra por una sola cosa: la **transformación de fotos con inteligencia artificial** al estilo de la lotería tradicional, que se paga con tokens. Crear cartas, generar tableros y descargar el PDF es gratis. _(confirmado el 2026-10-06)_
+El negocio cobra por dos cosas: la **transformación de fotos con inteligencia artificial** al estilo de la lotería tradicional, que se paga con tokens, y las **loterías de temporada**, ya hechas, que se pagan en pesos (§18). Crear cartas, generar tableros y descargar el PDF de la lotería propia es gratis. _(confirmado el 2026-10-06; las loterías de temporada se agregaron ese mismo día, FEAT-17)_
 
 ## 2. Principio central — DEFINIDO
 
@@ -26,12 +26,14 @@ El negocio cobra por una sola cosa: la **transformación de fotos con inteligenc
 
 Cuando dos reglas choquen, o haya que decidir algo que no está escrito, se elige lo que no bloquea a quien solo quiere su lotería. Decidido el 2026-10-06.
 
+El principio habla de la lotería que cada quien hace con sus fotos. Las loterías de temporada (§18) son un producto aparte, de pago, y no lo contradicen: nunca estorban el camino de crear e imprimir la propia. Aclarado el 2026-10-06 (FEAT-17).
+
 ## 3. Actores, roles y permisos
 
 | Actor | Quién es | Qué puede hacer |
 |---|---|---|
-| **Visitante** | Cualquiera sin cuenta | Crear cartas y tableros y descargar el PDF. Su trabajo se guarda solo en su navegador. No puede usar la IA ni comprar tokens. _(confirmado el 2026-10-06)_ |
-| **Usuario registrado** | Tiene cuenta (correo y contraseña, o Google) | Todo lo del visitante, y además: guardar varias loterías en la nube, usar la IA, comprar tokens, ver su historial y editar su perfil. _(confirmado el 2026-10-06)_ |
+| **Visitante** | Cualquiera sin cuenta | Crear cartas y tableros y descargar el PDF. Su trabajo se guarda solo en su navegador. Puede ver el catálogo de loterías de temporada (§18). No puede usar la IA, comprar tokens ni comprar loterías de temporada. _(confirmado el 2026-10-06)_ |
+| **Usuario registrado** | Tiene cuenta (correo y contraseña, o Google) | Todo lo del visitante, y además: guardar varias loterías en la nube, usar la IA, comprar tokens, comprar y descargar loterías de temporada (§18), ver su historial y editar su perfil. _(confirmado el 2026-10-06)_ |
 | **Administrador** | Usuario incluido en la lista de administradores | Todo lo del usuario, y además el panel de administración (§10). _(confirmado el 2026-10-06)_ |
 
 - Un usuario solo ve y modifica sus propias loterías, cartas, tableros, compras y saldo. **DEFINIDO** (2026-10-06)
@@ -57,6 +59,7 @@ Cuando dos reglas choquen, o haya que decidir algo que no está escrito, se elig
 
 - Formatos aceptados para las cartas: PNG, JPEG y WebP, de hasta 5 MB. _(confirmado el 2026-10-06)_
 - Las imágenes de los usuarios registrados son privadas: solo su dueño puede verlas. _(confirmado el 2026-10-06)_
+- La portada y las cartas de muestra de las loterías de temporada son públicas, pero solo en su versión reducida y con marca de agua (§18). **DEFINIDO** (2026-10-06, FEAT-17)
 - El PDF incluye los tableros en tamaño carta con área de corte, y la baraja completa para recortar. Descargarlo es gratis y no requiere cuenta. _(confirmado el 2026-10-06)_
 
 ## 6. Transformación con IA
@@ -83,6 +86,8 @@ Cuando dos reglas choquen, o haya que decidir algo que no está escrito, se elig
 - El usuario ve los regalos que recibió en su historial, mezclados por fecha con sus compras: cantidad y fecha. No ve el motivo ni quién se los dio. **DEFINIDO** (2026-10-06, fase 2)
 
 ## 8. Compra de tokens
+
+Mercado Pago cobra también las loterías de temporada; sus reglas están en §18 (2026-10-06, FEAT-17).
 
 - Solo los usuarios registrados pueden comprar. **DEFINIDO** (2026-10-06)
 - Se paga con Mercado Pago, en pesos mexicanos. En la versión en inglés del sitio el precio se muestra además en dólares, solo como referencia; el cobro es siempre en pesos. _(confirmado el 2026-10-06)_
@@ -122,7 +127,8 @@ El administrador puede: _(confirmado el 2026-10-06)_
 - crear y editar paquetes de tokens, y cambiar el precio por token;
 - ver los saldos de todos los usuarios y regalar tokens;
 - ver el uso de la IA (por día, por usuario y por lotería) y su costo estimado;
-- cambiar la cantidad de tokens de bienvenida.
+- cambiar la cantidad de tokens de bienvenida;
+- administrar las loterías de temporada (§18): crear temporadas, dar de alta loterías con su precio y sus archivos, publicarlas y retirarlas. Sus ventas se ven junto a las compras de tokens, distinguidas por tipo. **DEFINIDO** (2026-10-06, FEAT-17)
 
 ## 11. Modelo de entidades
 
@@ -140,6 +146,9 @@ El administrador puede: _(confirmado el 2026-10-06)_
 | Configuración (`app_config`) | Tokens de bienvenida | — |
 | Perfil (`profiles`) | Correo y nombre | Uno por usuario |
 | Administradores (`admin_users`) | Quién es administrador | Apunta a un usuario |
+| Temporada (`seasons`) — por construir | Nombre (español; inglés opcional) y orden | — |
+| Lotería de temporada (`seasonal_loterias`) — por construir | Nombre, descripción, modo, número de cartas y de tableros, precio, publicada, fechas, portada, muestras y PDF | Pertenece a una temporada |
+| Compra de temporada (`seasonal_purchases`) — por construir | Monto pagado, pago de Mercado Pago y estado | Pertenece a un usuario y a una lotería de temporada |
 
 ## 12. Permisos de acceso a datos — DEFINIDO
 
@@ -152,8 +161,13 @@ El administrador puede: _(confirmado el 2026-10-06)_
 | Promociones | Los administradores | Los administradores |
 | Tokens de bienvenida | Cualquiera | Los administradores |
 | Lista de administradores | Los administradores | Los administradores |
+| Temporadas | Cualquiera | Los administradores |
+| Lotería de temporada visible: ficha, portada y muestras | Cualquiera | Los administradores |
+| Lotería de temporada no visible | Los administradores; quien la compró | Los administradores |
+| PDF de una lotería de temporada | Quien tiene una compra aprobada de esa lotería; los administradores | Los administradores |
+| Compras de loterías de temporada | Su dueño; los administradores | Solo el servidor |
 
-Decidido el 2026-10-06 (remediación del code review). El detalle técnico está en las migraciones 022 a 025.
+Decidido el 2026-10-06 (remediación del code review). El detalle técnico está en las migraciones 022 a 025. Los cinco renglones de loterías de temporada se agregaron el 2026-10-06 (FEAT-17) y están por construir.
 
 ## 13. Notificaciones — DEFINIDO
 
@@ -166,12 +180,14 @@ Decidido el 2026-10-06 (remediación del code review). El detalle técnico está
 
 - No se avisa de una compra normal acreditada, de saldo bajo ni de un pago devuelto. Decidido el 2026-10-06.
 - Los dos avisos nuevos llegan por correo. Decidido el 2026-10-06.
+- El aviso de pago pendiente confirmado cubre también las compras de loterías de temporada (§18). Mientras no exista, esas compras no generan ningún aviso. Decidido el 2026-10-06 (FEAT-17).
 
 ## 14. Fechas, plazos y cálculos automáticos
 
 - Vigencia de las promociones (§9).
 - Límite de 10 transformaciones por minuto (§6).
-- Nada caduca: ni los tokens, ni las loterías guardadas, ni las cuentas sin uso. **DEFINIDO** (2026-10-06)
+- Fechas de inicio y fin de cada lotería de temporada (§18).
+- Nada caduca: ni los tokens, ni las loterías guardadas, ni las cuentas sin uso, ni las loterías de temporada compradas. **DEFINIDO** (2026-10-06)
 
 ## 15. Decisiones definidas
 
@@ -206,6 +222,19 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-06 | Nada caduca: ni tokens, ni loterías, ni cuentas. _(Descartadas: caducidad de tokens; borrar loterías de cuentas inactivas.)_ |
 | 2026-10-06 | Principio central: terminar e imprimir una lotería siempre es gratis y sin registro; la IA es un extra de pago. _(Descartados: "el dinero del usuario primero"; "lo más simple gana".)_ |
 | 2026-10-06 | El sitio se publica con Vercel: `main` es producción y `dev` es el entorno de pruebas, cada uno con su propio proyecto de Supabase. |
+| 2026-10-06 | Loterías de temporada: se vende el PDF ya terminado que sube el administrador, igual para todos. _(Descartadas: desbloquear la lotería para elegir cuántos tableros; una copia editable en la cuenta. Origen: FEAT-17, como todas las de temporada.)_ |
+| 2026-10-06 | Las loterías de temporada se pagan en pesos con Mercado Pago, un precio por lotería, mínimo $10.00 MXN; los tokens siguen siendo solo para la IA. _(Descartadas: pagar con tokens; aceptar las dos formas.)_ |
+| 2026-10-06 | Comprar una lotería de temporada requiere cuenta; ver el catálogo no. Una lotería se compra una sola vez por cuenta. _(Descartada: comprar sin cuenta y recibir un enlace por correo.)_ |
+| 2026-10-06 | La vista previa de una lotería de temporada son una portada y las cartas de muestra que el administrador elija, reducidas y con marca de agua puesta por el sitio. El PDF nunca llega a quien no pagó. _(Descartadas: que el administrador suba las muestras ya protegidas; mostrar solo portada y descripción.)_ |
+| 2026-10-06 | Cada lotería de temporada tiene «publicada sí/no» y fechas opcionales. Lo comprado se conserva y se puede descargar siempre, sin límite de veces, aunque la lotería salga del catálogo. _(Descartadas: solo interruptor manual; todo visible todo el año; que deje de aparecerle también a quien la compró.)_ |
+| 2026-10-06 | El catálogo vive en la zona Pública, con el enlace «De Temporada» en la barra; lo comprado, en Mi cuenta; la administración, en una pestaña del panel. _(Descartadas: llegar solo desde un bloque en Inicio; enlace más bloque.)_ |
+| 2026-10-06 | Ante un reembolso o contracargo de una lotería de temporada se quita el acceso a la descarga y la compra queda como devuelta. _(Descartada: nada automático.)_ |
+| 2026-10-06 | Las temporadas las crea y ordena el administrador; cada lotería pertenece a una. Una temporada con loterías no se borra. _(Descartadas: lista fija de temporadas; sin temporadas.)_ |
+| 2026-10-06 | Sin descuentos en las loterías de temporada: un solo precio. Cambiarlo no afecta compras ya hechas. _(Descartadas: precio de oferta; códigos de descuento.)_ |
+| 2026-10-06 | En las loterías de temporada el español es obligatorio y el inglés opcional; el precio en dólares es solo referencia. _(Descartadas: solo español; los dos obligatorios.)_ |
+| 2026-10-06 | El cobro de una lotería de temporada tiene las mismas garantías que el de tokens: precio puesto por el servidor, entrega una sola vez por pago, y sin entrega si el monto es menor. Los pagos pendientes entregan al confirmarse. |
+| 2026-10-06 | Una lotería de temporada con ventas no se borra, solo se despublica. No se puede publicar incompleta. Se puede reemplazar su PDF: los compradores descargan la versión nueva. |
+| 2026-10-06 | Para publicar una lotería de temporada hacen falta también el número de cartas y el de tableros, además de nombre, descripción, precio, PDF y portada (FEAT-17). |
 
 ## 16. Pendientes por definir
 
@@ -213,7 +242,7 @@ Ninguno al 2026-10-06. Todas las reglas de este documento están confirmadas o d
 
 ## 17. Reglas definidas que el sitio todavía no cumple
 
-Decididas el 2026-10-06 y pendientes de construir. Los correos son la fase 3 de `plan-fases.md`; el descuento por reembolso quedó apartado el 2026-10-06, sin fecha.
+Decididas el 2026-10-06 y pendientes de construir. Los correos son la fase 3 de `plan-fases.md`; el descuento por reembolso quedó apartado el 2026-10-06, sin fecha. Las loterías de temporada son la feature `docs/features/FEAT-17-loterias-de-temporada.md`.
 
 Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en producción: mínimo de 24 cartas en Clásico, mínimo de 15 en Kids, y mínimo de compra de 5 tokens. Retirada el 2026-10-06, al publicarse la fase 2: registrar cada regalo de tokens.
 
@@ -222,3 +251,58 @@ Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en
 | Descontar tokens ante reembolso o contracargo | §8 | No descuenta nada |
 | Avisar por correo de pago pendiente acreditado | §13 | No avisa |
 | Avisar por correo de tokens regalados | §13 | No avisa |
+| Loterías de temporada: catálogo, compra, descarga y administración | §18 | No existen |
+| Quitar el acceso a una lotería de temporada ante reembolso o contracargo | §18 | No existe; se construirá junto con el descuento de tokens |
+
+## 18. Loterías de temporada — DEFINIDO
+
+Definido con Carlos el 2026-10-06 (FEAT-17). Por construir.
+
+**Qué son.** Loterías ya hechas, preparadas por el administrador, agrupadas por temporada (Halloween, Día de Muertos, Navidad…). Se muestran en un catálogo público y se venden como descarga digital: no se envía nada físico.
+
+**Qué se vende.** El PDF terminado que subió el administrador. Todos los compradores de una lotería reciben el mismo archivo; el comprador no la edita ni elige cuántos tableros trae.
+
+**Temporadas.**
+
+- Las crea, nombra, ordena y borra el administrador. El orden decide cuál sale primero en el catálogo.
+- Cada lotería pertenece a una temporada. Una temporada con loterías no se puede borrar.
+
+**Ficha de una lotería.** Temporada, nombre, descripción, modo (Clásico o Kids), número de cartas, número de tableros, precio, PDF, portada y cartas de muestra. El nombre y la descripción son obligatorios en español y opcionales en inglés; si falta el inglés, se muestra el español.
+
+**Vista previa.**
+
+- El administrador sube una portada y las cartas de muestra que quiera, pocas o todas.
+- El sitio las reduce y les pone marca de agua antes de guardarlas; la imagen limpia no se guarda.
+- El PDF nunca se entrega a quien no lo compró.
+
+**Visibilidad.**
+
+- Cada lotería tiene «publicada sí/no» y fechas opcionales de inicio y de fin. Es visible cuando está publicada y dentro de sus fechas.
+- El catálogo muestra solo las visibles, y solo las temporadas que tienen al menos una.
+- No se puede publicar una lotería a la que le falte nombre, descripción, número de cartas, número de tableros, precio, PDF o portada. _(El número de cartas y de tableros se agregaron el 2026-10-06, FEAT-17: el catálogo los muestra en cada tarjeta.)_
+- Una lotería con ventas no se borra: solo se despublica.
+
+**Precio y cobro.**
+
+- Un solo precio por lotería, en pesos mexicanos, con mínimo de $10.00 MXN. No hay descuentos, ofertas ni códigos. Las promociones de §9 no aplican.
+- No se pagan con tokens.
+- En la versión en inglés el precio se muestra además en dólares, solo como referencia.
+- Ver el catálogo no requiere cuenta; comprar sí.
+- Una cuenta compra cada lotería una sola vez: quien ya la tiene, o tiene un pago en proceso por ella, no puede iniciar otro cobro.
+- El precio lo pone el servidor. Un pago aprobado entrega la lotería una sola vez, sin importar cuántas veces lo notifique Mercado Pago, y no se entrega si el monto pagado es menor al precio.
+- Vale el precio del momento en que se inició el pago. Quien pagó recibe su lotería aunque el precio haya cambiado o la lotería se haya despublicado mientras tanto.
+- Los pagos pendientes (efectivo, transferencia) entregan la lotería cuando Mercado Pago los confirma; mientras, el comprador la ve como «pago en proceso».
+- Cambiar el precio no afecta compras ya hechas: cada compra guarda lo que se pagó.
+- Limitación conocida: si alguien abre dos pagos por la misma lotería y paga los dos, el segundo queda registrado como compra repetida para devolverlo a mano.
+
+**Entrega.**
+
+- La lotería comprada queda en Mi cuenta. Se descarga las veces que se quiera.
+- Lo comprado se conserva siempre, aunque la lotería se despublique o pasen sus fechas (§14).
+- Si el administrador reemplaza el PDF, los compradores descargan la versión nueva.
+
+**Reembolso o contracargo.** Se quita el acceso a la descarga y la compra queda marcada como devuelta. Lo que ya se descargó no se puede deshacer. Por construir junto con el descuento de tokens por reembolso (§8).
+
+**Historial.** El comprador ve estas compras en su historial, mezcladas por fecha con las de tokens y los regalos. El administrador las ve en la lista de compras, distinguidas por tipo, y ve cuántas ventas lleva cada lotería.
+
+**Avisos.** Ninguno por ahora (§13).

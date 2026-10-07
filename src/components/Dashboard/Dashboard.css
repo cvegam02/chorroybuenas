@@ -1183,3 +1183,8 @@
     max-width: 200px;
   }
 }
+
+/* Deja libre la barra de navegación fija al llegar desde el menú de usuario */
+.dashboard__loterias {
+  scroll-margin-top: 120px;
+}

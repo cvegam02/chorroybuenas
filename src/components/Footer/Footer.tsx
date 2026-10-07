@@ -1,5 +1,6 @@
 import { FaEnvelope, FaPaypal } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 export const Footer = () => {
@@ -36,6 +37,7 @@ export const Footer = () => {
                     <p className="footer__copyright">
                         &copy; {currentYear} Lotería Personalizada
                     </p>
+                    <Link to="/privacidad" className="footer__legal-link">{t('footer.privacy')}</Link>
                     <p className="footer__slogan">{t('footer.slogan')}</p>
                 </div>
             </div>

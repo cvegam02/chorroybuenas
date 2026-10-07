@@ -9,9 +9,12 @@ import { ConfirmationModal } from './components/ConfirmationModal/ConfirmationMo
 import { WarningModal } from './components/ConfirmationModal/WarningModal';
 import { HowToPlay } from './components/HowToPlay/HowToPlay';
 import { AboutLoteria } from './components/AboutLoteria/AboutLoteria';
+import { PrivacyNotice } from './components/PrivacyNotice/PrivacyNotice';
 import BenefitsPage from './components/BenefitsPage/BenefitsPage';
 import { SetView } from './components/SetView/SetView';
 import { BuyTokensPage } from './components/BuyTokens/BuyTokensPage';
+import { SeasonalCatalog } from './components/Seasonal/SeasonalCatalog';
+import { SeasonalDetail } from './components/Seasonal/SeasonalDetail';
 import { Dashboard } from './components/Dashboard/Dashboard';
 import { AdminPanel } from './components/AdminPanel/AdminPanel';
 import { Navbar } from './components/Navbar/Navbar';
@@ -263,8 +266,20 @@ function AppContent() {
           element={<HowToPlay />}
         />
         <Route
+          path="/privacidad"
+          element={<PrivacyNotice />}
+        />
+        <Route
           path="/que-es-la-loteria"
           element={<AboutLoteria />}
+        />
+        <Route
+          path="/temporada"
+          element={<SeasonalCatalog />}
+        />
+        <Route
+          path="/temporada/:id"
+          element={<SeasonalDetail />}
         />
         <Route
           path="/crear"
