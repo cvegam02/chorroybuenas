@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import './EmailAuthModal.css';
 import { logger } from '../../utils/logger';
 import { getErrorMessage } from '../../utils/errors';
+import { EMAIL_ALREADY_REGISTERED_MESSAGE } from '../../utils/signUpResult';
 
 interface EmailAuthModalProps {
     isOpen: boolean;
@@ -87,7 +88,7 @@ export const EmailAuthModal: React.FC<EmailAuthModalProps> = ({ isOpen, onClose,
             const message = getErrorMessage(err);
             if (message.includes('invalid_credentials')) {
                 setError(t('common.auth.errors.authFailed'));
-            } else if (message.includes('User already registered')) {
+            } else if (message.includes(EMAIL_ALREADY_REGISTERED_MESSAGE)) {
                 setError(t('common.auth.errors.emailTaken'));
             } else {
                 setError(message || t('common.auth.errors.authFailed'));

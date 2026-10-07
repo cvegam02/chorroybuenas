@@ -3,6 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
 import { SyncService } from '../services/SyncService';
 import { AVATAR_BUCKET } from '../utils/avatar';
+import { EMAIL_ALREADY_REGISTERED_MESSAGE, isEmailAlreadyRegistered } from '../utils/signUpResult';
 
 interface AuthContextType {
     user: User | null;
@@ -101,12 +102,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const signUpWithEmail = async (email: string, password: string, metadata?: { full_name?: string }) => {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
             email,
             password,
             options: metadata?.full_name ? { data: { full_name: metadata.full_name } } : undefined
         });
         if (error) throw error;
+        if (isEmailAlreadyRegistered(data.user)) throw new Error(EMAIL_ALREADY_REGISTERED_MESSAGE);
     };
 
     const signOut = async () => {
