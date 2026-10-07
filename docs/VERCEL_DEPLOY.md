@@ -27,7 +27,6 @@ En **Settings → Environment Variables**. Las variables `VITE_*` se incrustan e
 | `VITE_SUPABASE_URL` | URL del proyecto PROD | URL del proyecto DEV |
 | `VITE_SUPABASE_ANON_KEY` | anon key de PROD | anon key de DEV |
 | `VITE_APP_URL` | `https://chorroybuenas.com.mx` | **No definir** |
-| `VITE_REPLICATE_USE_FLUX` | Opcional | Opcional |
 
 Sin `VITE_APP_URL`, la app usa el dominio desde el que se abrió, que es lo correcto en Preview.
 

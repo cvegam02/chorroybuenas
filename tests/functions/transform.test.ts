@@ -42,19 +42,29 @@ describe('isUuid', () => {
 describe('parseTransformRequest', () => {
   it('aplica los valores por defecto', () => {
     expect(parseTransformRequest({ image: IMG })).toEqual({
-      ok: true, value: { image: IMG, model: 'gpt-image', promptVariant: 0, strength: 0.5, setId: null },
+      ok: true, value: { image: IMG, promptVariant: 0, strength: 0.5, setId: null },
     });
   });
 
   it('respeta parámetros válidos', () => {
-    expect(parseTransformRequest({ image: IMG, model: 'flux', prompt_variant: 2, prompt_strength: 0.3, set_id: SET })).toEqual({
-      ok: true, value: { image: IMG, model: 'flux', promptVariant: 2, strength: 0.3, setId: SET },
+    expect(parseTransformRequest({ image: IMG, prompt_variant: 2, prompt_strength: 0.3, set_id: SET })).toEqual({
+      ok: true, value: { image: IMG, promptVariant: 2, strength: 0.3, setId: SET },
     });
   });
 
   it('normaliza parámetros fuera de rango en vez de fallar', () => {
     const r = parseTransformRequest({ image: IMG, model: 'otro', prompt_variant: 9, prompt_strength: 5, set_id: 'x' });
-    expect(r).toEqual({ ok: true, value: { image: IMG, model: 'gpt-image', promptVariant: 0, strength: 0.5, setId: null } });
+    expect(r).toEqual({ ok: true, value: { image: IMG, promptVariant: 0, strength: 0.5, setId: null } });
+  });
+
+  it('ignora el modelo que pida el navegador: siempre se usa el modelo principal', () => {
+    const asked = parseTransformRequest({ image: IMG, model: 'flux' });
+    const plain = parseTransformRequest({ image: IMG });
+    expect(asked).toEqual(plain);
+    if (!asked.ok || !plain.ok) throw new Error('la petición debía ser válida');
+    const body = buildPredictionBody(asked.value);
+    expect(body.version).toBe(buildPredictionBody(plain.value).version);
+    expect(body.input).toMatchObject({ input_images: [IMG] });
   });
 
   it.each([
@@ -68,7 +78,7 @@ describe('parseTransformRequest', () => {
 });
 
 describe('buildPredictionBody', () => {
-  const base = { image: IMG, model: 'gpt-image' as const, promptVariant: 0 as const, strength: 0.5, setId: null };
+  const base = { image: IMG, promptVariant: 0 as const, strength: 0.5, setId: null };
 
   it('gpt-image: fidelidad alta sobre 0.4 y prompt según variante', () => {
     const high = buildPredictionBody(base).input as Record<string, unknown>;
@@ -77,19 +87,6 @@ describe('buildPredictionBody', () => {
     expect(low.input_fidelity).toBe('low');
     expect(low.prompt).toContain('symbolic illustration');
     expect(low.prompt).not.toBe(high.prompt);
-  });
-
-  it('flux: acota el denoising entre 0.45 y 0.72 y usa 0.65 si la fuerza es 0', () => {
-    const d = (strength: number) =>
-      (buildPredictionBody({ ...base, model: 'flux', strength }).input as { denoising: number }).denoising;
-    expect(d(0.1)).toBe(0.45);
-    expect(d(0.6)).toBe(0.6);
-    expect(d(1)).toBe(0.72);
-    expect(d(0)).toBe(0.65);
-  });
-
-  it('cada modelo usa su propia versión', () => {
-    expect(buildPredictionBody(base).version).not.toBe(buildPredictionBody({ ...base, model: 'flux' }).version);
   });
 });
 
