@@ -1,6 +1,6 @@
 # FEAT-19 — Registrarse e iniciar sesión con Google
 
-**Estado: 🔨 en curso — construida en la rama `feature/registro-con-google`. Falta subirla a `dev` y la demo de Carlos ahí.**
+**Estado: 🔨 en curso — construida; PR abierto hacia `dev`. Falta la demo de Carlos ahí.**
 
 **Contexto.** Carlos pidió (2026-10-06) que los usuarios puedan registrarse con Google. Las reglas de negocio ya lo contemplaban (`contexto-negocio.md` §roles, casos de uso de registro e inicio de sesión, pantalla M1), y el sitio ya sabía hablar con Google, pero la ventana «Iniciar sesión / Crear cuenta» no tenía ningún botón que lo usara: solo ofrecía correo y contraseña. Los estilos y los textos del botón también seguían en el sitio, sin usarse.
 
