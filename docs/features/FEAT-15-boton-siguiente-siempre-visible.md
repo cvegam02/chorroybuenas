@@ -1,6 +1,6 @@
 # FEAT-15 — El botón «Siguiente: Generar Tableros» siempre visible en Cartas
 
-**Estado: ✅ hecha — probada por Carlos en dev («ya funciona», 2026-10-06). Falta pasarla a producción (`main`)**
+**Estado: ✅ hecha — probada por Carlos en dev («ya funciona», 2026-10-06). En producción desde el 2026-10-06 (`dev` pasó a `main` con el PR #23).**
 
 **Contexto.** En la pantalla de Cartas (C1), el botón «Siguiente: Generar Tableros» solo aparecía cuando ya había el mínimo de cartas del modo elegido. Con menos cartas no se veía, así que no quedaba claro cuál era el paso siguiente. Carlos lo señaló el 2026-10-06.
 

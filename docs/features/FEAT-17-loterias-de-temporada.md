@@ -1,6 +1,6 @@
 # FEAT-17 — Loterías de temporada (catálogo de pago)
 
-**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. B1 hecha. B2 hecha. C1 hecha. C2 hecha. C4 hecha. C3 construida el 2026-10-06, **falta la demo de Carlos** (el pago en efectivo). El 2026-10-06 Carlos agregó la historia C5 (ingresos de temporada en el resumen del panel), construida ese día, **falta su demo**. Todo, de A1 a C5, está en commits en la rama `feature/loterias-de-temporada`, subida el 2026-10-06 con el PR #18 hacia `dev` (abierto, sin fusionar). Las migraciones 027 a 034 están en dev y ninguna en producción.**
+**Estado: ✅ hecha — todas las historias, de A1 a C5, dadas por hechas por Carlos el 2026-10-07 («marca todo como completado»). Definida con Carlos el 2026-10-06. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. B1 hecha. B2 hecha. C1 hecha. C2 hecha. C4 hecha. C3 construida el 2026-10-06, **falta la demo de Carlos** (el pago en efectivo). El 2026-10-06 Carlos agregó la historia C5 (ingresos de temporada en el resumen del panel), construida ese día, **falta su demo**. Todo, de A1 a C5, está en commits en la rama `feature/loterias-de-temporada`, subida el 2026-10-06 con el PR #18 hacia `dev` (fusionado; C5 entró después con el PR #19). En producción desde el 2026-10-06, con confirmación de Carlos: `dev` pasó a `main` con el PR #23 y Vercel lo publicó en `chorroybuenas.com.mx`. Antes de fusionar se revisó el estado real de la base de producción (historial en la 026, sin ningún objeto de temporada, nada que respaldar), se aplicaron las migraciones 027 a 034 una por una, registradas en el historial, y se desplegaron `create-seasonal-preference` (nueva), `webhook-mercadopago` y `credit-payment-on-return`. Comparado contra dev: mismas tablas, 22 reglas de acceso, mismas funciones, almacenes y disparadores. Las funciones responden y rechazan sin sesión; no se hizo ningún pago de prueba en producción.**
 
 **Contexto.** Hoy el sitio solo cobra por la transformación de fotos con IA. Carlos quiere una segunda cosa que vender: loterías ya hechas por él, por temporada (Halloween, Día de Muertos, Thanksgiving, Navidad…), en una sección nueva tipo catálogo. Cualquiera las ve; para descargarlas hay que pagar. Carlos las prepara fuera del sitio y las administra desde el panel: las sube, les pone precio y las publica.
 
@@ -187,8 +187,8 @@
   - [x] Un usuario normal o un visitante puede leer las temporadas pero no crear, editar ni borrar. (Prueba de base.)
   - [x] Nombre en español vacío: se rechaza. (Prueba de base.)
   - [x] Una temporada con loterías no se puede borrar. (Prueba de base.)
-  - [ ] La pestaña solo aparece para administradores. (Demo.)
-  - [ ] Se ve bien en teléfono. (Demo.)
+  - [x] La pestaña solo aparece para administradores. (Demo.)
+  - [x] Se ve bien en teléfono. (Demo.)
 
 ### US A2 — Dar de alta una lotería con sus datos, precio y PDF   ·   Estado: ✅ hecha (2026-10-06)
 
@@ -264,9 +264,9 @@
   - [x] Una temporada sin loterías visibles no se muestra. (Prueba automática.)
   - [x] Las temporadas salen en el orden definido. (Prueba automática.)
   - [x] En inglés se usa el texto en inglés si existe; si no, el español. (Prueba automática.)
-  - [ ] Catálogo vacío, cargando y error. (Demo del vacío.)
-  - [ ] Se ve igual con y sin sesión. (Demo.)
-  - [ ] Se ve bien en teléfono. (Demo.)
+  - [x] Catálogo vacío, cargando y error. (Demo del vacío.)
+  - [x] Se ve igual con y sin sesión. (Demo.)
+  - [x] Se ve bien en teléfono. (Demo.)
 
 ### US B2 — Ver el detalle de una lotería   ·   Estado: ✅ hecha (2026-10-06)
 
@@ -279,12 +279,12 @@
 - **Depende de** — B1.
 - **Cómo se prueba (guion de demo)** — En el catálogo, toca una lotería. Debería verse la portada grande, las muestras, la nota «Estas son algunas de las 54 cartas», «Qué incluye», la descripción y el recuadro con el precio, «Comprar» y la línea de descarga digital. Toca una muestra: se ve más grande, con marca de agua; ciérrala con Escape. Sin sesión, pulsa «Comprar»: se abre la ventana de iniciar sesión; al entrar, sigues en la misma lotería. Abre la dirección de una lotería en borrador: «Esta lotería ya no está disponible» y un botón al catálogo. En el celular, el recuadro de compra queda pegado abajo.
 - **Escenarios cubiertos**:
-  - [ ] Detalle completo de una lotería visible, con y sin sesión. (Demo.)
+  - [x] Detalle completo de una lotería visible, con y sin sesión. (Demo.)
   - [x] La nota de «algunas de las N cartas» solo sale si las muestras son menos que las cartas. (Prueba automática.)
-  - [ ] Lotería no visible o inexistente: mensaje de no disponible. (Demo.)
-  - [ ] «Comprar» sin sesión abre el inicio de sesión y regresa a la misma pantalla. (Demo.)
-  - [ ] Teclado, Escape y textos alternativos. (Demo.)
-  - [ ] Se ve bien en teléfono. (Demo.)
+  - [x] Lotería no visible o inexistente: mensaje de no disponible. (Demo.)
+  - [x] «Comprar» sin sesión abre el inicio de sesión y regresa a la misma pantalla. (Demo.)
+  - [x] Teclado, Escape y textos alternativos. (Demo.)
+  - [x] Se ve bien en teléfono. (Demo.)
 
 ## Grupo C — Compra y entrega
 
@@ -310,7 +310,7 @@
   - [x] No se puede iniciar el cobro de una lotería no visible. (Prueba automática.)
   - [x] Si el precio cambia o la lotería se despublica con el pago en curso, quien pagó la recibe al precio con que inició. (Prueba automática.)
   - [x] Un segundo pago aprobado por la misma lotería y cuenta queda guardado como repetido, sin romper nada. (Prueba de base.)
-  - [ ] Una compra de tokens se sigue acreditando igual que antes. (Pruebas existentes en verde; falta la demo comprando tokens.)
+  - [x] Una compra de tokens se sigue acreditando igual que antes. (Pruebas existentes en verde; falta la demo comprando tokens.)
   - [x] Un usuario no ve compras de otros ni puede inventarse una. (Prueba de base.)
 
 ### US C2 — Descargar lo que compré   ·   Estado: ✅ hecha (2026-10-06)
@@ -330,11 +330,11 @@
   - [x] Sin compra, con compra pendiente o sin sesión, no se puede obtener el PDF. (Prueba de base.)
   - [x] La compra de una lotería no da acceso al PDF de otra. (Prueba de base.)
   - [x] Una lotería despublicada o fuera de fechas sigue disponible para quien la compró. (Prueba de base; falta la demo.)
-  - [ ] Si Carlos reemplaza el PDF, el comprador descarga la versión nueva. (Demo.)
-  - [ ] Sección vacía con enlace al catálogo. (Demo.)
-  - [ ] Fallo al descargar: aviso con «Reintentar». (Demo.)
+  - [x] Si Carlos reemplaza el PDF, el comprador descarga la versión nueva. (Demo.)
+  - [x] Sección vacía con enlace al catálogo. (Demo.)
+  - [x] Fallo al descargar: aviso con «Reintentar». (Demo.)
 
-### US C3 — Pago en efectivo o transferencia   ·   Estado: 🔨 construida (2026-10-06), falta la demo
+### US C3 — Pago en efectivo o transferencia   ·   Estado: ✅ hecha — dada por hecha por Carlos el 2026-10-07 («marca todo como completado»)
 
 - **Historia** — Como comprador que paga en efectivo o por transferencia, quiero ver que mi compra quedó registrada mientras se confirma, y recibir la lotería cuando Mercado Pago lo confirme, para no pagar dos veces ni quedarme con la duda.
 - **Entrega demostrable** — Tras elegir un pago pendiente vuelvo al detalle con «Tu pago está en proceso»; en Mi cuenta la lotería aparece con la etiqueta «Pago en proceso» y sin descarga; cuando el pago se aprueba, pasa a descargable.
@@ -374,7 +374,7 @@
   - [x] Solo un administrador ve las compras de todos. (Prueba de base.)
   - [x] El número de ventas de cada lotería cuenta solo compras aprobadas. (Prueba automática de C1, `seasonalPurchase.test.ts`: el conteo se hace en el navegador, no en la base.)
 
-### US C5 — Los ingresos de temporada en el resumen del panel   ·   Estado: 🔨 construida (2026-10-06), falta la demo
+### US C5 — Los ingresos de temporada en el resumen del panel   ·   Estado: ✅ hecha — dada por hecha por Carlos el 2026-10-07 («marca todo como completado»)
 
 - **Historia** — Como administrador, quiero que el resumen de ingresos incluya lo vendido en loterías de temporada, para saber cuánto ha entrado en total y cuánto por cada cosa.
 - **Entrega demostrable** — En la pestaña Saldos, la tarjeta «Ingresos totales» suma tokens y temporada, y debajo dice cuánto es de cada uno y cuántas compras son.
@@ -388,7 +388,7 @@
   - [x] El total suma compras de tokens y de temporada. (Prueba automática.)
   - [x] Una compra de temporada pendiente, repetida o devuelta no cuenta como ingreso. (Prueba automática.)
   - [x] Sin ventas de temporada, el total es el de tokens. (Prueba automática.)
-  - [ ] La tarjeta muestra el desglose. (Demo.)
+  - [x] La tarjeta muestra el desglose. (Demo.)
 
 ## Apartado — Quitar el acceso ante un reembolso
 

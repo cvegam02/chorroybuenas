@@ -1,6 +1,6 @@
 # FEAT-14 — Ver una carta en grande desde la pantalla de Cartas
 
-**Estado: 🟡 construida, falta la demo de Carlos en dev (2026-10-06)**
+**Estado: ✅ hecha — dada por hecha por Carlos el 2026-10-07 («marca todo como completado»). En producción desde el 2026-10-06 (`dev` pasó a `main` con el PR #23).**
 
 **Contexto.** En la lotería guardada (U2) se puede tocar una carta y verla en grande (ventana M10). En la pantalla de Cartas (C1), que es donde se suben y se convierten con IA, no: en teléfono, tocar una carta abre un menú con Editar, Restaurar, Convertir y Eliminar, y la miniatura es muy chica para juzgar cómo quedó la conversión. Carlos lo señaló el 2026-10-06.
 
@@ -26,7 +26,7 @@
 
 ## Grupo A — Vista previa
 
-### US A1 — Ver una carta en grande desde Cartas, en teléfono   ·   Estado: 🟡 construida, falta la demo (2026-10-06)
+### US A1 — Ver una carta en grande desde Cartas, en teléfono   ·   Estado: ✅ hecha — dada por hecha por Carlos el 2026-10-07 («marca todo como completado»)
 
 - **Historia** — Como persona que arma su lotería desde el celular, quiero ver una carta en grande desde la pantalla de Cartas, para revisar cómo quedó la imagen (sobre todo después de convertirla con IA) sin tener que entrar a editarla.
 - **Entrega demostrable** — En teléfono, al tocar una carta en Cartas, el menú tiene arriba «Ver en grande» y al tocarlo la carta se abre en grande con su título.
@@ -34,9 +34,9 @@
 - **Depende de** — nada.
 - **Cómo se prueba (guion de demo)** — En `dev.chorroybuenas.com.mx`, desde el celular → Crear → Cartas, con al menos una carta subida → toca la carta → debería salir el menú con «Ver en grande» como primera opción → tócala → debería verse la carta en grande con su título abajo → ciérrala con la ✕ o tocando fuera → deberías volver a la lista de cartas, sin cambios.
 - **Escenarios cubiertos**:
-  - [ ] En teléfono, el menú de la carta muestra «Ver en grande» arriba y abre la carta en grande. (Demo.)
-  - [ ] La ventana se cierra con la ✕ y tocando fuera, y la lista queda igual. (Demo.)
-  - [ ] Una carta recién convertida con IA se ve en grande con la imagen nueva. (Demo.)
-  - [ ] El resto del menú (Editar, Restaurar, Convertir, Eliminar) funciona como antes. (Demo.)
-  - [ ] En computadora no cambia nada: el clic sigue abriendo la ventana de editar. (Demo.)
-  - [ ] Con el sitio en inglés, la opción dice «View larger». (Demo.)
+  - [x] En teléfono, el menú de la carta muestra «Ver en grande» arriba y abre la carta en grande. (Demo.)
+  - [x] La ventana se cierra con la ✕ y tocando fuera, y la lista queda igual. (Demo.)
+  - [x] Una carta recién convertida con IA se ve en grande con la imagen nueva. (Demo.)
+  - [x] El resto del menú (Editar, Restaurar, Convertir, Eliminar) funciona como antes. (Demo.)
+  - [x] En computadora no cambia nada: el clic sigue abriendo la ventana de editar. (Demo.)
+  - [x] Con el sitio en inglés, la opción dice «View larger». (Demo.)

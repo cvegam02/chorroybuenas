@@ -1,6 +1,6 @@
 # FEAT-16 — Menú de usuario como panel en escritorio
 
-**Estado: 🔨 en curso — construida; Carlos la vio en local («se ve bien», 2026-10-06). PR abierto hacia `dev`; falta la demo ahí**
+**Estado: ✅ hecha — Carlos la vio en local («se ve bien», 2026-10-06); dada por hecha por Carlos el 2026-10-07 («marca todo como completado»). En producción desde el 2026-10-06 (`dev` pasó a `main` con el PR #23).**
 
 **Contexto.** Al hacer clic en el nombre del usuario, en la barra de navegación, se abre una lista angosta con Mi cuenta, Crear nueva lotería, Mis loterías, Comprar tokens, Administración y Cerrar sesión. En teléfono funciona bien; en computadora se ve pobre para el espacio que hay. Carlos pidió mejorarla en escritorio y dejarla igual en móvil (2026-10-06).
 
@@ -43,7 +43,7 @@
 
 ## Grupo A — Menú de usuario
 
-### US A1 — Ver el menú de usuario como panel en computadora   ·   Estado: 🔨 construida, falta la demo de Carlos en dev
+### US A1 — Ver el menú de usuario como panel en computadora   ·   Estado: ✅ hecha — dada por hecha por Carlos el 2026-10-07 («marca todo como completado»)
 
 - **Historia** — Como persona con sesión iniciada en una computadora, quiero que el menú de mi nombre me muestre de un vistazo quién soy, cuántos tokens tengo y mis loterías, para llegar a lo que busco sin leer una lista larga.
 - **Entrega demostrable** — En computadora, al hacer clic en el nombre se abre un panel con encabezado (foto, nombre, correo, saldo y «Comprar») y las opciones agrupadas; en teléfono se abre el menú de siempre.
@@ -51,10 +51,10 @@
 - **Depende de** — nada.
 - **Cómo se prueba (guion de demo)** — En computadora, con sesión iniciada, haz clic en tu nombre (arriba a la derecha) → debería abrirse un panel con tu foto, nombre y correo, y debajo tu saldo de tokens con el botón «Comprar» → debajo, «Mis loterías» con «Crear nueva lotería» y tus loterías, la actual resaltada con palomita → luego «Mi cuenta» (y «Administración» si eres administrador) → al final «Cerrar sesión». Haz clic en «Comprar» → deberías llegar a Comprar tokens. Abre el menú otra vez y elige una lotería → debería abrirse esa lotería. Abre el menú y presiona Escape, o haz clic fuera → debería cerrarse. Con una cuenta que tenga más de cinco loterías: abre el menú → deberían verse solo cinco y, debajo, «Ver todas mis loterías» con el total → haz clic → debería abrirse Mi cuenta y bajar sola hasta la lista de loterías. Por último, abre el sitio desde el celular (o angosta la ventana) y toca tu foto → debería verse el menú de siempre.
 - **Escenarios cubiertos**:
-  - [ ] En computadora se abre el panel con encabezado, saldo y opciones agrupadas. (Demo.)
-  - [ ] «Comprar», «Crear nueva lotería», cada lotería, «Mi cuenta», «Administración» y «Cerrar sesión» hacen lo mismo que antes. (Demo.)
-  - [ ] «Administración» solo aparece para administradores. (Demo.)
-  - [ ] Con más de cinco loterías se ven cinco (la abierta siempre entre ellas) y «Ver todas mis loterías», que lleva a la lista en Mi cuenta. (Demo.)
-  - [ ] Con cinco o menos no aparece «Ver todas mis loterías». (Demo.)
-  - [ ] Escape y el clic fuera cierran el menú. (Demo.)
-  - [ ] En teléfono y tableta el menú se ve igual que antes. (Demo.)
+  - [x] En computadora se abre el panel con encabezado, saldo y opciones agrupadas. (Demo.)
+  - [x] «Comprar», «Crear nueva lotería», cada lotería, «Mi cuenta», «Administración» y «Cerrar sesión» hacen lo mismo que antes. (Demo.)
+  - [x] «Administración» solo aparece para administradores. (Demo.)
+  - [x] Con más de cinco loterías se ven cinco (la abierta siempre entre ellas) y «Ver todas mis loterías», que lleva a la lista en Mi cuenta. (Demo.)
+  - [x] Con cinco o menos no aparece «Ver todas mis loterías». (Demo.)
+  - [x] Escape y el clic fuera cierran el menú. (Demo.)
+  - [x] En teléfono y tableta el menú se ve igual que antes. (Demo.)
