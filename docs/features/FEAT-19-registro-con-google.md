@@ -1,6 +1,6 @@
 # FEAT-19 — Registrarse e iniciar sesión con Google
 
-**Estado: 🔨 en curso — construida; PR abierto hacia `dev`. Falta la demo de Carlos ahí.**
+**Estado: 🔨 en curso — construida y publicada. Entró a `dev` con el PR #21. En producción desde el 2026-10-06, con confirmación de Carlos: `dev` pasó a `main` con el PR #23 y Vercel lo publicó en `chorroybuenas.com.mx`. Google está activado en el Supabase de producción (lo configuró Carlos; comprobado ese día: activado, con Site URL y direcciones de regreso del dominio). Falta que Carlos confirme la demo; hasta entonces la historia no se marca como hecha.**
 
 **Contexto.** Carlos pidió (2026-10-06) que los usuarios puedan registrarse con Google. Las reglas de negocio ya lo contemplaban (`contexto-negocio.md` §roles, casos de uso de registro e inicio de sesión, pantalla M1), y el sitio ya sabía hablar con Google, pero la ventana «Iniciar sesión / Crear cuenta» no tenía ningún botón que lo usara: solo ofrecía correo y contraseña. Los estilos y los textos del botón también seguían en el sitio, sin usarse.
 

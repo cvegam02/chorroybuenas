@@ -1,6 +1,6 @@
 # FEAT-20 — Página de aviso de privacidad
 
-**Estado: 🔨 en curso — construida; PR abierto hacia `dev` (va después del de FEAT-19). Falta que Carlos revise el texto y la demo ahí.**
+**Estado: 🔨 en curso — construida y publicada. Entró a `dev` con el PR #22. En producción desde el 2026-10-06, con confirmación de Carlos: `dev` pasó a `main` con el PR #23 y Vercel lo publicó en `chorroybuenas.com.mx`. El aviso ya es público en `chorroybuenas.com.mx/privacidad`. Falta que Carlos revise el texto (sigue siendo un borrador sin revisión de un abogado) y confirme la demo; hasta entonces la historia no se marca como hecha.**
 
 **Contexto.** Carlos pidió (2026-10-06) una página de política de privacidad. Surgió al revisar la pantalla de Google del inicio de sesión (FEAT-19): Google pide el enlace a la política de privacidad para verificar la aplicación y mostrar su nombre y logotipo. El sitio no tenía ninguna página de este tipo.
 
