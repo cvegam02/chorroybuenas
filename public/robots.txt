@@ -1,5 +1,9 @@
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /comprar-tokens
+Disallow: /loteria/
 Disallow: /cards
 Disallow: /board-count
 Disallow: /preview

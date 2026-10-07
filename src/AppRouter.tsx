@@ -18,6 +18,7 @@ import { SeasonalDetail } from './components/Seasonal/SeasonalDetail';
 import { Dashboard } from './components/Dashboard/Dashboard';
 import { AdminPanel } from './components/AdminPanel/AdminPanel';
 import { Navbar } from './components/Navbar/Navbar';
+import { PageMeta } from './components/PageMeta/PageMeta';
 import { Footer } from './components/Footer/Footer';
 import { SetNewPasswordModal } from './components/Auth/SetNewPasswordModal';
 import { useAuth } from './contexts/AuthContext';
@@ -237,6 +238,7 @@ function AppContent() {
 
   return (
     <>
+      <PageMeta />
       <Navbar />
       <Routes>
         <Route

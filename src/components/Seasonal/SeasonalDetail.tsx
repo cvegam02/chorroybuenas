@@ -9,6 +9,7 @@ import { createSeasonalPreference } from '../../services/SeasonalPurchaseService
 import { localizedText, showsSampleNote } from '../../utils/seasonalCatalog';
 import { seasonalStatus } from '../../utils/seasonalPublishing';
 import { readSeasonalReturn } from '../../utils/seasonalPurchase';
+import { applyPageMeta, seasonalDetailMeta } from '../../utils/pageMeta';
 import { formatUsdReference } from '../../utils/usdReference';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import { CardPreviewModal } from '../SetView/CardPreviewModal';
@@ -53,6 +54,15 @@ export const SeasonalDetail = () => {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Solo una lotería publicada presenta su nombre a los buscadores.
+  useEffect(() => {
+    if (result?.status !== 'found' || seasonalStatus(result.loteria, new Date()) !== 'published') return;
+    const { loteria } = result;
+    const name = localizedText(loteria.name_es, loteria.name_en, language);
+    const description = localizedText(loteria.description_es, loteria.description_en, language);
+    applyPageMeta(document, seasonalDetailMeta(id, name, description, t));
+  }, [result, language, id, t]);
 
   useEffect(() => {
     if (!showUsd) return;

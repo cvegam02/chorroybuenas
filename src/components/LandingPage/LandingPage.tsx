@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -29,14 +28,6 @@ interface LandingPageProps {
 
 export const LandingPage = ({ onStart }: LandingPageProps) => {
   const { t } = useTranslation();
-
-  useEffect(() => {
-    document.title = t('landing.title');
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', t('landing.metaDescription'));
-    }
-  }, [t]);
 
   return (
     <div className="landing-page">
