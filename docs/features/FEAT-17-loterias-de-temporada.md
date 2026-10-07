@@ -1,6 +1,6 @@
 # FEAT-17 — Loterías de temporada (catálogo de pago)
 
-**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. B1 hecha. B2 hecha. C1 hecha. C2 hecha. C3 construida el 2026-10-06, **falta la demo de Carlos**. Siguiente historia tras la demo: C4. De A4 a C2 está en commits en la rama `feature/loterias-de-temporada`, sin subir; la C3 está sin commit. Las migraciones 027 a 033 están en dev y ninguna en producción.**
+**Estado: 📝 definida con Carlos el 2026-10-06; sin construir. Carlos revisó este documento y confirmó los cambios a la base de conocimiento ese mismo día («todo bien»). A1 hecha. A2 hecha. A3 hecha. A4 hecha. B1 hecha. B2 hecha. C1 hecha. C2 hecha. C3 construida el 2026-10-06, **falta la demo de Carlos**. Siguiente historia tras la demo: C4. Todo, de A1 a C3, está en commits en la rama `feature/loterias-de-temporada`, subida el 2026-10-06 con el PR #18 hacia `dev` (abierto, sin fusionar). Las migraciones 027 a 033 están en dev y ninguna en producción.**
 
 **Contexto.** Hoy el sitio solo cobra por la transformación de fotos con IA. Carlos quiere una segunda cosa que vender: loterías ya hechas por él, por temporada (Halloween, Día de Muertos, Thanksgiving, Navidad…), en una sección nueva tipo catálogo. Cualquiera las ve; para descargarlas hay que pagar. Carlos las prepara fuera del sitio y las administra desde el panel: las sube, les pone precio y las publica.
 
