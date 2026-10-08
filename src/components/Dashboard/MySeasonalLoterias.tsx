@@ -51,7 +51,7 @@ export const MySeasonalLoterias = () => {
       return (
         <div className="dashboard__empty-state">
           <p className="dashboard__empty-text">{t('dashboard.seasonal.empty')}</p>
-          <Link to="/temporada" className="seasonal-catalog__button">
+          <Link to="/tematicas" className="seasonal-catalog__button">
             {t('dashboard.seasonal.toCatalog')}
           </Link>
         </div>
@@ -74,7 +74,7 @@ export const MySeasonalLoterias = () => {
                 <div className="my-seasonal__cover" aria-hidden="true" />
               )}
               <div className="my-seasonal__info">
-                <Link to={`/temporada/${purchase.loteriaId}`} className="my-seasonal__name">
+                <Link to={`/tematicas/${purchase.loteriaId}`} className="my-seasonal__name">
                   {name}
                 </Link>
                 <span className="my-seasonal__meta">

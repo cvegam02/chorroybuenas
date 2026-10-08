@@ -11,7 +11,7 @@ import logoImage from '../../img/logo.png';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { UserMenuPanel } from './UserMenuPanel';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { FaCalendarAlt, FaCoins } from 'react-icons/fa';
+import { FaTags, FaCoins } from 'react-icons/fa';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import './Navbar.css';
 import { logger } from '../../utils/logger';
@@ -248,12 +248,12 @@ export const Navbar = () => {
                     role="menuitem"
                     className="navbar__user-dropdown-item"
                     onClick={() => {
-                      navigate('/temporada');
+                      navigate('/tematicas');
                       setUserMenuOpen(false);
                       closeMenu();
                     }}
                   >
-                    <FaCalendarAlt />
+                    <FaTags />
                     <span>{t('navbar.seasonal')}</span>
                   </button>
                   {isAdmin && (
@@ -346,8 +346,8 @@ export const Navbar = () => {
             </li>
             <li>
               <Link
-                to="/temporada"
-                className={`navbar__link ${location.pathname.startsWith('/temporada') ? 'navbar__link--active' : ''}`}
+                to="/tematicas"
+                className={`navbar__link ${location.pathname.startsWith('/tematicas') ? 'navbar__link--active' : ''}`}
                 onClick={closeMenu}
               >
                 {t('navbar.seasonal')}

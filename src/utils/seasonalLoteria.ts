@@ -108,7 +108,7 @@ export function validateSeasonalLoteriaForm(form: SeasonalLoteriaForm): Seasonal
   const dateMessage = 'Escribe una fecha válida.';
 
   const candidates: SeasonalFormErrors = {
-    seasonId: form.seasonId === '' ? 'Elige una temporada.' : undefined,
+    seasonId: form.seasonId === '' ? 'Elige una temática.' : undefined,
     nameEs:
       form.nameEs.trim() === '' ? 'Escribe el nombre en español.' : tooLong(form.nameEs, SEASONAL_NAME_MAX_LENGTH),
     nameEn: tooLong(form.nameEn, SEASONAL_NAME_MAX_LENGTH),
@@ -187,7 +187,7 @@ export function seasonalPdfFileName(name: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
-  return `${slug || 'loteria-de-temporada'}.pdf`;
+  return `${slug || 'loteria-tematica'}.pdf`;
 }
 
 /** Pestañas de la ventana de la ficha, en el orden en que se muestran. */

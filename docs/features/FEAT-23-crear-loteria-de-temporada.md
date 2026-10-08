@@ -1,6 +1,6 @@
 # FEAT-23 — Crear una lotería de temporada con cartas ya terminadas
 
-**Estado: 🟡 US A1, A2, A3 y A5 hechas y probadas por Carlos en local contra la base de pruebas (2026-10-07); a petición suya («hay que mandar esto a dev y prod») pasan a `dev` y a `main` sin demo previa en `dev.chorroybuenas.com.mx`. Falta US A4 (elegir las muestras): mientras tanto el paso 3 solo guarda el PDF y la ficha conserva sus muestras. Rama `feature/crear-loteria-temporada`. Sin migración ni edge function.**
+**Estado: 🟡 en producción desde el 2026-10-07 las historias US A1, A2, A3 y A5, a petición de Carlos («mándalo a prod») y sin demo previa en `dev.chorroybuenas.com.mx`: las probó en local contra la base de pruebas. Entró a `dev` con el PR #33 y a `main` con el PR #34. Falta US A4 (elegir las muestras): mientras tanto el paso 3 solo guarda el PDF y la ficha conserva sus muestras. Faltan también las pruebas de Carlos ya sobre producción (lotería normal: generar tableros y descargar el PDF; temporada: armar un PDF de punta a punta). Sin migración ni edge function.**
 
 **Contexto.** Hoy (FEAT-17) el administrador da de alta una lotería de temporada y le sube un PDF ya terminado, hecho fuera del sitio. Falta la herramienta para fabricar ese PDF dentro del sitio. Las cartas de temporada llegan ya diseñadas, con el nombre dibujado en la imagen: no hay que escribirles título ni pasarlas por la IA. Se suben las 54 de golpe, se generan los tableros y se arma el PDF, como en la lotería normal.
 
@@ -57,6 +57,7 @@ Administración → De Temporada → ficha de una lotería → «Crear el PDF co
 - `docs/contexto-negocio.md` §18, «Qué se vende» y «Vista previa»: el PDF puede subirse ya hecho o armarse en el sitio con las cartas del administrador; las muestras pueden elegirse de esas cartas.
 - `docs/casos-de-uso.md`, caso 28 (Gestionar loterías de temporada): flujo alterno para armar el PDF en el sitio.
 - `docs/diseno-mockups.md`: pantalla nueva en Administración y el botón nuevo en A1.7.
+- `docs/diseno-mockups.md`, A1.7 y A1.7a (2026-10-07, con la confirmación de Carlos: «haz los cambios en los documentos»): la ficha en tres pestañas, y A1.7a pasa de «por construir» a construida, con las muestras del paso 3 todavía pendientes.
 
 ## US A1 — Subir las cartas por lote, completas y sin nombre   ·   Estado: ✅ hecha — Carlos la probó el 2026-10-07 («ya las pude subir, todo se ve bien»)
 

@@ -35,6 +35,14 @@ import { logger } from './utils/logger';
 
 type AppStep = 'cards' | 'board-count' | 'preview' | 'confirmation';
 
+const LEGACY_SEASONAL_PATH = /^\/temporada/;
+
+/** `/temporada` fue la dirección de `/tematicas` (FEAT-24): redirige conservando ficha y parámetros. */
+function LegacySeasonalRedirect() {
+  const { pathname, search } = useLocation();
+  return <Navigate to={{ pathname: pathname.replace(LEGACY_SEASONAL_PATH, '/tematicas'), search }} replace />;
+}
+
 function AppContent() {
   const { t } = useTranslation();
   const { user, recoverySession, isLoading: authLoading } = useAuth();
@@ -261,7 +269,7 @@ function AppContent() {
           element={<AdminPanel />}
         />
         <Route
-          path="/admin/temporada/:id/crear"
+          path="/admin/tematicas/:id/crear"
           element={<SeasonalBuilder />}
         />
         <Route
@@ -281,12 +289,16 @@ function AppContent() {
           element={<AboutLoteria />}
         />
         <Route
-          path="/temporada"
+          path="/tematicas"
           element={<SeasonalCatalog />}
         />
         <Route
-          path="/temporada/:id"
+          path="/tematicas/:id"
           element={<SeasonalDetail />}
+        />
+        <Route
+          path="/temporada/*"
+          element={<LegacySeasonalRedirect />}
         />
         <Route
           path="/crear"

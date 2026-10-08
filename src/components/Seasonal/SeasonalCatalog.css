@@ -1,4 +1,4 @@
-/* P5 — Catálogo «De Temporada». Congruente con BuyTokensPage y BenefitsPage. */
+/* P5 — Catálogo «Temáticas». Congruente con BuyTokensPage y BenefitsPage. */
 
 .seasonal-catalog {
   min-height: 100vh;
@@ -34,6 +34,112 @@
   max-width: 1000px;
   margin: 0 auto;
   padding: 0 24px;
+}
+
+.seasonal-catalog__how,
+.seasonal-catalog__faq {
+  margin-top: var(--spacing-xl);
+}
+
+.seasonal-catalog__faq {
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid var(--color-border);
+}
+
+.seasonal-catalog__section-title {
+  margin: 0 0 var(--spacing-md);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  text-align: center;
+}
+
+.seasonal-catalog__steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.seasonal-catalog__step {
+  padding: var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  text-align: center;
+}
+
+.seasonal-catalog__step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.seasonal-catalog__step-title {
+  margin: var(--spacing-sm) 0 var(--spacing-xs);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.seasonal-catalog__step-text,
+.seasonal-catalog__faq-answer {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.seasonal-catalog__faq-list {
+  max-width: 720px;
+  margin: 0 auto;
+  border-top: 1px solid var(--color-border);
+}
+
+.seasonal-catalog__faq-item {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.seasonal-catalog__faq-question {
+  padding: var(--spacing-sm) 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  cursor: pointer;
+}
+
+.seasonal-catalog__faq-question:hover {
+  color: var(--color-primary-dark);
+}
+
+.seasonal-catalog__faq-question:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.seasonal-catalog__faq-item .seasonal-catalog__faq-answer {
+  padding-bottom: var(--spacing-md);
+}
+
+.seasonal-catalog__faq-link {
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.seasonal-catalog__faq-link:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .seasonal-catalog__season {
@@ -213,7 +319,8 @@ a.seasonal-catalog__card:focus-visible {
     padding: 0 16px;
   }
 
-  .seasonal-catalog__grid {
+  .seasonal-catalog__grid,
+  .seasonal-catalog__steps {
     grid-template-columns: 1fr;
   }
 }

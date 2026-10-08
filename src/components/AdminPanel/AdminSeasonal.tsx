@@ -84,7 +84,7 @@ export const AdminSeasonal = () => {
         : await SeasonalRepository.updateSeason(formTarget, input);
     setIsSaving(false);
     if (!saved) {
-      setError('No se pudo guardar la temporada. Intenta de nuevo.');
+      setError('No se pudo guardar la temática. Intenta de nuevo.');
       return;
     }
     setFormTarget(null);
@@ -157,14 +157,14 @@ export const AdminSeasonal = () => {
       return (
         <div className="admin-packs__loading">
           <div className="admin-packs__spinner" />
-          <span>Cargando temporadas...</span>
+          <span>Cargando temáticas...</span>
         </div>
       );
     }
     if (loadFailed) {
       return (
         <div className="admin-seasonal__load-error">
-          <p className="admin-packs__error">No se pudieron cargar las temporadas.</p>
+          <p className="admin-packs__error">No se pudieron cargar las temáticas.</p>
           <button type="button" className="admin-packs__btn admin-packs__btn--secondary" onClick={load}>
             Reintentar
           </button>
@@ -172,7 +172,7 @@ export const AdminSeasonal = () => {
       );
     }
     if (seasons.length === 0) {
-      return <p className="admin-packs__empty">Primero crea una temporada.</p>;
+      return <p className="admin-packs__empty">Primero crea una temática.</p>;
     }
     return (
       <div className="admin-packs__list">
@@ -221,20 +221,20 @@ export const AdminSeasonal = () => {
   return (
     <div className="admin-packs">
       <div className="admin-packs__header">
-        <h2 className="admin-packs__title">De Temporada</h2>
+        <h2 className="admin-packs__title">Loterías temáticas</h2>
         <p className="admin-packs__subtitle">
-          Temporadas y loterías del catálogo. El orden decide qué temporada aparece primero: el número más bajo va
+          Temáticas y loterías del catálogo. El orden decide qué temática aparece primero: el número más bajo va
           arriba.
         </p>
       </div>
 
-      <h3 className="admin-seasonal__section-title">Temporadas</h3>
+      <h3 className="admin-seasonal__section-title">Temáticas</h3>
 
       {formTarget === 'new' ? (
         renderForm()
       ) : (
         <button type="button" className="admin-packs__add-btn" onClick={openNewForm}>
-          <FaPlus /> Nueva temporada
+          <FaPlus /> Nueva temática
         </button>
       )}
 
@@ -246,7 +246,7 @@ export const AdminSeasonal = () => {
 
       <WarningModal
         isOpen={!!deleteTarget}
-        title="Borrar temporada"
+        title="Borrar temática"
         message={deleteTarget ? `¿Borrar «${deleteTarget.name_es}»?` : ''}
         confirmText="Borrar"
         cancelText="Cancelar"

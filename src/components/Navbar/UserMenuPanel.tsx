@@ -1,4 +1,4 @@
-import { FaArrowRight, FaCalendarAlt, FaCheck, FaCog, FaCoins, FaSignOutAlt, FaUser } from 'react-icons/fa';
+import { FaArrowRight, FaTags, FaCheck, FaCog, FaCoins, FaSignOutAlt, FaUser } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 
 interface MenuSet {
@@ -152,9 +152,9 @@ export const UserMenuPanel = ({
           type="button"
           role="menuitem"
           className="navbar__user-dropdown-item"
-          onClick={() => onGoTo('/temporada')}
+          onClick={() => onGoTo('/tematicas')}
         >
-          <FaCalendarAlt />
+          <FaTags />
           <span>{t('navbar.seasonal')}</span>
         </button>
         {isAdmin && (

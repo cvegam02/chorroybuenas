@@ -140,7 +140,7 @@ export const AdminPurchases = () => {
           >
             <option value="">Todos los tipos</option>
             <option value="tokens">Tokens</option>
-            <option value="seasonal">Lotería de temporada</option>
+            <option value="seasonal">Lotería temática</option>
           </select>
           <select
             className="admin-purchases__filter-select"
@@ -217,7 +217,7 @@ export const AdminPurchases = () => {
                     <td className="admin-purchases__cell-email" data-label="Email" title={p.user_id ?? undefined}>
                       {p.email || '—'}
                     </td>
-                    <td data-label="Tipo">{isSeasonal(p) ? 'Lotería de temporada' : 'Tokens'}</td>
+                    <td data-label="Tipo">{isSeasonal(p) ? 'Lotería temática' : 'Tokens'}</td>
                     <td data-label="Compra">{formatPack(p)}</td>
                     <td className="admin-purchases__cell-tokens" data-label="Tokens">
                       {p.total_tokens ?? '—'}
