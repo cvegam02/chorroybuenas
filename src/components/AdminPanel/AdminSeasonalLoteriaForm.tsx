@@ -22,6 +22,7 @@ import {
   type SeasonalGridSize,
   type SeasonalLoteriaForm,
 } from '../../utils/seasonalLoteria';
+import { openDownloadLink } from '../../utils/openDownloadLink';
 import { isoToLocalInput, missingToPublish } from '../../utils/seasonalPublishing';
 import { AdminSeasonalPreviews } from './AdminSeasonalPreviews';
 import { storedPreviewItem, uploadPendingPreviews, type PreviewItem } from './seasonalPreviewItems';
@@ -109,6 +110,7 @@ export const AdminSeasonalLoteriaForm = ({
   const [errors, setErrors] = useState<SeasonalFormErrors>({});
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfError, setPdfError] = useState<string | null>(null);
+  const [isPreparingPdf, setIsPreparingPdf] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   // Si la ficha se guardó pero el PDF falló, el reintento actualiza esa ficha en vez de crear otra.
@@ -136,6 +138,19 @@ export const AdminSeasonalLoteriaForm = ({
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handlePdfDownload = async () => {
+    if (!loteria) return;
+    setPdfError(null);
+    setIsPreparingPdf(true);
+    const url = await SeasonalRepository.getPdfDownloadUrl(loteria.id);
+    setIsPreparingPdf(false);
+    if (!url) {
+      setPdfError('No se pudo preparar la descarga del PDF. Intenta de nuevo.');
+      return;
+    }
+    openDownloadLink(url);
+  };
+
   const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     // Se limpia para poder volver a elegir el mismo archivo después de un rechazo.
@@ -151,6 +166,8 @@ export const AdminSeasonalLoteriaForm = ({
     : loteria?.pdf
       ? { name: loteria.pdf.name, sizeBytes: loteria.pdf.sizeBytes, note: null }
       : null;
+  // Solo el PDF ya guardado se puede bajar: el recién elegido todavía no está en el sitio.
+  const canDownloadPdf = pdfFile === null && Boolean(loteria?.pdf);
   const missing = missingToPublish({
     name_es: form.nameEs,
     description_es: form.descriptionEs,
@@ -455,6 +472,16 @@ export const AdminSeasonalLoteriaForm = ({
                 </span>
               )}
             </div>
+            {canDownloadPdf && (
+              <button
+                type="button"
+                className="admin-packs__btn admin-packs__btn--secondary"
+                onClick={handlePdfDownload}
+                disabled={isPreparingPdf}
+              >
+                {isPreparingPdf ? 'Preparando…' : 'Descargar'}
+              </button>
+            )}
             <button
               type="button"
               className="admin-packs__btn admin-packs__btn--secondary"
