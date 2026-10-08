@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { FaPencilAlt, FaPlus, FaTrash } from 'react-icons/fa';
 import { SeasonalRepository, type AdminSeasonalLoteria, type Season } from '../../repositories/SeasonalRepository';
 import { formatFileSize } from '../../utils/seasonalLoteria';
@@ -65,6 +66,8 @@ export const AdminSeasonalLoterias = ({ seasons, onChanged }: AdminSeasonalLoter
   const [isLoading, setIsLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
   const [formTarget, setFormTarget] = useState<FormTarget>(null);
+  // Quien vuelve de armar el PDF ve primero la pestaña donde quedó.
+  const [openInFiles, setOpenInFiles] = useState(false);
   const [seasonFilter, setSeasonFilter] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<AdminSeasonalLoteria | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -88,9 +91,26 @@ export const AdminSeasonalLoterias = ({ seasons, onChanged }: AdminSeasonalLoter
     load();
   }, [load]);
 
+  // Quien vuelve de armar el PDF con sus cartas (A1.7a) llega a la ficha de esa lotería, ya actualizada.
+  const location = useLocation();
+  const navigate = useNavigate();
+  const openLoteriaId = (location.state as { openLoteriaId?: string } | null)?.openLoteriaId;
+
+  useEffect(() => {
+    if (!openLoteriaId || isLoading) return;
+    const loteria = loterias.find((item) => item.id === openLoteriaId);
+    if (loteria) {
+      setOpenInFiles(true);
+      setFormTarget(loteria);
+    }
+    // Se limpia el aviso para que recargar la página no vuelva a abrir la ficha.
+    navigate(location.pathname, { replace: true, state: { tab: 'temporada' } });
+  }, [openLoteriaId, isLoading, loterias, navigate, location.pathname]);
+
   const handleFormClose = useCallback(
     (changed: boolean) => {
       setFormTarget(null);
+      setOpenInFiles(false);
       if (!changed) return;
       load();
       onChanged();
@@ -304,6 +324,7 @@ export const AdminSeasonalLoterias = ({ seasons, onChanged }: AdminSeasonalLoter
           seasons={seasons}
           loteria={formTarget === 'new' ? null : formTarget}
           hasSales={formTarget !== 'new' && (sales.get(formTarget.id)?.approved ?? 0) > 0}
+          initialTab={openInFiles ? 'archivos' : 'datos'}
           onClose={handleFormClose}
         />
       )}
