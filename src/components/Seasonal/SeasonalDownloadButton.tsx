@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SeasonalRepository } from '../../repositories/SeasonalRepository';
+import { openDownloadLink } from '../../utils/openDownloadLink';
 import './SeasonalDownloadButton.css';
 
 interface SeasonalDownloadButtonProps {
@@ -24,13 +25,7 @@ export const SeasonalDownloadButton = ({ loteriaId, loteriaName }: SeasonalDownl
       setFailed(true);
       return;
     }
-    // El enlace viene marcado como descarga: el navegador baja el archivo sin salir de la página.
-    const link = document.createElement('a');
-    link.href = url;
-    link.rel = 'noopener';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    openDownloadLink(url);
   };
 
   return (

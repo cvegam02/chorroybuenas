@@ -1,6 +1,6 @@
 # FEAT-24 — Las loterías «de temporada» pasan a llamarse «temáticas», y su página explica cómo funcionan
 
-**Estado: 🟡 US A1 y US A2 construidas el 2026-10-07 en la rama `feature/loterias-tematicas` (creada desde `dev`), que entra a `dev` con su propio PR; falta la demo de Carlos en `dev.chorroybuenas.com.mx`. Sin migración. La función de cobro `create-seasonal-preference` cambia: desplegada en dev (`vjglrfofyzvyvaetakpu`) el 2026-10-07 a petición de Carlos; en producción falta, y se despliega —con su confirmación— antes de fusionar a `main`.**
+**Estado: ✅ hecha — US A3 (descargar el PDF desde la ficha de administración) construida el 2026-10-07 y probada por Carlos ese día («funciona»); va a `dev` con el PR #37, sin migración ni cambios en funciones. US A1 y US A2 — construidas el 2026-10-07 en la rama `feature/loterias-tematicas` (creada desde `dev`), que entró a `dev` con el PR #35 y a `main` con el PR #36 el 2026-10-07, fusionados por Carlos; en producción desde ese día, donde Carlos la revisó («todo se ve bien»). Sin migración. La función de cobro `create-seasonal-preference` cambia: desplegada en dev (`vjglrfofyzvyvaetakpu`) el 2026-10-07 a petición de Carlos y en producción (`bdruzgjboxalpywljemk`) ese mismo día, también a petición suya («solo falta que mandes la función a prod»), después de fusionar a `main`.**
 
 **Contexto.** Carlos pidió el 2026-10-07 cambiar el enfoque de las «Loterías de temporada» (FEAT-17): «mejor vamos a llamarlas Temáticas, y vamos a dar ese enfoque en todos lados del flujo». «Temporada» amarra el catálogo a fechas del año (Halloween, Navidad); «temática» admite también ocasiones sin fecha (baby shower, bodas, cumpleaños). Pidió además que la página del catálogo deje de estar «muy pelona»: que explique cómo se usan y cómo se compran.
 
@@ -59,12 +59,12 @@ Barra (o menú de usuario) → «Temáticas» → `/tematicas`: título «Loter�
 - `docs/casos-de-uso.md`: todas las menciones.
 - `docs/diseno-mockups.md`: P5 y P6 (nombre y dirección), la barra, el menú de usuario, Mi cuenta, el historial y la pestaña de administración; P5 describe los pasos y las preguntas frecuentes.
 
-## US A1 — El nombre «Temáticas» en todo el recorrido   ·   Estado: 🟡 construida el 2026-10-07 — falta la demo de Carlos
+## US A1 — El nombre «Temáticas» en todo el recorrido   ·   Estado: ✅ hecha — Carlos la revisó en producción el 2026-10-07 («todo se ve bien»)
 
 - **Historia** — Como dueño del sitio, quiero que las loterías ya hechas se llamen «temáticas» en todo el sitio, para poder vender loterías de cualquier ocasión y no solo de fechas del año.
 - **Entrega demostrable** — En la barra, el catálogo, la ficha, Mi cuenta, el historial de compras, el cargo de Mercado Pago y la administración dice «temática(s)»; la dirección es `/tematicas` y la vieja lleva sola a la nueva.
 - **Construido** — 2026-10-07, en la rama `feature/loterias-tematicas`. Textos en español e inglés (`src/locales/*/translation.json`), textos fijos de la administración (`src/components/AdminPanel/`) y el aviso de privacidad. Rutas `/tematicas`, `/tematicas/:id` y `/admin/tematicas/:id/crear` (`src/AppRouter.tsx`); `/temporada` y `/temporada/:id` redirigen conservando los parámetros, en `vercel.json` (redirección permanente) y dentro del sitio. Datos para Google y sitemap con la dirección nueva (`src/utils/pageMeta.ts`, `src/utils/sitemap.ts`). En la función de cobro, el título del cargo y la dirección de regreso (`supabase/functions/_shared/seasonal.ts`), empezando por su prueba (`tests/functions/seasonal.test.ts`).
-- **Depende de** — `create-seasonal-preference` desplegada en dev (hecho el 2026-10-07); en producción antes de fusionar a `main`.
+- **Depende de** — `create-seasonal-preference` desplegada en dev y en producción (hecho el 2026-10-07).
 - **Cómo se prueba (guion de demo)** — Abre el sitio sin sesión → en la barra debería decir «Temáticas» → púlsalo → la dirección debería ser `/tematicas` y el título «Loterías temáticas» → abre una lotería → la dirección debería ser `/tematicas/…` y el enlace de regreso «← Temáticas» → escribe a mano `/temporada` en la barra de direcciones → debería llevarte a `/tematicas` → inicia sesión y abre el menú de usuario → debería decir «Temáticas» → en Mi cuenta, la sección debería llamarse «Mis loterías temáticas» → pulsa Comprar en una lotería → en Mercado Pago el cargo debería decir «Lotería temática - …» → al terminar deberías volver a `/tematicas/…` con el aviso de compra → entra como administrador → la pestaña debería llamarse «Temáticas», con la lista «Temáticas» y el botón «Nueva temática».
 - **Escenarios cubiertos**:
   - [x] El cargo de Mercado Pago dice «Lotería temática» y regresa a `/tematicas/:id`. (Prueba automática.)
@@ -73,7 +73,7 @@ Barra (o menú de usuario) → «Temáticas» → `/tematicas`: título «Loter�
   - [ ] Ningún texto visible dice «temporada», en español ni en inglés. (Demo.)
   - [ ] La compra de punta a punta funciona en dev con la función desplegada. (Demo. Carlos vio el 2026-10-07 el cargo en Mercado Pago: «Lotería temática - Haloween, $ 80»; falta confirmar el regreso a `/tematicas/…`.)
 
-## US A2 — La página explica cómo funcionan y cómo se compran   ·   Estado: 🟡 construida el 2026-10-07 — falta la demo de Carlos
+## US A2 — La página explica cómo funcionan y cómo se compran   ·   Estado: ✅ hecha — Carlos la revisó en producción el 2026-10-07 («todo se ve bien»)
 
 - **Historia** — Como visitante, quiero que la página de loterías temáticas me diga qué son, cómo se compran y cómo se usan, para decidirme sin tener que adivinar.
 - **Entrega demostrable** — `/tematicas` muestra una introducción, tres pasos antes del catálogo y siete preguntas frecuentes después —cerradas, cada una se abre al pulsarla—, en español e inglés.
@@ -85,3 +85,17 @@ Barra (o menú de usuario) → «Temáticas» → `/tematicas`: título «Loter�
   - [ ] Los dos enlaces de las respuestas llevan a su página. (Demo.)
   - [ ] Se ve bien en teléfono y en inglés. (Demo.)
   - [ ] El código fuente de `/tematicas` trae los pasos y las preguntas ya escritos. (Demo, en dev.)
+
+## US A3 — Descargar el PDF desde la ficha de administración   ·   Estado: ✅ hecha — Carlos la probó el 2026-10-07 («funciona»)
+
+Agregada el 2026-10-07 a petición de Carlos («se crea el archivo PDF y todo en el modal pero no podemos descargarlo para verificarlo que está bien»), que confirmó que va en esta feature.
+
+- **Historia** — Como administrador, quiero bajar el PDF que ya tiene guardado una lotería temática, para revisar que quedó bien antes de publicarla.
+- **Entrega demostrable** — En la ficha de una lotería, pestaña Archivos, junto al nombre del PDF guardado hay un botón «Descargar» que baja el archivo.
+- **Construido** — 2026-10-07, en la rama `feature/loterias-tematicas`; va a `dev` con el PR #37. Botón en `src/components/AdminPanel/AdminSeasonalLoteriaForm.tsx`, que pide el mismo enlace temporal que usa quien la compró (`SeasonalRepository.getPdfDownloadUrl`); abrir el enlace quedó en `src/utils/openDownloadLink.ts`, compartido con el botón del comprador. Sin migración: el permiso del administrador sobre el archivo ya existía (migración 028).
+- **Depende de** — Nada.
+- **Cómo se prueba (guion de demo)** — Entra como administrador → pestaña «Temáticas» → abre una lotería que ya tenga PDF → pestaña «Archivos» → junto al nombre del PDF debería verse «Descargar», antes de «Reemplazar» → púlsalo → debería decir «Preparando…» un momento y bajar el PDF con su nombre → pulsa «Reemplazar» y elige otro PDF → «Descargar» debería desaparecer hasta que guardes → arma un PDF con «Crear el PDF con mis cartas» y guarda → al volver a la ficha, «Descargar» debería bajar el PDF recién armado.
+- **Escenarios cubiertos**:
+  - [x] El botón baja el PDF guardado, también el recién armado con las cartas. (Demo.)
+  - [ ] No aparece si la lotería no tiene PDF ni mientras hay uno elegido sin guardar. (Demo.)
+  - [ ] Si el enlace no se puede preparar, se ve el aviso «No se pudo preparar la descarga del PDF. Intenta de nuevo.» (Demo.)
