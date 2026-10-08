@@ -35,7 +35,7 @@ const shareImage = (file: string, width: number, height: number): ShareImage => 
   height,
 });
 
-export const DEFAULT_SHARE_IMAGE = shareImage('og-image.jpg', 1024, 682);
+export const DEFAULT_SHARE_IMAGE = shareImage('og-image.jpg', 1536, 1024);
 
 const withSiteName = (title: string) => `${title} | ${SITE_NAME}`;
 
