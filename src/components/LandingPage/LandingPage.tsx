@@ -71,7 +71,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
 
       <main className="landing-page__main">
         {/* Banner: Beneficios de registrarse */}
-        <Link to="/beneficios" className="landing-page__banner">
+        <Link to="/beneficios" className="landing-page__banner landing-page__banner--stacked">
           <div className="landing-page__banner-content">
             <div className="landing-page__banner-text">
               <h2 className="landing-page__banner-title">{t('landing.banner.title')}</h2>
@@ -79,6 +79,20 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
             </div>
             <span className="landing-page__banner-cta">
               {t('landing.banner.cta')}
+              <FaArrowRight />
+            </span>
+          </div>
+        </Link>
+
+        {/* Banner: Loterías temáticas */}
+        <Link to="/tematicas" className="landing-page__banner landing-page__banner--themed">
+          <div className="landing-page__banner-content">
+            <div className="landing-page__banner-text">
+              <h2 className="landing-page__banner-title">{t('landing.themedBanner.title')}</h2>
+              <p className="landing-page__banner-subtitle">{t('landing.themedBanner.subtitle')}</p>
+            </div>
+            <span className="landing-page__banner-cta">
+              {t('landing.themedBanner.cta')}
               <FaArrowRight />
             </span>
           </div>

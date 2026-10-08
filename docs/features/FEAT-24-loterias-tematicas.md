@@ -1,6 +1,6 @@
 # FEAT-24 — Las loterías «de temporada» pasan a llamarse «temáticas», y su página explica cómo funcionan
 
-**Estado: ✅ hecha — US A3 (descargar el PDF desde la ficha de administración) construida el 2026-10-07 y probada por Carlos ese día («funciona»); va a `dev` con el PR #37, sin migración ni cambios en funciones. US A1 y US A2 — construidas el 2026-10-07 en la rama `feature/loterias-tematicas` (creada desde `dev`), que entró a `dev` con el PR #35 y a `main` con el PR #36 el 2026-10-07, fusionados por Carlos; en producción desde ese día, donde Carlos la revisó («todo se ve bien»). Sin migración. La función de cobro `create-seasonal-preference` cambia: desplegada en dev (`vjglrfofyzvyvaetakpu`) el 2026-10-07 a petición de Carlos y en producción (`bdruzgjboxalpywljemk`) ese mismo día, también a petición suya («solo falta que mandes la función a prod»), después de fusionar a `main`.**
+**Estado: US A4 (el inicio anuncia las temáticas) construida el 2026-10-07 en la rama `feature/loterias-tematicas` y probada por Carlos en local ese día («todo funciona»); va a `dev` con el PR #39, junto con el logo y los íconos nuevos del sitio; sin migración ni cambios en funciones. Lo demás, ✅ hecho — US A3 (descargar el PDF desde la ficha de administración) construida el 2026-10-07 y probada por Carlos ese día («funciona»); va a `dev` con el PR #37, sin migración ni cambios en funciones. US A1 y US A2 — construidas el 2026-10-07 en la rama `feature/loterias-tematicas` (creada desde `dev`), que entró a `dev` con el PR #35 y a `main` con el PR #36 el 2026-10-07, fusionados por Carlos; en producción desde ese día, donde Carlos la revisó («todo se ve bien»). Sin migración. La función de cobro `create-seasonal-preference` cambia: desplegada en dev (`vjglrfofyzvyvaetakpu`) el 2026-10-07 a petición de Carlos y en producción (`bdruzgjboxalpywljemk`) ese mismo día, también a petición suya («solo falta que mandes la función a prod»), después de fusionar a `main`.**
 
 **Contexto.** Carlos pidió el 2026-10-07 cambiar el enfoque de las «Loterías de temporada» (FEAT-17): «mejor vamos a llamarlas Temáticas, y vamos a dar ese enfoque en todos lados del flujo». «Temporada» amarra el catálogo a fechas del año (Halloween, Navidad); «temática» admite también ocasiones sin fecha (baby shower, bodas, cumpleaños). Pidió además que la página del catálogo deje de estar «muy pelona»: que explique cómo se usan y cómo se compran.
 
@@ -13,6 +13,7 @@
 1. **Solo cambia el nombre.** El producto se llama «Loterías temáticas» y los grupos pasan de «temporadas» a «temáticas». Las reglas no cambian: cada lotería pertenece a una temática y conserva «publicada sí/no» y fechas opcionales. _(Descartadas: quitar además las fechas de inicio y fin; cambiar solo el título público y dejar «temporada» por dentro.)_
 2. **La dirección pasa de `/temporada` a `/tematicas`**, y la dirección vieja redirige sola a la nueva, conservando lo que venga después del signo de interrogación (para quien regresa de Mercado Pago con un pago iniciado antes del cambio). _(Descartada: dejar `/temporada` y cambiar solo los textos.)_
 3. **El texto nuevo va en dos bloques:** arriba del catálogo, una introducción corta y tres pasos de cómo funciona; debajo del catálogo, las preguntas frecuentes. _(Descartadas: solo los pasos, sin preguntas; todo el texto debajo del catálogo.)_
+4. **El inicio anuncia las temáticas con una franja propia debajo del banner de beneficios** (2026-10-07, US A4): título, una línea y el botón «Ver loterías temáticas». Carlos pidió además «hacer los cambios necesarios para seguir con el SEO». _(Descartadas: un segundo botón en la portada, que le quita protagonismo a crear la lotería propia; una sección con portadas reales del catálogo, que hace depender el inicio de que el catálogo cargue.)_
 
 **Propuesto al diseñar, por confirmar con Carlos:**
 
@@ -58,6 +59,7 @@ Barra (o menú de usuario) → «Temáticas» → `/tematicas`: título «Loter�
 - `docs/contexto-negocio.md`: §18 pasa a «Loterías temáticas» y sus grupos a «temáticas»; lo mismo en roles, datos, permisos y las demás menciones vigentes. Las decisiones fechadas el 2026-10-06 y el 2026-10-07 se conservan con su redacción original y se agrega el renglón de esta decisión.
 - `docs/casos-de-uso.md`: todas las menciones.
 - `docs/diseno-mockups.md`: P5 y P6 (nombre y dirección), la barra, el menú de usuario, Mi cuenta, el historial y la pestaña de administración; P5 describe los pasos y las preguntas frecuentes.
+- `docs/diseno-mockups.md`, P1 (US A4, confirmado por Carlos el 2026-10-07: «si»): el inicio lleva la franja «Loterías temáticas» debajo del banner de beneficios.
 
 ## US A1 — El nombre «Temáticas» en todo el recorrido   ·   Estado: ✅ hecha — Carlos la revisó en producción el 2026-10-07 («todo se ve bien»)
 
@@ -99,3 +101,22 @@ Agregada el 2026-10-07 a petición de Carlos («se crea el archivo PDF y todo en
   - [x] El botón baja el PDF guardado, también el recién armado con las cartas. (Demo.)
   - [ ] No aparece si la lotería no tiene PDF ni mientras hay uno elegido sin guardar. (Demo.)
   - [ ] Si el enlace no se puede preparar, se ve el aviso «No se pudo preparar la descarga del PDF. Intenta de nuevo.» (Demo.)
+
+## US A4 — El inicio anuncia las loterías temáticas   ·   Estado: ✅ hecha — Carlos la probó en local el 2026-10-07 («todo funciona»); falta verla en dev
+
+Agregada el 2026-10-07 a petición de Carlos («en la pantalla principal no hacemos referencia a la nueva sección de las loterías temáticas»), que confirmó que va en esta feature («si»).
+
+- **Historia** — Como visitante, quiero enterarme desde el inicio de que hay loterías ya hechas, para comprarlas sin tener que descubrir el enlace de la barra.
+- **Entrega demostrable** — En el inicio, debajo del banner de beneficios, hay una franja «Loterías temáticas, listas para imprimir» que lleva a `/tematicas`, en español e inglés; y lo que el inicio le dice a los buscadores menciona las temáticas.
+- **Construido** — 2026-10-07, en la rama `feature/loterias-tematicas`; va a `dev` con el PR #39. Franja en `src/components/LandingPage/LandingPage.tsx`, que reutiliza el banner de beneficios con una variante clara (`LandingPage.css`, solo colores de la paleta); textos en `src/locales/*/translation.json` (`landing.themedBanner`). Es un enlace de verdad con texto fijo: no lee el catálogo, se ve igual con o sin sesión y llega ya escrito en la página pre-generada del inicio. Para los buscadores: la descripción del inicio (`landing.metaDescription` y `index.html`) menciona las temáticas, y `index.html` suma palabras clave y un renglón en la lista de funciones de los datos estructurados. El precio «0» de esos datos no se tocó: sigue describiendo la herramienta gratuita.
+- **Depende de** — US A1.
+- **Cómo se prueba (guion de demo)** — Abre el inicio sin sesión → debajo del banner naranja de beneficios debería verse una franja clara: «Loterías temáticas, listas para imprimir», una línea de texto y el botón «Ver loterías temáticas» → púlsala → debería abrir `/tematicas` → vuelve, inicia sesión y abre el inicio → la franja debería seguir ahí → cambia el idioma a inglés → debería decir «Themed loterías, ready to print» → ábrelo en el teléfono → el botón debería bajar debajo del texto, sin cortarse → en dev, mira el código fuente del inicio → debería traer el texto de la franja ya escrito y la descripción nueva.
+- **Textos**:
+  - **Título:** «Loterías temáticas, listas para imprimir»
+  - **Línea:** «¿Sin tiempo para armar la tuya? Elige una ya hecha para tu fiesta o reunión, cómprala y descarga el PDF.»
+  - **Botón:** «Ver loterías temáticas»
+  - **Descripción del inicio para buscadores:** «Crea tu Lotería Mexicana con tus propias cartas e imágenes, o elige una lotería temática lista para imprimir. Modo Kids (3x3) para niños. Ideal para baby showers y fiestas.» (Antes: «Crea tableros personalizados de Lotería Mexicana con tus propias cartas e imágenes. Nuevo Modo Kids (3x3) para niños. Perfecto para baby showers y eventos familiares.»)
+- **Escenarios cubiertos**:
+  - [x] La franja lleva a `/tematicas`, con y sin sesión. (Demo, en local.)
+  - [ ] Se ve bien en teléfono y en inglés. (Demo.)
+  - [ ] El código fuente del inicio trae la franja y la descripción nueva ya escritas. (Demo, en dev.)

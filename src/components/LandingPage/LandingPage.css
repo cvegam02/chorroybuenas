@@ -315,6 +315,32 @@
   background: rgba(255, 255, 255, 0.35);
 }
 
+/* Dos banners seguidos: el primero deja menos aire debajo */
+.landing-page__banner--stacked {
+  margin-bottom: 24px;
+}
+
+/* Variante clara, para no repetir el naranja del banner de beneficios */
+.landing-page__banner--themed {
+  background: var(--color-bg-subtle);
+  border: 2px solid var(--color-primary-lighter);
+  color: var(--color-text-main);
+}
+
+.landing-page__banner--themed .landing-page__banner-title {
+  color: var(--color-primary-dark);
+  text-shadow: none;
+}
+
+.landing-page__banner--themed .landing-page__banner-cta {
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+}
+
+.landing-page__banner--themed:hover .landing-page__banner-cta {
+  background: var(--color-primary-dark);
+}
+
 /* ============================================
    STEPS SECTION
    ============================================ */
