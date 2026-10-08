@@ -4,10 +4,10 @@ import type { GridSize } from '../../../types';
 import {
   SEASONAL_CARD_ACCEPTED_MIME_TYPES,
   SEASONAL_EXPECTED_CARDS,
+  seasonalMinCards,
   cardCountStatus,
   hasEnoughCards,
 } from '../../../utils/seasonalCards';
-import { minCardsForGrid } from '../../../utils/gridRules';
 import type { SeasonalCardsState } from './useSeasonalCards';
 
 interface SeasonalBuilderCardsProps extends SeasonalCardsState {
@@ -17,7 +17,7 @@ interface SeasonalBuilderCardsProps extends SeasonalCardsState {
 function countMessage(count: number, gridSize: GridSize): string | null {
   if (count === 0) return null;
   if (!hasEnoughCards(count, gridSize)) {
-    return `Hacen falta al menos ${minCardsForGrid(gridSize)} cartas para generar tableros.`;
+    return `Hacen falta al menos ${seasonalMinCards(gridSize)} cartas para generar tableros.`;
   }
   const status = cardCountStatus(count);
   if (status.kind === 'missing') {

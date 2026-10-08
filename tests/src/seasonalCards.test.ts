@@ -7,8 +7,10 @@ import {
   hasEnoughCards,
   isCardRatio,
   placeCardImage,
+  seasonalMinCards,
   validateCardFile,
 } from '../../src/utils/seasonalCards';
+import { minCardsForGrid } from '../../src/utils/gridRules';
 
 describe('proporción de una carta de temporada (FEAT-23, decisión 2)', () => {
   it('reconoce las imágenes 2:3', () => {
@@ -84,17 +86,25 @@ describe('cuántas cartas hay frente a las 54 esperadas (FEAT-23, decisión 3)',
     expect(cardCountStatus(54)).toEqual({ kind: 'exact', difference: 0 });
   });
 
-  it('no bloquea si llegan al mínimo de la lotería normal (24 en Clásico, 15 en Kids)', () => {
+  it('no bloquea si llegan al mínimo: 24 en Clásico, 9 en Kids (FEAT-24, US A5)', () => {
     expect(hasEnoughCards(48, 16)).toBe(true);
     expect(hasEnoughCards(24, 16)).toBe(true);
+    expect(hasEnoughCards(9, 9)).toBe(true);
     expect(hasEnoughCards(15, 9)).toBe(true);
     expect(hasEnoughCards(60, 16)).toBe(true);
   });
 
   it('bloquea por debajo de ese mínimo', () => {
     expect(hasEnoughCards(23, 16)).toBe(false);
-    expect(hasEnoughCards(14, 9)).toBe(false);
+    expect(hasEnoughCards(8, 9)).toBe(false);
     expect(hasEnoughCards(0, 16)).toBe(false);
+  });
+
+  it('el mínimo de la lotería normal no cambia', () => {
+    expect(seasonalMinCards(9)).toBe(9);
+    expect(seasonalMinCards(16)).toBe(24);
+    expect(minCardsForGrid(9)).toBe(15);
+    expect(minCardsForGrid(16)).toBe(24);
   });
 });
 
