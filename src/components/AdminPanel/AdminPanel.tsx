@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   FaCog, FaArrowLeft, FaTicketAlt, FaShoppingCart,
-  FaBoxOpen, FaWallet, FaChartLine, FaCreditCard, FaCalendarAlt, FaBars, FaTimes
+  FaBoxOpen, FaWallet, FaChartLine, FaCreditCard, FaTags, FaBars, FaTimes
 } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import { AdminPurchases } from './AdminPurchases';
@@ -23,7 +23,7 @@ const TABS: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
   { id: 'balances',    label: 'Balances',           icon: <FaWallet /> },
   { id: 'uso-ia',      label: 'Uso de IA',          icon: <FaChartLine /> },
   { id: 'mp',          label: 'Transacciones MP',   icon: <FaCreditCard /> },
-  { id: 'temporada',   label: 'De Temporada',       icon: <FaCalendarAlt /> },
+  { id: 'temporada',   label: 'Temáticas',          icon: <FaTags /> },
 ];
 
 export const AdminPanel = () => {

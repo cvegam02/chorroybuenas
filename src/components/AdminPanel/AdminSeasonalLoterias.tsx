@@ -169,10 +169,10 @@ export const AdminSeasonalLoterias = ({ seasons, onChanged }: AdminSeasonalLoter
       );
     }
     if (loterias.length === 0) {
-      return <p className="admin-packs__empty">Aún no hay loterías de temporada.</p>;
+      return <p className="admin-packs__empty">Aún no hay loterías temáticas.</p>;
     }
     if (shownLoterias.length === 0) {
-      return <p className="admin-packs__empty">Esta temporada no tiene loterías.</p>;
+      return <p className="admin-packs__empty">Esta temática no tiene loterías.</p>;
     }
     return (
       <div className="admin-purchases__table-wrapper">
@@ -181,7 +181,7 @@ export const AdminSeasonalLoterias = ({ seasons, onChanged }: AdminSeasonalLoter
             <tr>
               <th>Portada</th>
               <th>Nombre</th>
-              <th>Temporada</th>
+              <th>Temática</th>
               <th>Precio</th>
               <th>Estado</th>
               <th>Fechas</th>
@@ -214,7 +214,7 @@ export const AdminSeasonalLoterias = ({ seasons, onChanged }: AdminSeasonalLoter
                     )}
                   </td>
                   <td data-label="Nombre">{loteria.name_es}</td>
-                  <td data-label="Temporada">{seasonName(loteria.season_id)}</td>
+                  <td data-label="Temática">{seasonName(loteria.season_id)}</td>
                   <td data-label="Precio">
                     {loteria.price_cents === null ? 'Sin precio' : PRICE_FORMAT.format(loteria.price_cents / 100)}
                   </td>
@@ -292,14 +292,14 @@ export const AdminSeasonalLoterias = ({ seasons, onChanged }: AdminSeasonalLoter
         className="admin-packs__add-btn"
         onClick={() => setFormTarget('new')}
         disabled={!hasSeasons}
-        title={hasSeasons ? undefined : 'Primero crea una temporada'}
+        title={hasSeasons ? undefined : 'Primero crea una temática'}
       >
         <FaPlus /> Nueva lotería
       </button>
 
       {hasSeasons && (
         <label className="admin-seasonal__filter">
-          Temporada
+          Temática
           <select value={seasonFilter} onChange={(e) => setSeasonFilter(e.target.value)}>
             <option value="">Todas</option>
             {seasons.map((season) => (

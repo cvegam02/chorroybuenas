@@ -47,6 +47,15 @@ Cada vez que se complete una User Story (o parte de una) del documento de la fas
 
 Si se va a hacer algo que **no está listado** en ese documento (una subtarea nueva, una extensión de alcance, algo que surgió en la conversación), **antes de implementarlo** hay que agregarlo al checklist — y antes de agregarlo, preguntarle al usuario si corresponde a esa fase o story. No agregar subtareas ni marcarlas como completas sin esa confirmación.
 
+## Regla obligatoria: documentos al día antes del commit o del PR
+
+Decidido por el usuario el 2026-10-07 (FEAT-23).
+
+Antes de hacer commit o abrir un PR, todos los documentos que el cambio deja desactualizados tienen que estar ya corregidos e incluidos en ese mismo commit: el archivo de la fase o feature (estado, «Construido», escenarios, fechas y PR de despliegue), la base de conocimiento y el índice de pantallas (`docs/diseno-mockups.md`, quitando las marcas «por construir» de lo ya construido). Un deploy solo para corregir documentos es un deploy que no debió hacer falta.
+
+- Si algún documento necesita la confirmación del usuario (ver «mantener la base de conocimiento sincronizada», más abajo), se le pide **antes** del commit; no se deja como pendiente para después.
+- El estado de despliegue se redacta de modo que siga siendo cierto después de fusionar (por ejemplo, citando el PR que lo lleva a `dev` o a `main`), para no tener que editarlo otra vez.
+
 ## Reglas de trabajo en este proyecto
 
 Estas reglas mandan sobre las reglas globales del usuario cuando se contradigan (decidido el 2026-10-06).

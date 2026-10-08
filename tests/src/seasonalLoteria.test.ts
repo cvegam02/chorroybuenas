@@ -198,6 +198,6 @@ describe('pestañas de la ficha (FEAT-23, US A5)', () => {
   });
 
   it('con errores en varias pestañas se listan en el orden en que aparecen', () => {
-    expect(tabsWithErrors({ price: 'Mínimo $10.00.', seasonId: 'Elige una temporada.' })).toEqual(['datos', 'precio']);
+    expect(tabsWithErrors({ price: 'Mínimo $10.00.', seasonId: 'Elige una temática.' })).toEqual(['datos', 'precio']);
   });
 });

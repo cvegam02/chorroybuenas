@@ -1,6 +1,6 @@
 # FEAT-21 — Que el sitio salga en las búsquedas de Google (SEO)
 
-**Estado: 🚧 en curso — definida con Carlos el 2026-10-07. Rama `feature/seo`, creada desde `dev`.**
+**Estado: ✅ hecha — definida con Carlos el 2026-10-07; fusionada a `dev` (PR #26) y publicada en producción el mismo día. Carlos envió el sitemap y pidió la indexación de las seis páginas en Search Console.**
 
 **Contexto.** Carlos dio de alta `chorroybuenas.com.mx` en Google Search Console (2026-10-07, a raíz de la verificación de marca del inicio de sesión con Google) y pidió ayuda para que el sitio aparezca en las búsquedas. Al revisar el sitio se encontraron cuatro frenos:
 
@@ -26,7 +26,7 @@
 - Páginas que se pre-generan: `/`, `/como-se-juega`, `/que-es-la-loteria`, `/beneficios`, `/privacidad`, `/temporada`.
 - Páginas que se marcan para que Google no las indexe: `/dashboard`, `/admin`, `/comprar-tokens`, `/loteria/…`, `/cards`, `/board-count`, `/preview`.
 
-## US A1 — Cada página pública se presenta a Google con su propia dirección, título y descripción   ·   Estado: 🟡 construida el 2026-10-07 — falta la demo de Carlos en dev
+## US A1 — Cada página pública se presenta a Google con su propia dirección, título y descripción   ·   Estado: ✅ hecha el 2026-10-07 — demo confirmada por Carlos; en producción
 
 - **Historia** — Como dueño del sitio, quiero que cada página informativa le diga a Google cuál es su dirección, su título y su descripción, para que se indexe como página propia y no como duplicado del inicio.
 - **Entrega demostrable** — Al abrir cada página pública, su dirección oficial, su título, su descripción y los datos para compartir en redes son los de esa página. Las páginas privadas piden no ser indexadas y `robots.txt` las excluye.
@@ -39,9 +39,9 @@
   - [x] Título, descripción y datos para compartir cambian por página. (Prueba automática.)
   - [x] Las páginas privadas piden no ser indexadas. (Prueba automática.)
   - [x] `robots.txt` excluye las páginas privadas.
-  - [ ] Carlos lo vio en dev. (Demo.)
+  - [x] Carlos lo vio en dev. (Demo, 2026-10-07.)
 
-## US A2 — El sitio abre en español   ·   Estado: 🟡 construida el 2026-10-07 — falta la demo de Carlos en dev
+## US A2 — El sitio abre en español   ·   Estado: ✅ hecha el 2026-10-07 — demo confirmada por Carlos; en producción
 
 - **Historia** — Como dueño del sitio, quiero que el sitio abra en español para todos, para que Google lea e indexe el contenido en el idioma en que la gente lo busca.
 - **Entrega demostrable** — Con el navegador en inglés y sin haber elegido idioma, el sitio abre en español. Quien elige inglés con el selector lo conserva en sus siguientes visitas.
@@ -50,10 +50,10 @@
 - **Depende de** — nada.
 - **Cómo se prueba (guion de demo)** — Abre el sitio en una ventana de incógnito con el navegador en inglés → debería verse en español → cambia a inglés con el selector → recarga → debería seguir en inglés.
 - **Escenarios cubiertos**:
-  - [ ] Primera visita con navegador en inglés: se ve en español.
-  - [ ] El idioma elegido con el selector se recuerda.
+  - [x] Primera visita con navegador en inglés: se ve en español. (Demo de Carlos, 2026-10-07.)
+  - [x] El idioma elegido con el selector se recuerda. (Demo de Carlos, 2026-10-07.)
 
-## US A3 — El sitemap lista todas las páginas públicas y se actualiza solo   ·   Estado: 🟡 construida el 2026-10-07 — falta la demo de Carlos en dev
+## US A3 — El sitemap lista todas las páginas públicas y se actualiza solo   ·   Estado: ✅ hecha el 2026-10-07 — demo confirmada por Carlos; en producción
 
 - **Historia** — Como dueño del sitio, quiero que el sitemap incluya todas las páginas públicas y las loterías de temporada publicadas, para que Google las descubra sin que yo lo mantenga a mano.
 - **Entrega demostrable** — `/sitemap.xml` lista las páginas públicas fijas y cada lotería de temporada publicada, con la fecha de la última publicación del sitio.
@@ -66,23 +66,23 @@
   - [x] Está cada lotería de temporada publicada; no aparecen las no publicadas. (Prueba automática para las entradas; las no publicadas las filtra la regla de acceso de la base.)
   - [x] No aparece ninguna página privada. (Prueba automática.)
   - [x] Si la base de datos no responde al construir, el sitio se publica igual con las páginas fijas. (La falla de lectura tiene prueba automática; que la construcción siga adelante con un aviso, no.)
-  - [ ] Carlos lo vio en dev. (Demo.)
+  - [x] Carlos lo vio en dev. (Demo, 2026-10-07.)
 
-## US A4 — Las páginas públicas llegan ya escritas   ·   Estado: 🟡 construida el 2026-10-07 — falta la demo de Carlos en dev
+## US A4 — Las páginas públicas llegan ya escritas   ·   Estado: ✅ hecha el 2026-10-07 — demo confirmada por Carlos; en producción
 
 - **Historia** — Como dueño del sitio, quiero que las páginas públicas lleguen a Google con su texto ya escrito, para que las lea completas y rápido sin depender de que ejecute el código del sitio.
 - **Entrega demostrable** — El código fuente de cada página pública contiene su texto, y la página se comporta igual que hoy para quien la visita.
 - **Construido** — 2026-10-07, en la rama `feature/seo`. Al construir el sitio, un paso nuevo en `vite.config.ts` dibuja las seis páginas públicas en español sin abrir un navegador (`src/entry-server.tsx`) y escribe cada una en su propio archivo, con su texto y con su título, descripción, dirección oficial y datos para compartir ya puestos (`src/utils/prerender.ts`; pruebas en `tests/src/prerender.test.ts`). Con esto la vista previa al compartir un enlace de esas seis páginas ya muestra los datos de la página (el límite que quedó anotado en la US A1). Al abrir, el sitio reutiliza ese texto en vez de volver a dibujarlo (`src/main.tsx`). Las demás direcciones (panel, administración, zona Crear, ficha de cada lotería) reciben una página sin texto, `shell.html`, y funcionan como antes: `vercel.json` ahora las manda ahí en vez de a `index.html`, que pasó a ser el inicio ya escrito. Comprobado construyendo en local: las seis páginas traen su texto, su título y su dirección oficial, y todas las imágenes que mencionan existen.
-- **Límites conocidos** — `/temporada` llega con su título y subtítulo, pero la lista de loterías se sigue cargando en el navegador (así no hay que volver a publicar cuando cambia el catálogo). Quien tiene el inglés elegido ve un instante la página en español antes de que cambie a inglés. Quien entra al inicio con sesión iniciada ve un instante el inicio antes de pasar a su panel, igual que hoy. En el CI de GitHub (sin variables `VITE_*`) las páginas no se pre-generan: solo se comprueba que el sitio compila. Falta confirmar en dev que Vercel sirve `/como-se-juega` desde su archivo propio sin redirigir; si no lo hiciera, la página se vería igual que hoy (sin texto en el código fuente), no rota.
+- **Límites conocidos** — `/temporada` llega con su título y subtítulo, pero la lista de loterías se sigue cargando en el navegador (así no hay que volver a publicar cuando cambia el catálogo). Quien tiene el inglés elegido ve un instante la página en español antes de que cambie a inglés. Quien entra al inicio con sesión iniciada ve un instante el inicio antes de pasar a su panel, igual que hoy. En el CI de GitHub (sin variables `VITE_*`) las páginas no se pre-generan: solo se comprueba que el sitio compila. Confirmado en producción el 2026-10-07: Vercel sirve cada página desde su archivo propio, sin redirigir.
 - **Depende de** — A1 y A2.
 - **Cómo se prueba (guion de demo)** — Abre `/como-se-juega` → pulsa Ctrl+U (ver código fuente) → busca una frase del texto de la página → debería aparecer. Repite con el inicio y `/temporada`. Navega por el sitio con sesión iniciada y sin ella → todo debería verse y funcionar como antes, sin parpadeos ni textos que cambien al cargar.
 - **Escenarios cubiertos**:
   - [x] El código fuente de las seis páginas pre-generadas contiene su texto en español. (Comprobado en la construcción local; falta verlo en dev.)
-  - [ ] Entrar directo a una página privada o de la zona Crear sigue funcionando.
-  - [ ] Quien tiene el inglés elegido ve la página en inglés tras cargar.
-  - [ ] La sesión iniciada se sigue reconociendo al entrar por una página pre-generada.
+  - [x] Entrar directo a una página privada o de la zona Crear sigue funcionando. (Demo de Carlos, 2026-10-07.)
+  - [x] Quien tiene el inglés elegido ve la página en inglés tras cargar. (Demo de Carlos, 2026-10-07.)
+  - [x] La sesión iniciada se sigue reconociendo al entrar por una página pre-generada. (Demo de Carlos, 2026-10-07.)
 
-## US A5 — Cada página se comparte con su propia imagen   ·   Estado: 🟡 construida el 2026-10-07 — falta la demo de Carlos en dev
+## US A5 — Cada página se comparte con su propia imagen   ·   Estado: ✅ hecha el 2026-10-07 — demo confirmada por Carlos; en producción
 
 Agregada el 2026-10-07 a pedido de Carlos: es el detalle menor del alcance acordado (decisión 1) que faltaba. _(Descartadas: incluir también la portada de cada ficha de temporada; dejar la imagen general en todas.)_
 
@@ -95,4 +95,4 @@ Agregada el 2026-10-07 a pedido de Carlos: es el detalle menor del alcance acord
 - **Escenarios cubiertos**:
   - [x] Las tres páginas declaran su propia imagen, con su tamaño. (Prueba automática.)
   - [x] Las demás páginas conservan la imagen general. (Prueba automática.)
-  - [ ] Carlos lo vio en dev. (Demo.)
+  - [x] Carlos lo vio en dev. (Demo, 2026-10-07.)

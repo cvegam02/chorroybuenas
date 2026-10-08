@@ -15,6 +15,16 @@ interface CatalogData {
 
 const PRICE_FORMAT = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
 const SKELETON_CARDS = [0, 1, 2];
+const STEPS = ['choose', 'buy', 'print'] as const;
+const FAQ: { id: string; linkTo?: string }[] = [
+  { id: 'receive' },
+  { id: 'physical' },
+  { id: 'pay' },
+  { id: 'account' },
+  { id: 'downloads' },
+  { id: 'use', linkTo: '/como-se-juega' },
+  { id: 'custom', linkTo: '/cards' },
+];
 
 export const SeasonalCatalog = () => {
   const { t, i18n } = useTranslation();
@@ -77,7 +87,7 @@ export const SeasonalCatalog = () => {
 
     return (
       <li key={loteria.id}>
-        <Link to={`/temporada/${loteria.id}`} className="seasonal-catalog__card">
+        <Link to={`/tematicas/${loteria.id}`} className="seasonal-catalog__card">
           {loteria.cover_path ? (
             <img
               className="seasonal-catalog__cover"
@@ -167,7 +177,50 @@ export const SeasonalCatalog = () => {
         <h1 className="seasonal-catalog__title">{t('seasonal.catalog.title')}</h1>
         <p className="seasonal-catalog__subtitle">{t('seasonal.catalog.subtitle')}</p>
       </header>
-      <main className="seasonal-catalog__main">{renderContent()}</main>
+      <main className="seasonal-catalog__main">
+        <section className="seasonal-catalog__how" aria-labelledby="seasonal-how-title">
+          <h2 id="seasonal-how-title" className="seasonal-catalog__section-title">
+            {t('seasonal.catalog.howTitle')}
+          </h2>
+          <ol className="seasonal-catalog__steps">
+            {STEPS.map((step, index) => (
+              <li key={step} className="seasonal-catalog__step">
+                <span className="seasonal-catalog__step-number" aria-hidden="true">
+                  {index + 1}
+                </span>
+                <h3 className="seasonal-catalog__step-title">{t(`seasonal.catalog.steps.${step}.title`)}</h3>
+                <p className="seasonal-catalog__step-text">{t(`seasonal.catalog.steps.${step}.text`)}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {renderContent()}
+
+        <section className="seasonal-catalog__faq" aria-labelledby="seasonal-faq-title">
+          <h2 id="seasonal-faq-title" className="seasonal-catalog__section-title">
+            {t('seasonal.catalog.faqTitle')}
+          </h2>
+          <div className="seasonal-catalog__faq-list">
+            {FAQ.map(({ id, linkTo }) => (
+              <details key={id} className="seasonal-catalog__faq-item">
+                <summary className="seasonal-catalog__faq-question">{t(`seasonal.catalog.faq.${id}.q`)}</summary>
+                <p className="seasonal-catalog__faq-answer">
+                  {t(`seasonal.catalog.faq.${id}.a`)}
+                  {linkTo && (
+                    <>
+                      {' '}
+                      <Link to={linkTo} className="seasonal-catalog__faq-link">
+                        {t(`seasonal.catalog.faq.${id}.link`)}
+                      </Link>
+                    </>
+                  )}
+                </p>
+              </details>
+            ))}
+          </div>
+        </section>
+      </main>
     </div>
   );
 };

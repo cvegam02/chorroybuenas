@@ -61,7 +61,7 @@ export const SeasonalBuilder = () => {
 
   const backLink = (
     <Link className="seasonal-builder__back" to={BACK_TO_SEASONAL.pathname} state={BACK_TO_SEASONAL.state}>
-      ← Volver a De Temporada
+      ← Volver a Temáticas
     </Link>
   );
 
@@ -78,7 +78,7 @@ export const SeasonalBuilder = () => {
           )}
           {load.status === 'missing' && (
             <p className="admin-packs__error" role="alert">
-              Esta lotería de temporada no existe o fue borrada.
+              Esta lotería temática no existe o fue borrada.
             </p>
           )}
         </main>

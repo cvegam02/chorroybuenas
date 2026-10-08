@@ -15,7 +15,7 @@ const escapeXml = (text: string) =>
 
 /** Páginas públicas fijas más la ficha de cada lotería de temporada publicada. */
 export function sitemapPaths(seasonalIds: readonly string[]): string[] {
-  return [...PUBLIC_PATHS, ...seasonalIds.map((id) => `/temporada/${encodeURIComponent(id)}`)];
+  return [...PUBLIC_PATHS, ...seasonalIds.map((id) => `/tematicas/${encodeURIComponent(id)}`)];
 }
 
 /** `lastmod` en formato AAAA-MM-DD: la fecha en que se publica el sitio. */

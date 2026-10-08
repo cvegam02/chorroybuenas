@@ -95,7 +95,7 @@ describe('buildSeasonalPreference', () => {
 
   it('cobra el precio de la base, en pesos', () => {
     expect(preference.items).toEqual([
-      expect.objectContaining({ title: 'Lotería de temporada - Día de Muertos', quantity: 1, unit_price: 49, currency_id: 'MXN' }),
+      expect.objectContaining({ title: 'Lotería temática - Día de Muertos', quantity: 1, unit_price: 49, currency_id: 'MXN' }),
     ]);
   });
 
@@ -106,9 +106,9 @@ describe('buildSeasonalPreference', () => {
 
   it('regresa al detalle de la lotería', () => {
     expect(preference.back_urls).toEqual({
-      success: `https://chorroybuenas.com.mx/temporada/${LOTERIA}?success=1&payment_id={payment_id}`,
-      failure: `https://chorroybuenas.com.mx/temporada/${LOTERIA}?cancel=1`,
-      pending: `https://chorroybuenas.com.mx/temporada/${LOTERIA}?pending=1&payment_id={payment_id}`,
+      success: `https://chorroybuenas.com.mx/tematicas/${LOTERIA}?success=1&payment_id={payment_id}`,
+      failure: `https://chorroybuenas.com.mx/tematicas/${LOTERIA}?cancel=1`,
+      pending: `https://chorroybuenas.com.mx/tematicas/${LOTERIA}?pending=1&payment_id={payment_id}`,
     });
     expect(preference.auto_return).toBe('approved');
     expect(preference.notification_url).toBe('https://x.supabase.co/functions/v1/webhook-mercadopago');

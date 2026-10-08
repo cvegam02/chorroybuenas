@@ -60,7 +60,7 @@ const PUBLIC_PAGES: Record<string, PublicPage> = {
     description: (t) => t('landing.benefitsPage.subtitle'),
     image: shareImage('og-beneficios.jpg', 1200, 670),
   },
-  '/temporada': {
+  '/tematicas': {
     title: (t) => withSiteName(t('seasonal.catalog.title')),
     description: (t) => t('seasonal.catalog.subtitle'),
   },
@@ -73,7 +73,7 @@ const PUBLIC_PAGES: Record<string, PublicPage> = {
 
 export const PUBLIC_PATHS = Object.keys(PUBLIC_PAGES);
 
-const SEASONAL_DETAIL_PATH = /^\/temporada\/[^/]+$/;
+const SEASONAL_DETAIL_PATH = /^\/tematicas\/[^/]+$/;
 
 export const normalizePath = (pathname: string) => (pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname) || '/';
 
@@ -82,7 +82,7 @@ const canonicalFor = (path: string) => `${SITE_URL}${path}`;
 export function resolvePageMeta(pathname: string, t: Translate): PageMeta {
   const path = normalizePath(pathname);
   // La ficha de temporada arranca con los datos del catálogo; al cargar pone los suyos.
-  const page = PUBLIC_PAGES[path] ?? (SEASONAL_DETAIL_PATH.test(path) ? PUBLIC_PAGES['/temporada'] : null);
+  const page = PUBLIC_PAGES[path] ?? (SEASONAL_DETAIL_PATH.test(path) ? PUBLIC_PAGES['/tematicas'] : null);
   const source = page ?? PUBLIC_PAGES['/'];
 
   return {
@@ -97,8 +97,8 @@ export function resolvePageMeta(pathname: string, t: Translate): PageMeta {
 export function seasonalDetailMeta(id: string, name: string, description: string, t: Translate): PageMeta {
   return {
     title: withSiteName(name),
-    description: description !== '' ? description : PUBLIC_PAGES['/temporada'].description(t),
-    canonicalUrl: canonicalFor(`/temporada/${id}`),
+    description: description !== '' ? description : PUBLIC_PAGES['/tematicas'].description(t),
+    canonicalUrl: canonicalFor(`/tematicas/${id}`),
     indexable: true,
     image: DEFAULT_SHARE_IMAGE,
   };
