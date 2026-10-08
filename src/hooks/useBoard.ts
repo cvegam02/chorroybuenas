@@ -5,38 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useSetContext } from '../contexts/SetContext';
 import { BoardRepository } from '../repositories/BoardRepository';
 import { logger } from '../utils/logger';
-
-// Fisher-Yates shuffle algorithm
-const shuffleArray = <T,>(array: T[]): T[] => {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
-
-// Get a sorted array of card IDs from a board (for comparison)
-const getCardIds = (cards: Array<{ id: string }>): string[] => {
-  return cards.map(card => card.id).sort();
-};
-
-// Check if two boards have the same cards (regardless of order)
-const areBoardsDuplicate = (board1: Board, board2: Board): boolean => {
-  const ids1 = getCardIds(board1.cards);
-  const ids2 = getCardIds(board2.cards);
-
-  if (ids1.length !== ids2.length) {
-    return false;
-  }
-
-  return ids1.every((id, index) => id === ids2[index]);
-};
-
-// Check if a board is duplicate of any board in the array
-const isDuplicateBoard = (board: Board, existingBoards: Board[]): boolean => {
-  return existingBoards.some(existingBoard => areBoardsDuplicate(board, existingBoard));
-};
+import { generateUniqueBoards } from '../utils/boardGeneration';
 
 export const useBoard = () => {
   const [boards, setBoards] = useState<Board[]>([]);
@@ -100,37 +69,11 @@ export const useBoard = () => {
         throw new Error(`No hay suficientes cartas para generar un tablero de ${gridSize === 16 ? '4x4' : '3x3'}. Necesitas al menos ${gridSize} cartas, pero solo tienes ${allCards.length}.`);
       }
 
-      const generatedBoards: Board[] = [];
-      const MAX_ATTEMPTS = 1000; // Maximum attempts to find a unique board
-
-      for (let i = 0; i < count; i++) {
-        let board: Board;
-        let attempts = 0;
-        let isUnique = false;
-
-        // Keep generating boards until we find a unique one
-        while (!isUnique && attempts < MAX_ATTEMPTS) {
-          // Shuffle all cards and take first gridSize (no duplicates within board)
-          const shuffled = shuffleArray(allCards);
-          const selectedCards = shuffled.slice(0, gridSize);
-
-          board = {
-            id: `board-${i + 1}-${Date.now()}-${Math.random()}`,
-            cards: selectedCards,
-            gridSize,
-          };
-
-          // Check if this board is unique
-          if (!isDuplicateBoard(board, generatedBoards)) {
-            isUnique = true;
-          } else {
-            attempts++;
-          }
-        }
-
-        // Add the board even if not unique (to avoid infinite loop)
-        generatedBoards.push(board!);
-      }
+      const generatedBoards: Board[] = generateUniqueBoards(allCards, count, gridSize).map((selectedCards, i) => ({
+        id: `board-${i + 1}-${Date.now()}-${Math.random()}`,
+        cards: selectedCards,
+        gridSize,
+      }));
 
       setBoards(generatedBoards);
 

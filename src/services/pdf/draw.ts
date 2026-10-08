@@ -4,6 +4,7 @@ import { logger } from '../../utils/logger';
 import logoImage from '../../img/logo.png';
 import { BOARD_HEIGHT_PT, BOARD_WIDTH_PT, CARD_GAP_PT, CUT_AREA_HEIGHT_PT, CUT_AREA_WIDTH_PT, CUT_AREA_X_PT, CUT_AREA_Y_PT, HEADER_GAP_PT, LOGO_HEIGHT_PT } from './constants';
 import { EmbedResult, embedImageInPDF } from './images';
+import { placeImageInCard, type CardImageFit } from './layout';
 
 export const titleFontCache = new WeakMap<PDFDocument, PDFFont>();
 export const getTitleFont = async (pdfDoc: PDFDocument): Promise<PDFFont> => {
@@ -67,7 +68,8 @@ export const drawCardOnPage = async (
   pdfDoc: PDFDocument,
   showTitle: boolean = true,
   titleSize: number = 8,
-  embedCache?: Map<string, EmbedResult>
+  embedCache?: Map<string, EmbedResult>,
+  fit: CardImageFit = 'cover'
 ) => {
   try {
     if (!card.image) {
@@ -85,18 +87,13 @@ export const drawCardOnPage = async (
     const titleSpace = showTitle ? titleSize + 8 : 0;
     const imageAreaHeight = height - titleSpace;
 
-    // Scale to cover the card area while maintaining aspect ratio
-    // This avoids empty margins by allowing cropping.
-    const scaleX = width / imgWidth;
-    const scaleY = imageAreaHeight / imgHeight;
-    const scale = Math.max(scaleX, scaleY);
-
-    const scaledWidth = imgWidth * scale;
-    const scaledHeight = imgHeight * scale;
-
-    // Center the image in the card area (above title space)
-    const offsetX = (width - scaledWidth) / 2;
-    const offsetY = titleSpace + (imageAreaHeight - scaledHeight) / 2;
+    // 'cover' llena la casilla y recorta lo que sobra; 'contain' deja la imagen entera, centrada.
+    const {
+      offsetX,
+      offsetY,
+      width: scaledWidth,
+      height: scaledHeight,
+    } = placeImageInCard(imgWidth, imgHeight, width, height, titleSpace, fit);
 
     // Clip image to the image area so it never overflows the card bounds
     page.pushOperators(
@@ -228,7 +225,9 @@ export const drawBoardOnPage = async (
   board: Board,
   boardNumber: number,
   pdfDoc: PDFDocument,
-  embedCache?: Map<string, EmbedResult>
+  embedCache?: Map<string, EmbedResult>,
+  /** Cartas que ya traen su nombre dibujado (lotería de temporada): van enteras y sin título. */
+  finishedCards: boolean = false
 ) => {
   // Determine grid size (default to 4x4 if undefined)
   const gridSize = board.gridSize || 16;
@@ -319,9 +318,10 @@ export const drawBoardOnPage = async (
           cardWidthPt,
           cardHeightPt,
           pdfDoc,
-          true, // showTitle
+          !finishedCards, // showTitle
           gridSize === 9 ? 14 : 11, // Larger title for 3x3 cards
-          embedCache
+          embedCache,
+          finishedCards ? 'contain' : 'cover'
         );
       }
     }

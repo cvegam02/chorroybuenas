@@ -9,69 +9,13 @@ import { useSetContext } from '../../contexts/SetContext';
 import { CardRepository } from '../../repositories/CardRepository';
 import { logger } from '../../utils/logger';
 import { minCardsForGrid } from '../../utils/gridRules';
+import { maxUniqueBoards, suggestedBoardCount } from '../../utils/boardGeneration';
 
 interface BoardCountSelectorProps {
   onGenerate: (count: number, gridSize: GridSize) => void;
   onCancel: () => void;
   gridSize: GridSize;
 }
-
-// Calculate binomial coefficient C(n, k) = n! / (k! * (n-k)!)
-const binomialCoefficient = (n: number, k: number): number => {
-  if (k > n || k < 0) return 0;
-  if (k === 0 || k === n) return 1;
-
-  // Use iterative approach to avoid overflow
-  let result = 1;
-  const minK = Math.min(k, n - k);
-
-  for (let i = 0; i < minK; i++) {
-    result = result * (n - i) / (i + 1);
-  }
-
-  return Math.round(result);
-};
-
-// Calculate maximum unique boards possible (no duplicates)
-const calculateMaxUniqueBoards = (availableCards: number, gridSize: GridSize): number => {
-  if (availableCards < gridSize) return 0;
-
-  // Maximum unique boards = C(availableCards, gridSize)
-  // But we use 50% of theoretical max as safe limit for generation efficiency
-  const theoreticalMax = binomialCoefficient(availableCards, gridSize);
-  const safeMax = Math.floor(theoreticalMax * 0.5); // 50% safety margin
-
-  return safeMax;
-};
-
-// Calculate suggested board count based on available cards
-const calculateSuggestedBoards = (availableCards: number, gridSize: GridSize): number => {
-  if (availableCards < gridSize) {
-    return 8; // Default if not enough cards (won't be used anyway)
-  }
-
-  // Formula:
-  // - Kids (3x3): 1 board per 3 cards (User request)
-  // - Classic (4x4): 8 appearances per card (balanced distribution)
-
-  let idealBoards: number;
-
-  if (gridSize === 9) {
-    idealBoards = Math.floor(availableCards / 3);
-  } else {
-    idealBoards = Math.round((availableCards * 8) / gridSize);
-  }
-
-  // Maximum unique boards considering duplicates are not allowed
-  const maxUniqueBoards = calculateMaxUniqueBoards(availableCards, gridSize);
-
-  // Take the minimum to ensure we can generate unique boards
-  // For very few cards, maxUniqueBoards might be small
-  const suggested = Math.min(idealBoards, maxUniqueBoards);
-
-  // Never less than 1, but also never more than max unique
-  return Math.max(1, Math.min(suggested, maxUniqueBoards));
-};
 
 export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCountSelectorProps) => {
   const { t } = useTranslation();
@@ -103,7 +47,7 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
         setCardCount(loadedCardCount);
 
         // Calculate suggested boards based on loaded cards and current grid size
-        const suggested = calculateSuggestedBoards(loadedCardCount, gridSize);
+        const suggested = suggestedBoardCount(loadedCardCount, gridSize);
         setSuggestedBoards(suggested);
 
         // Set initial value.
@@ -183,9 +127,9 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
 
     // Check if requested count exceeds maximum unique boards possible
     if (cardCount >= gridSize) {
-      const maxUniqueBoards = calculateMaxUniqueBoards(cardCount, gridSize);
-      if (boardCount > maxUniqueBoards) {
-        setError(t('boardGenerator.form.errorMaxUnique', { count: cardCount, max: maxUniqueBoards }));
+      const maxBoards = maxUniqueBoards(cardCount, gridSize);
+      if (boardCount > maxBoards) {
+        setError(t('boardGenerator.form.errorMaxUnique', { count: cardCount, max: maxBoards }));
         return;
       }
     }
@@ -215,7 +159,7 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
             <div className="board-count-selector__suggestion-text">
               {t('boardGenerator.suggestion.text', { count: cardCount, suggested: suggestedBoards })}
               {(() => {
-                const maxUnique = calculateMaxUniqueBoards(cardCount, gridSize);
+                const maxUnique = maxUniqueBoards(cardCount, gridSize);
                 if (maxUnique < 100 && maxUnique !== suggestedBoards) {
                   return t('boardGenerator.suggestion.maxTheoretical', { max: maxUnique });
                 }

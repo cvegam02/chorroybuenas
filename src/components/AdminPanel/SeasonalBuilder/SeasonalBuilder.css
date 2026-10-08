@@ -1,0 +1,328 @@
+/* A1.7a — Crear una lotería de temporada con cartas ya terminadas (FEAT-23). Botones: AdminTokenPacks.css. */
+
+.seasonal-builder {
+  min-height: 100vh;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-main);
+  padding-bottom: 80px;
+  font-family: var(--font-body);
+}
+
+.seasonal-builder__main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--spacing-lg) 24px 0;
+}
+
+.seasonal-builder__back {
+  display: inline-block;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  text-decoration: none;
+}
+
+.seasonal-builder__back:hover {
+  text-decoration: underline;
+}
+
+.seasonal-builder__back:focus-visible,
+.seasonal-builder__card-remove:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.seasonal-builder__header {
+  margin: var(--spacing-lg) 0 var(--spacing-md);
+}
+
+.seasonal-builder__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+}
+
+.seasonal-builder__subtitle {
+  margin: var(--spacing-xs) 0 0;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.seasonal-builder__steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin: 0 0 var(--spacing-lg);
+  padding: 0;
+  list-style: none;
+}
+
+.seasonal-builder__step {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.seasonal-builder__step--active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-lightest);
+  color: var(--color-text-main);
+}
+
+.seasonal-builder__step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-tertiary);
+  font-size: 0.85rem;
+}
+
+.seasonal-builder__step--active .seasonal-builder__step-number {
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+}
+
+.seasonal-builder__section-title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-md);
+  margin: 0 0 var(--spacing-md);
+  font-size: 1.25rem;
+}
+
+.seasonal-builder__count {
+  padding: 2px var(--spacing-md);
+  border-radius: var(--radius-full);
+  background: var(--color-primary-lightest);
+  color: var(--color-primary-dark);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.seasonal-builder__dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  border: 2px dashed var(--color-primary-lighter);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  text-align: center;
+}
+
+.seasonal-builder__dropzone--dragging {
+  border-color: var(--color-primary);
+  background: var(--color-primary-lightest);
+}
+
+.seasonal-builder__dropzone-icon {
+  font-size: 2rem;
+  color: var(--color-primary);
+}
+
+.seasonal-builder__dropzone-text {
+  margin: 0;
+  max-width: 520px;
+  color: var(--color-text-muted);
+}
+
+.seasonal-builder__notice {
+  margin: var(--spacing-md) 0 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-light);
+  color: var(--color-text-main);
+  font-weight: 600;
+}
+
+.seasonal-builder__notice p {
+  margin: 0;
+}
+
+.seasonal-builder__file-list {
+  margin: var(--spacing-xs) 0 0;
+  padding-left: var(--spacing-lg);
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+.seasonal-builder__hint {
+  margin: var(--spacing-lg) 0 0;
+  color: var(--color-text-muted);
+}
+
+.seasonal-builder__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--spacing-md);
+  margin: var(--spacing-lg) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.seasonal-builder__card {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.seasonal-builder__card--off-ratio {
+  border: 2px solid var(--color-accent);
+}
+
+.seasonal-builder__card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.seasonal-builder__card-badge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2px var(--spacing-xs);
+  background: var(--color-accent);
+  color: var(--color-text-main);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.seasonal-builder__card-remove {
+  position: absolute;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  cursor: pointer;
+}
+
+.seasonal-builder__card-remove:hover {
+  background: var(--color-primary-lightest);
+}
+
+.seasonal-builder__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
+}
+
+@media (max-width: 600px) {
+  .seasonal-builder__main {
+    padding: var(--spacing-md) var(--spacing-md) 0;
+  }
+
+  .seasonal-builder__title {
+    font-size: 1.4rem;
+  }
+
+  .seasonal-builder__grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-sm);
+  }
+
+  .seasonal-builder__actions .admin-packs__btn {
+    flex: 1;
+  }
+}
+
+/* Paso 2 — Tableros */
+
+.seasonal-builder__board-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--spacing-md);
+}
+
+.seasonal-builder__hint--tight {
+  margin-top: var(--spacing-sm);
+}
+
+.seasonal-builder__boards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--spacing-lg);
+  margin: var(--spacing-lg) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.seasonal-builder__board {
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.seasonal-builder__board-title {
+  margin: 0 0 var(--spacing-sm);
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.seasonal-builder__board-grid {
+  display: grid;
+  gap: 3px;
+}
+
+.seasonal-builder__board-grid--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.seasonal-builder__board-grid--4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.seasonal-builder__board-grid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: contain;
+  background: var(--color-bg-surface);
+}
+
+@media (max-width: 600px) {
+  .seasonal-builder__boards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+  }
+}
+
+/* Paso 3 — Guardar */
+
+.seasonal-builder__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm) var(--spacing-lg);
+  margin: 0;
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  list-style: none;
+}
