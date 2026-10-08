@@ -11,10 +11,13 @@ import { drawBoardOnPage, drawCardOnPage } from './pdf/draw';
 export interface GeneratePDFOptions {
   /** Cartas para la sección "Baraja Completa". Si no se pasa, se usa loadCards() (invitados). */
   allCards?: Card[];
+  /** Cartas que ya traen su nombre dibujado (lotería de temporada, FEAT-23): van enteras y sin título. */
+  finishedCards?: boolean;
 }
 
 export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions): Promise<Blob> => {
   const pdfDoc = await PDFDocument.create();
+  const finishedCards = options?.finishedCards ?? false;
 
   // Una sola lectura/conversión por carta: caché base64 por card.id (IndexedDB ya tiene el blob tras prefetch)
   const base64Cache = new Map<string, string>();
@@ -81,7 +84,7 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
     const board = refreshedBoards[i];
     const page = pdfDoc.addPage([PAGE_WIDTH_PT, PAGE_HEIGHT_PT]);
 
-    await drawBoardOnPage(page, board, i + 1, pdfDoc, embedCache);
+    await drawBoardOnPage(page, board, i + 1, pdfDoc, embedCache, finishedCards);
   }
 
   // Optionally add pages with all cards (full deck)
@@ -166,9 +169,10 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
           deckCardW,
           deckCardH,
           pdfDoc,
-          true,
+          !finishedCards,
           11, // titleSize (same as boards for consistency)
-          embedCache
+          embedCache,
+          finishedCards ? 'contain' : 'cover'
         );
       }
 

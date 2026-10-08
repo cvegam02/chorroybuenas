@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   FaCog, FaArrowLeft, FaTicketAlt, FaShoppingCart,
   FaBoxOpen, FaWallet, FaChartLine, FaCreditCard, FaCalendarAlt, FaBars, FaTimes
@@ -29,7 +29,11 @@ const TABS: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
 export const AdminPanel = () => {
   const navigate = useNavigate();
   const { user, isAdmin, isLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState<AdminTab>('compras');
+  const location = useLocation();
+  // Quien vuelve de crear una lotería de temporada (A1.7a) regresa a su pestaña.
+  const [activeTab, setActiveTab] = useState<AdminTab>(() =>
+    (location.state as { tab?: string } | null)?.tab === 'temporada' ? 'temporada' : 'compras',
+  );
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {

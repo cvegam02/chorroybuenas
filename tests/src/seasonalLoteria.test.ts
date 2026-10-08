@@ -6,6 +6,7 @@ import {
   validatePdfFile,
   validateSeasonalLoteriaForm,
   type SeasonalLoteriaForm,
+  tabsWithErrors,
 } from '../../src/utils/seasonalLoteria';
 
 const COMPLETE_FORM: SeasonalLoteriaForm = {
@@ -181,5 +182,22 @@ describe('fechas de una lotería de temporada (FEAT-17, decisión 5)', () => {
   it('lo que no es una fecha se rechaza', () => {
     const result = validateSeasonalLoteriaForm({ ...COMPLETE_FORM, validFrom: 'mañana' });
     expect(result.errors.validFrom).toBeDefined();
+  });
+});
+
+describe('pestañas de la ficha (FEAT-23, US A5)', () => {
+  it('cada campo con error pertenece a una pestaña', () => {
+    expect(tabsWithErrors({ nameEs: 'Falta el nombre.' })).toEqual(['datos']);
+    expect(tabsWithErrors({ cardCount: 'No es un número.' })).toEqual(['datos']);
+    expect(tabsWithErrors({ price: 'Mínimo $10.00.' })).toEqual(['precio']);
+    expect(tabsWithErrors({ validUntil: 'Es anterior al inicio.' })).toEqual(['precio']);
+  });
+
+  it('sin errores no se marca ninguna pestaña', () => {
+    expect(tabsWithErrors({})).toEqual([]);
+  });
+
+  it('con errores en varias pestañas se listan en el orden en que aparecen', () => {
+    expect(tabsWithErrors({ price: 'Mínimo $10.00.', seasonId: 'Elige una temporada.' })).toEqual(['datos', 'precio']);
   });
 });

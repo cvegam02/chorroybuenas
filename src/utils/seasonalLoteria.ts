@@ -157,3 +157,66 @@ export function formatFileSize(bytes: number): string {
   if (megabytes >= 1) return `${megabytes.toFixed(1)} MB`;
   return `${Math.max(1, Math.ceil(bytes / 1024))} KB`;
 }
+
+/** La ficha tal como queda al armar el PDF en el sitio: solo cambian el número de cartas y el de tableros (FEAT-23). */
+export function withBuiltCounts(
+  loteria: SeasonalLoteriaInput,
+  cardCount: number,
+  boardCount: number,
+): SeasonalLoteriaInput {
+  return {
+    season_id: loteria.season_id,
+    name_es: loteria.name_es,
+    name_en: loteria.name_en,
+    description_es: loteria.description_es,
+    description_en: loteria.description_en,
+    grid_size: loteria.grid_size,
+    card_count: cardCount,
+    board_count: boardCount,
+    price_cents: loteria.price_cents,
+    valid_from: loteria.valid_from,
+    valid_until: loteria.valid_until,
+  };
+}
+
+/** «Día de Muertos» → «dia-de-muertos.pdf». */
+export function seasonalPdfFileName(name: string): string {
+  const slug = name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return `${slug || 'loteria-de-temporada'}.pdf`;
+}
+
+/** Pestañas de la ventana de la ficha, en el orden en que se muestran. */
+export const SEASONAL_FORM_TABS = [
+  { id: 'datos', label: 'Datos' },
+  { id: 'precio', label: 'Precio y fechas' },
+  { id: 'archivos', label: 'Archivos' },
+] as const;
+
+export type SeasonalFormTab = (typeof SEASONAL_FORM_TABS)[number]['id'];
+
+const TAB_OF_FIELD: Record<keyof SeasonalLoteriaForm, SeasonalFormTab> = {
+  seasonId: 'datos',
+  nameEs: 'datos',
+  nameEn: 'datos',
+  descriptionEs: 'datos',
+  descriptionEn: 'datos',
+  gridSize: 'datos',
+  cardCount: 'datos',
+  boardCount: 'datos',
+  price: 'precio',
+  validFrom: 'precio',
+  validUntil: 'precio',
+};
+
+/** Las pestañas que tienen algún campo con error, en el orden en que se muestran. */
+export function tabsWithErrors(errors: SeasonalFormErrors): SeasonalFormTab[] {
+  const withErrors = new Set(
+    (Object.keys(errors) as (keyof SeasonalLoteriaForm)[]).filter((field) => errors[field]).map((field) => TAB_OF_FIELD[field]),
+  );
+  return SEASONAL_FORM_TABS.map((tab) => tab.id).filter((id) => withErrors.has(id));
+}

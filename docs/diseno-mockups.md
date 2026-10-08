@@ -79,7 +79,8 @@ Requiere ser administrador.
 | A1.4 | — Balances | | Saldos de todos los usuarios, regalo de tokens (con motivo opcional) e historial general de regalos. |
 | A1.5 | — Uso de IA | | Uso por día, por usuario y por lotería, con costo estimado. |
 | A1.6 | — Transacciones MP | | Transacciones de Mercado Pago, con filtros. |
-| A1.7 | — De Temporada | | **Por construir (FEAT-17).** Lista de temporadas (crear, editar, ordenar, borrar) y tabla de loterías de temporada con estado, fechas, ventas e interruptor de publicar; formulario de lotería con ficha, precio, fechas, PDF, portada y muestras. |
+| A1.7 | — De Temporada | | **Por construir (FEAT-17).** Lista de temporadas (crear, editar, ordenar, borrar) y tabla de loterías de temporada con estado, fechas, ventas e interruptor de publicar; formulario de lotería con ficha, precio, fechas, PDF, portada y muestras. Por construir (FEAT-23): junto a «Subir PDF», el botón «Crear el PDF con mis cartas», que abre A1.7a. |
+| A1.7a | Crear lotería de temporada con cartas | `/admin/temporada/:id/crear` | **Por construir (2026-10-07, FEAT-23).** Solo administradores; pantalla completa, fuera del panel con pestañas, con botón para volver a la ficha. Tres pasos: Cartas (subida por lote, cartas completas sin nombre, contador «N de 54», aviso de las que no vienen en 2:3) → Tableros (cuántos, generar, volver a generar) → Muestras y guardar (marcar muestras; guarda el PDF, las muestras y los números en la ficha). |
 
 ## Ventanas emergentes
 

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { FaCheck, FaFilePdf, FaTimes } from 'react-icons/fa';
 import {
   SeasonalRepository,
@@ -8,13 +9,16 @@ import {
 } from '../../repositories/SeasonalRepository';
 import {
   SEASONAL_DESCRIPTION_MAX_LENGTH,
+  SEASONAL_FORM_TABS,
   SEASONAL_NAME_MAX_LENGTH,
   SEASONAL_PDF_MIME_TYPE,
   formatFileSize,
   parsePriceToCents,
+  tabsWithErrors,
   validatePdfFile,
   validateSeasonalLoteriaForm,
   type SeasonalFormErrors,
+  type SeasonalFormTab,
   type SeasonalGridSize,
   type SeasonalLoteriaForm,
 } from '../../utils/seasonalLoteria';
@@ -30,6 +34,8 @@ interface AdminSeasonalLoteriaFormProps {
   loteria: AdminSeasonalLoteria | null;
   /** Con ventas, reemplazar el PDF cambia lo que descargan quienes ya compraron. */
   hasSales: boolean;
+  /** Pestaña con la que abre la ventana; por omisión, Datos. */
+  initialTab?: SeasonalFormTab;
   /** `changed` avisa si se guardó algo, para que la tabla se vuelva a cargar. */
   onClose: (changed: boolean) => void;
 }
@@ -91,7 +97,14 @@ function toFormState(loteria: AdminSeasonalLoteria | null, seasons: readonly Sea
   };
 }
 
-export const AdminSeasonalLoteriaForm = ({ seasons, loteria, hasSales, onClose }: AdminSeasonalLoteriaFormProps) => {
+export const AdminSeasonalLoteriaForm = ({
+  seasons,
+  loteria,
+  hasSales,
+  initialTab = 'datos',
+  onClose,
+}: AdminSeasonalLoteriaFormProps) => {
+  const [activeTab, setActiveTab] = useState<SeasonalFormTab>(initialTab);
   const [form, setForm] = useState<SeasonalLoteriaForm>(() => toFormState(loteria, seasons));
   const [errors, setErrors] = useState<SeasonalFormErrors>({});
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -107,6 +120,7 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, hasSales, onClose }
   );
   const [samples, setSamples] = useState<PreviewItem[]>(() => (loteria?.sample_paths ?? []).map(storedPreviewItem));
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const hasPendingFiles = pdfFile !== null || [cover, ...samples].some((item) => item?.blob);
 
@@ -171,7 +185,12 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, hasSales, onClose }
     e.preventDefault();
     const result = validateSeasonalLoteriaForm(form);
     setErrors(result.errors);
-    if (!result.input) return;
+    if (!result.input) {
+      // El error puede estar en una pestaña que no se ve: se abre la primera que tenga uno.
+      const [firstTab] = tabsWithErrors(result.errors);
+      if (firstTab) setActiveTab(firstTab);
+      return;
+    }
     if (loteria?.is_published && missing.length > 0) {
       setSaveError(`Esta lotería está publicada y no puede quedarse sin ${missing.join(', ')}. Despublícala primero.`);
       return;
@@ -205,6 +224,28 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, hasSales, onClose }
   };
 
 
+  const errorTabs = tabsWithErrors(errors);
+
+  /** Flechas izquierda y derecha cambian de pestaña, como en cualquier grupo de pestañas. */
+  const handleTabKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    const ids = SEASONAL_FORM_TABS.map((tab) => tab.id);
+    const step = e.key === 'ArrowRight' ? 1 : -1;
+    const next = ids[(ids.indexOf(activeTab) + step + ids.length) % ids.length];
+    setActiveTab(next);
+    document.getElementById(`seasonal-tab-${next}`)?.focus();
+  };
+
+  const panelProps = (tab: SeasonalFormTab) => ({
+    className: 'admin-seasonal-form__group',
+    disabled: isSaving,
+    hidden: activeTab !== tab,
+    id: `seasonal-panel-${tab}`,
+    role: 'tabpanel',
+    'aria-labelledby': `seasonal-tab-${tab}`,
+  });
+
   const content = (
     <div
       className="admin-seasonal-form"
@@ -216,21 +257,46 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, hasSales, onClose }
       }}
     >
       <form className="admin-seasonal-form__content" onSubmit={handleSubmit} noValidate>
-        <h2 id="seasonal-form-title" className="admin-seasonal-form__title">
-          {loteria ? 'Editar lotería' : 'Nueva lotería'}
-        </h2>
+        <div className="admin-seasonal-form__header">
+          <h2 id="seasonal-form-title" className="admin-seasonal-form__title">
+            {loteria ? 'Editar lotería' : 'Nueva lotería'}
+          </h2>
 
-        {saveError && (
-          <p className="admin-packs__error" role="alert">
-            {saveError}
-          </p>
-        )}
-        {missing.length > 0 && (
-          <p className="admin-seasonal__meta">Para poder publicarla falta: {missing.join(', ')}.</p>
-        )}
+          {saveError && (
+            <p className="admin-packs__error" role="alert">
+              {saveError}
+            </p>
+          )}
+          {missing.length > 0 && (
+            <p className="admin-seasonal__meta">Para poder publicarla falta: {missing.join(', ')}.</p>
+          )}
 
-        <fieldset className="admin-seasonal-form__group" disabled={isSaving}>
-          <legend>Datos</legend>
+          <div className="admin-seasonal-form__tabs" role="tablist" aria-label="Secciones de la ficha" onKeyDown={handleTabKeyDown}>
+            {SEASONAL_FORM_TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                id={`seasonal-tab-${tab.id}`}
+                className={`admin-seasonal-form__tab${activeTab === tab.id ? ' admin-seasonal-form__tab--active' : ''}`}
+                aria-selected={activeTab === tab.id}
+                aria-controls={`seasonal-panel-${tab.id}`}
+                tabIndex={activeTab === tab.id ? 0 : -1}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+                {errorTabs.includes(tab.id) && (
+                  <span className="admin-seasonal-form__tab-error" aria-label="tiene errores">
+                    !
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="admin-seasonal-form__body">
+        <fieldset {...panelProps('datos')}>
           <div className="admin-packs__new-row">
             <Field id="seasonal-season" label="Temporada" error={errors.seasonId} wide>
               <select
@@ -285,7 +351,7 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, hasSales, onClose }
             <Field id="seasonal-description-es" label="Descripción en español" error={errors.descriptionEs} wide>
               <textarea
                 id="seasonal-description-es"
-                rows={4}
+                rows={3}
                 maxLength={SEASONAL_DESCRIPTION_MAX_LENGTH}
                 value={form.descriptionEs}
                 onChange={(e) => setField('descriptionEs', e.target.value)}
@@ -300,7 +366,7 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, hasSales, onClose }
             >
               <textarea
                 id="seasonal-description-en"
-                rows={4}
+                rows={3}
                 maxLength={SEASONAL_DESCRIPTION_MAX_LENGTH}
                 value={form.descriptionEn}
                 onChange={(e) => setField('descriptionEn', e.target.value)}
@@ -334,8 +400,7 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, hasSales, onClose }
           </div>
         </fieldset>
 
-        <fieldset className="admin-seasonal-form__group" disabled={isSaving}>
-          <legend>Precio y visibilidad</legend>
+        <fieldset {...panelProps('precio')}>
           <div className="admin-packs__new-row">
             <Field id="seasonal-price" label="Precio en pesos (mínimo $10.00)" error={errors.price}>
               <input
@@ -369,8 +434,7 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, hasSales, onClose }
           </div>
         </fieldset>
 
-        <fieldset className="admin-seasonal-form__group" disabled={isSaving}>
-          <legend>Archivos</legend>
+        <fieldset {...panelProps('archivos')}>
           <div className="admin-seasonal-form__file">
             <FaFilePdf className="admin-seasonal-form__file-icon" aria-hidden="true" />
             <div className="admin-seasonal-form__file-info">
@@ -399,6 +463,15 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, hasSales, onClose }
             >
               {shownPdf ? 'Reemplazar' : 'Elegir PDF'}
             </button>
+            <button
+              type="button"
+              className="admin-packs__btn admin-packs__btn--secondary"
+              onClick={() => navigate(`/admin/temporada/${savedId}/crear`)}
+              disabled={!savedId}
+              aria-describedby="seasonal-builder-hint"
+            >
+              Crear el PDF con mis cartas
+            </button>
             <input
               ref={fileInputRef}
               type="file"
@@ -408,6 +481,11 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, hasSales, onClose }
               hidden
             />
           </div>
+          <p className="admin-seasonal__meta" id="seasonal-builder-hint">
+            {savedId
+              ? '«Crear el PDF con mis cartas» abre otra pantalla: guarda antes los cambios de esta ficha.'
+              : 'Guarda la ficha para poder crear el PDF con tus cartas.'}
+          </p>
           {pdfError && (
             <p className="admin-packs__error admin-seasonal-form__field-error" id="seasonal-pdf-error" role="alert">
               {pdfError}
@@ -415,6 +493,8 @@ export const AdminSeasonalLoteriaForm = ({ seasons, loteria, hasSales, onClose }
           )}
           <AdminSeasonalPreviews cover={cover} samples={samples} onCoverChange={setCover} onSamplesChange={setSamples} />
         </fieldset>
+
+        </div>
 
         {isSaving && hasPendingFiles && (
           <div className="admin-seasonal-form__progress" role="progressbar" aria-label="Subiendo los archivos">

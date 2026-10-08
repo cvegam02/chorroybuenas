@@ -17,6 +17,7 @@ import { SeasonalCatalog } from './components/Seasonal/SeasonalCatalog';
 import { SeasonalDetail } from './components/Seasonal/SeasonalDetail';
 import { Dashboard } from './components/Dashboard/Dashboard';
 import { AdminPanel } from './components/AdminPanel/AdminPanel';
+import { SeasonalBuilder } from './components/AdminPanel/SeasonalBuilder/SeasonalBuilder';
 import { Navbar } from './components/Navbar/Navbar';
 import { PageMeta } from './components/PageMeta/PageMeta';
 import { Footer } from './components/Footer/Footer';
@@ -258,6 +259,10 @@ function AppContent() {
         <Route
           path="/admin"
           element={<AdminPanel />}
+        />
+        <Route
+          path="/admin/temporada/:id/crear"
+          element={<SeasonalBuilder />}
         />
         <Route
           path="/beneficios"

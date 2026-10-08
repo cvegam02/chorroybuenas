@@ -237,6 +237,7 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-06 | El cobro de una lotería de temporada tiene las mismas garantías que el de tokens: precio puesto por el servidor, entrega una sola vez por pago, y sin entrega si el monto es menor. Los pagos pendientes entregan al confirmarse. |
 | 2026-10-06 | Una lotería de temporada con ventas no se borra, solo se despublica. No se puede publicar incompleta. Se puede reemplazar su PDF: los compradores descargan la versión nueva. |
 | 2026-10-06 | Para publicar una lotería de temporada hacen falta también el número de cartas y el de tableros, además de nombre, descripción, precio, PDF y portada (FEAT-17). |
+| 2026-10-07 | El PDF de una lotería de temporada también se puede armar en el sitio: el administrador sube por lote sus cartas ya terminadas (con el nombre dibujado, 54 esperadas, sin recortarlas), genera los tableros y el PDF queda guardado en la ficha; solo se guarda el PDF, no las cartas. Las muestras se pueden elegir de esas cartas. _(Descartadas: una página pública para cualquier usuario; exigir exactamente 54; recortar a 2:3; guardar cartas y tableros. Origen: FEAT-23.)_ |
 
 ## 16. Pendientes por definir
 
@@ -262,7 +263,7 @@ Definido con Carlos el 2026-10-06 (FEAT-17). Por construir.
 
 **Qué son.** Loterías ya hechas, preparadas por el administrador, agrupadas por temporada (Halloween, Día de Muertos, Navidad…). Se muestran en un catálogo público y se venden como descarga digital: no se envía nada físico.
 
-**Qué se vende.** El PDF terminado que subió el administrador. Todos los compradores de una lotería reciben el mismo archivo; el comprador no la edita ni elige cuántos tableros trae.
+**Qué se vende.** El PDF terminado que el administrador subió ya hecho o armó en el sitio con sus propias cartas (2026-10-07, FEAT-23). Todos los compradores de una lotería reciben el mismo archivo; el comprador no la edita ni elige cuántos tableros trae.
 
 **Temporadas.**
 
@@ -273,7 +274,7 @@ Definido con Carlos el 2026-10-06 (FEAT-17). Por construir.
 
 **Vista previa.**
 
-- El administrador sube una portada y las cartas de muestra que quiera, pocas o todas.
+- El administrador sube una portada y las cartas de muestra que quiera, pocas o todas. Si arma el PDF en el sitio, puede elegir las muestras entre las cartas que cargó (2026-10-07, FEAT-23).
 - El sitio las reduce y les pone marca de agua antes de guardarlas; la imagen limpia no se guarda.
 - El PDF nunca se entrega a quien no lo compró.
 

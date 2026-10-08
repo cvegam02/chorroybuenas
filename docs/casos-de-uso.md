@@ -308,6 +308,7 @@ Todos los casos de este bloque están por construir (§17, §18).
 - **Actor(es)**: Administrador.
 - **Precondiciones**: Sesión iniciada como administrador; existe al menos una temporada.
 - **Flujo principal**: (1) Crea una lotería con su ficha y su precio. (2) Sube el PDF, la portada y las cartas de muestra; el sitio protege las imágenes. (3) La guarda como borrador. (4) La publica, con fechas si quiere. (5) Después puede editarla, reemplazar sus archivos, despublicarla o borrarla (§18).
+- **Flujo alterno — armar el PDF en el sitio** (2026-10-07, FEAT-23): en el paso 2, en vez de subir un PDF hecho, (a) sube por lote sus cartas ya terminadas, con el nombre dibujado; (b) el sitio las muestra completas, sin recortarlas, y le avisa cuáles no vienen en proporción 2:3 y si faltan o sobran respecto a 54; (c) genera los tableros; (d) marca las cartas de muestra; (e) guarda: el PDF, las muestras protegidas y los números de cartas y de tableros quedan en la ficha. Las cartas no se guardan.
 - **Excepciones**: Precio menor a $10.00 MXN: se rechaza. Lotería incompleta: no se puede publicar. Lotería con ventas: no se puede borrar, solo despublicar. Reemplazar el PDF de una lotería vendida: se le avisa que los compradores descargarán la versión nueva.
 - **Resultado**: La lotería queda creada, cambiada, publicada, retirada o eliminada.
 - **Estados afectados**: Lotería de temporada (§11).
