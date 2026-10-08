@@ -4,6 +4,10 @@
   "installCommand": "npm ci",
   "buildCommand": "npm run verify && npm run build",
   "outputDirectory": "dist",
+  "redirects": [
+    { "source": "/temporada", "destination": "/tematicas", "permanent": true },
+    { "source": "/temporada/:id", "destination": "/tematicas/:id", "permanent": true }
+  ],
   "rewrites": [{ "source": "/(.*)", "destination": "/shell.html" }],
   "headers": [
     {

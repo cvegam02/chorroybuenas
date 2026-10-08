@@ -18,8 +18,8 @@ describe('sitemap (FEAT-21, US A3)', () => {
 
   it('cada lotería de temporada publicada tiene su entrada', () => {
     const xml = buildSitemapXml(sitemapPaths(['abc-123', 'def-456']), '2026-10-07');
-    expect(xml).toContain(`<loc>${SITE_URL}/temporada/abc-123</loc>`);
-    expect(xml).toContain(`<loc>${SITE_URL}/temporada/def-456</loc>`);
+    expect(xml).toContain(`<loc>${SITE_URL}/tematicas/abc-123</loc>`);
+    expect(xml).toContain(`<loc>${SITE_URL}/tematicas/def-456</loc>`);
   });
 
   it('todas las entradas llevan la fecha de la publicación', () => {
@@ -37,7 +37,7 @@ describe('sitemap (FEAT-21, US A3)', () => {
 
   it('un identificador con caracteres especiales no rompe el archivo', () => {
     const xml = buildSitemapXml(sitemapPaths(['a&b<c']), '2026-10-07');
-    expect(xml).toContain(`<loc>${SITE_URL}/temporada/a%26b%3Cc</loc>`);
+    expect(xml).toContain(`<loc>${SITE_URL}/tematicas/a%26b%3Cc</loc>`);
   });
 
   it('pide solo las loterías publicadas y devuelve sus identificadores', async () => {

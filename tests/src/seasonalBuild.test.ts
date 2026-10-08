@@ -78,6 +78,6 @@ describe('ficha después de armar el PDF en el sitio (FEAT-23, decisión 6)', ()
   it('el archivo se llama como la lotería, sin caracteres raros', () => {
     expect(seasonalPdfFileName('Halloween 2026')).toBe('halloween-2026.pdf');
     expect(seasonalPdfFileName('  Día de Muertos: ¡edición niños!  ')).toBe('dia-de-muertos-edicion-ninos.pdf');
-    expect(seasonalPdfFileName('///')).toBe('loteria-de-temporada.pdf');
+    expect(seasonalPdfFileName('///')).toBe('loteria-tematica.pdf');
   });
 });

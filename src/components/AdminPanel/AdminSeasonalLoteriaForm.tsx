@@ -298,7 +298,7 @@ export const AdminSeasonalLoteriaForm = ({
         <div className="admin-seasonal-form__body">
         <fieldset {...panelProps('datos')}>
           <div className="admin-packs__new-row">
-            <Field id="seasonal-season" label="Temporada" error={errors.seasonId} wide>
+            <Field id="seasonal-season" label="Temática" error={errors.seasonId} wide>
               <select
                 id="seasonal-season"
                 value={form.seasonId}
@@ -306,7 +306,7 @@ export const AdminSeasonalLoteriaForm = ({
                 aria-describedby={describedBy('seasonal-season', errors.seasonId)}
                 autoFocus
               >
-                <option value="">Elige una temporada</option>
+                <option value="">Elige una temática</option>
                 {seasons.map((season) => (
                   <option key={season.id} value={season.id}>
                     {season.name_es}
@@ -466,7 +466,7 @@ export const AdminSeasonalLoteriaForm = ({
             <button
               type="button"
               className="admin-packs__btn admin-packs__btn--secondary"
-              onClick={() => navigate(`/admin/temporada/${savedId}/crear`)}
+              onClick={() => navigate(`/admin/tematicas/${savedId}/crear`)}
               disabled={!savedId}
               aria-describedby="seasonal-builder-hint"
             >

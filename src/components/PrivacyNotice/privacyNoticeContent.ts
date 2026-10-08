@@ -44,7 +44,7 @@ export const PRIVACY_SECTIONS: PrivacySection[] = [
       'Crear y administrar tu cuenta, y permitirte iniciar sesión.',
       'Guardar tus loterías, cartas y tableros para que puedas volver a ellas y descargarlas en PDF.',
       'Transformar con inteligencia artificial las fotos que tú elijas.',
-      'Llevar tu saldo de tokens y procesar tus compras de tokens y de loterías de temporada.',
+      'Llevar tu saldo de tokens y procesar tus compras de tokens y de loterías temáticas.',
       'Enviarte los correos necesarios para el funcionamiento de tu cuenta, como la confirmación de registro y la recuperación de contraseña.',
       'Atender tus dudas o solicitudes, prevenir abusos y cumplir obligaciones legales.',
     ],

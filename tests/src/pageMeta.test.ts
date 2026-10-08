@@ -25,8 +25,8 @@ describe('datos de cada página para buscadores (FEAT-21, US A1)', () => {
   });
 
   it('la ficha de una lotería de temporada se indexa con su propia dirección', () => {
-    const meta = resolvePageMeta('/temporada/abc-123', t);
-    expect(meta.canonicalUrl).toBe(`${SITE_URL}/temporada/abc-123`);
+    const meta = resolvePageMeta('/tematicas/abc-123', t);
+    expect(meta.canonicalUrl).toBe(`${SITE_URL}/tematicas/abc-123`);
     expect(meta.indexable).toBe(true);
   });
 
@@ -34,12 +34,12 @@ describe('datos de cada página para buscadores (FEAT-21, US A1)', () => {
     const meta = seasonalDetailMeta('abc-123', 'Lotería de Navidad', 'Con villancicos.', t);
     expect(meta.title).toContain('Lotería de Navidad');
     expect(meta.description).toBe('Con villancicos.');
-    expect(meta.canonicalUrl).toBe(`${SITE_URL}/temporada/abc-123`);
+    expect(meta.canonicalUrl).toBe(`${SITE_URL}/tematicas/abc-123`);
   });
 
   it('si la lotería no tiene descripción, la ficha usa la del catálogo', () => {
     const meta = seasonalDetailMeta('abc-123', 'Lotería de Navidad', '', t);
-    expect(meta.description).toBe(resolvePageMeta('/temporada', t).description);
+    expect(meta.description).toBe(resolvePageMeta('/tematicas', t).description);
   });
 
   it.each(['/como-se-juega', '/que-es-la-loteria', '/beneficios'])('%s se comparte con su propia imagen (US A5)', (path) => {
@@ -49,7 +49,7 @@ describe('datos de cada página para buscadores (FEAT-21, US A1)', () => {
     expect(image.height).toBeGreaterThan(0);
   });
 
-  it.each(['/', '/temporada', '/privacidad', '/temporada/abc-123'])('%s conserva la imagen general (US A5)', (path) => {
+  it.each(['/', '/tematicas', '/privacidad', '/tematicas/abc-123'])('%s conserva la imagen general (US A5)', (path) => {
     expect(resolvePageMeta(path, t).image).toEqual(DEFAULT_SHARE_IMAGE);
   });
 

@@ -18,7 +18,7 @@ Sitio web para crear una **lotería mexicana personalizada**: la persona sube su
 
 Está pensado para reuniones familiares y de amigos (cumpleaños, fiestas, eventos), no para uso comercial masivo. _(confirmado el 2026-10-06)_
 
-El negocio cobra por dos cosas: la **transformación de fotos con inteligencia artificial** al estilo de la lotería tradicional, que se paga con tokens, y las **loterías de temporada**, ya hechas, que se pagan en pesos (§18). Crear cartas, generar tableros y descargar el PDF de la lotería propia es gratis. _(confirmado el 2026-10-06; las loterías de temporada se agregaron ese mismo día, FEAT-17)_
+El negocio cobra por dos cosas: la **transformación de fotos con inteligencia artificial** al estilo de la lotería tradicional, que se paga con tokens, y las **loterías temáticas**, ya hechas, que se pagan en pesos (§18). Crear cartas, generar tableros y descargar el PDF de la lotería propia es gratis. _(confirmado el 2026-10-06; las loterías temáticas se agregaron ese mismo día, FEAT-17)_
 
 ## 2. Principio central — DEFINIDO
 
@@ -26,14 +26,14 @@ El negocio cobra por dos cosas: la **transformación de fotos con inteligencia a
 
 Cuando dos reglas choquen, o haya que decidir algo que no está escrito, se elige lo que no bloquea a quien solo quiere su lotería. Decidido el 2026-10-06.
 
-El principio habla de la lotería que cada quien hace con sus fotos. Las loterías de temporada (§18) son un producto aparte, de pago, y no lo contradicen: nunca estorban el camino de crear e imprimir la propia. Aclarado el 2026-10-06 (FEAT-17).
+El principio habla de la lotería que cada quien hace con sus fotos. Las loterías temáticas (§18) son un producto aparte, de pago, y no lo contradicen: nunca estorban el camino de crear e imprimir la propia. Aclarado el 2026-10-06 (FEAT-17).
 
 ## 3. Actores, roles y permisos
 
 | Actor | Quién es | Qué puede hacer |
 |---|---|---|
-| **Visitante** | Cualquiera sin cuenta | Crear cartas y tableros y descargar el PDF. Su trabajo se guarda solo en su navegador. Puede ver el catálogo de loterías de temporada (§18). No puede usar la IA, comprar tokens ni comprar loterías de temporada. _(confirmado el 2026-10-06)_ |
-| **Usuario registrado** | Tiene cuenta (correo y contraseña, o Google) | Todo lo del visitante, y además: guardar varias loterías en la nube, usar la IA, comprar tokens, comprar y descargar loterías de temporada (§18), ver su historial y editar su perfil. _(confirmado el 2026-10-06)_ |
+| **Visitante** | Cualquiera sin cuenta | Crear cartas y tableros y descargar el PDF. Su trabajo se guarda solo en su navegador. Puede ver el catálogo de loterías temáticas (§18). No puede usar la IA, comprar tokens ni comprar loterías temáticas. _(confirmado el 2026-10-06)_ |
+| **Usuario registrado** | Tiene cuenta (correo y contraseña, o Google) | Todo lo del visitante, y además: guardar varias loterías en la nube, usar la IA, comprar tokens, comprar y descargar loterías temáticas (§18), ver su historial y editar su perfil. _(confirmado el 2026-10-06)_ |
 | **Administrador** | Usuario incluido en la lista de administradores | Todo lo del usuario, y además el panel de administración (§10). _(confirmado el 2026-10-06)_ |
 
 - Un usuario solo ve y modifica sus propias loterías, cartas, tableros, compras y saldo. **DEFINIDO** (2026-10-06)
@@ -59,7 +59,7 @@ El principio habla de la lotería que cada quien hace con sus fotos. Las loterí
 
 - Formatos aceptados para las cartas: PNG, JPEG y WebP, de hasta 5 MB. _(confirmado el 2026-10-06)_
 - Las imágenes de los usuarios registrados son privadas: solo su dueño puede verlas. _(confirmado el 2026-10-06)_
-- La portada y las cartas de muestra de las loterías de temporada son públicas, pero solo en su versión reducida y con marca de agua (§18). **DEFINIDO** (2026-10-06, FEAT-17)
+- La portada y las cartas de muestra de las loterías temáticas son públicas, pero solo en su versión reducida y con marca de agua (§18). **DEFINIDO** (2026-10-06, FEAT-17)
 - El PDF incluye los tableros en tamaño carta con área de corte, y la baraja completa para recortar. Descargarlo es gratis y no requiere cuenta. _(confirmado el 2026-10-06)_
 
 ## 6. Transformación con IA
@@ -89,7 +89,7 @@ El principio habla de la lotería que cada quien hace con sus fotos. Las loterí
 
 ## 8. Compra de tokens
 
-Mercado Pago cobra también las loterías de temporada; sus reglas están en §18 (2026-10-06, FEAT-17).
+Mercado Pago cobra también las loterías temáticas; sus reglas están en §18 (2026-10-06, FEAT-17).
 
 - Solo los usuarios registrados pueden comprar. **DEFINIDO** (2026-10-06)
 - Se paga con Mercado Pago, en pesos mexicanos. En la versión en inglés del sitio el precio se muestra además en dólares, solo como referencia; el cobro es siempre en pesos. _(confirmado el 2026-10-06)_
@@ -130,7 +130,7 @@ El administrador puede: _(confirmado el 2026-10-06)_
 - ver los saldos de todos los usuarios y regalar tokens;
 - ver el uso de la IA (por día, por usuario y por lotería) y su costo estimado;
 - cambiar la cantidad de tokens de bienvenida;
-- administrar las loterías de temporada (§18): crear temporadas, dar de alta loterías con su precio y sus archivos, publicarlas y retirarlas. Sus ventas se ven junto a las compras de tokens, distinguidas por tipo. **DEFINIDO** (2026-10-06, FEAT-17)
+- administrar las loterías temáticas (§18): crear temáticas, dar de alta loterías con su precio y sus archivos, publicarlas y retirarlas. Sus ventas se ven junto a las compras de tokens, distinguidas por tipo. **DEFINIDO** (2026-10-06, FEAT-17)
 
 ## 11. Modelo de entidades
 
@@ -148,9 +148,9 @@ El administrador puede: _(confirmado el 2026-10-06)_
 | Configuración (`app_config`) | Tokens de bienvenida | — |
 | Perfil (`profiles`) | Correo y nombre | Uno por usuario |
 | Administradores (`admin_users`) | Quién es administrador | Apunta a un usuario |
-| Temporada (`seasons`) — por construir | Nombre (español; inglés opcional) y orden | — |
-| Lotería de temporada (`seasonal_loterias`) — por construir | Nombre, descripción, modo, número de cartas y de tableros, precio, publicada, fechas, portada, muestras y PDF | Pertenece a una temporada |
-| Compra de temporada (`seasonal_purchases`) — por construir | Monto pagado, pago de Mercado Pago y estado | Pertenece a un usuario y a una lotería de temporada |
+| Temática (`seasons`) — por construir | Nombre (español; inglés opcional) y orden | — |
+| Lotería temática (`seasonal_loterias`) — por construir | Nombre, descripción, modo, número de cartas y de tableros, precio, publicada, fechas, portada, muestras y PDF | Pertenece a una temática |
+| Compra de lotería temática (`seasonal_purchases`) — por construir | Monto pagado, pago de Mercado Pago y estado | Pertenece a un usuario y a una lotería temática |
 
 ## 12. Permisos de acceso a datos — DEFINIDO
 
@@ -163,13 +163,13 @@ El administrador puede: _(confirmado el 2026-10-06)_
 | Promociones | Los administradores | Los administradores |
 | Tokens de bienvenida | Cualquiera | Los administradores |
 | Lista de administradores | Los administradores | Los administradores |
-| Temporadas | Cualquiera | Los administradores |
-| Lotería de temporada visible: ficha, portada y muestras | Cualquiera | Los administradores |
-| Lotería de temporada no visible | Los administradores; quien la compró | Los administradores |
-| PDF de una lotería de temporada | Quien tiene una compra aprobada de esa lotería; los administradores | Los administradores |
-| Compras de loterías de temporada | Su dueño; los administradores | Solo el servidor |
+| Temáticas | Cualquiera | Los administradores |
+| Lotería temática visible: ficha, portada y muestras | Cualquiera | Los administradores |
+| Lotería temática no visible | Los administradores; quien la compró | Los administradores |
+| PDF de una lotería temática | Quien tiene una compra aprobada de esa lotería; los administradores | Los administradores |
+| Compras de loterías temáticas | Su dueño; los administradores | Solo el servidor |
 
-Decidido el 2026-10-06 (remediación del code review). El detalle técnico está en las migraciones 022 a 025. Los cinco renglones de loterías de temporada se agregaron el 2026-10-06 (FEAT-17) y están por construir.
+Decidido el 2026-10-06 (remediación del code review). El detalle técnico está en las migraciones 022 a 025. Los cinco renglones de loterías temáticas se agregaron el 2026-10-06 (FEAT-17) y están por construir.
 
 ## 13. Notificaciones — DEFINIDO
 
@@ -182,14 +182,14 @@ Decidido el 2026-10-06 (remediación del code review). El detalle técnico está
 
 - No se avisa de una compra normal acreditada, de saldo bajo ni de un pago devuelto. Decidido el 2026-10-06.
 - Los dos avisos nuevos llegan por correo. Decidido el 2026-10-06.
-- El aviso de pago pendiente confirmado cubre también las compras de loterías de temporada (§18). Mientras no exista, esas compras no generan ningún aviso. Decidido el 2026-10-06 (FEAT-17).
+- El aviso de pago pendiente confirmado cubre también las compras de loterías temáticas (§18). Mientras no exista, esas compras no generan ningún aviso. Decidido el 2026-10-06 (FEAT-17).
 
 ## 14. Fechas, plazos y cálculos automáticos
 
 - Vigencia de las promociones (§9).
 - Límite de 10 transformaciones por minuto (§6).
-- Fechas de inicio y fin de cada lotería de temporada (§18).
-- Nada caduca: ni los tokens, ni las loterías guardadas, ni las cuentas sin uso, ni las loterías de temporada compradas. **DEFINIDO** (2026-10-06)
+- Fechas de inicio y fin de cada lotería temática (§18).
+- Nada caduca: ni los tokens, ni las loterías guardadas, ni las cuentas sin uso, ni las loterías temáticas compradas. **DEFINIDO** (2026-10-06)
 
 ## 15. Decisiones definidas
 
@@ -238,6 +238,7 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-06 | Una lotería de temporada con ventas no se borra, solo se despublica. No se puede publicar incompleta. Se puede reemplazar su PDF: los compradores descargan la versión nueva. |
 | 2026-10-06 | Para publicar una lotería de temporada hacen falta también el número de cartas y el de tableros, además de nombre, descripción, precio, PDF y portada (FEAT-17). |
 | 2026-10-07 | El PDF de una lotería de temporada también se puede armar en el sitio: el administrador sube por lote sus cartas ya terminadas (con el nombre dibujado, 54 esperadas, sin recortarlas), genera los tableros y el PDF queda guardado en la ficha; solo se guarda el PDF, no las cartas. Las muestras se pueden elegir de esas cartas. _(Descartadas: una página pública para cualquier usuario; exigir exactamente 54; recortar a 2:3; guardar cartas y tableros. Origen: FEAT-23.)_ |
+| 2026-10-07 | Las loterías «de temporada» pasan a llamarse «loterías temáticas» y sus grupos «temáticas», para dar cabida a ocasiones sin fecha del año; el catálogo pasa de `/temporada` a `/tematicas` y la dirección anterior redirige a la nueva. Ninguna regla cambia. En las decisiones de arriba, «temporada» es el nombre anterior de lo mismo. _(Descartadas: quitar además las fechas de inicio y fin; cambiar solo el título público; conservar la dirección `/temporada`. Origen: FEAT-24.)_ |
 
 ## 16. Pendientes por definir
 
@@ -245,7 +246,7 @@ Ninguno al 2026-10-06. Todas las reglas de este documento están confirmadas o d
 
 ## 17. Reglas definidas que el sitio todavía no cumple
 
-Decididas el 2026-10-06 y pendientes de construir. Los correos son la fase 3 de `plan-fases.md`; el descuento por reembolso quedó apartado el 2026-10-06, sin fecha. Las loterías de temporada son la feature `docs/features/FEAT-17-loterias-de-temporada.md`.
+Decididas el 2026-10-06 y pendientes de construir. Los correos son la fase 3 de `plan-fases.md`; el descuento por reembolso quedó apartado el 2026-10-06, sin fecha. Las loterías temáticas son la feature `docs/features/FEAT-17-loterias-de-temporada.md`.
 
 Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en producción: mínimo de 24 cartas en Clásico, mínimo de 15 en Kids, y mínimo de compra de 5 tokens. Retirada el 2026-10-06, al publicarse la fase 2: registrar cada regalo de tokens.
 
@@ -254,23 +255,23 @@ Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en
 | Descontar tokens ante reembolso o contracargo | §8 | No descuenta nada |
 | Avisar por correo de pago pendiente acreditado | §13 | No avisa |
 | Avisar por correo de tokens regalados | §13 | No avisa |
-| Loterías de temporada: catálogo, compra, descarga y administración | §18 | No existen |
-| Quitar el acceso a una lotería de temporada ante reembolso o contracargo | §18 | No existe; se construirá junto con el descuento de tokens |
+| Loterías temáticas: catálogo, compra, descarga y administración | §18 | No existen |
+| Quitar el acceso a una lotería temática ante reembolso o contracargo | §18 | No existe; se construirá junto con el descuento de tokens |
 
-## 18. Loterías de temporada — DEFINIDO
+## 18. Loterías temáticas — DEFINIDO
 
-Definido con Carlos el 2026-10-06 (FEAT-17). Por construir.
+Definido con Carlos el 2026-10-06 (FEAT-17). Por construir. Hasta el 2026-10-07 se llamaron «loterías de temporada», agrupadas por «temporada»; el nombre cambió con FEAT-24 sin tocar ninguna regla.
 
-**Qué son.** Loterías ya hechas, preparadas por el administrador, agrupadas por temporada (Halloween, Día de Muertos, Navidad…). Se muestran en un catálogo público y se venden como descarga digital: no se envía nada físico.
+**Qué son.** Loterías ya hechas, preparadas por el administrador, agrupadas por temática: fechas del año (Halloween, Día de Muertos, Navidad…) u ocasiones sin fecha (un baby shower, una boda…). Se muestran en un catálogo público y se venden como descarga digital: no se envía nada físico.
 
 **Qué se vende.** El PDF terminado que el administrador subió ya hecho o armó en el sitio con sus propias cartas (2026-10-07, FEAT-23). Todos los compradores de una lotería reciben el mismo archivo; el comprador no la edita ni elige cuántos tableros trae.
 
-**Temporadas.**
+**Temáticas.**
 
 - Las crea, nombra, ordena y borra el administrador. El orden decide cuál sale primero en el catálogo.
-- Cada lotería pertenece a una temporada. Una temporada con loterías no se puede borrar.
+- Cada lotería pertenece a una temática. Una temática con loterías no se puede borrar.
 
-**Ficha de una lotería.** Temporada, nombre, descripción, modo (Clásico o Kids), número de cartas, número de tableros, precio, PDF, portada y cartas de muestra. El nombre y la descripción son obligatorios en español y opcionales en inglés; si falta el inglés, se muestra el español.
+**Ficha de una lotería.** Temática, nombre, descripción, modo (Clásico o Kids), número de cartas, número de tableros, precio, PDF, portada y cartas de muestra. El nombre y la descripción son obligatorios en español y opcionales en inglés; si falta el inglés, se muestra el español.
 
 **Vista previa.**
 
@@ -281,7 +282,7 @@ Definido con Carlos el 2026-10-06 (FEAT-17). Por construir.
 **Visibilidad.**
 
 - Cada lotería tiene «publicada sí/no» y fechas opcionales de inicio y de fin. Es visible cuando está publicada y dentro de sus fechas.
-- El catálogo muestra solo las visibles, y solo las temporadas que tienen al menos una.
+- El catálogo muestra solo las visibles, y solo las temáticas que tienen al menos una.
 - No se puede publicar una lotería a la que le falte nombre, descripción, número de cartas, número de tableros, precio, PDF o portada. _(El número de cartas y de tableros se agregaron el 2026-10-06, FEAT-17: el catálogo los muestra en cada tarjeta.)_
 - Una lotería con ventas no se borra: solo se despublica.
 

@@ -95,12 +95,12 @@ export function buildSeasonalPreference(input: {
     loteria_id: item.loteriaId,
     amount_cents: item.amountCents,
   };
-  const returnUrl = `${appUrl}/temporada/${item.loteriaId}`;
+  const returnUrl = `${appUrl}/tematicas/${item.loteriaId}`;
 
   return {
     items: [
       {
-        title: `Lotería de temporada - ${item.name}`,
+        title: `Lotería temática - ${item.name}`,
         description: 'Descarga digital en PDF',
         quantity: 1,
         unit_price: item.amountCents / 100, // MP espera pesos, no centavos

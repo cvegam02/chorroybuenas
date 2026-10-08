@@ -140,7 +140,7 @@ export const AdminBalances = () => {
           {revenue && (
             <>
               <span className="admin-stat-card__detail">
-                Tokens: {formatPesos(revenue.tokensCents)} · Temporada: {formatPesos(revenue.seasonalCents)}
+                Tokens: {formatPesos(revenue.tokensCents)} · Temáticas: {formatPesos(revenue.seasonalCents)}
               </span>
               <span className="admin-stat-card__detail">
                 {revenue.totalCount} compra{revenue.totalCount !== 1 ? 's' : ''}

@@ -158,7 +158,7 @@ export const SeasonalDetail = () => {
   };
 
   const backLink = (
-    <Link to="/temporada" className="seasonal-detail__back">
+    <Link to="/tematicas" className="seasonal-detail__back">
       {t('seasonal.detail.back')}
     </Link>
   );
@@ -193,7 +193,7 @@ export const SeasonalDetail = () => {
       return (
         <div className="seasonal-catalog__notice">
           <p>{t('seasonal.detail.unavailable')}</p>
-          <Link to="/temporada" className="seasonal-catalog__button">
+          <Link to="/tematicas" className="seasonal-catalog__button">
             {t('seasonal.detail.toCatalog')}
           </Link>
         </div>
