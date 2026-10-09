@@ -50,6 +50,7 @@ El principio habla de la lotería que cada quien hace con sus fotos. Las loterí
 - **Mínimo de cartas para generar tableros:**
   - Kids: **15 cartas. DEFINIDO** (2026-10-06; ese mismo día se había confirmado en 12 y se subió a 15).
   - Clásico: **24 cartas. DEFINIDO** (2026-10-06; ese mismo día se había fijado en 20 y se subió a 24).
+  - Estos mínimos son los de la lotería que arma el usuario. Una lotería temática en modo Kids tiene el suyo, 9 cartas (§18; 2026-10-08, FEAT-24).
 - **Tableros:** se generan al azar con las cartas de la lotería. No se generan dos tableros iguales. _(confirmado el 2026-10-06)_
 - **Cantidad sugerida de tableros:** en Clásico, la que hace que cada carta aparezca unas 8 veces en total; en Kids, un tablero por cada 3 cartas. El usuario puede cambiarla. _(confirmado el 2026-10-06)_
 - **Al iniciar sesión**, lo que el visitante tenía guardado en su navegador se pasa a su cuenta, dentro de una lotería por defecto. _(confirmado el 2026-10-06)_
@@ -239,6 +240,7 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-06 | Para publicar una lotería de temporada hacen falta también el número de cartas y el de tableros, además de nombre, descripción, precio, PDF y portada (FEAT-17). |
 | 2026-10-07 | El PDF de una lotería de temporada también se puede armar en el sitio: el administrador sube por lote sus cartas ya terminadas (con el nombre dibujado, 54 esperadas, sin recortarlas), genera los tableros y el PDF queda guardado en la ficha; solo se guarda el PDF, no las cartas. Las muestras se pueden elegir de esas cartas. _(Descartadas: una página pública para cualquier usuario; exigir exactamente 54; recortar a 2:3; guardar cartas y tableros. Origen: FEAT-23.)_ |
 | 2026-10-07 | Las loterías «de temporada» pasan a llamarse «loterías temáticas» y sus grupos «temáticas», para dar cabida a ocasiones sin fecha del año; el catálogo pasa de `/temporada` a `/tematicas` y la dirección anterior redirige a la nueva. Ninguna regla cambia. En las decisiones de arriba, «temporada» es el nombre anterior de lo mismo. _(Descartadas: quitar además las fechas de inicio y fin; cambiar solo el título público; conservar la dirección `/temporada`. Origen: FEAT-24.)_ |
+| 2026-10-08 | Una lotería temática en modo Kids se puede armar con 9 cartas en vez de 15; la lotería normal conserva 15 en Kids y 24 en Clásico, y la temática en Clásico sigue en 24. Con exactamente 9 cartas los tableros llevan las mismas cartas, cada uno con un acomodo distinto (FEAT-24, US A5). _(Descartadas: bajar a 9 todo el modo Kids, también para los usuarios; dejarlo en 15 y solo aclarar el contador «de 54». Para los tableros con 9 cartas, descartadas: generar un solo tablero; permitir copias con el mismo acomodo.)_ |
 
 ## 16. Pendientes por definir
 
@@ -265,6 +267,8 @@ Definido con Carlos el 2026-10-06 (FEAT-17). Por construir. Hasta el 2026-10-07 
 **Qué son.** Loterías ya hechas, preparadas por el administrador, agrupadas por temática: fechas del año (Halloween, Día de Muertos, Navidad…) u ocasiones sin fecha (un baby shower, una boda…). Se muestran en un catálogo público y se venden como descarga digital: no se envía nada físico.
 
 **Qué se vende.** El PDF terminado que el administrador subió ya hecho o armó en el sitio con sus propias cartas (2026-10-07, FEAT-23). Todos los compradores de una lotería reciben el mismo archivo; el comprador no la edita ni elige cuántos tableros trae.
+
+**Mínimo de cartas al armarla en el sitio** (2026-10-08, FEAT-24). En modo Kids (3 × 3) bastan **9 cartas**, una por casilla; en Clásico (4 × 4) se conserva el mínimo de la lotería normal, 24 (§4). Con exactamente 9 cartas todos los tableros llevan las mismas cartas y cada uno tiene un acomodo distinto: no se generan dos tableros con el mismo acomodo. Con 10 cartas o más los tableros se generan como en la lotería normal.
 
 **Temáticas.**
 

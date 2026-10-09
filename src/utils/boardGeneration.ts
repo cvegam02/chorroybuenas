@@ -88,3 +88,31 @@ export function generateUniqueBoards<T extends { id: string }>(
 
   return boards;
 }
+
+/** Acomodos distintos que se pueden pedir de las mismas cartas: la mitad del máximo teórico. */
+export const maxArrangedBoards = (gridSize: GridSize): number => {
+  let arrangements = 1;
+  for (let i = 2; i <= gridSize; i++) arrangements *= i;
+  return Math.floor(arrangements * 0.5);
+};
+
+/**
+ * Tableros con las mismas cartas y distinto acomodo, para cuando hay justo una carta por casilla.
+ * Si tras muchos intentos no sale un acomodo nuevo, se acepta el repetido para no quedarse atorado.
+ */
+export function generateArrangedBoards<T extends { id: string }>(cards: readonly T[], count: number): T[][] {
+  const arrangementKey = (board: readonly T[]): string => board.map((card) => card.id).join('|');
+  const boards: T[][] = [];
+  const seen = new Set<string>();
+
+  for (let i = 0; i < count; i++) {
+    let arranged = shuffleArray(cards);
+    for (let attempts = 0; seen.has(arrangementKey(arranged)) && attempts < MAX_ATTEMPTS; attempts++) {
+      arranged = shuffleArray(cards);
+    }
+    seen.add(arrangementKey(arranged));
+    boards.push(arranged);
+  }
+
+  return boards;
+}

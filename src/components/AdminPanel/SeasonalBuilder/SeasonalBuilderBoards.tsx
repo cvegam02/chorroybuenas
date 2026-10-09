@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import type { GridSize } from '../../../types';
-import { generateUniqueBoards, maxUniqueBoards, suggestedBoardCount } from '../../../utils/boardGeneration';
+import {
+  generateSeasonalBoards,
+  seasonalMaxBoards,
+  seasonalSuggestedBoardCount,
+  usesSameCardsOnEveryBoard,
+} from '../../../utils/seasonalBoards';
 import type { SeasonalCard } from './useSeasonalCards';
 
 interface SeasonalBuilderBoardsProps {
@@ -21,20 +26,21 @@ function parseBoardCount(text: string, max: number): { count: number } | { error
 
 /** Paso 2: generar los tableros con las cartas cargadas. No se escribe ningún nombre: la carta ya lo trae. */
 export const SeasonalBuilderBoards = ({ cards, gridSize, boards, onBoardsChange }: SeasonalBuilderBoardsProps) => {
-  const suggested = suggestedBoardCount(cards.length, gridSize);
+  const suggested = seasonalSuggestedBoardCount(cards.length, gridSize);
+  const sameCards = usesSameCardsOnEveryBoard(cards.length, gridSize);
   const [countText, setCountText] = useState(() => String(boards.length > 0 ? boards.length : suggested));
   const [error, setError] = useState<string | null>(null);
   const columns = gridSize === 9 ? 3 : 4;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = parseBoardCount(countText, maxUniqueBoards(cards.length, gridSize));
+    const parsed = parseBoardCount(countText, seasonalMaxBoards(cards.length, gridSize));
     if ('error' in parsed) {
       setError(parsed.error);
       return;
     }
     setError(null);
-    onBoardsChange(generateUniqueBoards(cards, parsed.count, gridSize));
+    onBoardsChange(generateSeasonalBoards(cards, parsed.count, gridSize));
   };
 
   return (
@@ -71,6 +77,7 @@ export const SeasonalBuilderBoards = ({ cards, gridSize, boards, onBoardsChange 
       ) : (
         <p className="seasonal-builder__hint seasonal-builder__hint--tight" id="seasonal-builder-board-count-hint">
           Sugeridos para {cards.length} cartas en {columns}×{columns}: {suggested}.
+          {sameCards && ' Con las cartas justas, todos los tableros llevan las mismas y solo cambia el acomodo.'}
         </p>
       )}
 
