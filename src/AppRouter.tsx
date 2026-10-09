@@ -32,6 +32,7 @@ import { saveBoards, saveBoardCount, loadBoards, clearAllData } from './utils/st
 import { BoardRepository } from './repositories/BoardRepository';
 import { Board, GridSize } from './types';
 import { logger } from './utils/logger';
+import { pdfErrorMessage } from './utils/pdfErrorMessage';
 
 type AppStep = 'cards' | 'board-count' | 'preview' | 'confirmation';
 
@@ -57,6 +58,7 @@ function AppContent() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
   const { generateBoards, isGenerating } = useBoard();
 
   // Initialize step based on current route
@@ -170,11 +172,13 @@ function AppContent() {
   };
 
   const handlePreviewModify = () => {
+    setPdfError(null);
     setCurrentStep('cards');
     navigate('/cards');
   };
 
   const handlePreviewRegenerate = () => {
+    setPdfError(null);
     setCurrentStep('board-count');
     navigate('/board-count');
   };
@@ -194,6 +198,7 @@ function AppContent() {
   }, [boards, cards]);
 
   const handlePreviewConfirm = async () => {
+    setPdfError(null);
     setIsGeneratingPDF(true);
     try {
       const pdfBlob = await generatePDF(boardsWithHydratedImages, user && currentSetId ? { allCards: cards } : undefined);
@@ -201,7 +206,7 @@ function AppContent() {
       setShowConfirmation(true);
     } catch (error) {
       logger.error('Error generating PDF:', error);
-      alert(t('boardGenerator.errors.pdfError'));
+      setPdfError(pdfErrorMessage(error, t));
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -342,6 +347,7 @@ function AppContent() {
                 onModify={handlePreviewModify}
                 onConfirm={handlePreviewConfirm}
                 onRegenerate={handlePreviewRegenerate}
+                error={pdfError}
               />
             ) : (
               <div style={{ padding: '48px', textAlign: 'center' }}>

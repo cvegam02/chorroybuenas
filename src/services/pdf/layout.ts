@@ -32,3 +32,16 @@ export function placeImageInCard(
     height,
   };
 }
+
+/** Alto de la letra mayúscula de Helvetica Bold, como fracción del tamaño de letra. */
+const TITLE_CAP_HEIGHT_RATIO = 0.718;
+
+/** Alto de la franja del nombre, al pie de la carta. La foto termina justo donde empieza. */
+export function titleSpaceFor(titleSize: number): number {
+  return titleSize + 8;
+}
+
+/** Distancia del pie de la carta a la base del texto, para que el nombre quede centrado en su franja. */
+export function titleBaselineOffset(titleSpace: number, fontSize: number): number {
+  return (titleSpace - fontSize * TITLE_CAP_HEIGHT_RATIO) / 2;
+}

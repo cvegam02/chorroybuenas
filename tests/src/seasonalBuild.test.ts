@@ -1,6 +1,31 @@
 import { describe, expect, it } from 'vitest';
-import { placeImageInCard } from '../../src/services/pdf/layout';
+import { placeImageInCard, titleBaselineOffset, titleSpaceFor } from '../../src/services/pdf/layout';
 import { seasonalPdfFileName, withBuiltCounts } from '../../src/utils/seasonalLoteria';
+
+describe('franja del nombre al pie de la carta (FEAT-25)', () => {
+  const cell = { width: 96, height: 145.6 };
+
+  it('la foto cubre su espacio hasta donde empieza la franja, en tableros de 4 × 4 y de 3 × 3', () => {
+    for (const [titleSize, expectedSpace] of [[11, 19], [14, 22]]) {
+      const titleSpace = titleSpaceFor(titleSize);
+      expect(titleSpace).toBe(expectedSpace);
+      const placed = placeImageInCard(512, 768, cell.width, cell.height, titleSpace, 'cover');
+      expect(placed.offsetY).toBeLessThanOrEqual(titleSpace + 0.001);
+      expect(placed.offsetY + placed.height).toBeGreaterThanOrEqual(cell.height - 0.001);
+    }
+  });
+
+  it('el nombre queda centrado dentro de la franja, también con la letra más chica de un nombre largo', () => {
+    const titleSpace = titleSpaceFor(11);
+    for (const fontSize of [10, 8, 6]) {
+      const baseline = titleBaselineOffset(titleSpace, fontSize);
+      const capHeight = fontSize * 0.718;
+      expect(baseline).toBeGreaterThan(0);
+      expect(baseline + capHeight).toBeLessThan(titleSpace);
+      expect(baseline).toBeCloseTo(titleSpace - (baseline + capHeight));
+    }
+  });
+});
 
 describe('imagen de una carta dentro de su casilla del PDF', () => {
   const cell = { width: 96, height: 145.6 };
