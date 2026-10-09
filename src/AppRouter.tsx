@@ -1,5 +1,5 @@
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LandingPage } from './components/LandingPage/LandingPage';
 import { CardEditor } from './components/CardEditor/CardEditor';
@@ -26,6 +26,7 @@ import { useAuth } from './contexts/AuthContext';
 import { useSetContext } from './contexts/SetContext';
 import { SetRepository } from './repositories/SetRepository';
 import { useBoard } from './hooks/useBoard';
+import { CardRepository } from './repositories/CardRepository';
 import { useCards } from './hooks/useCards';
 import { generatePDF, downloadPDF } from './services/PDFService';
 import { saveBoards, saveBoardCount, loadBoards, clearAllData } from './utils/storage';
@@ -58,6 +59,8 @@ function AppContent() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  // El estado tarda un render en llegar: la referencia frena una segunda pulsación inmediata.
+  const isGeneratingPDFRef = useRef(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const { generateBoards, isGenerating } = useBoard();
 
@@ -198,16 +201,22 @@ function AppContent() {
   }, [boards, cards]);
 
   const handlePreviewConfirm = async () => {
+    if (isGeneratingPDFRef.current) return;
+    isGeneratingPDFRef.current = true;
     setPdfError(null);
     setIsGeneratingPDF(true);
     try {
-      const pdfBlob = await generatePDF(boardsWithHydratedImages, user && currentSetId ? { allCards: cards } : undefined);
+      // Con sesión, la baraja se lee de la lotería en este momento: `cards` se cargó al abrirla y no ve
+      // las cartas agregadas después en la pantalla de cartas.
+      const deckCards = user && currentSetId ? await CardRepository.getCards(user.id, currentSetId) : undefined;
+      const pdfBlob = await generatePDF(boardsWithHydratedImages, deckCards ? { allCards: deckCards } : undefined);
       downloadPDF(pdfBlob);
       setShowConfirmation(true);
     } catch (error) {
       logger.error('Error generating PDF:', error);
       setPdfError(pdfErrorMessage(error, t));
     } finally {
+      isGeneratingPDFRef.current = false;
       setIsGeneratingPDF(false);
     }
   };
@@ -364,14 +373,14 @@ function AppContent() {
       <Footer />
 
       {isGenerating && (
-        <div className="app__loading">
+        <div className="app__loading" role="status" aria-live="polite">
           <div className="app__loading-spinner"></div>
           <p>{t('boardGenerator.status.generatingBoards')}</p>
         </div>
       )}
 
       {isGeneratingPDF && (
-        <div className="app__loading">
+        <div className="app__loading" role="status" aria-live="polite">
           <div className="app__loading-spinner"></div>
           <p>{t('boardGenerator.status.generatingPDF')}</p>
         </div>

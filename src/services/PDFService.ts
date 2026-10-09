@@ -6,7 +6,7 @@ import { CardRepository } from '../repositories/CardRepository';
 import { logger } from '../utils/logger';
 import { PAGE_HEIGHT_PT, PAGE_WIDTH_PT } from './pdf/constants';
 import { EmbedResult, urlToBase64 } from './pdf/images';
-import { drawBoardOnPage, drawCardOnPage } from './pdf/draw';
+import { drawBoardOnPage, drawCardOnPage, drawDeckCutGuides } from './pdf/draw';
 import { deckGridLayout } from './pdf/layout';
 import { createOnceLoader } from './pdf/loadOnce';
 import { PdfCardsFailedError, uniqueFailedCards } from './pdf/failedCards';
@@ -116,6 +116,7 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
       });
 
       const chunk = allCards.slice(start, start + cardsPerPage);
+      drawDeckCutGuides(cardsPage, deck, chunk.length);
       for (let idx = 0; idx < chunk.length; idx++) {
         const row = Math.floor(idx / deck.cols);
         const col = idx % deck.cols;

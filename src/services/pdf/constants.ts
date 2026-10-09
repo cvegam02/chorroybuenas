@@ -39,6 +39,8 @@ export const CUT_LINE_MARGIN_PT = cmToPoints(0.3);
 // Marcas de corte de las esquinas: empiezan un poco después del fondo crema
 export const CUT_MARK_GAP_PT = 3;
 export const CUT_MARK_LENGTH_PT = 12;
+// Franja de la orilla de la hoja que una impresora casera no alcanza a imprimir (un cuarto de pulgada)
+export const PRINT_SAFE_MARGIN_PT = 18;
 
 // Calculate cut area position (centered both vertically and horizontally)
 export const CUT_AREA_X_PT = (PAGE_WIDTH_PT - CUT_AREA_WIDTH_PT) / 2; // Centered horizontally

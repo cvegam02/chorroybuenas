@@ -9,6 +9,7 @@ import {
   CUT_MARK_LENGTH_PT,
   PAGE_HEIGHT_PT,
   PAGE_WIDTH_PT,
+  PRINT_SAFE_MARGIN_PT,
   cmToPoints,
 } from './constants';
 
@@ -165,4 +166,60 @@ export function cutGuides(): CutGuides {
   );
 
   return { line: { x: left, y: bottom, width: right - left, height: top - bottom }, marks };
+}
+
+export interface DeckCutGuides {
+  /** Líneas punteadas de corte: por en medio de cada espacio entre cartas y alrededor del grupo. */
+  lines: CutMark[];
+  /** Una marca corta en cada extremo de cada línea, ya fuera del grupo. */
+  marks: CutMark[];
+}
+
+/**
+ * Guías de corte de una página de la baraja con `cardCount` cartas. Entre cartas no cabe una línea
+ * por carta, así que cada línea pasa a media distancia de las dos vecinas: un corte separa dos cartas.
+ */
+export function deckCutGuides(deck: DeckGridLayout, cardCount: number): DeckCutGuides {
+  if (cardCount <= 0) return { lines: [], marks: [] };
+
+  const rows = Math.min(deck.rows, Math.ceil(cardCount / deck.cols));
+  const cols = rows > 1 ? deck.cols : Math.min(deck.cols, cardCount);
+  const half = deck.gap / 2;
+  const xAt = (col: number) => deck.startX - half + col * (deck.cardWidth + deck.gap);
+  const yAt = (row: number) => deck.topY + half - row * (deck.cardHeight + deck.gap);
+  const left = xAt(0);
+  const right = xAt(cols);
+  const top = yAt(0);
+  const bottom = yAt(rows);
+
+  // Una marca sale de la orilla del grupo hacia afuera y se acorta si no cabe en lo que la impresora alcanza.
+  const markSpan = (edge: number, outward: 1 | -1, limit: number): [number, number] => {
+    const start = edge + outward * CUT_MARK_GAP_PT;
+    const end = start + outward * CUT_MARK_LENGTH_PT;
+    return [start, outward === 1 ? Math.min(end, limit) : Math.max(end, limit)];
+  };
+  const [aboveStart, aboveEnd] = markSpan(top, 1, deck.areaTop - CUT_MARK_GAP_PT);
+  const [belowStart, belowEnd] = markSpan(bottom, -1, PRINT_SAFE_MARGIN_PT);
+  const [leftStart, leftEnd] = markSpan(left, -1, PRINT_SAFE_MARGIN_PT);
+  const [rightStart, rightEnd] = markSpan(right, 1, deck.pageWidth - PRINT_SAFE_MARGIN_PT);
+
+  const columnXs = Array.from({ length: cols + 1 }, (_, col) => xAt(col));
+  const rowYs = Array.from({ length: rows + 1 }, (_, row) => yAt(row));
+
+  return {
+    lines: [
+      ...columnXs.map((x) => ({ start: { x, y: bottom }, end: { x, y: top } })),
+      ...rowYs.map((y) => ({ start: { x: left, y }, end: { x: right, y } })),
+    ],
+    marks: [
+      ...columnXs.flatMap((x) => [
+        { start: { x, y: aboveStart }, end: { x, y: aboveEnd } },
+        { start: { x, y: belowStart }, end: { x, y: belowEnd } },
+      ]),
+      ...rowYs.flatMap((y) => [
+        { start: { x: leftStart, y }, end: { x: leftEnd, y } },
+        { start: { x: rightStart, y }, end: { x: rightEnd, y } },
+      ]),
+    ],
+  };
 }

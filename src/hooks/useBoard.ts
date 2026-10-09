@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Board, Card } from '../types';
 import { loadCards } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
@@ -6,6 +6,7 @@ import { useSetContext } from '../contexts/SetContext';
 import { BoardRepository } from '../repositories/BoardRepository';
 import { logger } from '../utils/logger';
 import { generateUniqueBoards } from '../utils/boardGeneration';
+import { createSingleFlight } from '../utils/singleFlight';
 
 export const useBoard = () => {
   const [boards, setBoards] = useState<Board[]>([]);
@@ -13,6 +14,8 @@ export const useBoard = () => {
   const [isBoardsLoading, setIsBoardsLoading] = useState(false);
   const { user } = useAuth();
   const { currentSetId } = useSetContext();
+  // Una generación a la vez: una segunda borraría los tableros que la primera acaba de guardar.
+  const generateOnce = useRef(createSingleFlight<Board[]>()).current;
 
   useEffect(() => {
     // Clear immediately so stale boards from a previous set are never shown
@@ -39,7 +42,7 @@ export const useBoard = () => {
     };
   }, [user, currentSetId]);
 
-  const generateBoardsAsync = async (count: number, gridSize: 9 | 16 = 16): Promise<Board[]> => {
+  const runGeneration = async (count: number, gridSize: 9 | 16): Promise<Board[]> => {
     setIsGenerating(true);
     try {
       // Borrar tableros anteriores antes de generar nuevos (solo usuarios logueados; invitados se sobrescribe en saveBoards)
@@ -88,6 +91,9 @@ export const useBoard = () => {
       setIsGenerating(false);
     }
   };
+
+  const generateBoardsAsync = (count: number, gridSize: 9 | 16 = 16): Promise<Board[]> =>
+    generateOnce(() => runGeneration(count, gridSize));
 
   const clearBoardsAsync = async (): Promise<void> => {
     if (!user || !currentSetId) {
