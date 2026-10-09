@@ -261,6 +261,7 @@ Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en
 | Avisar por correo de tokens regalados | §13 | No avisa |
 | Loterías temáticas: catálogo, compra, descarga y administración | §18 | No existen |
 | Quitar el acceso a una lotería temática ante reembolso o contracargo | §18 | No existe; se construirá junto con el descuento de tokens |
+| Tableros del PDF en tamaño carta | §5 | El PDF sale en hoja A4. Anotada el 2026-10-09; se corrige con `docs/features/FEAT-26-pdf-impresion-y-recorte.md` |
 
 ## 18. Loterías temáticas — DEFINIDO
 

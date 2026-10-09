@@ -4,9 +4,10 @@ import { loadCards } from '../utils/storage';
 import { blobToBase64, getImageBlob, cacheImageBlob } from '../utils/indexedDB';
 import { CardRepository } from '../repositories/CardRepository';
 import { logger } from '../utils/logger';
-import { PAGE_HEIGHT_PT, PAGE_WIDTH_PT, cmToPoints } from './pdf/constants';
+import { PAGE_HEIGHT_PT, PAGE_WIDTH_PT } from './pdf/constants';
 import { EmbedResult, urlToBase64 } from './pdf/images';
 import { drawBoardOnPage, drawCardOnPage } from './pdf/draw';
+import { deckGridLayout } from './pdf/layout';
 import { createOnceLoader } from './pdf/loadOnce';
 import { PdfCardsFailedError, uniqueFailedCards } from './pdf/failedCards';
 
@@ -99,71 +100,36 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
   }
 
   if (allCards.length > 0) {
-    // Full deck pages: use LANDSCAPE to reduce wasted whitespace while keeping safe gaps for cutting.
-    // We compute a fixed grid (cols/rows) and then center it on the page.
-    const DECK_PAGE_W = PAGE_HEIGHT_PT; // landscape width
-    const DECK_PAGE_H = PAGE_WIDTH_PT; // landscape height
-
-    // Cutting-friendly spacing (gap between cards) and margins
-    const DECK_GAP = cmToPoints(0.4); // ~11pt
-    const DECK_MARGIN_X = 30;
-    const DECK_MARGIN_TOP = 26;
-    const DECK_MARGIN_BOTTOM = 26;
-    const DECK_HEADER_H = 26; // smaller header to save space
-
-    // Card aspect ratio (5:7.5 = 2/3 = 0.666...) - matches the actual card aspect ratio
-    const DECK_ASPECT = 5 / 7.5; // width / height (same as cards in boards)
-
-    // Grid configuration: 5x2 in landscape usually maximizes usage with safe cut gaps.
-    const DECK_COLS = 5;
-    const DECK_ROWS = 2;
-    const CARDS_PER_PAGE = DECK_COLS * DECK_ROWS;
-
-    const availableW = DECK_PAGE_W - (DECK_MARGIN_X * 2) - (DECK_COLS - 1) * DECK_GAP;
-    const availableH =
-      DECK_PAGE_H - DECK_MARGIN_TOP - DECK_HEADER_H - DECK_MARGIN_BOTTOM - (DECK_ROWS - 1) * DECK_GAP;
-
-    let deckCardW = availableW / DECK_COLS;
-    let deckCardH = deckCardW / DECK_ASPECT;
-    const maxCardH = availableH / DECK_ROWS;
-
-    // If height is the limiting factor, shrink width to match height
-    if (deckCardH > maxCardH) {
-      deckCardH = maxCardH;
-      deckCardW = deckCardH * DECK_ASPECT;
-    }
-
-    const gridW = DECK_COLS * deckCardW + (DECK_COLS - 1) * DECK_GAP;
-    const gridStartX = (DECK_PAGE_W - gridW) / 2;
-    const topY = DECK_PAGE_H - DECK_MARGIN_TOP - DECK_HEADER_H;
+    const deck = deckGridLayout();
+    const cardsPerPage = deck.cols * deck.rows;
 
     let pageNumber = 1;
-    for (let start = 0; start < allCards.length; start += CARDS_PER_PAGE) {
-      const cardsPage = pdfDoc.addPage([DECK_PAGE_W, DECK_PAGE_H]);
+    for (let start = 0; start < allCards.length; start += cardsPerPage) {
+      const cardsPage = pdfDoc.addPage([deck.pageWidth, deck.pageHeight]);
       const titleText =
         pageNumber === 1 ? 'Baraja Completa' : `Baraja Completa (continuación - Página ${pageNumber})`;
       cardsPage.drawText(titleText, {
         x: 30,
-        y: DECK_PAGE_H - 18,
+        y: deck.titleY,
         size: 12,
         color: rgb(0, 0, 0),
       });
 
-      const chunk = allCards.slice(start, start + CARDS_PER_PAGE);
+      const chunk = allCards.slice(start, start + cardsPerPage);
       for (let idx = 0; idx < chunk.length; idx++) {
-        const row = Math.floor(idx / DECK_COLS);
-        const col = idx % DECK_COLS;
+        const row = Math.floor(idx / deck.cols);
+        const col = idx % deck.cols;
 
-        const cardX = gridStartX + col * (deckCardW + DECK_GAP);
-        const cardY = topY - deckCardH - row * (deckCardH + DECK_GAP);
+        const cardX = deck.startX + col * (deck.cardWidth + deck.gap);
+        const cardY = deck.topY - deck.cardHeight - row * (deck.cardHeight + deck.gap);
 
         const drawn = await drawCardOnPage(
           cardsPage,
           chunk[idx],
           cardX,
           cardY,
-          deckCardW,
-          deckCardH,
+          deck.cardWidth,
+          deck.cardHeight,
           pdfDoc,
           !finishedCards,
           11, // titleSize (same as boards for consistency)
