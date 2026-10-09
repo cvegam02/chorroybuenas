@@ -44,6 +44,7 @@ El principio habla de la lotería que cada quien hace con sus fotos. Las loterí
 
 - **Lotería (set):** un conjunto de cartas con nombre. Un usuario registrado puede tener varias; un visitante trabaja con una sola, guardada en su navegador. _(confirmado el 2026-10-06)_
 - **Carta:** una imagen con un título. No puede haber dos cartas con el mismo título en la misma lotería. _(confirmado el 2026-10-06)_
+  - El título solo admite letras (con acentos, ñ y ü), números, espacios y signos de puntuación comunes; no admite emojis ni letras de otros alfabetos, porque el PDF no puede dibujarlos. El sitio lo rechaza al escribirlo. Las cartas guardadas antes de esta regla no se modifican: el PDF las dibuja sin esos caracteres. **DEFINIDO** (2026-10-09, FEAT-25)
 - **Modos de juego:** _(confirmado el 2026-10-06)_
   - **Clásico:** tableros de 4 × 4 (16 cartas).
   - **Kids:** tableros de 3 × 3 (9 cartas).
@@ -239,6 +240,7 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-06 | Para publicar una lotería de temporada hacen falta también el número de cartas y el de tableros, además de nombre, descripción, precio, PDF y portada (FEAT-17). |
 | 2026-10-07 | El PDF de una lotería de temporada también se puede armar en el sitio: el administrador sube por lote sus cartas ya terminadas (con el nombre dibujado, 54 esperadas, sin recortarlas), genera los tableros y el PDF queda guardado en la ficha; solo se guarda el PDF, no las cartas. Las muestras se pueden elegir de esas cartas. _(Descartadas: una página pública para cualquier usuario; exigir exactamente 54; recortar a 2:3; guardar cartas y tableros. Origen: FEAT-23.)_ |
 | 2026-10-07 | Las loterías «de temporada» pasan a llamarse «loterías temáticas» y sus grupos «temáticas», para dar cabida a ocasiones sin fecha del año; el catálogo pasa de `/temporada` a `/tematicas` y la dirección anterior redirige a la nueva. Ninguna regla cambia. En las decisiones de arriba, «temporada» es el nombre anterior de lo mismo. _(Descartadas: quitar además las fechas de inicio y fin; cambiar solo el título público; conservar la dirección `/temporada`. Origen: FEAT-24.)_ |
+| 2026-10-09 | El título de una carta solo admite letras (con acentos, ñ y ü), números, espacios y signos de puntuación comunes; no admite emojis ni letras de otros alfabetos. Se valida en el navegador; las cartas ya guardadas no se tocan y el PDF las dibuja sin esos caracteres. _(Descartadas: quitarlos solo en el PDF y dejar el título intacto en el sitio; quitarlos en el PDF y avisar con una nota en el editor. Origen: FEAT-25.)_ |
 
 ## 16. Pendientes por definir
 

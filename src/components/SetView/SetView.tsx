@@ -17,6 +17,7 @@ import { Card, GridSize } from '../../types';
 import './SetView.css';
 import { logger } from '../../utils/logger';
 import { minCardsForGrid } from '../../utils/gridRules';
+import { pdfErrorMessage } from '../../utils/pdfErrorMessage';
 
 export const SetView = () => {
   const { setId } = useParams<{ setId: string }>();
@@ -29,6 +30,7 @@ export const SetView = () => {
   const [selectedBoardIndex, setSelectedBoardIndex] = useState<number | null>(null);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
   const [showClearBoardsModal, setShowClearBoardsModal] = useState(false);
   const [showRegenerateBoardsModal, setShowRegenerateBoardsModal] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -135,13 +137,14 @@ export const SetView = () => {
 
   const handleDownloadPDF = async () => {
     if (boards.length === 0) return;
+    setPdfError(null);
     setIsGeneratingPDF(true);
     try {
       const blob = await generatePDF(boards, { allCards: cards });
       downloadPDF(blob);
     } catch (err) {
       logger.error('Error generating PDF:', err);
-      alert(t('boardGenerator.errors.pdfError'));
+      setPdfError(pdfErrorMessage(err, t));
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -347,6 +350,11 @@ export const SetView = () => {
                     count: cards.length
                   })}
                 </p>
+              </div>
+            )}
+            {pdfError && (
+              <div className="set-view__insufficient-cards" role="alert">
+                <p className="set-view__insufficient-cards-title">{pdfError}</p>
               </div>
             )}
             <div className="set-view__actions">

@@ -11,9 +11,11 @@ interface BoardPreviewProps {
   onModify: () => void;
   onConfirm: () => void;
   onRegenerate: () => void;
+  /** Aviso cuando no se pudo crear el PDF. */
+  error?: string | null;
 }
 
-export const BoardPreview = ({ boards, onModify, onConfirm, onRegenerate }: BoardPreviewProps) => {
+export const BoardPreview = ({ boards, onModify, onConfirm, onRegenerate, error }: BoardPreviewProps) => {
   const { t } = useTranslation();
   const [selectedBoardIndex, setSelectedBoardIndex] = useState<number | null>(null);
 
@@ -55,6 +57,12 @@ export const BoardPreview = ({ boards, onModify, onConfirm, onRegenerate }: Boar
           onClose={handleCloseModal}
           onChangeIndex={setSelectedBoardIndex}
         />
+      )}
+
+      {error && (
+        <p className="board-preview__error" role="alert">
+          {error}
+        </p>
       )}
 
       <div className="board-preview__actions">

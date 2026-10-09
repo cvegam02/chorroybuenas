@@ -6,6 +6,7 @@ import { ImageEditor } from './ImageEditor';
 import { convertFileToBase64, validateImageFile, compressImage, adjustImageToCardAspectRatio } from '../../utils/imageUtils';
 import './BatchUploadModal.css';
 import { logger } from '../../utils/logger';
+import { isPrintableCardTitle } from '../../utils/cardTitle';
 
 
 interface PendingImage {
@@ -127,6 +128,9 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
       return;
     }
 
+    // El aviso ya está a la vista bajo el campo.
+    if (!isPrintableCardTitle(currentTitle)) return;
+
     if (!currentImage) {
       alert(t('cardUpload.errorNoImage'));
       return;
@@ -213,6 +217,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
     Boolean(currentTitle.trim()) &&
     (existingTitleSet.has(normalizeTitle(currentTitle)) ||
       completedCardsRef.current.some(card => normalizeTitle(card.title) === normalizeTitle(currentTitle)));
+  const isInvalidTitle = !isPrintableCardTitle(currentTitle);
 
   const modalContent = (
     <div
@@ -304,6 +309,11 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
                       {t('cardUpload.errorDuplicate')}
                     </p>
                   )}
+                  {isInvalidTitle && (
+                    <p className="batch-upload-modal__error-text" role="alert">
+                      {t('cardUpload.errorInvalidTitle')}
+                    </p>
+                  )}
                   <p className="batch-upload-modal__help-text">
                     {t('cardUpload.helpText')}
                   </p>
@@ -329,7 +339,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
               <button
                 type="button"
                 onClick={handleNext}
-                disabled={!currentTitle.trim()}
+                disabled={!currentTitle.trim() || isInvalidTitle}
                 className="batch-upload-modal__next-button"
                   >
                     {remaining > 0 ? t('batchUpload.actions.next', { count: remaining }) : t('batchUpload.actions.finish')}

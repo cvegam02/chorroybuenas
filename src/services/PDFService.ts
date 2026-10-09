@@ -7,6 +7,8 @@ import { logger } from '../utils/logger';
 import { PAGE_HEIGHT_PT, PAGE_WIDTH_PT, cmToPoints } from './pdf/constants';
 import { EmbedResult, urlToBase64 } from './pdf/images';
 import { drawBoardOnPage, drawCardOnPage } from './pdf/draw';
+import { createOnceLoader } from './pdf/loadOnce';
+import { PdfCardsFailedError, uniqueFailedCards } from './pdf/failedCards';
 
 export interface GeneratePDFOptions {
   /** Cartas para la sección "Baraja Completa". Si no se pasa, se usa loadCards() (invitados). */
@@ -15,25 +17,20 @@ export interface GeneratePDFOptions {
   finishedCards?: boolean;
 }
 
+/**
+ * Arma el PDF de tableros y baraja. Si alguna carta no se puede dibujar, no devuelve un PDF incompleto:
+ * lanza `PdfCardsFailedError` con las cartas que fallaron.
+ */
 export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions): Promise<Blob> => {
   const pdfDoc = await PDFDocument.create();
   const finishedCards = options?.finishedCards ?? false;
 
-  // Una sola lectura/conversión por carta: caché base64 por card.id (IndexedDB ya tiene el blob tras prefetch)
-  const base64Cache = new Map<string, string>();
-
-  const getBase64ForPDF = async (card: Card): Promise<string | null> => {
-    if (!card.id) return null;
-    const cached = base64Cache.get(card.id);
-    if (cached) return cached;
-
+  // Lee la imagen de una carta: primero la copia local (IndexedDB), luego Storage, luego la que trae la carta.
+  const readCardImage = async (card: Card): Promise<string | null> => {
     try {
       const blob = await getImageBlob(card.id);
-      if (blob) {
-        const base64 = await blobToBase64(blob);
-        base64Cache.set(card.id, base64);
-        return base64;
-      }
+      if (blob) return await blobToBase64(blob);
+
       if (card.imagePath) {
         const downloaded = await CardRepository.downloadImage(card.imagePath);
         try {
@@ -41,26 +38,24 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
         } catch (_) {
           // La caché local es opcional: si falla, se sigue con la imagen descargada.
         }
-        const base64 = await blobToBase64(downloaded);
-        base64Cache.set(card.id, base64);
-        return base64;
+        return await blobToBase64(downloaded);
       }
       if (card.image) {
         if (card.image.startsWith('http://') || card.image.startsWith('https://') || card.image.startsWith('blob:')) {
-          const base64 = await urlToBase64(card.image);
-          base64Cache.set(card.id, base64);
-          return base64;
+          return await urlToBase64(card.image);
         }
-        if (card.image.startsWith('data:')) {
-          base64Cache.set(card.id, card.image);
-          return card.image;
-        }
+        if (card.image.startsWith('data:')) return card.image;
       }
     } catch (error) {
       logger.error(`PDF: error getting image for card ${card.id}:`, error);
     }
     return null;
   };
+
+  // Una sola lectura por carta, aunque aparezca en varios tableros y todos la pidan a la vez.
+  const loadOnce = createOnceLoader<string>();
+  const getBase64ForPDF = (card: Card): Promise<string | null> =>
+    card.id ? loadOnce(card.id, () => readCardImage(card)) : Promise.resolve(null);
 
   const refreshedBoards: Board[] = await Promise.all(
     boards.map(async (board) => {
@@ -79,12 +74,13 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
 
   // Caché por card.id: cada imagen se decodifica/embebe una sola vez (evita 160+ decodificaciones cuando hay 10 tableros)
   const embedCache = new Map<string, EmbedResult>();
+  const failedCards: Card[] = [];
 
   for (let i = 0; i < refreshedBoards.length; i++) {
     const board = refreshedBoards[i];
     const page = pdfDoc.addPage([PAGE_WIDTH_PT, PAGE_HEIGHT_PT]);
 
-    await drawBoardOnPage(page, board, i + 1, pdfDoc, embedCache, finishedCards);
+    failedCards.push(...(await drawBoardOnPage(page, board, i + 1, pdfDoc, embedCache, finishedCards)));
   }
 
   // Optionally add pages with all cards (full deck)
@@ -161,7 +157,7 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
         const cardX = gridStartX + col * (deckCardW + DECK_GAP);
         const cardY = topY - deckCardH - row * (deckCardH + DECK_GAP);
 
-        await drawCardOnPage(
+        const drawn = await drawCardOnPage(
           cardsPage,
           chunk[idx],
           cardX,
@@ -174,11 +170,14 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
           embedCache,
           finishedCards ? 'contain' : 'cover'
         );
+        if (!drawn) failedCards.push(chunk[idx]);
       }
 
       pageNumber++;
     }
   }
+
+  if (failedCards.length > 0) throw new PdfCardsFailedError(uniqueFailedCards(failedCards));
 
   const pdfBytes = await pdfDoc.save();
   return new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });
@@ -222,7 +221,7 @@ export const generateCardPDF = async (card: Card): Promise<Blob> => {
   const cardY = (PAGE_HEIGHT_PT - cardHeight) / 2;
 
   // Draw the card
-  await drawCardOnPage(
+  const drawn = await drawCardOnPage(
     page,
     card,
     cardX,
@@ -233,6 +232,7 @@ export const generateCardPDF = async (card: Card): Promise<Blob> => {
     true, // showTitle
     12 // titleSize
   );
+  if (!drawn) throw new PdfCardsFailedError([card]);
 
   const pdfBytes = await pdfDoc.save();
   return new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });

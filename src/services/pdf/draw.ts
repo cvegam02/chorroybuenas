@@ -1,10 +1,11 @@
 import { PDFDocument, rgb, StandardFonts, type PDFFont, pushGraphicsState, popGraphicsState, rectangle, clip, endPath, type PDFPage } from 'pdf-lib';
 import { Board, Card } from '../../types';
 import { logger } from '../../utils/logger';
+import { printableCardTitle } from '../../utils/cardTitle';
 import logoImage from '../../img/logo.png';
 import { BOARD_HEIGHT_PT, BOARD_WIDTH_PT, CARD_GAP_PT, CUT_AREA_HEIGHT_PT, CUT_AREA_WIDTH_PT, CUT_AREA_X_PT, CUT_AREA_Y_PT, HEADER_GAP_PT, LOGO_HEIGHT_PT } from './constants';
 import { EmbedResult, embedImageInPDF } from './images';
-import { placeImageInCard, type CardImageFit } from './layout';
+import { placeImageInCard, titleBaselineOffset, titleSpaceFor, type CardImageFit } from './layout';
 
 export const titleFontCache = new WeakMap<PDFDocument, PDFFont>();
 export const getTitleFont = async (pdfDoc: PDFDocument): Promise<PDFFont> => {
@@ -58,6 +59,10 @@ export const fitTextToWidth = (
   return { text: finalText, size, width: finalWidth };
 };
 
+/**
+ * Dibuja una carta. Devuelve `false` si no se pudo (no tiene imagen o la imagen no cargó):
+ * quien llama decide qué hacer; aquí no se dibuja nada en su lugar.
+ */
 export const drawCardOnPage = async (
   page: PDFPage,
   card: Card,
@@ -70,10 +75,11 @@ export const drawCardOnPage = async (
   titleSize: number = 8,
   embedCache?: Map<string, EmbedResult>,
   fit: CardImageFit = 'cover'
-) => {
+): Promise<boolean> => {
   try {
     if (!card.image) {
-      return;
+      logger.error(`Card ${card.id} has no image to draw`);
+      return false;
     }
 
     const { image, width: imgWidth, height: imgHeight } = await embedImageInPDF(
@@ -84,7 +90,7 @@ export const drawCardOnPage = async (
     );
 
     // Reserve space for title if showing (more space for larger fonts)
-    const titleSpace = showTitle ? titleSize + 8 : 0;
+    const titleSpace = showTitle ? titleSpaceFor(titleSize) : 0;
     const imageAreaHeight = height - titleSpace;
 
     // 'cover' llena la casilla y recorta lo que sobra; 'contain' deja la imagen entera, centrada.
@@ -113,7 +119,8 @@ export const drawCardOnPage = async (
     // Draw title at bottom of card (centered, inside card area)
     if (showTitle) {
       const font = await getTitleFont(pdfDoc);
-      const rawTitle = normalizeTitle(card.title || '');
+      // Las cartas guardadas antes de la regla del nombre pueden traer emojis: se dibujan sin ellos.
+      const rawTitle = normalizeTitle(printableCardTitle(card.title || ''));
       const titlePaddingX = 6;
       const maxTextWidth = Math.max(0, width - titlePaddingX * 2);
 
@@ -131,18 +138,18 @@ export const drawCardOnPage = async (
           minSize
         );
 
-        // Fondo del título (debajo del borde; el borde se dibuja al final)
-        const titleBoxHeight = Math.max(10, fitted.size + 7);
+        // Fondo del título (debajo del borde; el borde se dibuja al final).
+        // Mide lo mismo que el espacio reservado, para que llegue hasta donde termina la foto.
         page.drawRectangle({
           x,
           y,
           width,
-          height: titleBoxHeight,
+          height: titleSpace,
           color: rgb(1, 1, 1),
           borderWidth: 0,
         });
 
-        const titleY = y + 3;
+        const titleY = y + titleBaselineOffset(titleSpace, fitted.size);
         const titleX = x + titlePaddingX + (maxTextWidth - fitted.width) / 2;
 
         page.drawText(fitted.text, {
@@ -164,6 +171,7 @@ export const drawCardOnPage = async (
       borderColor: rgb(0, 0, 0),
       borderWidth: 2,
     });
+    return true;
   } catch (error) {
     logger.error(`Error drawing card ${card.id}:`, error);
     logger.error(`Card title: ${card.title}`);
@@ -172,22 +180,7 @@ export const drawCardOnPage = async (
       logger.error(`Error message: ${error.message}`);
       logger.error(`Error stack: ${error.stack}`);
     }
-    // Draw error rectangle
-    page.drawRectangle({
-      x: x,
-      y: y,
-      width: width,
-      height: height,
-      color: rgb(0.9, 0.9, 0.9),
-      borderColor: rgb(0.5, 0.5, 0.5),
-      borderWidth: 1,
-    });
-    page.drawText('Error', {
-      x: x + 5,
-      y: y + height / 2,
-      size: 10,
-      color: rgb(0.5, 0.5, 0.5),
-    });
+    return false;
   }
 };
 
@@ -228,7 +221,9 @@ export const drawBoardOnPage = async (
   embedCache?: Map<string, EmbedResult>,
   /** Cartas que ya traen su nombre dibujado (lotería de temporada): van enteras y sin título. */
   finishedCards: boolean = false
-) => {
+): Promise<Card[]> => {
+  const failedCards: Card[] = [];
+
   // Determine grid size (default to 4x4 if undefined)
   const gridSize = board.gridSize || 16;
   const rows = gridSize === 9 ? 3 : 4;
@@ -310,7 +305,7 @@ export const drawBoardOnPage = async (
         // Invert row: row 0 is at top, so we use (rows - 1 - row)
         const cardY = boardY + (rows - 1 - row) * (cardHeightPt + CARD_GAP_PT);
 
-        await drawCardOnPage(
+        const drawn = await drawCardOnPage(
           page,
           card,
           cardX,
@@ -323,7 +318,10 @@ export const drawBoardOnPage = async (
           embedCache,
           finishedCards ? 'contain' : 'cover'
         );
+        if (!drawn) failedCards.push(card);
       }
     }
   }
+
+  return failedCards;
 };

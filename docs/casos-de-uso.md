@@ -70,7 +70,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 - **Actor(es)**: Visitante o usuario registrado.
 - **Precondiciones**: Tener una lotería abierta.
 - **Flujo principal**: (1) Sube una imagen, la ajusta y le pone título; o sube varias a la vez y revisa sus títulos. (2) Las cartas aparecen en la lotería. (3) Ve cuántas le faltan para el mínimo del modo elegido (§4).
-- **Excepciones**: Título repetido en la misma lotería: se rechaza (§4). Formato o tamaño de imagen no permitido: se rechaza (§5).
+- **Excepciones**: Título repetido en la misma lotería: se rechaza (§4). Título con emojis o letras de otros alfabetos: se rechaza (§4; 2026-10-09, FEAT-25). Formato o tamaño de imagen no permitido: se rechaza (§5).
 - **Resultado**: La lotería tiene las cartas nuevas.
 - **Estados afectados**: Cartas (§11). Para el visitante, se guardan en su navegador (§3).
 - **Notificaciones**: Ninguna.
@@ -80,7 +80,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 - **Actor(es)**: Visitante o usuario registrado, sobre sus propias cartas.
 - **Precondiciones**: La carta existe.
 - **Flujo principal**: (1) Cambia el título o la imagen de una carta, o la borra. (2) Puede vaciar la lotería completa, confirmando antes.
-- **Excepciones**: Título repetido: se rechaza (§4). No se puede vaciar la lotería mientras hay una transformación en lote en curso.
+- **Excepciones**: Título repetido: se rechaza (§4). Título con emojis o letras de otros alfabetos: se rechaza (§4; 2026-10-09, FEAT-25). No se puede vaciar la lotería mientras hay una transformación en lote en curso.
 - **Resultado**: La carta cambió o dejó de existir.
 - **Estados afectados**: Cartas (§11).
 - **Notificaciones**: Ninguna.
