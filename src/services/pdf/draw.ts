@@ -3,9 +3,9 @@ import { Board, Card } from '../../types';
 import { logger } from '../../utils/logger';
 import { printableCardTitle } from '../../utils/cardTitle';
 import logoImage from '../../img/logo.png';
-import { BOARD_HEIGHT_PT, BOARD_WIDTH_PT, CARD_GAP_PT, CUT_AREA_HEIGHT_PT, CUT_AREA_WIDTH_PT, CUT_AREA_X_PT, CUT_AREA_Y_PT, HEADER_GAP_PT, LOGO_HEIGHT_PT } from './constants';
+import { BOARD_HEIGHT_PT, BOARD_WIDTH_PT, CARD_GAP_PT, CUT_AREA_BLEED_PT, CUT_AREA_HEIGHT_PT, CUT_AREA_WIDTH_PT, CUT_AREA_X_PT, CUT_AREA_Y_PT, HEADER_GAP_PT, LOGO_HEIGHT_PT, MIN_TITLE_SIZE_PT } from './constants';
 import { EmbedResult, embedImageInPDF } from './images';
-import { placeImageInCard, titleBaselineOffset, titleSpaceFor, type CardImageFit } from './layout';
+import { cutGuides, placeImageInCard, titleBaselineOffset, titleSpaceFor, type CardImageFit } from './layout';
 
 export const titleFontCache = new WeakMap<PDFDocument, PDFFont>();
 export const getTitleFont = async (pdfDoc: PDFDocument): Promise<PDFFont> => {
@@ -127,8 +127,8 @@ export const drawCardOnPage = async (
       // Si llega vacío, no dibujamos nada
       if (rawTitle) {
         // Ajustes: un poco más pequeño en general y con mínimo para legibilidad
-        const preferred = Math.max(6, titleSize - 1);
-        const minSize = 6;
+        const preferred = Math.max(MIN_TITLE_SIZE_PT, titleSize - 1);
+        const minSize = MIN_TITLE_SIZE_PT;
 
         const fitted = fitTextToWidth(
           rawTitle,
@@ -213,6 +213,25 @@ export const getLogoImage = async (pdfDoc: PDFDocument): Promise<EmbedResult> =>
   }
 };
 
+const CUT_GUIDE_COLOR = rgb(0.35, 0.35, 0.35);
+const CUT_GUIDE_THICKNESS = 0.5;
+
+/** Línea punteada por donde se recorta el tablero y marcas de corte en sus cuatro esquinas. */
+const drawCutGuides = (page: PDFPage) => {
+  const { line, marks } = cutGuides();
+
+  page.drawRectangle({
+    ...line,
+    borderColor: CUT_GUIDE_COLOR,
+    borderWidth: CUT_GUIDE_THICKNESS,
+    borderDashArray: [3, 3],
+  });
+
+  for (const mark of marks) {
+    page.drawLine({ ...mark, color: CUT_GUIDE_COLOR, thickness: CUT_GUIDE_THICKNESS });
+  }
+};
+
 export const drawBoardOnPage = async (
   page: PDFPage,
   board: Board,
@@ -250,14 +269,16 @@ export const drawBoardOnPage = async (
   // This creates a subtle, diffused background that doesn't overpower the white background
   // Using very light orange/coral tint that matches the app's color scheme (#fef3e7, #fed7aa)
   page.drawRectangle({
-    x: boardX - 20, // Extra padding around the cut area
-    y: boardY - 20,
-    width: CUT_AREA_WIDTH_PT + 40,
-    height: CUT_AREA_HEIGHT_PT + 40,
+    x: boardX - CUT_AREA_BLEED_PT, // Extra padding around the cut area
+    y: boardY - CUT_AREA_BLEED_PT,
+    width: CUT_AREA_WIDTH_PT + CUT_AREA_BLEED_PT * 2,
+    height: CUT_AREA_HEIGHT_PT + CUT_AREA_BLEED_PT * 2,
     color: rgb(0.995, 0.953, 0.906), // Very light orange-tinted background (similar to #fef3e7)
     borderColor: rgb(0.98, 0.92, 0.87), // Slightly darker border (similar to #fed7aa but lighter)
     borderWidth: 1,
   });
+
+  drawCutGuides(page);
 
   // Draw board title (left-aligned, just above board)
   const titleText = `Tablero ${boardNumber}`;
