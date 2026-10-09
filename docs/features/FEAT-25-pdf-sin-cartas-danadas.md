@@ -9,7 +9,7 @@
 3. En los tableros se ve una franja color crema entre la foto y el nombre, porque el fondo blanco del nombre mide menos que el espacio reservado para él.
 4. La misma imagen se lee, o se descarga de Supabase, una vez por cada tablero en que aparece.
 
-**Fuera de esta feature.** Los otros diez puntos de la revisión van en tres features aparte, todavía sin definir: impresión y recorte (hoja A4 en vez de carta, guías de corte, nombres largos, centrado de la baraja), velocidad y peso del archivo, y detalles menores. Sobre la hoja: `contexto-negocio.md` §5 ya dice que los tableros van en tamaño carta y el código usa A4; se corrige en la feature de impresión, no aquí. No cambia el diseño del PDF ni el de ninguna pantalla, salvo los avisos de error que se describen abajo.
+**Fuera de esta feature.** Los otros diez puntos de la revisión van en tres features aparte, con sus historias en borrador y decisiones por tomar: impresión y recorte ([FEAT-26](FEAT-26-pdf-impresion-y-recorte.md): hoja A4 en vez de carta, guías de corte, nombres largos, centrado de la baraja), velocidad y peso del archivo ([FEAT-27](FEAT-27-pdf-velocidad-y-peso.md)) y detalles menores ([FEAT-28](FEAT-28-pdf-detalles-menores.md)). Sobre la hoja: `contexto-negocio.md` §5 ya dice que los tableros van en tamaño carta y el código usa A4; se corrige en la feature de impresión, no aquí. No cambia el diseño del PDF ni el de ninguna pantalla, salvo los avisos de error que se describen abajo.
 
 **Clasificación:** corrección de errores en la generación del PDF (zonas Crear, Mi cuenta y Administración) y una regla nueva para el nombre de la carta (pantalla C1). No toca base de datos, saldos, cobros ni permisos; sin migración ni cambios en funciones. Estimado: 2 sesiones.
 
