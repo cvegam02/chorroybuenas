@@ -7,10 +7,18 @@ import {
   CUT_LINE_MARGIN_PT,
   CUT_MARK_GAP_PT,
   CUT_MARK_LENGTH_PT,
+  DECK_CARD_ASPECT,
+  DECK_COLS,
+  DECK_GAP_PT,
+  DECK_HEADER_HEIGHT_PT,
+  DECK_MARGIN_BOTTOM_PT,
+  DECK_MARGIN_TOP_PT,
+  DECK_MARGIN_X_PT,
+  DECK_ROWS,
+  DECK_TITLE_DROP_PT,
   PAGE_HEIGHT_PT,
   PAGE_WIDTH_PT,
   PRINT_SAFE_MARGIN_PT,
-  cmToPoints,
 } from './constants';
 
 /** Cómo se acomoda la imagen en su casilla: llenándola (se recorta lo que sobra) o entera (sin recortar). */
@@ -61,18 +69,6 @@ export function titleBaselineOffset(titleSpace: number, fontSize: number): numbe
   return (titleSpace - fontSize * TITLE_CAP_HEIGHT_RATIO) / 2;
 }
 
-// Baraja completa: hoja acostada, para desperdiciar menos papel dejando espacio de corte entre cartas.
-const DECK_GAP_PT = cmToPoints(0.4);
-const DECK_MARGIN_X_PT = 30;
-const DECK_MARGIN_TOP_PT = 26;
-const DECK_MARGIN_BOTTOM_PT = 26;
-const DECK_HEADER_HEIGHT_PT = 26;
-const DECK_TITLE_DROP_PT = 18;
-const DECK_COLS = 5;
-const DECK_ROWS = 2;
-/** Proporción ancho / alto de la carta (5 × 7.5), la misma que en los tableros. */
-const DECK_CARD_ASPECT = 5 / 7.5;
-
 export interface DeckGridLayout {
   pageWidth: number;
   pageHeight: number;
@@ -89,7 +85,8 @@ export interface DeckGridLayout {
   /** Límites, arriba y abajo, del espacio donde se acomoda la cuadrícula: bajo el título y sobre el margen. */
   areaTop: number;
   areaBottom: number;
-  /** Base del título de la página. */
+  /** Dónde empieza el título de la página: orilla izquierda y base del texto. */
+  titleX: number;
   titleY: number;
 }
 
@@ -122,13 +119,37 @@ export function deckGridLayout(): DeckGridLayout {
     topY: areaTop - (areaTop - areaBottom - gridHeight) / 2,
     areaTop,
     areaBottom,
+    titleX: DECK_MARGIN_X_PT,
     titleY: pageHeight - DECK_TITLE_DROP_PT,
   };
+}
+
+/** Reparte la baraja en páginas: todas llenas, y lo que sobre en la última. */
+export function deckPages<T>(cards: T[], deck: DeckGridLayout): T[][] {
+  const perPage = deck.cols * deck.rows;
+  return Array.from({ length: Math.ceil(cards.length / perPage) }, (_, page) =>
+    cards.slice(page * perPage, (page + 1) * perPage),
+  );
+}
+
+/** Título de una página de la baraja; de la segunda en adelante avisa que es continuación. */
+export function deckPageTitle(pageNumber: number): string {
+  return pageNumber === 1 ? 'Baraja Completa' : `Baraja Completa (continuación - Página ${pageNumber})`;
 }
 
 export interface Point {
   x: number;
   y: number;
+}
+
+/** Esquina inferior izquierda de la carta número `index` de una página: se llenan por filas, desde arriba. */
+export function deckCardPosition(deck: DeckGridLayout, index: number): Point {
+  const row = Math.floor(index / deck.cols);
+  const col = index % deck.cols;
+  return {
+    x: deck.startX + col * (deck.cardWidth + deck.gap),
+    y: deck.topY - deck.cardHeight - row * (deck.cardHeight + deck.gap),
+  };
 }
 
 export interface CutMark {

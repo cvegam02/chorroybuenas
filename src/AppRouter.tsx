@@ -28,7 +28,7 @@ import { SetRepository } from './repositories/SetRepository';
 import { useBoard } from './hooks/useBoard';
 import { CardRepository } from './repositories/CardRepository';
 import { useCards } from './hooks/useCards';
-import { generatePDF, downloadPDF } from './services/PDFService';
+import { generatePDF, downloadPDF, pdfFileName } from './services/PDFService';
 import { saveBoards, saveBoardCount, loadBoards, clearAllData } from './utils/storage';
 import { BoardRepository } from './repositories/BoardRepository';
 import { Board, GridSize } from './types';
@@ -209,8 +209,13 @@ function AppContent() {
       // Con sesión, la baraja se lee de la lotería en este momento: `cards` se cargó al abrirla y no ve
       // las cartas agregadas después en la pantalla de cartas.
       const deckCards = user && currentSetId ? await CardRepository.getCards(user.id, currentSetId) : undefined;
-      const pdfBlob = await generatePDF(boardsWithHydratedImages, deckCards ? { allCards: deckCards } : undefined);
-      downloadPDF(pdfBlob);
+      // La lotería del visitante sin sesión no tiene nombre: su archivo lleva el nombre por defecto.
+      const setName = user && currentSetId ? sets.find(s => s.id === currentSetId)?.name : undefined;
+      const pdfBlob = await generatePDF(boardsWithHydratedImages, {
+        ...(deckCards ? { allCards: deckCards } : {}),
+        title: setName,
+      });
+      downloadPDF(pdfBlob, pdfFileName(setName));
       setShowConfirmation(true);
     } catch (error) {
       logger.error('Error generating PDF:', error);

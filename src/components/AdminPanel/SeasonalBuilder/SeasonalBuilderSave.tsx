@@ -63,7 +63,11 @@ export const SeasonalBuilderSave = ({ loteria, cards, boards, onBack }: Seasonal
         cards: board.map(toPdfCard),
         gridSize: loteria.grid_size,
       }));
-      const blob = await generatePDF(pdfBoards, { allCards: cards.map(toPdfCard), finishedCards: true });
+      const blob = await generatePDF(pdfBoards, {
+        allCards: cards.map(toPdfCard),
+        finishedCards: true,
+        title: loteria.name_es,
+      });
       file = new File([blob], seasonalPdfFileName(loteria.name_es), { type: SEASONAL_PDF_MIME_TYPE });
     } catch (buildError) {
       logger.error('Lotería de temporada: no se pudo armar el PDF:', buildError);
