@@ -45,3 +45,19 @@ export const PRINT_SAFE_MARGIN_PT = 18;
 // Calculate cut area position (centered both vertically and horizontally)
 export const CUT_AREA_X_PT = (PAGE_WIDTH_PT - CUT_AREA_WIDTH_PT) / 2; // Centered horizontally
 export const CUT_AREA_Y_PT = (PAGE_HEIGHT_PT - CUT_AREA_HEIGHT_PT) / 2; // Centered vertically
+
+// Baraja completa: hoja acostada, para desperdiciar menos papel dejando espacio de corte entre cartas
+export const DECK_COLS = 5;
+export const DECK_ROWS = 2;
+// Proporción ancho / alto de la carta (5 × 7.5), la misma que en los tableros
+export const DECK_CARD_ASPECT = 5 / 7.5;
+export const DECK_GAP_PT = cmToPoints(0.4);
+export const DECK_MARGIN_X_PT = 30;
+export const DECK_MARGIN_TOP_PT = 26;
+export const DECK_MARGIN_BOTTOM_PT = 26;
+export const DECK_HEADER_HEIGHT_PT = 26;
+// Distancia de la orilla superior de la hoja a la base del título de la página
+export const DECK_TITLE_DROP_PT = 18;
+export const DECK_TITLE_SIZE_PT = 12;
+// Letra del nombre de cada carta de la baraja
+export const DECK_CARD_TITLE_SIZE_PT = 11;

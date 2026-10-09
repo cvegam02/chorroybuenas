@@ -12,7 +12,7 @@ import { BoardThumbnail } from '../BoardGenerator/BoardThumbnail';
 import { BoardModal } from '../BoardGenerator/BoardModal';
 import { CardPreviewModal } from './CardPreviewModal';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
-import { generatePDF, downloadPDF } from '../../services/PDFService';
+import { generatePDF, downloadPDF, pdfFileName } from '../../services/PDFService';
 import { Card, GridSize } from '../../types';
 import './SetView.css';
 import { logger } from '../../utils/logger';
@@ -140,8 +140,8 @@ export const SetView = () => {
     setPdfError(null);
     setIsGeneratingPDF(true);
     try {
-      const blob = await generatePDF(boards, { allCards: cards });
-      downloadPDF(blob);
+      const blob = await generatePDF(boards, { allCards: cards, title: set?.name });
+      downloadPDF(blob, pdfFileName(set?.name));
     } catch (err) {
       logger.error('Error generating PDF:', err);
       setPdfError(pdfErrorMessage(err, t));

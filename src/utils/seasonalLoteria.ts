@@ -2,6 +2,7 @@
  * Validación de la ficha y del PDF de una lotería de temporada (FEAT-17).
  * La base repite estos límites (supabase/migrations/027 y 028): ella es quien manda.
  */
+import { fileNameSlug } from './fileNameSlug';
 import { localInputToIso } from './seasonalPublishing';
 
 export const SEASONAL_NAME_MAX_LENGTH = 80;
@@ -181,13 +182,7 @@ export function withBuiltCounts(
 
 /** «Día de Muertos» → «dia-de-muertos.pdf». */
 export function seasonalPdfFileName(name: string): string {
-  const slug = name
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  return `${slug || 'loteria-tematica'}.pdf`;
+  return `${fileNameSlug(name) || 'loteria-tematica'}.pdf`;
 }
 
 /** Pestañas de la ventana de la ficha, en el orden en que se muestran. */

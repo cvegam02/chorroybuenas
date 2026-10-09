@@ -3,9 +3,9 @@ import { Board, Card } from '../../types';
 import { logger } from '../../utils/logger';
 import { printableCardTitle } from '../../utils/cardTitle';
 import logoImage from '../../img/logo.png';
-import { BOARD_HEIGHT_PT, BOARD_WIDTH_PT, CARD_GAP_PT, CUT_AREA_BLEED_PT, CUT_AREA_HEIGHT_PT, CUT_AREA_WIDTH_PT, CUT_AREA_X_PT, CUT_AREA_Y_PT, HEADER_GAP_PT, LOGO_HEIGHT_PT, MIN_TITLE_SIZE_PT } from './constants';
+import { BOARD_HEIGHT_PT, BOARD_WIDTH_PT, CARD_GAP_PT, CUT_AREA_BLEED_PT, CUT_AREA_HEIGHT_PT, CUT_AREA_WIDTH_PT, CUT_AREA_X_PT, CUT_AREA_Y_PT, DECK_CARD_TITLE_SIZE_PT, DECK_TITLE_SIZE_PT, HEADER_GAP_PT, LOGO_HEIGHT_PT, MIN_TITLE_SIZE_PT } from './constants';
 import { EmbedResult, embedImageInPDF } from './images';
-import { cutGuides, deckCutGuides, placeImageInCard, titleBaselineOffset, titleSpaceFor, type CardImageFit, type DeckGridLayout } from './layout';
+import { cutGuides, deckCardPosition, deckCutGuides, deckGridLayout, deckPages, deckPageTitle, placeImageInCard, titleBaselineOffset, titleSpaceFor, type CardImageFit, type DeckGridLayout } from './layout';
 
 export const titleFontCache = new WeakMap<PDFDocument, PDFFont>();
 export const getTitleFont = async (pdfDoc: PDFDocument): Promise<PDFFont> => {
@@ -234,7 +234,7 @@ const drawCutGuides = (page: PDFPage) => {
 };
 
 /** Líneas punteadas de corte entre las cartas de una página de la baraja, con una marca en cada extremo. */
-export const drawDeckCutGuides = (page: PDFPage, deck: DeckGridLayout, cardCount: number) => {
+const drawDeckCutGuides = (page: PDFPage, deck: DeckGridLayout, cardCount: number) => {
   const { lines, marks } = deckCutGuides(deck, cardCount);
 
   for (const line of lines) {
@@ -243,6 +243,51 @@ export const drawDeckCutGuides = (page: PDFPage, deck: DeckGridLayout, cardCount
   for (const mark of marks) {
     page.drawLine({ ...mark, color: CUT_GUIDE_COLOR, thickness: CUT_GUIDE_THICKNESS });
   }
+};
+
+/** Agrega las páginas de «Baraja Completa». Devuelve las cartas que no se pudieron dibujar. */
+export const drawDeckPages = async (
+  pdfDoc: PDFDocument,
+  cards: Card[],
+  embedCache?: Map<string, EmbedResult>,
+  /** Cartas que ya traen su nombre dibujado (lotería de temporada): van enteras y sin título. */
+  finishedCards: boolean = false
+): Promise<Card[]> => {
+  const failedCards: Card[] = [];
+  const deck = deckGridLayout();
+  const pages = deckPages(cards, deck);
+
+  for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+    const pageCards = pages[pageIndex];
+    const page = pdfDoc.addPage([deck.pageWidth, deck.pageHeight]);
+    page.drawText(deckPageTitle(pageIndex + 1), {
+      x: deck.titleX,
+      y: deck.titleY,
+      size: DECK_TITLE_SIZE_PT,
+      color: rgb(0, 0, 0),
+    });
+    drawDeckCutGuides(page, deck, pageCards.length);
+
+    for (let index = 0; index < pageCards.length; index++) {
+      const { x, y } = deckCardPosition(deck, index);
+      const drawn = await drawCardOnPage(
+        page,
+        pageCards[index],
+        x,
+        y,
+        deck.cardWidth,
+        deck.cardHeight,
+        pdfDoc,
+        !finishedCards,
+        DECK_CARD_TITLE_SIZE_PT,
+        embedCache,
+        finishedCards ? 'contain' : 'cover'
+      );
+      if (!drawn) failedCards.push(pageCards[index]);
+    }
+  }
+
+  return failedCards;
 };
 
 export const drawBoardOnPage = async (
