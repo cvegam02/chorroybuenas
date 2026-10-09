@@ -5,7 +5,7 @@ import { printableCardTitle } from '../../utils/cardTitle';
 import logoImage from '../../img/logo.png';
 import { BOARD_HEIGHT_PT, BOARD_WIDTH_PT, CARD_GAP_PT, CUT_AREA_BLEED_PT, CUT_AREA_HEIGHT_PT, CUT_AREA_WIDTH_PT, CUT_AREA_X_PT, CUT_AREA_Y_PT, HEADER_GAP_PT, LOGO_HEIGHT_PT, MIN_TITLE_SIZE_PT } from './constants';
 import { EmbedResult, embedImageInPDF } from './images';
-import { cutGuides, placeImageInCard, titleBaselineOffset, titleSpaceFor, type CardImageFit } from './layout';
+import { cutGuides, deckCutGuides, placeImageInCard, titleBaselineOffset, titleSpaceFor, type CardImageFit, type DeckGridLayout } from './layout';
 
 export const titleFontCache = new WeakMap<PDFDocument, PDFFont>();
 export const getTitleFont = async (pdfDoc: PDFDocument): Promise<PDFFont> => {
@@ -215,6 +215,7 @@ export const getLogoImage = async (pdfDoc: PDFDocument): Promise<EmbedResult> =>
 
 const CUT_GUIDE_COLOR = rgb(0.35, 0.35, 0.35);
 const CUT_GUIDE_THICKNESS = 0.5;
+const CUT_GUIDE_DASH = [3, 3];
 
 /** Línea punteada por donde se recorta el tablero y marcas de corte en sus cuatro esquinas. */
 const drawCutGuides = (page: PDFPage) => {
@@ -224,9 +225,21 @@ const drawCutGuides = (page: PDFPage) => {
     ...line,
     borderColor: CUT_GUIDE_COLOR,
     borderWidth: CUT_GUIDE_THICKNESS,
-    borderDashArray: [3, 3],
+    borderDashArray: CUT_GUIDE_DASH,
   });
 
+  for (const mark of marks) {
+    page.drawLine({ ...mark, color: CUT_GUIDE_COLOR, thickness: CUT_GUIDE_THICKNESS });
+  }
+};
+
+/** Líneas punteadas de corte entre las cartas de una página de la baraja, con una marca en cada extremo. */
+export const drawDeckCutGuides = (page: PDFPage, deck: DeckGridLayout, cardCount: number) => {
+  const { lines, marks } = deckCutGuides(deck, cardCount);
+
+  for (const line of lines) {
+    page.drawLine({ ...line, color: CUT_GUIDE_COLOR, thickness: CUT_GUIDE_THICKNESS, dashArray: CUT_GUIDE_DASH });
+  }
   for (const mark of marks) {
     page.drawLine({ ...mark, color: CUT_GUIDE_COLOR, thickness: CUT_GUIDE_THICKNESS });
   }
