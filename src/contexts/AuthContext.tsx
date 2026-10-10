@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { googleRedirectUrl } from '../utils/authRedirect';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
 import { SyncService } from '../services/SyncService';
@@ -13,7 +14,8 @@ interface AuthContextType {
     isAdmin: boolean;
     /** Set when user landed from password reset link; show "set new password" UI until cleared */
     recoverySession: Session | null;
-    signInWithGoogle: () => Promise<void>;
+    /** `returnPath`: ruta del sitio a la que se regresa; sin ella, Mi cuenta. */
+    signInWithGoogle: (returnPath?: string) => Promise<void>;
     signInWithEmail: (email: string, password: string) => Promise<void>;
     signUpWithEmail: (email: string, password: string, metadata?: { full_name?: string }) => Promise<void>;
     signOut: () => Promise<void>;
@@ -83,11 +85,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         checkAdmin();
     }, [user]);
 
-    const signInWithGoogle = async () => {
+    const signInWithGoogle = async (returnPath?: string) => {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: `${window.location.origin}/dashboard`
+                redirectTo: googleRedirectUrl(window.location.origin, returnPath)
             }
         });
         if (error) throw error;

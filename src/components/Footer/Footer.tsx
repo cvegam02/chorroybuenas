@@ -8,17 +8,10 @@ import './Footer.css';
 const CONTACT_EMAIL = 'carlos.tests01@gmail.com';
 const PAYPAL_URL = 'https://paypal.me/cavegam';
 
-/** Redes del sitio. Un enlace solo se muestra cuando tiene su URL (FEAT-32, decisión 9). */
-const SOCIAL_LINKS: readonly { label: string; url: string }[] = [
-    { label: 'Instagram', url: '' },
-    { label: 'TikTok', url: '' },
-];
-
 export const Footer = () => {
     const { t } = useTranslation();
     const { user } = useAuth();
     const currentYear = new Date().getFullYear();
-    const socialLinks = SOCIAL_LINKS.filter(({ url }) => url !== '');
 
     return (
         <footer className="footer">
@@ -40,11 +33,6 @@ export const Footer = () => {
                     <Link to="/como-se-juega">{t('footer.howToPlay')}</Link>
                     <Link to="/que-es-la-loteria">{t('footer.whatIsLoteria')}</Link>
                     <Link to="/privacidad">{t('footer.privacy')}</Link>
-                    {socialLinks.map(({ label, url }) => (
-                        <a key={label} href={url} target="_blank" rel="noopener noreferrer">
-                            {label}
-                        </a>
-                    ))}
                 </nav>
             </div>
 

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { LandingVideo } from './LandingVideo';
+import { PromoVideo } from './PromoVideo';
 import type { LandingPrices } from './useLandingPrices';
 import './LandingPaths.css';
 
@@ -20,7 +20,7 @@ export const LandingPaths = ({ aiPrice, themedPrice }: LandingPrices) => {
       </h2>
 
       <Link to="/beneficios" className="landing-paths__card landing-paths__card--ai">
-        <LandingVideo
+        <PromoVideo
           name="hero-cartas"
           alt={t('landing.paths.ai.mediaAlt')}
           className="landing-paths__media"

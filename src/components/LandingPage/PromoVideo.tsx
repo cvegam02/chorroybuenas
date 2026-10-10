@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { playsMp4Only } from '../../utils/landingVideo';
 
-interface LandingVideoProps {
+interface PromoVideoProps {
   /** Nombre del archivo en `/media/inicio`, sin extensión. */
   name: 'hero-gratis' | 'hero-cartas';
   alt: string;
@@ -24,11 +24,11 @@ const useIsBrowser = (): boolean =>
   );
 
 /**
- * Video de la página de inicio, sin sonido y en bucle. La página pre-generada lleva solo la imagen
+ * Video de presentación (inicio y Beneficios), sin sonido y en bucle. La página pre-generada lleva solo la imagen
  * fija: el video se decide ya en el navegador, que es donde se sabe cuál puede pintar y si el
  * visitante pidió menos movimiento.
  */
-export const LandingVideo = ({ name, alt, className, still = false }: LandingVideoProps) => {
+export const PromoVideo = ({ name, alt, className, still = false }: PromoVideoProps) => {
   const isBrowser = useIsBrowser();
   const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
   const poster = `${MEDIA_BASE}/${name}-poster.jpg`;

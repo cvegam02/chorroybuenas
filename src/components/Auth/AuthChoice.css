@@ -1,0 +1,91 @@
+/* «Entrar con Google» y «Crear tu cuenta», del mismo tamaño (FEAT-33) */
+
+.auth-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auth-choice__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.auth-choice__button {
+  flex: 1 1 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.auth-choice__button:hover {
+  transform: translateY(-2px);
+}
+
+.auth-choice--onPrimary .auth-choice__button--google {
+  background: var(--color-bg-surface);
+  color: var(--color-primary-dark);
+}
+
+.auth-choice--onPrimary .auth-choice__button--signup {
+  border-color: color-mix(in srgb, var(--color-text-inverted) 75%, transparent);
+  background: transparent;
+  color: var(--color-text-inverted);
+}
+
+.auth-choice--onLight .auth-choice__button--google {
+  border-color: var(--color-primary-lighter);
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+}
+
+.auth-choice--onLight .auth-choice__button--signup {
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+}
+
+.auth-choice__button:focus-visible,
+.auth-choice__login-button:focus-visible {
+  outline: 3px solid var(--color-accent-light);
+  outline-offset: 3px;
+}
+
+.auth-choice--onLight .auth-choice__button:focus-visible,
+.auth-choice--onLight .auth-choice__login-button:focus-visible {
+  outline-color: var(--color-primary-dark);
+}
+
+.auth-choice__login {
+  font-size: 14px;
+}
+
+.auth-choice__login-button {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-choice__button {
+    transition: none;
+  }
+
+  .auth-choice__button:hover {
+    transform: none;
+  }
+}

@@ -139,3 +139,16 @@ describe('showsSampleNote', () => {
     expect(showsSampleNote(6, null)).toBe(false);
   });
 });
+
+describe('forma del catálogo rediseñado (FEAT-33, US A3)', () => {
+  it('una temática con una sola lotería se muestra como tarjeta grande', async () => {
+    const { catalogLayout } = await import('../../src/utils/seasonalCatalog');
+    expect(catalogLayout(1)).toBe('feature');
+  });
+
+  it('con varias loterías se muestra como cuadrícula', async () => {
+    const { catalogLayout } = await import('../../src/utils/seasonalCatalog');
+    expect(catalogLayout(2)).toBe('grid');
+    expect(catalogLayout(5)).toBe('grid');
+  });
+});

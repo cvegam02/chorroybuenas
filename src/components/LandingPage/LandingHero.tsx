@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { LandingVideo } from './LandingVideo';
+import { PromoVideo } from './PromoVideo';
 import './LandingHero.css';
 
 interface LandingHeroProps {
@@ -28,7 +28,7 @@ export const LandingHero = ({ onStart }: LandingHeroProps) => {
           </div>
         </div>
         <div className="landing-hero__media">
-          <LandingVideo name="hero-gratis" alt={t('landing.hero.videoAlt')} className="landing-hero__video" />
+          <PromoVideo name="hero-gratis" alt={t('landing.hero.videoAlt')} className="landing-hero__video" />
         </div>
       </div>
     </section>

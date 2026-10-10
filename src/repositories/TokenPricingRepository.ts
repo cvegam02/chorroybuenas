@@ -71,6 +71,23 @@ export class TokenPricingRepository {
   }
 
   /**
+   * Paquetes activos tal como están guardados, o null si no se pudieron leer. Para quien prefiere
+   * no mostrar la sección antes que mostrar paquetes supuestos (Beneficios, FEAT-33).
+   */
+  static async getPacksOrNull(): Promise<TokenPack[] | null> {
+    const { data, error } = await supabase
+      .from('token_packs')
+      .select('id, base_tokens, bonus_tokens, price_cents, sort_order, is_active, created_at')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+
+    if (error || !data?.length) {
+      return null;
+    }
+    return data as TokenPack[];
+  }
+
+  /**
    * Precio por token en una moneda. Fallback 200 centavos MXN.
    */
   static async getPricing(currency = 'MXN'): Promise<number> {

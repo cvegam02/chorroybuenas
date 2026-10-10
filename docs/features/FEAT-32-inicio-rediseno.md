@@ -1,6 +1,6 @@
 # FEAT-32 — Rediseño de la página de inicio (P1)
 
-**Estado: definida con Carlos el 2026-10-10; ese día aprobó el diseño y las historias y pidió construir la página completa en una sola sesión. Las seis historias están construidas (2026-10-10) y guardadas en la rama, pendientes de su demo; todavía no hay PR a `dev`. Pendiente de Carlos: confirmar el cambio en `docs/diseno-mockups.md`, volver a exportar las dos imágenes fijas de los videos (traen fondo negro), las URL de las redes y el texto de la pregunta del papel (ver «Pendientes de Carlos»). Rama `feature/inicio-rediseno`, creada desde `dev`.**
+**Estado: definida con Carlos el 2026-10-10; ese día aprobó el diseño y las historias y pidió construir la página completa en una sola sesión. Las seis historias están construidas (2026-10-10) y guardadas en la rama, pendientes de su demo; todavía no hay PR a `dev`. `docs/diseno-mockups.md` al día (Carlos lo confirmó el 2026-10-10). Pendiente de Carlos: volver a exportar las dos imágenes fijas de los videos (traen fondo negro), las URL de las redes y el texto de la pregunta del papel (ver «Pendientes de Carlos»). Rama `feature/inicio-rediseno`, creada desde `dev`.**
 
 **Contexto.** Carlos pidió el 2026-10-10 rehacer la página de inicio para que quede como las maquetas de `docs/referencia-diseno/` (`inicio-escritorio.html` e `inicio-celular.html`, de 390 px), siguiendo `docs/referencia-diseno/INSTRUCCIONES-CLAUDE-CODE.md`. Las maquetas son referencia visual de estructura, textos, orden y estilos: no se copia su HTML. Los archivos multimedia ya están en `public/media/inicio/` con su nombre final y no se mueven ni se renombran.
 
@@ -21,7 +21,7 @@ Todas del 2026-10-10.
 
 Tomadas del documento de instrucciones, sin pregunta aparte:
 
-9. **Redes sociales:** el pie queda listo para mostrarlas, pero no muestra ningún enlace hasta tener su URL. Carlos las pasa después.
+9. **Redes sociales:** el pie queda listo para mostrarlas, pero no muestra ningún enlace hasta tener su URL. Carlos las pasa después. _(Sustituida el 2026-10-10 por FEAT-33, decisión 3: se quitaron del todo.)_
 10. **Precio de la IA:** 1 token = 1 foto. Si el precio no se puede leer, la etiqueta no aparece.
 11. **Videos:** primero el WebM (fondo transparente) y después el MP4 (fondo naranja, para Safari). Con «reducir movimiento» activado se ve solo la imagen fija. En celular, la tarjeta de IA lleva imagen fija para no poner dos videos seguidos.
 
@@ -96,7 +96,6 @@ Dos ajustes que salieron al construir (2026-10-10):
 
 ## Pendientes de Carlos
 
-- **Confirmar el cambio en `docs/diseno-mockups.md`** (descripción de P1 y línea del pie). Los 4 puntos se le presentaron el 2026-10-10; sin su sí, ese documento no se toca.
 - **Imágenes fijas de los videos con fondo negro.** `hero-gratis-poster.jpg` y `hero-cartas-poster.jpg` son JPG, que no guarda transparencia, y salieron con fondo negro. Se ven como un cuadro negro sobre el naranja en tres momentos: el instante antes de que arranque el video, con «reducir movimiento» activado y, siempre, en la tarjeta de IA en celular. Hay que volver a exportarlas con el mismo nombre y fondo naranja `#D25014` (o transparente, en otro formato, y se ajusta el nombre en el código). Detectado el 2026-10-10.
 - **URL de las redes sociales** para el pie (US C2).
 - **Texto de la pregunta del papel** (decisión 8).
@@ -105,7 +104,7 @@ Dos ajustes que salieron al construir (2026-10-10):
 
 Se editan en el mismo commit que el código. Los de la base de conocimiento, solo con el sí de Carlos a los 4 puntos.
 
-- `docs/diseno-mockups.md` — descripción de P1 y la línea del pie de página. **Pendiente de confirmación de Carlos.**
+- `docs/diseno-mockups.md` — descripción de P1 y la línea del pie de página. **Hecho el 2026-10-10, con el sí de Carlos.**
 - `docs/sistema-diseno.md` — colores nuevos y la excepción a FEAT-29 (decisión 9). **Hecho el 2026-10-10.**
 - `docs/contexto-negocio.md` y `docs/casos-de-uso.md` — no cambian.
 
@@ -189,7 +188,7 @@ Se editan en el mismo commit que el código. Los de la base de conocimiento, sol
   - [x] No aparece la pregunta del papel.
   - [x] Textos en español y en inglés. (Prueba automática: mismas claves en los dos idiomas.)
 
-### US C2 — Llamada final, pie de página único y limpieza   ·   Estado: construida el 2026-10-10, pendiente de la demo de Carlos y de su sí para `docs/diseno-mockups.md`
+### US C2 — Llamada final, pie de página único y limpieza   ·   Estado: construida el 2026-10-10, pendiente de la demo de Carlos
 
 - **Historia** — Como visitante, quiero un último botón para empezar y un pie con los enlaces útiles en cualquier página, para no tener que volver arriba ni buscar la información.
 - **Entrega demostrable** — «¿Listo para comenzar?» con su botón, sin insignia. Un solo pie oscuro en todo el sitio, con el corazón, el crédito de Carlos, correo, PayPal y los enlaces (¿Qué es chorroybuenas?, ¿Cómo se juega?, ¿Qué es la lotería?, Aviso de privacidad). Sin enlaces a redes hasta tener sus URL. Se borran el pie pequeño de inicio, el bloque de dos enlaces, y los estilos, textos e imágenes que ya nadie usa. Documentos al día.
@@ -204,6 +203,6 @@ Se editan en el mismo commit que el código. Los de la base de conocimiento, sol
   - [ ] Se conservan el crédito, el correo y PayPal.
   - [x] No se muestra ningún enlace a redes sin URL.
   - [x] No quedan estilos, textos ni imágenes de la versión anterior sin usar.
-  - [ ] `docs/diseno-mockups.md` al día (falta el sí de Carlos). `docs/sistema-diseno.md` ya lo está.
+  - [x] `docs/diseno-mockups.md` y `docs/sistema-diseno.md` al día (el primero, con el sí de Carlos del 2026-10-10).
   - [x] `npm run typecheck`, `npm run lint` y `npm test` en verde.
   - [x] Textos en español y en inglés. (Prueba automática: mismas claves en los dos idiomas.)

@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaSignOutAlt, FaUser, FaChevronDown, FaThList, FaCog } from 'react-icons/fa';
+import { FaBars, FaChevronDown, FaCoins } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAvatarUrl } from '../../hooks/useAvatarUrl';
@@ -8,41 +8,54 @@ import { useSetContext } from '../../contexts/SetContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import { SetRepository } from '../../repositories/SetRepository';
 import logoImage from '../../img/logo.png';
-import { LanguageSwitcher } from './LanguageSwitcher';
-import { UserMenuPanel } from './UserMenuPanel';
-import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { FaTags, FaCoins } from 'react-icons/fa';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
-import './Navbar.css';
 import { logger } from '../../utils/logger';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { MOBILE_MENU_ID, MobileMenu } from './MobileMenu';
+import { NAV_LINKS, displayFirstName, isNavLinkActive } from './navLinks';
+import { UserAvatar } from './UserAvatar';
+import { UserMenuPanel } from './UserMenuPanel';
+import './Navbar.css';
 
-// Mismo corte en que Navbar.css pasa a la versión compacta
-const DESKTOP_QUERY = '(min-width: 1201px)';
+type AuthMode = 'login' | 'signup';
 
+/**
+ * Barra superior (FEAT-33, opción A). En pantallas anchas muestra los enlaces y la cuenta; en las
+ * angostas, el botón de menú. Cuál de las dos se ve lo decide Navbar.css, en 1200 px.
+ */
 export const Navbar = () => {
-  const location = useLocation();
+  const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { user, signOut, isLoading, isAdmin } = useAuth();
+  const { t } = useTranslation();
+  const { user, signOut, signInWithGoogle, isLoading, isAdmin } = useAuth();
   const avatarUrl = useAvatarUrl(user);
   const { sets, currentSetId, setCurrentSetId, setSets } = useSetContext();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const userMenuRef = useRef<HTMLDivElement>(null);
   const { balance } = useTokenBalance();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isCreatingSet, setIsCreatingSet] = useState(false);
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
-  const [emailModalMode, setEmailModalMode] = useState<'login' | 'signup'>('login');
-  const [isLoteriasSectionOpen, setIsLoteriasSectionOpen] = useState(true);
-  const isDesktop = useMediaQuery(DESKTOP_QUERY);
+  const [authMode, setAuthMode] = useState<AuthMode | null>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  const fullName: string = user?.user_metadata?.full_name?.trim() ?? '';
+  const email = user?.email ?? '';
+
+  const closeMobileMenu = useCallback(() => setIsMobileMenuOpen(false), []);
+
+  // Al cambiar de página se cierran los dos menús.
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setIsUserMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
-        setUserMenuOpen(false);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
       }
     };
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setUserMenuOpen(false);
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsUserMenuOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleEscape);
@@ -52,370 +65,187 @@ export const Navbar = () => {
     };
   }, []);
 
-  const { t } = useTranslation();
-  const isActive = (path: string) => location.pathname === path;
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+  const openAuth = (mode: AuthMode) => {
+    setIsMobileMenuOpen(false);
+    setAuthMode(mode);
   };
 
-  const closeMenu = () => {
-    setIsMenuOpen(false);
+  const handleGoogle = async () => {
+    try {
+      // Si sale bien, el navegador se va a Google: no hay nada más que hacer aquí.
+      await signInWithGoogle();
+    } catch (error) {
+      logger.error('Navbar: no se pudo entrar con Google', error);
+      // La ventana de registro ofrece Google otra vez y el registro por correo.
+      openAuth('signup');
+    }
   };
 
   const getNextNewLoteriaName = () => {
     const baseName = (t('navbar.newLoteriaName') || 'Nueva lotería').trim();
     const numbers = sets
-      .filter(s => s.name.startsWith(baseName))
-      .map(s => {
-        const rest = s.name.slice(baseName.length).trim();
-        const n = parseInt(rest, 10);
-        return Number.isInteger(n) && n >= 1 ? n : null;
+      .filter((set) => set.name.startsWith(baseName))
+      .map((set) => {
+        const number = parseInt(set.name.slice(baseName.length).trim(), 10);
+        return Number.isInteger(number) && number >= 1 ? number : null;
       })
-      .filter((n): n is number => n !== null);
-    const nextNum = numbers.length > 0 ? Math.max(...numbers) + 1 : 1;
-    return `${baseName} ${nextNum}`;
+      .filter((number): number is number => number !== null);
+    return `${baseName} ${numbers.length > 0 ? Math.max(...numbers) + 1 : 1}`;
   };
 
   const handleCreateNewLoteria = async () => {
     if (!user || isCreatingSet) return;
     setIsCreatingSet(true);
     try {
-      const name = getNextNewLoteriaName();
-      const newSet = await SetRepository.createSet(user.id, name);
-      setSets(prev => [...prev, newSet]);
+      const newSet = await SetRepository.createSet(user.id, getNextNewLoteriaName());
+      setSets((previous) => [...previous, newSet]);
       setCurrentSetId(newSet.id);
-      setUserMenuOpen(false);
-      closeMenu();
+      setIsUserMenuOpen(false);
       navigate('/cards');
-    } catch (err) {
-      logger.error('Error creating set:', err);
+    } catch (error) {
+      logger.error('Error creating set:', error);
     } finally {
       setIsCreatingSet(false);
     }
   };
 
+  const goTo = (path: string) => {
+    navigate(path);
+    setIsUserMenuOpen(false);
+  };
+
+  const handleSignOut = () => {
+    signOut();
+    setIsUserMenuOpen(false);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
-    <nav className="navbar">
-      <div className="navbar__container">
-        <Link to="/" className="navbar__logo" onClick={closeMenu}>
-          <img
-            src={logoImage}
-            alt="chorroybuenas.com.mx"
-            className="navbar__logo-image"
-          />
-          <span className="navbar__logo-text">chorroybuenas.com.mx</span>
+    <header className="navbar">
+      <nav className="navbar__container" aria-label={t('navbar.mainLabel')}>
+        <Link to="/" className="navbar__logo">
+          <img src={logoImage} alt="chorroybuenas.com.mx" className="navbar__logo-image" />
         </Link>
 
-        <div className="navbar__actions">
-          <LanguageSwitcher />
+        <ul className="navbar__links navbar__wide-only">
+          {NAV_LINKS.map((link) => {
+            const isActive = isNavLinkActive(link, pathname);
+            return (
+              <li key={link.to}>
+                <Link
+                  to={link.to}
+                  className={`navbar__link ${isActive ? 'navbar__link--active' : ''}`}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  {t(link.labelKey)}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
 
-          {!isLoading && user && (
-            <div className="navbar__auth" ref={userMenuRef}>
-              <button
-                type="button"
-                className="navbar__user-trigger"
-                onClick={() => setUserMenuOpen((v) => !v)}
-                aria-expanded={userMenuOpen}
-                aria-haspopup="true"
-                aria-label={t('navbar.myAccount')}
-              >
-                <div className="navbar__user-container">
-                  <div className="navbar__user-info" title={user.email}>
-                    {avatarUrl ? (
-                      <img src={avatarUrl} alt="" className="navbar__user-avatar" />
-                    ) : (
-                      <FaUser className="navbar__user-icon" />
-                    )}
-                  </div>
-                  <span className="navbar__user-name" title={user.email}>
-                    {user.user_metadata?.full_name?.trim() || user.email || ''}
-                  </span>
-                  {balance !== null && (
-                    <div className="navbar__tokens-badge" title={t('landing.benefits.feature3.title')}>
-                      <FaCoins />
-                      <span>{balance}</span>
-                    </div>
-                  )}
-                  <FaChevronDown className={`navbar__user-chevron ${userMenuOpen ? 'navbar__user-chevron--open' : ''}`} />
-                </div>
-              </button>
-              {userMenuOpen && isDesktop && (
-                <UserMenuPanel
-                  name={user.user_metadata?.full_name?.trim() || ''}
-                  email={user.email || ''}
-                  avatarUrl={avatarUrl}
-                  balance={balance}
-                  sets={sets}
-                  currentSetId={currentSetId}
-                  isAdmin={isAdmin}
-                  isCreatingSet={isCreatingSet}
-                  onGoTo={(path) => {
-                    navigate(path);
-                    setUserMenuOpen(false);
-                  }}
-                  onCreateSet={handleCreateNewLoteria}
-                  onSelectSet={(setId) => {
-                    setCurrentSetId(setId);
-                    navigate(`/loteria/${setId}`);
-                    setUserMenuOpen(false);
-                  }}
-                  onSignOut={() => {
-                    signOut();
-                    setUserMenuOpen(false);
-                  }}
-                />
-              )}
-              {userMenuOpen && !isDesktop && (
-                <div className="navbar__user-dropdown" role="menu">
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="navbar__user-dropdown-item"
-                    onClick={() => {
-                      navigate('/dashboard');
-                      setUserMenuOpen(false);
-                      closeMenu();
-                    }}
-                  >
-                    <FaUser />
-                    <span>{t('navbar.myAccount')}</span>
-                  </button>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="navbar__user-dropdown-item navbar__user-dropdown-item--create"
-                    onClick={handleCreateNewLoteria}
-                    disabled={isCreatingSet}
-                  >
-                    <span className="navbar__user-dropdown-item-icon">+</span>
-                    <span>{t('navbar.createNewLoteria')}</span>
-                  </button>
-                  <div className="navbar__user-dropdown-section" role="group" aria-label={t('navbar.myLoterias')}>
-                    <button
-                      type="button"
-                      className={`navbar__user-dropdown-section-title ${isLoteriasSectionOpen ? 'navbar__user-dropdown-section-title--open' : ''}`}
-                      onClick={() => setIsLoteriasSectionOpen((v) => !v)}
-                      aria-expanded={isLoteriasSectionOpen}
-                      aria-controls="navbar-loterias-list"
-                    >
-                      <FaChevronDown className="navbar__user-dropdown-section-chevron" />
-                      <FaThList className="navbar__user-dropdown-section-icon" />
-                      <span>{t('navbar.myLoterias')}</span>
-                    </button>
-                    <div
-                      id="navbar-loterias-list"
-                      className="navbar__user-dropdown-section-list"
-                      hidden={!isLoteriasSectionOpen}
-                    >
-                      {sets.length === 0 ? (
-                        <div className="navbar__user-dropdown-empty">{t('common.loading')}</div>
-                      ) : (
-                        sets.map((set) => (
-                          <button
-                            key={set.id}
-                            type="button"
-                            role="menuitem"
-                            className={`navbar__user-dropdown-item navbar__user-dropdown-item--set ${currentSetId === set.id ? 'navbar__user-dropdown-item--active' : ''}`}
-                            onClick={() => {
-                              setCurrentSetId(set.id);
-                              navigate(`/loteria/${set.id}`);
-                              setUserMenuOpen(false);
-                              closeMenu();
-                            }}
-                          >
-                            {set.name}
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="navbar__user-dropdown-item"
-                    onClick={() => {
-                      navigate('/comprar-tokens');
-                      setUserMenuOpen(false);
-                      closeMenu();
-                    }}
-                  >
-                    <FaCoins />
-                    <span>{t('navbar.buyTokens')}</span>
-                  </button>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="navbar__user-dropdown-item"
-                    onClick={() => {
-                      navigate('/tematicas');
-                      setUserMenuOpen(false);
-                      closeMenu();
-                    }}
-                  >
-                    <FaTags />
-                    <span>{t('navbar.seasonal')}</span>
-                  </button>
-                  {isAdmin && (
-                    <button
-                      type="button"
-                      role="menuitem"
-                      className="navbar__user-dropdown-item navbar__user-dropdown-item--admin"
-                      onClick={() => {
-                        navigate('/admin');
-                        setUserMenuOpen(false);
-                        closeMenu();
-                      }}
-                    >
-                      <FaCog />
-                      <span>Admin</span>
-                    </button>
-                  )}
-                  <div className="navbar__user-dropdown-divider" />
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="navbar__user-dropdown-item navbar__user-dropdown-item--logout"
-                    onClick={() => {
-                      signOut();
-                      setUserMenuOpen(false);
-                      closeMenu();
-                    }}
-                  >
-                    <FaSignOutAlt />
-                    <span>{t('common.logout')}</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
+        <div className="navbar__actions">
+          <span className="navbar__wide-only">
+            <LanguageSwitcher />
+          </span>
 
           {!isLoading && !user && (
-            <div className="navbar__auth-guest">
-              <button
-                className="navbar__auth-btn navbar__auth-btn--login-text navbar__auth-guest--desktop-only"
-                onClick={() => {
-                  setEmailModalMode('login');
-                  setIsEmailModalOpen(true);
-                }}
-              >
-                {t('common.auth.titleLogin')}
+            <>
+              <button type="button" className="navbar__sign-in navbar__wide-only" onClick={() => openAuth('login')}>
+                {t('navbar.signIn')}
               </button>
-              <button
-                type="button"
-                className="navbar__auth-btn navbar__auth-btn--signup navbar__auth-guest--desktop-only"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setEmailModalMode('signup');
-                  setIsEmailModalOpen(true);
-                  closeMenu();
-                }}
-              >
-                {t('common.auth.titleSignUp')}
-              </button>
-            </div>
+              <Link to="/cards" className="navbar__cta">
+                <span className="navbar__wide-only">{t('navbar.createFree')}</span>
+                <span className="navbar__narrow-only">{t('navbar.createShort')}</span>
+              </Link>
+            </>
           )}
 
-          {!user && (
-            <button
-              className="navbar__toggle"
-              onClick={toggleMenu}
-              aria-label="Toggle menu"
-              aria-expanded={isMenuOpen}
-            >
-              <span className={`navbar__toggle-icon ${isMenuOpen ? 'navbar__toggle-icon--open' : ''}`}>
-                <span></span>
-                <span></span>
-                <span></span>
-              </span>
-            </button>
+          {!isLoading && user && (
+            <>
+              {balance !== null && (
+                <Link
+                  to="/comprar-tokens"
+                  className="navbar__tokens"
+                  aria-label={t('navbar.tokensBalance', { count: balance })}
+                >
+                  <FaCoins aria-hidden="true" />
+                  <span className="navbar__wide-only">{t('navbar.tokensBalance', { count: balance })}</span>
+                  <span className="navbar__narrow-only">{balance}</span>
+                </Link>
+              )}
+
+              <div className="navbar__user navbar__wide-only" ref={userMenuRef}>
+                <button
+                  type="button"
+                  className="navbar__user-trigger"
+                  onClick={() => setIsUserMenuOpen((open) => !open)}
+                  aria-expanded={isUserMenuOpen}
+                  aria-haspopup="true"
+                  aria-label={t('navbar.myAccount')}
+                >
+                  <UserAvatar avatarUrl={avatarUrl} name={fullName} email={email} />
+                  <span className="navbar__user-name" title={email}>
+                    {displayFirstName(fullName, email)}
+                  </span>
+                  <FaChevronDown
+                    className={`navbar__user-chevron ${isUserMenuOpen ? 'navbar__user-chevron--open' : ''}`}
+                    aria-hidden="true"
+                  />
+                </button>
+                {isUserMenuOpen && (
+                  <UserMenuPanel
+                    name={fullName}
+                    email={email}
+                    avatarUrl={avatarUrl}
+                    balance={balance}
+                    sets={sets}
+                    currentSetId={currentSetId}
+                    isAdmin={isAdmin}
+                    isCreatingSet={isCreatingSet}
+                    onGoTo={goTo}
+                    onCreateSet={handleCreateNewLoteria}
+                    onSelectSet={(setId) => {
+                      setCurrentSetId(setId);
+                      goTo(`/loteria/${setId}`);
+                    }}
+                    onSignOut={handleSignOut}
+                  />
+                )}
+              </div>
+
+              <Link to="/dashboard" className="navbar__account navbar__narrow-only" aria-label={t('navbar.myAccount')}>
+                <UserAvatar avatarUrl={avatarUrl} name={fullName} email={email} />
+              </Link>
+            </>
           )}
+
+          <button
+            type="button"
+            className="navbar__icon-button navbar__narrow-only"
+            onClick={() => setIsMobileMenuOpen(true)}
+            aria-label={t('navbar.openMenu')}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls={MOBILE_MENU_ID}
+          >
+            <FaBars aria-hidden="true" />
+          </button>
         </div>
+      </nav>
 
-        {!user && (
-          <ul className={`navbar__menu ${isMenuOpen ? 'navbar__menu--open' : ''}`}>
-            <li>
-              <Link
-                to="/cards"
-                className={`navbar__link ${location.pathname === '/cards' ? 'navbar__link--active' : ''}`}
-                onClick={closeMenu}
-              >
-                {t('navbar.create')}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/tematicas"
-                className={`navbar__link ${location.pathname.startsWith('/tematicas') ? 'navbar__link--active' : ''}`}
-                onClick={closeMenu}
-              >
-                {t('navbar.seasonal')}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/beneficios"
-                className={`navbar__link ${isActive('/beneficios') ? 'navbar__link--active' : ''}`}
-                onClick={closeMenu}
-              >
-                {t('navbar.benefits')}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/como-se-juega"
-                className={`navbar__link ${isActive('/como-se-juega') ? 'navbar__link--active' : ''}`}
-                onClick={closeMenu}
-              >
-                {t('navbar.howToPlay')}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/que-es-la-loteria"
-                className={`navbar__link ${isActive('/que-es-la-loteria') ? 'navbar__link--active' : ''}`}
-                onClick={closeMenu}
-              >
-                {t('navbar.whatIs')}
-              </Link>
-            </li>
-            <li className="navbar__menu-auth navbar__menu-auth--mobile-only">
-              <div className="navbar__menu-auth-divider" />
-              <button
-                type="button"
-                className="navbar__link navbar__link--button navbar__auth-btn-mobile"
-                onClick={() => {
-                  setEmailModalMode('login');
-                  setIsEmailModalOpen(true);
-                  closeMenu();
-                }}
-              >
-                {t('common.auth.titleLogin')}
-              </button>
-              <button
-                type="button"
-                className="navbar__auth-btn navbar__auth-btn--signup navbar__auth-btn-mobile-full"
-                onClick={() => {
-                  setEmailModalMode('signup');
-                  setIsEmailModalOpen(true);
-                  closeMenu();
-                }}
-              >
-                {t('common.auth.titleSignUp')}
-              </button>
-            </li>
-          </ul>
-        )}
-      </div>
-      {!user && isMenuOpen && (
-        <div className="navbar__overlay" onClick={closeMenu}></div>
+      {isMobileMenuOpen && (
+        <MobileMenu
+          pathname={pathname}
+          user={user ? { name: fullName, email, avatarUrl, balance, isAdmin } : null}
+          onClose={closeMobileMenu}
+          onGoogle={handleGoogle}
+          onSignUp={() => openAuth('signup')}
+          onLogin={() => openAuth('login')}
+          onSignOut={handleSignOut}
+        />
       )}
-      <EmailAuthModal
-        isOpen={isEmailModalOpen}
-        onClose={() => setIsEmailModalOpen(false)}
-        initialMode={emailModalMode}
-      />
-    </nav>
+
+      <EmailAuthModal isOpen={authMode !== null} onClose={() => setAuthMode(null)} initialMode={authMode ?? 'login'} />
+    </header>
   );
 };
