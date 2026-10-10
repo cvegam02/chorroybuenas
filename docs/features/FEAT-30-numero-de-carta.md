@@ -1,6 +1,6 @@
 # FEAT-30 — Número de carta
 
-**Estado: construida el 2026-10-09 (US A1 y A2). Carlos vio el número en el PDF y lo dio por bueno. Va a `dev` con el PR de la rama `feature/numero-de-carta`; ahí falta seguir los guiones de demo. Sin decisiones pendientes. Rama creada desde `dev` con FEAT-29 ya fusionada.**
+**Estado: construida el 2026-10-09 (US A1 y A2). Carlos vio el número en el PDF y lo dio por bueno. Llegó a `dev` con el PR #48; Carlos siguió ahí los guiones de demo y el 2026-10-10 confirmó que todo se ve bien. Falta pasar a `main`, cuando Carlos lo pida. Sin decisiones pendientes. Rama creada desde `dev` con FEAT-29 ya fusionada.**
 
 **Contexto.** Salió el 2026-10-09 al definir [FEAT-29](FEAT-29-pdf-aspecto-de-las-cartas.md): el diseño de carta que trajo Carlos lleva un número en la esquina superior izquierda. Se dejó para una feature aparte porque no es solo aspecto: es una regla de negocio nueva (FEAT-29, decisión 4).
 
@@ -43,7 +43,7 @@ Todas del 2026-10-09.
 
 ## Grupo A — Número de carta
 
-### US A1 — El número sale en las cartas del PDF   ·   Estado: construida, falta la demo en `dev`
+### US A1 — El número sale en las cartas del PDF   ·   Estado: hecha, probada por Carlos en `dev` (confirmado el 2026-10-10)
 
 - **Historia** — Como persona que imprime su lotería, quiero que cada carta lleve su número, para cantarla y encontrarla como en una lotería de verdad.
 - **Entrega demostrable** — En los tableros y en la baraja del PDF, cada carta con foto normal o convertida con IA lleva su número arriba a la izquierda, sobre la imagen, con la misma letra del nombre. La misma carta lleva el mismo número en todos los tableros y en la baraja. Las loterías temáticas no cambian.
@@ -54,9 +54,9 @@ Todas del 2026-10-09.
   - [x] Las cartas se numeran 1, 2, 3… en el orden de la lista. (Prueba automática.)
   - [x] La misma carta lleva el mismo número en los tableros y en la baraja. (Prueba automática.)
   - [x] Las cartas de una lotería temática no se numeran. (Prueba automática.)
-  - [ ] El número se ve bien en el PDF, en tableros 4 × 4, 3 × 3 y baraja, con uno y dos dígitos. (Demo.)
+  - [x] El número se ve bien en el PDF, en tableros 4 × 4, 3 × 3 y baraja, con uno y dos dígitos. (Demo. en `dev`, confirmada el 2026-10-10.)
 
-### US A2 — El número se ve en las pantallas   ·   Estado: construida, falta la demo en `dev`
+### US A2 — El número se ve en las pantallas   ·   Estado: hecha, probada por Carlos en `dev` (confirmado el 2026-10-10)
 
 - **Historia** — Como persona que arma su lotería, quiero ver el número de cada carta desde que la subo, para saber cómo va a quedar.
 - **Entrega demostrable** — En el editor de cartas, la vista previa de tableros, la lotería guardada y la carta ampliada, cada carta muestra su número. Al subir una carta recibe el siguiente número; al borrar una, las siguientes bajan un número en pantalla. `docs/contexto-negocio.md` y `docs/diseno-mockups.md` quedaron al día el 2026-10-09, con la confirmación de Carlos.
@@ -66,6 +66,6 @@ Todas del 2026-10-09.
 - **Escenarios cubiertos**:
   - [x] Si cambia el número de una carta, se vuelve a componer. (Prueba automática.)
   - [x] Las cartas de los tableros en pantalla llevan el número de la lista de cartas. (Prueba automática.)
-  - [ ] Al subir y borrar cartas los números se actualizan en el editor. (Demo.)
-  - [ ] La subida por lote numera en el orden de los archivos. (Demo.)
-  - [ ] Pantalla y PDF muestran el mismo número para cada carta. (Demo.)
+  - [x] Al subir y borrar cartas los números se actualizan en el editor. (Demo. en `dev`, confirmada el 2026-10-10.)
+  - [x] La subida por lote numera en el orden de los archivos. (Demo. en `dev`, confirmada el 2026-10-10.)
+  - [x] Pantalla y PDF muestran el mismo número para cada carta. (Demo. en `dev`, confirmada el 2026-10-10.)
