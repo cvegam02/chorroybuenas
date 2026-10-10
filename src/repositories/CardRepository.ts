@@ -2,6 +2,8 @@ import { supabase } from '../utils/supabaseClient';
 import { Card } from '../types';
 import { z } from 'zod';
 import { logger } from '../utils/logger';
+import { createConcurrencyLimit } from '../utils/concurrencyLimit';
+import { createKeyedSingleFlight } from '../utils/singleFlight';
 
 // Zod Schema for Card Validation
 export const CardSchema = z.object({
@@ -20,6 +22,15 @@ export type CardDB = z.infer<typeof CardSchema>;
 const signedUrlCache = new Map<string, { url: string; expiresAt: number }>();
 /** Margen (ms) antes del expiry para considerar la URL como válida (evita usar URLs a punto de caducar). */
 const CACHE_EXPIRY_MARGIN_MS = 5 * 60 * 1000;
+
+/**
+ * Descargas de imágenes: cada una ocupa una conexión de Storage a la base, y pedir decenas a la vez la satura
+ * («Too many connections») y tumba también las demás peticiones. Por eso van pocas a la vez, y la misma
+ * imagen no se descarga dos veces mientras la primera descarga sigue en curso.
+ */
+const MAX_CONCURRENT_IMAGE_DOWNLOADS = 6;
+const limitImageDownloads = createConcurrencyLimit(MAX_CONCURRENT_IMAGE_DOWNLOADS);
+const downloadImageOnce = createKeyedSingleFlight<Blob>();
 
 /** Cache para getCards: evita 2+ llamadas a la tabla cards al cargar (p. ej. Strict Mode). */
 const cardsCache = new Map<string, { cards: Card[]; expiresAt: number }>();
@@ -68,11 +79,15 @@ export class CardRepository {
     /**
      * Descarga un archivo de imagen desde Storage por path (para prefetch y PDF).
      */
-    static async downloadImage(path: string): Promise<Blob> {
-        const { data, error } = await supabase.storage.from(this.BUCKET_NAME).download(path);
-        if (error) throw error;
-        if (!data) throw new Error('Storage download returned no data');
-        return data;
+    static downloadImage(path: string): Promise<Blob> {
+        return downloadImageOnce(path, () =>
+            limitImageDownloads(async () => {
+                const { data, error } = await supabase.storage.from(this.BUCKET_NAME).download(path);
+                if (error) throw error;
+                if (!data) throw new Error('Storage download returned no data');
+                return data;
+            })
+        );
     }
 
     /**
