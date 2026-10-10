@@ -1,6 +1,6 @@
 # FEAT-31 — Encabezado del tablero en el PDF
 
-**Estado: construida el 2026-10-09 (US A1). Carlos vio las capturas ese día y las dio por buenas, con el logo de 2.3 cm. Va a `dev` con el PR de la rama `feature/pdf-encabezado-tablero`; ahí falta seguir el guion de demo. Sin decisiones pendientes. Rama `feature/pdf-encabezado-tablero`, creada desde `dev` y puesta al día con `dev` cuando entró FEAT-30 (PR #48).**
+**Estado: construida el 2026-10-09 (US A1). Carlos vio las capturas ese día y las dio por buenas, con el logo de 2.3 cm. Llegó a `dev` con el PR #49; Carlos la probó ahí el 2026-10-09 y dijo «se ve bien». Falta pasar a `main`, cuando Carlos lo pida. Sin decisiones pendientes. Rama `feature/pdf-encabezado-tablero`, creada desde `dev` y puesta al día con `dev` cuando entró FEAT-30 (PR #48).**
 
 **Contexto.** Hasta FEAT-30, cada página de tablero del PDF lleva «Tablero N» en letra chica arriba a la izquierda y el logo, pequeño, arriba a la derecha. Carlos pidió el 2026-10-09 un encabezado centrado, con el logo más grande y el título en la letra de las cartas. Es solo aspecto del PDF: no cambia ninguna regla de negocio ni ninguna pantalla, así que no toca la base de conocimiento.
 
@@ -26,7 +26,7 @@ Todas del 2026-10-09.
 
 ## Grupo A — Encabezado
 
-### US A1 — Encabezado centrado en los tableros del PDF   ·   Estado: construida, falta la demo en `dev`
+### US A1 — Encabezado centrado en los tableros del PDF   ·   Estado: hecha, probada por Carlos en `dev` el 2026-10-09
 
 - **Historia** — Como persona que imprime su lotería, quiero que cada tablero lleve el logo grande y su título centrado, con la letra de las cartas, para que se vea como un tablero de lotería terminado.
 - **Entrega demostrable** — En cada página de tablero del PDF, de 4 × 4 y de 3 × 3, el logo va centrado arriba y, debajo, «TABLERO N» en Arvo Bold entre dos líneas que llegan a las orillas de la cuadrícula. Ya no hay título a la izquierda ni logo a la derecha. Líneas de corte, fondo crema, cartas y baraja no cambian.
@@ -39,4 +39,4 @@ Todas del 2026-10-09.
   - [x] El logo queda centrado, arriba del título y dentro del área de recorte. (Prueba automática.)
   - [x] Se dibuja igual en tableros de 16 y de 9 cartas, con Arvo Bold y el color pedido. (Prueba automática.)
   - [x] Las marcas de corte siguen dentro de lo que la impresora alcanza y las cartas no cambian de tamaño. (Pruebas automáticas de FEAT-26.)
-  - [ ] El encabezado se ve bien en el PDF, en tableros de 4 × 4 y de 3 × 3. (Capturas aprobadas el 2026-10-09; falta la demo en `dev`.)
+  - [x] El encabezado se ve bien en el PDF, en tableros de 4 × 4 y de 3 × 3. (Capturas aprobadas y demo en `dev` el 2026-10-09.)
