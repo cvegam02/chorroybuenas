@@ -23,14 +23,27 @@ export const CARD_GAP_PT = cmToPoints(0.15); // ~4.25pt (small gap between cards
 
 // Removed hardcoded card dimensions (CARD_WIDTH_PT, CARD_HEIGHT_PT) - these are now calculated dynamically per board
 
+// Borde negro de cada carta: va centrado sobre su orilla, así que sobresale la mitad
+export const CARD_BORDER_PT = 2;
+
 // Cut area dimensions - contains logo, title, and board
-// Header maximum height: 3 cm (85.05 points)
-export const MAX_HEADER_CM = 3;
-export const MAX_HEADER_PT = cmToPoints(MAX_HEADER_CM);
-export const HEADER_GAP_PT = 3; // Gap between title and board (minimal)
-export const TITLE_HEIGHT_PT = 10; // Space reserved for title text
-export const LOGO_HEIGHT_PT = MAX_HEADER_PT - HEADER_GAP_PT - TITLE_HEIGHT_PT; // Logo height to fit in max header (72pt ~2.54cm)
-export const HEADER_TOTAL_PT = MAX_HEADER_PT; // Total header space (maximum 3 cm)
+// Encabezado del tablero: logo centrado arriba y, debajo, «TABLERO N» entre dos líneas.
+// Su alto es lo más que cabe sin que las marcas de corte se salgan de lo que la impresora alcanza
+export const HEADER_TOTAL_PT = cmToPoints(3.19);
+export const BOARD_TITLE_SIZE_PT = 16;
+// Alto de las mayúsculas de Arvo Bold: 0.74 del tamaño de la letra
+export const BOARD_TITLE_CAP_HEIGHT_PT = BOARD_TITLE_SIZE_PT * 0.74;
+// Del pie del título a la cuadrícula de cartas
+export const BOARD_TITLE_GAP_PT = cmToPoints(0.4);
+// De cada línea del título al texto
+export const BOARD_TITLE_LINE_GAP_PT = cmToPoints(0.4);
+export const BOARD_TITLE_LINE_THICKNESS_PT = 1.25;
+// Del logo al título
+export const BOARD_LOGO_GAP_PT = cmToPoints(0.1);
+// Alto de la parte visible del logo: lo que queda del encabezado
+export const BOARD_LOGO_HEIGHT_PT = HEADER_TOTAL_PT - BOARD_TITLE_GAP_PT - BOARD_TITLE_CAP_HEIGHT_PT - BOARD_LOGO_GAP_PT;
+// Parte de `logo.png` que no es transparente, como fracción de la imagen y medida desde su esquina superior izquierda
+export const LOGO_VISIBLE_BOX = { left: 77 / 500, right: 426 / 500, top: 89 / 500, bottom: 398 / 500 };
 export const CUT_AREA_WIDTH_PT = BOARD_WIDTH_PT; // Same width as board
 export const CUT_AREA_HEIGHT_PT = BOARD_HEIGHT_PT + HEADER_TOTAL_PT; // Board + header
 // Cuánto sobresale el fondo crema del tablero y su encabezado, por cada lado

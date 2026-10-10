@@ -98,7 +98,10 @@ describe('guías para recortar el tablero (FEAT-26, US A2)', () => {
       const dashed = drawRectangle.mock.calls.map(([options]) => options).filter((options) => options?.borderDashArray);
       expect(dashed).toHaveLength(1);
       expect(dashed[0]).toMatchObject(line);
-      expect(drawLine.mock.calls.map(([options]) => ({ start: options.start, end: options.end }))).toEqual(marks);
+      // Además de las marcas, el tablero dibuja las dos líneas de su título.
+      const lines = drawLine.mock.calls.map(([options]) => ({ start: options.start, end: options.end }));
+      expect(lines).toHaveLength(marks.length + 2);
+      expect(lines).toEqual(expect.arrayContaining(marks));
     });
   });
 });

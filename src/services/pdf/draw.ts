@@ -2,9 +2,10 @@ import { PDFDocument, rgb, pushGraphicsState, popGraphicsState, rectangle, clip,
 import { Board, Card } from '../../types';
 import { logger } from '../../utils/logger';
 import logoImage from '../../img/logo.png';
-import { BOARD_HEIGHT_PT, BOARD_WIDTH_PT, CARD_GAP_PT, CUT_AREA_BLEED_PT, CUT_AREA_HEIGHT_PT, CUT_AREA_WIDTH_PT, CUT_AREA_X_PT, CUT_AREA_Y_PT, DECK_TITLE_SIZE_PT, HEADER_GAP_PT, LOGO_HEIGHT_PT } from './constants';
+import { BOARD_HEIGHT_PT, BOARD_TITLE_LINE_THICKNESS_PT, BOARD_TITLE_SIZE_PT, BOARD_WIDTH_PT, CARD_BORDER_PT, CARD_GAP_PT, CUT_AREA_BLEED_PT, CUT_AREA_HEIGHT_PT, CUT_AREA_WIDTH_PT, CUT_AREA_X_PT, CUT_AREA_Y_PT, DECK_TITLE_SIZE_PT } from './constants';
 import { EmbedResult, embedImageInPDF } from './images';
-import { cutGuides, deckCardPosition, deckCutGuides, deckGridLayout, deckPages, deckPageTitle, placeImageInCard, type CardImageFit, type DeckGridLayout } from './layout';
+import { boardLogoBox, boardPageTitle, boardTitleLayout, cutGuides, deckCardPosition, deckCutGuides, deckGridLayout, deckPages, deckPageTitle, placeImageInCard, type CardImageFit, type DeckGridLayout } from './layout';
+import { getBoardTitleFont } from './titleFont';
 
 /**
  * Dibuja una carta: su imagen ya trae el nombre dentro. Devuelve `false` si no se pudo (no tiene imagen
@@ -63,7 +64,7 @@ export const drawCardOnPage = async (
       width: width,
       height: height,
       borderColor: rgb(0, 0, 0),
-      borderWidth: 2,
+      borderWidth: CARD_BORDER_PT,
     });
     return true;
   } catch (error) {
@@ -110,6 +111,8 @@ export const getLogoImage = async (pdfDoc: PDFDocument): Promise<EmbedResult> =>
 const CUT_GUIDE_COLOR = rgb(0.35, 0.35, 0.35);
 const CUT_GUIDE_THICKNESS = 0.5;
 const CUT_GUIDE_DASH = [3, 3];
+// Casi negro (#1A120E): título del tablero y sus líneas
+const BOARD_TITLE_COLOR = rgb(26 / 255, 18 / 255, 14 / 255);
 
 /** Línea punteada por donde se recorta el tablero y marcas de corte en sus cuatro esquinas. */
 const drawCutGuides = (page: PDFPage) => {
@@ -209,11 +212,6 @@ export const drawBoardOnPage = async (
   // Board position: bottom of cut area
   const boardY = CUT_AREA_Y_PT;
   const boardX = CUT_AREA_X_PT; // Same X as cut area
-  // Title and Logo position: same level Y, just above board
-  const titleSize = 12;
-  const titleY = boardY + BOARD_HEIGHT_PT + HEADER_GAP_PT + titleSize / 2;
-  // Logo at same Y level as title (centered vertically with title text)
-  const logoY = titleY - titleSize / 2; // Align logo center with title baseline
 
   // Draw semi-transparent background for the entire cut area (including header)
   // This creates a subtle, diffused background that doesn't overpower the white background
@@ -230,37 +228,28 @@ export const drawBoardOnPage = async (
 
   drawCutGuides(page);
 
-  // Draw board title (left-aligned, just above board)
-  const titleText = `Tablero ${boardNumber}`;
-  const titleX = CUT_AREA_X_PT + 10; // Left padding within cut area
-
-  page.drawText(titleText, {
-    x: titleX,
-    y: titleY,
-    size: titleSize,
-    color: rgb(0, 0, 0),
-  });
-
-  // Draw logo at same level as title (right side of cut area)
+  // Logo centrado arriba del título
   try {
-    const logoSize = LOGO_HEIGHT_PT; // Logo height in points (calculated to fit in max header)
     const { image: logoImageEmbed, width: logoWidth, height: logoHeight } = await getLogoImage(pdfDoc);
-    const logoAspectRatio = logoWidth / logoHeight;
-    const logoDisplayWidth = logoSize * logoAspectRatio;
-    const logoDisplayHeight = logoSize;
-
-    // Position logo at right side of cut area, at same Y level as title
-    const logoX = CUT_AREA_X_PT + CUT_AREA_WIDTH_PT - logoDisplayWidth - 10; // Right padding
-
-    page.drawImage(logoImageEmbed, {
-      x: logoX,
-      y: logoY,
-      width: logoDisplayWidth,
-      height: logoDisplayHeight,
-    });
+    page.drawImage(logoImageEmbed, boardLogoBox(logoWidth / logoHeight));
   } catch (error) {
     logger.warn('Could not draw logo on board:', error);
     // Continue without logo if there's an error
+  }
+
+  // Título centrado sobre la cuadrícula, con una línea a cada lado
+  const titleText = boardPageTitle(boardNumber);
+  const titleFont = await getBoardTitleFont(pdfDoc);
+  const title = boardTitleLayout(titleFont.widthOfTextAtSize(titleText, BOARD_TITLE_SIZE_PT));
+
+  page.drawText(titleText, {
+    ...title.text,
+    size: BOARD_TITLE_SIZE_PT,
+    font: titleFont,
+    color: BOARD_TITLE_COLOR,
+  });
+  for (const line of title.lines) {
+    page.drawLine({ ...line, color: BOARD_TITLE_COLOR, thickness: BOARD_TITLE_LINE_THICKNESS_PT });
   }
 
   // Draw each card in the grid (top to bottom, left to right)
