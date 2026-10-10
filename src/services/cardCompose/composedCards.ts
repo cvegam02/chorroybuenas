@@ -8,18 +8,26 @@ export interface ComposedCardStoreOptions {
   compose: CardComposer;
 }
 
-/** Una data URL es larguísima: para distinguir una imagen de otra bastan su largo y su final. */
-const imageKey = (image: string | undefined): string => {
-  if (!image) return '';
-  return image.startsWith('data:') ? `${image.length}:${image.slice(-32)}` : image;
-};
-
 /** Una imagen que vive en el navegador (no hay que descargarla). */
 const isLocalImage = (image: string | undefined): image is string =>
   !!image && (image.startsWith('blob:') || image.startsWith('data:'));
 
+/**
+ * Qué imagen tiene la carta. Una imagen remota se reconoce por su ruta en Storage, no por su dirección:
+ * la dirección firmada de una misma imagen cambia cada vez que se pide, y cada cambio haría componer
+ * (y descargar) la carta otra vez.
+ */
+const imageKey = (card: Card): string => {
+  const { image } = card;
+  if (isLocalImage(image)) {
+    // Una data URL es larguísima: para distinguir una de otra bastan su largo y su final.
+    return image.startsWith('data:') ? `${image.length}:${image.slice(-32)}` : image;
+  }
+  return card.imagePath ?? image ?? '';
+};
+
 const keyOf = (card: Card): string =>
-  [card.id, card.title, card.isAiGenerated ? 'ia' : 'foto', imageKey(card.image)].join('|');
+  [card.id, card.title, card.isAiGenerated ? 'ia' : 'foto', imageKey(card)].join('|');
 
 /**
  * Cartas compuestas para mostrarse en pantalla. Cada carta se compone una vez y se reutiliza mientras no

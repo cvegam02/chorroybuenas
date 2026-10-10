@@ -57,6 +57,17 @@ describe('cartas compuestas para la pantalla (FEAT-29, US A4)', () => {
     expect(compose).toHaveBeenCalledTimes(4);
   });
 
+  it('la misma imagen guardada con otra dirección firmada no se vuelve a componer ni a leer', async () => {
+    const { store, compose, readImage } = newStore();
+    const saved: Card = { ...photoCard, imagePath: 'usuario/foto.jpg' };
+
+    await store.get(saved);
+    await store.get({ ...saved, image: 'https://storage/foto?token=otro' });
+
+    expect(readImage).toHaveBeenCalledTimes(1);
+    expect(compose).toHaveBeenCalledTimes(1);
+  });
+
   it('si no hay copia guardada, se compone con la imagen que trae la carta', async () => {
     const { store, compose } = newStore({ readImage: async () => null });
 
