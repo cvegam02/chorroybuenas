@@ -14,7 +14,8 @@ export const BOARD_HEIGHT_PT = cmToPoints(BOARD_HEIGHT_CM);
 // Board has 4x4 cards
 // Removed hardcoded constants: BOARD_COLS, BOARD_ROWS
 
-// Letra más chica con la que se escribe el nombre de una carta; lo que no quepa a este tamaño se corta con «…»
+// Letra más chica con la que se escribe el nombre de una carta, medida en la carta de un tablero de 4 × 4;
+// lo que no quepa en un renglón a este tamaño pasa a dos renglones
 export const MIN_TITLE_SIZE_PT = 8;
 
 // Gap between cards (small gap for traditional look)
@@ -59,5 +60,3 @@ export const DECK_HEADER_HEIGHT_PT = 26;
 // Distancia de la orilla superior de la hoja a la base del título de la página
 export const DECK_TITLE_DROP_PT = 18;
 export const DECK_TITLE_SIZE_PT = 12;
-// Letra del nombre de cada carta de la baraja
-export const DECK_CARD_TITLE_SIZE_PT = 11;

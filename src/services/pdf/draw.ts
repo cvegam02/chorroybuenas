@@ -1,67 +1,14 @@
-import { PDFDocument, rgb, StandardFonts, type PDFFont, pushGraphicsState, popGraphicsState, rectangle, clip, endPath, type PDFPage } from 'pdf-lib';
+import { PDFDocument, rgb, pushGraphicsState, popGraphicsState, rectangle, clip, endPath, type PDFPage } from 'pdf-lib';
 import { Board, Card } from '../../types';
 import { logger } from '../../utils/logger';
-import { printableCardTitle } from '../../utils/cardTitle';
 import logoImage from '../../img/logo.png';
-import { BOARD_HEIGHT_PT, BOARD_WIDTH_PT, CARD_GAP_PT, CUT_AREA_BLEED_PT, CUT_AREA_HEIGHT_PT, CUT_AREA_WIDTH_PT, CUT_AREA_X_PT, CUT_AREA_Y_PT, DECK_CARD_TITLE_SIZE_PT, DECK_TITLE_SIZE_PT, HEADER_GAP_PT, LOGO_HEIGHT_PT, MIN_TITLE_SIZE_PT } from './constants';
+import { BOARD_HEIGHT_PT, BOARD_WIDTH_PT, CARD_GAP_PT, CUT_AREA_BLEED_PT, CUT_AREA_HEIGHT_PT, CUT_AREA_WIDTH_PT, CUT_AREA_X_PT, CUT_AREA_Y_PT, DECK_TITLE_SIZE_PT, HEADER_GAP_PT, LOGO_HEIGHT_PT } from './constants';
 import { EmbedResult, embedImageInPDF } from './images';
-import { cutGuides, deckCardPosition, deckCutGuides, deckGridLayout, deckPages, deckPageTitle, placeImageInCard, titleBaselineOffset, titleSpaceFor, type CardImageFit, type DeckGridLayout } from './layout';
-
-export const titleFontCache = new WeakMap<PDFDocument, PDFFont>();
-export const getTitleFont = async (pdfDoc: PDFDocument): Promise<PDFFont> => {
-  const cached = titleFontCache.get(pdfDoc);
-  if (cached) return cached;
-  // Nota: pdf-lib no incluye una “fuente de lotería” por defecto; usamos una estándar consistente y medible.
-  const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  titleFontCache.set(pdfDoc, font);
-  return font;
-};
-
-export const normalizeTitle = (title: string) =>
-  title.replace(/\s+/g, ' ').trim().toUpperCase();
-
-export const fitTextToWidth = (
-  text: string,
-  font: PDFFont,
-  maxWidth: number,
-  preferredSize: number,
-  minSize: number
-): { text: string; size: number; width: number } => {
-  let size = preferredSize;
-  let width = font.widthOfTextAtSize(text, size);
-
-  // Reduce tamaño hasta que quepa (con decremento fino para ajustar mejor el centrado)
-  while (width > maxWidth && size > minSize) {
-    size = Math.max(minSize, size - 0.5);
-    width = font.widthOfTextAtSize(text, size);
-  }
-
-  if (width <= maxWidth) return { text, size, width };
-
-  // Si aún no cabe, truncar con ellipsis
-  const ellipsis = '…';
-  const ellipsisWidth = font.widthOfTextAtSize(ellipsis, size);
-  const target = Math.max(0, maxWidth - ellipsisWidth);
-
-  let lo = 0;
-  let hi = text.length;
-  while (lo < hi) {
-    const mid = Math.ceil((lo + hi) / 2);
-    const candidate = text.slice(0, mid);
-    const w = font.widthOfTextAtSize(candidate, size);
-    if (w <= target) lo = mid;
-    else hi = mid - 1;
-  }
-
-  const truncated = text.slice(0, Math.max(0, lo)).trimEnd();
-  const finalText = truncated.length ? `${truncated}${ellipsis}` : ellipsis;
-  const finalWidth = font.widthOfTextAtSize(finalText, size);
-  return { text: finalText, size, width: finalWidth };
-};
+import { cutGuides, deckCardPosition, deckCutGuides, deckGridLayout, deckPages, deckPageTitle, placeImageInCard, type CardImageFit, type DeckGridLayout } from './layout';
 
 /**
- * Dibuja una carta. Devuelve `false` si no se pudo (no tiene imagen o la imagen no cargó):
- * quien llama decide qué hacer; aquí no se dibuja nada en su lugar.
+ * Dibuja una carta: su imagen ya trae el nombre dentro. Devuelve `false` si no se pudo (no tiene imagen
+ * o la imagen no cargó): quien llama decide qué hacer; aquí no se dibuja nada en su lugar.
  */
 export const drawCardOnPage = async (
   page: PDFPage,
@@ -71,9 +18,8 @@ export const drawCardOnPage = async (
   width: number,
   height: number,
   pdfDoc: PDFDocument,
-  showTitle: boolean = true,
-  titleSize: number = 8,
   embedCache?: Map<string, EmbedResult>,
+  /** 'cover' llena la casilla y recorta lo que sobra; 'contain' deja la imagen entera, centrada. */
   fit: CardImageFit = 'cover'
 ): Promise<boolean> => {
   try {
@@ -89,22 +35,17 @@ export const drawCardOnPage = async (
       card.id || undefined
     );
 
-    // Reserve space for title if showing (more space for larger fonts)
-    const titleSpace = showTitle ? titleSpaceFor(titleSize) : 0;
-    const imageAreaHeight = height - titleSpace;
-
-    // 'cover' llena la casilla y recorta lo que sobra; 'contain' deja la imagen entera, centrada.
     const {
       offsetX,
       offsetY,
       width: scaledWidth,
       height: scaledHeight,
-    } = placeImageInCard(imgWidth, imgHeight, width, height, titleSpace, fit);
+    } = placeImageInCard(imgWidth, imgHeight, width, height, fit);
 
-    // Clip image to the image area so it never overflows the card bounds
+    // Clip image to the card so it never overflows its bounds
     page.pushOperators(
       pushGraphicsState(),
-      rectangle(x, y + titleSpace, width, imageAreaHeight),
+      rectangle(x, y, width, height),
       clip(),
       endPath(),
     );
@@ -116,53 +57,6 @@ export const drawCardOnPage = async (
     });
     page.pushOperators(popGraphicsState());
 
-    // Draw title at bottom of card (centered, inside card area)
-    if (showTitle) {
-      const font = await getTitleFont(pdfDoc);
-      // Las cartas guardadas antes de la regla del nombre pueden traer emojis: se dibujan sin ellos.
-      const rawTitle = normalizeTitle(printableCardTitle(card.title || ''));
-      const titlePaddingX = 6;
-      const maxTextWidth = Math.max(0, width - titlePaddingX * 2);
-
-      // Si llega vacío, no dibujamos nada
-      if (rawTitle) {
-        // Ajustes: un poco más pequeño en general y con mínimo para legibilidad
-        const preferred = Math.max(MIN_TITLE_SIZE_PT, titleSize - 1);
-        const minSize = MIN_TITLE_SIZE_PT;
-
-        const fitted = fitTextToWidth(
-          rawTitle,
-          font,
-          maxTextWidth,
-          preferred,
-          minSize
-        );
-
-        // Fondo del título (debajo del borde; el borde se dibuja al final).
-        // Mide lo mismo que el espacio reservado, para que llegue hasta donde termina la foto.
-        page.drawRectangle({
-          x,
-          y,
-          width,
-          height: titleSpace,
-          color: rgb(1, 1, 1),
-          borderWidth: 0,
-        });
-
-        const titleY = y + titleBaselineOffset(titleSpace, fitted.size);
-        const titleX = x + titlePaddingX + (maxTextWidth - fitted.width) / 2;
-
-        page.drawText(fitted.text, {
-          x: titleX,
-          y: titleY,
-          size: fitted.size,
-          font,
-          color: rgb(0, 0, 0),
-        });
-      }
-    }
-
-    // Draw card border LAST so the title background never covers it
     page.drawRectangle({
       x: x,
       y: y,
@@ -250,7 +144,7 @@ export const drawDeckPages = async (
   pdfDoc: PDFDocument,
   cards: Card[],
   embedCache?: Map<string, EmbedResult>,
-  /** Cartas que ya traen su nombre dibujado (lotería de temporada): van enteras y sin título. */
+  /** Cartas de una lotería de temporada, que ya traen su nombre dibujado: van enteras. */
   finishedCards: boolean = false
 ): Promise<Card[]> => {
   const failedCards: Card[] = [];
@@ -278,8 +172,6 @@ export const drawDeckPages = async (
         deck.cardWidth,
         deck.cardHeight,
         pdfDoc,
-        !finishedCards,
-        DECK_CARD_TITLE_SIZE_PT,
         embedCache,
         finishedCards ? 'contain' : 'cover'
       );
@@ -296,7 +188,7 @@ export const drawBoardOnPage = async (
   boardNumber: number,
   pdfDoc: PDFDocument,
   embedCache?: Map<string, EmbedResult>,
-  /** Cartas que ya traen su nombre dibujado (lotería de temporada): van enteras y sin título. */
+  /** Cartas de una lotería de temporada, que ya traen su nombre dibujado: van enteras. */
   finishedCards: boolean = false
 ): Promise<Card[]> => {
   const failedCards: Card[] = [];
@@ -392,8 +284,6 @@ export const drawBoardOnPage = async (
           cardWidthPt,
           cardHeightPt,
           pdfDoc,
-          !finishedCards, // showTitle
-          gridSize === 9 ? 14 : 11, // Larger title for 3x3 cards
           embedCache,
           finishedCards ? 'contain' : 'cover'
         );

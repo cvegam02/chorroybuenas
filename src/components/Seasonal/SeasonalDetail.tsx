@@ -326,7 +326,7 @@ export const SeasonalDetail = () => {
         {renderNotice()}
         {renderBody()}
       </main>
-      <CardPreviewModal card={openSample} isOpen={openSample !== null} onClose={closeSample} />
+      <CardPreviewModal card={openSample} isOpen={openSample !== null} onClose={closeSample} finishedCard />
       <EmailAuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} initialMode="login" />
     </div>
   );

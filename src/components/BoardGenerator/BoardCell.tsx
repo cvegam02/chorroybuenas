@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '../../types';
 import { getImage } from '../../utils/indexedDB';
+import { useComposedCard } from '../../hooks/useComposedCard';
 import './BoardCell.css';
 
 interface BoardCellProps {
@@ -11,6 +12,9 @@ interface BoardCellProps {
 export const BoardCell = ({ card }: BoardCellProps) => {
   const { t } = useTranslation();
   const [imageUrl, setImageUrl] = useState<string | null>(card.image || null);
+  // La carta como sale impresa, con el nombre dentro. Mientras no está lista se muestra la foto, con el nombre debajo.
+  const composedUrl = useComposedCard(card);
+  const shownUrl = composedUrl ?? imageUrl;
 
   // When card changes (e.g. navigating between boards), update image immediately.
   // card.image may be a Supabase URL (https:) or blob URL - use it directly.
@@ -50,9 +54,9 @@ export const BoardCell = ({ card }: BoardCellProps) => {
   return (
     <div className="board-cell">
       <div className="board-cell__image-container">
-        {imageUrl ? (
+        {shownUrl ? (
           <img
-            src={imageUrl}
+            src={shownUrl}
             alt={card.title}
             className="board-cell__image"
             onContextMenu={handleImageContextMenu}
@@ -60,14 +64,14 @@ export const BoardCell = ({ card }: BoardCellProps) => {
             draggable={false}
             onError={() => {
               // If image fails to load, try to refresh again
-              setImageUrl(null);
+              if (!composedUrl) setImageUrl(null);
             }}
           />
         ) : (
           <div className="board-cell__image-placeholder">{t('boardGenerator.noImage')}</div>
         )}
       </div>
-      <div className="board-cell__title">{card.title}</div>
+      {!composedUrl && <div className="board-cell__title">{card.title}</div>}
     </div>
   );
 };

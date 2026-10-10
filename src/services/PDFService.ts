@@ -1,14 +1,15 @@
 import { PDFDocument } from 'pdf-lib';
 import { Board, Card } from '../types';
 import { loadCards } from '../utils/storage';
-import { blobToBase64, getImageBlob, cacheImageBlob } from '../utils/indexedDB';
-import { CardRepository } from '../repositories/CardRepository';
-import { logger } from '../utils/logger';
 import { PAGE_HEIGHT_PT, PAGE_WIDTH_PT } from './pdf/constants';
-import { EmbedResult, urlToBase64 } from './pdf/images';
+import { EmbedResult } from './pdf/images';
 import { drawBoardOnPage, drawDeckPages } from './pdf/draw';
 import { createOnceLoader } from './pdf/loadOnce';
 import { PdfCardsFailedError, uniqueFailedCards } from './pdf/failedCards';
+import { createCardPreparer } from './pdf/prepareCards';
+import { composeCard } from './cardCompose/compose';
+import type { CardComposer } from './cardCompose/input';
+import { readStoredCardImage } from './cardImage';
 
 export { downloadPDF } from './pdf/download';
 export { pdfFileName } from './pdf/fileName';
@@ -16,10 +17,12 @@ export { pdfFileName } from './pdf/fileName';
 export interface GeneratePDFOptions {
   /** Cartas para la sección "Baraja Completa". Si no se pasa, se usa loadCards() (invitados). */
   allCards?: Card[];
-  /** Cartas que ya traen su nombre dibujado (lotería de temporada, FEAT-23): van enteras y sin título. */
+  /** Cartas que ya traen su nombre dibujado (lotería de temporada, FEAT-23): van enteras y no se componen. */
   finishedCards?: boolean;
   /** Nombre de la lotería: queda como título del PDF (el que muestran los lectores en la pestaña). */
   title?: string;
+  /** Cómo se compone cada carta (foto, marco y nombre). Por defecto, en el navegador. */
+  composeCard?: CardComposer;
 }
 
 /**
@@ -32,51 +35,19 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
   const title = options?.title?.trim();
   if (title) pdfDoc.setTitle(title, { showInWindowTitleBar: true });
 
-  // Lee la imagen de una carta: primero la copia local (IndexedDB), luego Storage, luego la que trae la carta.
-  const readCardImage = async (card: Card): Promise<string | null> => {
-    try {
-      const blob = await getImageBlob(card.id);
-      if (blob) return await blobToBase64(blob);
-
-      if (card.imagePath) {
-        const downloaded = await CardRepository.downloadImage(card.imagePath);
-        try {
-          await cacheImageBlob(card.id, downloaded);
-        } catch (_) {
-          // La caché local es opcional: si falla, se sigue con la imagen descargada.
-        }
-        return await blobToBase64(downloaded);
-      }
-      if (card.image) {
-        if (card.image.startsWith('http://') || card.image.startsWith('https://') || card.image.startsWith('blob:')) {
-          return await urlToBase64(card.image);
-        }
-        if (card.image.startsWith('data:')) return card.image;
-      }
-    } catch (error) {
-      logger.error(`PDF: error getting image for card ${card.id}:`, error);
-    }
-    return null;
-  };
-
   // Una sola lectura por carta, aunque aparezca en varios tableros y todos la pidan a la vez.
   const loadOnce = createOnceLoader<string>();
   const getBase64ForPDF = (card: Card): Promise<string | null> =>
-    card.id ? loadOnce(card.id, () => readCardImage(card)) : Promise.resolve(null);
+    card.id ? loadOnce(card.id, () => readStoredCardImage(card)) : Promise.resolve(null);
+
+  const prepareCard = createCardPreparer({
+    readImage: getBase64ForPDF,
+    compose: options?.composeCard ?? composeCard,
+    finishedCards,
+  });
 
   const refreshedBoards: Board[] = await Promise.all(
-    boards.map(async (board) => {
-      const refreshedCards = await Promise.all(
-        board.cards.map(async (card) => {
-          if (card.id) {
-            const base64Image = await getBase64ForPDF(card);
-            if (base64Image) return { ...card, image: base64Image };
-          }
-          return card;
-        })
-      );
-      return { ...board, cards: refreshedCards };
-    })
+    boards.map(async (board) => ({ ...board, cards: await Promise.all(board.cards.map(prepareCard)) }))
   );
 
   // Caché por card.id: cada imagen se decodifica/embebe una sola vez (evita 160+ decodificaciones cuando hay 10 tableros)
@@ -92,18 +63,7 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
 
   // Optionally add pages with all cards (full deck)
   // Usar allCards pasadas (usuario logueado) o loadCards() (invitados)
-  let allCards: Card[] = options?.allCards ?? (await loadCards());
-  if (allCards.length > 0) {
-    allCards = await Promise.all(
-      allCards.map(async (card) => {
-        if (card.id) {
-          const base64Image = await getBase64ForPDF(card);
-          if (base64Image) return { ...card, image: base64Image };
-        }
-        return card;
-      })
-    );
-  }
+  const allCards: Card[] = await Promise.all((options?.allCards ?? (await loadCards())).map(prepareCard));
 
   failedCards.push(...(await drawDeckPages(pdfDoc, allCards, embedCache, finishedCards)));
 
