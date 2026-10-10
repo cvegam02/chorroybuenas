@@ -127,7 +127,13 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
     grid[i] = [];
     for (let j = 0; j < cols; j++) {
       const cardIndex = i * cols + j;
-      grid[i][j] = cardsWithImages[cardIndex] || null;
+      // Los datos de la carta (nombre, número, imagen) son los actuales del tablero; de lo guardado aquí
+      // solo se toma la imagen refrescada, que no se vuelve a pedir en cada cambio.
+      const card = board.cards[cardIndex];
+      const refreshed = cardsWithImages[cardIndex];
+      grid[i][j] = card
+        ? { ...card, freshImageUrl: refreshed?.id === card.id ? refreshed.freshImageUrl : null }
+        : null;
     }
   }
 

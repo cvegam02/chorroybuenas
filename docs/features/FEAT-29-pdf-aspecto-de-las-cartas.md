@@ -137,7 +137,7 @@ Agregada el 2026-10-09 con la confirmación de Carlos (decisión 13).
 
 Anotados el 2026-10-09 a pedido de Carlos y revisados con él ese mismo día. Queda una sola feature por definir.
 
-- [x] **Número de carta** → [FEAT-30](FEAT-30-numero-de-carta.md), en borrador: tiene lo que Carlos ya pidió, el punto de partida en el código y las preguntas que faltan. Se define con Carlos antes de construirla.
+- [x] **Número de carta** → [FEAT-30](FEAT-30-numero-de-carta.md), definida y construida el 2026-10-09.
 - [x] ~~**Nombre y número pintados por la IA en las cartas convertidas.**~~ Descartada (decisión 14): el nombre que escribe el sitio ya cumple, sale siempre bien escrito y no cuesta tokens al cambiarlo. El número de las cartas con IA se resuelve en FEAT-30.
 - [x] ~~**Límite de largo del nombre de la carta.**~~ Descartada (decisión 14): lo que no cabe en dos renglones se corta con «…».
 - [x] ~~**El aspecto nuevo en las demás pantallas con cartas.**~~ Se hizo aquí, en la US A5 (decisión 13). Lo único que quedó igual es la subida de cartas por lote.

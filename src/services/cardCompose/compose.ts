@@ -58,13 +58,21 @@ const drawPhoto = (ctx: CanvasRenderingContext2D, img: HTMLImageElement, area: R
 
 /**
  * Texto blanco con contorno oscuro y una sombra difuminada detrás, para leerse en fotos claras y oscuras.
- * `lastBaseline` es la base del último renglón; los anteriores van encima.
+ * `lastBaseline` es la base del último renglón; los anteriores van encima. `x` es el centro del texto o,
+ * con `align: 'left'`, su orilla izquierda.
  */
-const drawOutlinedText = (ctx: CanvasRenderingContext2D, lines: string[], size: number, centerX: number, lastBaseline: number) => {
+const drawOutlinedText = (
+  ctx: CanvasRenderingContext2D,
+  lines: string[],
+  size: number,
+  x: number,
+  lastBaseline: number,
+  align: CanvasTextAlign = 'center'
+) => {
   const baselines = lines.map((_, index) => lastBaseline - (lines.length - 1 - index) * size * CARD_NAME_LINE_HEIGHT_RATIO);
 
   ctx.font = fontOfSize(size);
-  ctx.textAlign = 'center';
+  ctx.textAlign = align;
   ctx.textBaseline = 'alphabetic';
   ctx.lineJoin = 'round';
 
@@ -77,11 +85,11 @@ const drawOutlinedText = (ctx: CanvasRenderingContext2D, lines: string[], size: 
   ctx.shadowOffsetY = size * TEXT_SHADOW_OFFSET_RATIO;
   ctx.strokeStyle = CARD_INK_COLOR;
   ctx.lineWidth = size * TEXT_OUTLINE_RATIO * 2;
-  lines.forEach((line, index) => ctx.strokeText(line, centerX, baselines[index]));
+  lines.forEach((line, index) => ctx.strokeText(line, x, baselines[index]));
   ctx.restore();
 
   ctx.fillStyle = CARD_NAME_COLOR;
-  lines.forEach((line, index) => ctx.fillText(line, centerX, baselines[index]));
+  lines.forEach((line, index) => ctx.fillText(line, x, baselines[index]));
 };
 
 const drawName = (ctx: CanvasRenderingContext2D, name: string, layout: CardComposeLayout) => {
@@ -98,8 +106,21 @@ const drawName = (ctx: CanvasRenderingContext2D, name: string, layout: CardCompo
   drawOutlinedText(ctx, fitted.lines, fitted.size, layout.name.centerX, lastBaseline);
 };
 
+/** El número de carta, arriba a la izquierda, con la misma letra del nombre. */
+const drawNumber = (ctx: CanvasRenderingContext2D, number: number, layout: CardComposeLayout) => {
+  const { x, top, size } = layout.number;
+  const text = String(number);
+  const outline = size * TEXT_OUTLINE_RATIO;
+
+  // La base del texto se baja lo que mide el número de alto, para que su tope quede en `top`.
+  ctx.font = fontOfSize(size);
+  const height = ctx.measureText(text).actualBoundingBoxAscent;
+
+  drawOutlinedText(ctx, [text], size, x + outline, top + outline + height, 'left');
+};
+
 /** Compone la carta en el navegador. */
-export const composeCard: CardComposer = async ({ photo, name, framed }) => {
+export const composeCard: CardComposer = async ({ photo, name, framed, number }) => {
   const [img] = await Promise.all([loadPhoto(photo), loadCardFont()]);
   if (img.naturalWidth === 0 || img.naturalHeight === 0) {
     throw new Error('La foto de la carta tiene dimensiones inválidas (0x0)');
@@ -121,6 +142,7 @@ export const composeCard: CardComposer = async ({ photo, name, framed }) => {
 
   drawPhoto(ctx, img, layout.photo);
   drawName(ctx, name, layout);
+  if (number !== undefined) drawNumber(ctx, number, layout);
 
   return canvas.toDataURL('image/jpeg', PDF_JPEG_QUALITY);
 };

@@ -19,6 +19,7 @@ import './SetView.css';
 import { logger } from '../../utils/logger';
 import { minCardsForGrid } from '../../utils/gridRules';
 import { pdfErrorMessage } from '../../utils/pdfErrorMessage';
+import { withNumbersFrom } from '../../utils/cardNumbers';
 
 export const SetView = () => {
   const { setId } = useParams<{ setId: string }>();
@@ -94,7 +95,8 @@ export const SetView = () => {
   const boardsWithHydratedImages = useMemo(() => {
     return boards.map((board) => ({
       ...board,
-      cards: board.cards.map((boardCard) => {
+      // Las cartas de un tablero son copias: toman de la lista su número y su imagen ya hidratada.
+      cards: withNumbersFrom(board.cards, cards).map((boardCard) => {
         const hydratedCard = cards.find((c) => c.id === boardCard.id);
         return {
           ...boardCard,

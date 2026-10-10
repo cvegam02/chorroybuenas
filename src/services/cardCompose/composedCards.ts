@@ -27,11 +27,11 @@ const imageKey = (card: Card): string => {
 };
 
 const keyOf = (card: Card): string =>
-  [card.id, card.title, card.isAiGenerated ? 'ia' : 'foto', imageKey(card)].join('|');
+  [card.id, card.title, card.number ?? '', card.isAiGenerated ? 'ia' : 'foto', imageKey(card)].join('|');
 
 /**
  * Cartas compuestas para mostrarse en pantalla. Cada carta se compone una vez y se reutiliza mientras no
- * cambien su nombre ni su foto. La que no se puede componer da `null` y no se guarda, para poder reintentar.
+ * cambien su nombre, su número ni su foto. La que no se puede componer da `null` y no se guarda, para poder reintentar.
  */
 export const createComposedCardStore = ({ readImage, compose }: ComposedCardStoreOptions) => {
   const pending = new Map<string, Promise<string | null>>();

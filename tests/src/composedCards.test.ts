@@ -68,6 +68,16 @@ describe('cartas compuestas para la pantalla (FEAT-29, US A4)', () => {
     expect(compose).toHaveBeenCalledTimes(1);
   });
 
+  it('si cambia el número de la carta, se vuelve a componer con el nuevo (FEAT-30)', async () => {
+    const compose = vi.fn(async ({ number }: { number?: number }) => `compuesta:${number}`);
+    const { store } = newStore({ compose });
+
+    expect(await store.get({ ...photoCard, number: 3 })).toBe('compuesta:3');
+    expect(await store.get({ ...photoCard, number: 2 })).toBe('compuesta:2');
+    expect(await store.get({ ...photoCard, number: 2 })).toBe('compuesta:2');
+    expect(compose).toHaveBeenCalledTimes(2);
+  });
+
   it('si no hay copia guardada, se compone con la imagen que trae la carta', async () => {
     const { store, compose } = newStore({ readImage: async () => null });
 
