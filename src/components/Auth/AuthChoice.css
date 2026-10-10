@@ -32,6 +32,15 @@
   transform: translateY(-2px);
 }
 
+/* Recuadros angostos: los dos botones caben lado a lado. */
+.auth-choice--compact .auth-choice__button {
+  flex: 1 1 150px;
+  gap: 8px;
+  padding: 9px 14px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
 .auth-choice--onPrimary .auth-choice__button--google {
   background: var(--color-bg-surface);
   color: var(--color-primary-dark);

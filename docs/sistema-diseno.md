@@ -44,6 +44,8 @@ Todos están definidos como variables en `:root`, en `src/index.css`. Se usan co
 | `--color-card-pink` | `#e8a3b8` | Fondo de carta de ocasión: rosa (FEAT-32) |
 | `--color-card-blue` | `#93c5fd` | Fondo de carta de ocasión: azul (FEAT-32) |
 | `--color-card-lilac` | `#c4b5fd` | Fondo de carta de ocasión: lila (FEAT-32) |
+| `--color-board-cell-1` a `-8` | `#fde68a`, `#fecaca`, `#bfdbfe`, `#bbf7d0`, `#e9d5ff`, `#fed7aa`, `#a5f3fc`, `#fbcfe8` | Casillas de los tableritos de las jugadas en «¿Cómo se juega?» (FEAT-33). Solo para eso. |
+| `--color-bean-light`, `--color-bean-dark` | `#a16207`, `#5b2a0a` | El frijol que marca una casilla en esos tableritos (FEAT-33) |
 
 `--color-bg-primary` y `--color-bg-secondary` son alias de `--color-bg-surface` y `--color-bg-base`.
 

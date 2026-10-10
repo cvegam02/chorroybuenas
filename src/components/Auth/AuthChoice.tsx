@@ -13,13 +13,15 @@ interface AuthChoiceProps {
   showLogin?: boolean;
   /** Ruta del sitio a la que regresa quien entra con Google; sin ella, Mi cuenta. */
   returnPath?: string;
+  /** Botones más chicos, para recuadros angostos. */
+  compact?: boolean;
 }
 
 /**
  * «Entrar con Google» y «Crear tu cuenta», con el mismo peso (FEAT-33): Google no es la opción por
  * defecto. La segunda abre el registro por correo.
  */
-export const AuthChoice = ({ tone, showLogin = false, returnPath }: AuthChoiceProps) => {
+export const AuthChoice = ({ tone, showLogin = false, returnPath, compact = false }: AuthChoiceProps) => {
   const { t } = useTranslation();
   const { signInWithGoogle } = useAuth();
   const [modalMode, setModalMode] = useState<'login' | 'signup' | null>(null);
@@ -35,7 +37,7 @@ export const AuthChoice = ({ tone, showLogin = false, returnPath }: AuthChoicePr
   };
 
   return (
-    <div className={`auth-choice auth-choice--${tone}`}>
+    <div className={`auth-choice auth-choice--${tone} ${compact ? 'auth-choice--compact' : ''}`}>
       <div className="auth-choice__buttons">
         <button type="button" className="auth-choice__button auth-choice__button--google" onClick={handleGoogle}>
           <FaGoogle aria-hidden="true" />

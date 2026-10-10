@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { OccasionIcon, type OccasionId } from './occasionIcons';
+import '../../fonts/arvoCarta.css';
 import './LandingOccasions.css';
 
 const OCCASIONS: readonly { id: OccasionId; tone: string }[] = [

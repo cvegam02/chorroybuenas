@@ -83,3 +83,48 @@ describe('Temáticas pre-generada (FEAT-33, US A3)', () => {
     expect(data.mainEntity[5].acceptedAnswer.text).toBe(`${faq.use.a} ${faq.use.link}.`);
   });
 });
+
+describe('¿Cómo se juega? pre-generada (FEAT-33, US A5)', () => {
+  it('trae su texto completo y un solo título principal', async () => {
+    const { html } = await render('/como-se-juega');
+    const page = es.howToPlay;
+    expect(countOf(html, 'h1')).toBe(1);
+    expect(html).toContain(page.hero.title);
+    expect(html).toContain(page.need.caller.title);
+    expect(html).toContain(page.steps.mark.title);
+    expect(html).toContain(page.calling.sirena.name);
+    expect(html).toContain(page.plays.others);
+    expect(html).toContain(page.bet.title);
+    expect(html).toContain(page.cta.title);
+  });
+
+  it('los mínimos de cartas son los del generador de tableros: 15 en Modo Kids y 24 en Clásico', async () => {
+    const { html } = await render('/como-se-juega');
+    expect(html).toContain('al menos 15 cartas para hacer tableros de Modo Kids');
+    expect(html).toContain('el Modo Clásico pide al menos 24 cartas');
+    expect(html).not.toContain('{{');
+  });
+
+  it('dibuja los cuatro tableros de las jugadas sin imágenes, con su descripción', async () => {
+    const { html } = await render('/como-se-juega');
+    expect(html.split('role="img"').length - 1).toBe(4);
+    expect(html).toContain(es.howToPlay.plays.esquinas.boardAlt);
+    expect(html.split('how-to-play__cell--marked').length - 1).toBe(4 + 4 + 4 + 16);
+  });
+
+  it('enlaza a crear la lotería y a las temáticas', async () => {
+    const { html } = await render('/como-se-juega');
+    expect(html).toContain('href="/cards"');
+    expect(html).toContain('href="/tematicas"');
+  });
+
+  it('sus datos FAQPage dicen lo mismo que las seis preguntas visibles', async () => {
+    const { html } = await render('/como-se-juega');
+    const data = faqPageOf(html);
+    expect(data.mainEntity).toHaveLength(6);
+    expect(data.mainEntity[0].name).toBe(es.howToPlay.faq.cards.question);
+    expect(data.mainEntity[0].acceptedAnswer.text).toContain('el mínimo es 24 (15 en Modo Kids)');
+    expect(data.mainEntity[5].acceptedAnswer.text).toBe(es.howToPlay.faq.markers.answer);
+  });
+});
+

@@ -1,6 +1,6 @@
 # FEAT-33 — Rediseño de las páginas públicas, la barra superior y el pie
 
-**Estado: Carlos dio el visto bueno a las seis historias el 2026-10-10. Construidas ese día las US A1 a A4 y la US A7, que surgió al revisar (Beneficios ya no repite los paquetes). Carlos las ha ido viendo en su servidor local y pidiendo ajustes; están guardadas en la rama, sin PR a `dev` ni demo completa todavía. Faltan A5 y A6. `docs/diseno-mockups.md` al día con la barra, el pie, P2, P5 y U3 (Carlos lo confirmó el 2026-10-10). Pendiente de Carlos: revisar en Supabase que `/comprar-tokens` esté permitida como dirección de regreso de Google (ver «Pendientes de Carlos»). Rama `feature/inicio-rediseno`, la misma de FEAT-32 (decisión 1).**
+**Estado: Carlos dio el visto bueno a las seis historias el 2026-10-10. Construidas ese día las US A1 a A4 y la US A7, que surgió al revisar (Beneficios ya no repite los paquetes); están guardadas en la rama. Construida y guardada también la US A5, con el detalle que Carlos pidió para sus pasos y sus tableritos; la fila P3 de `docs/diseno-mockups.md` se actualiza junto con P4 al cerrar la US A6, con su sí. Carlos las ha ido viendo en su servidor local y pidiendo ajustes; no hay PR a `dev` ni demo completa todavía. Falta A6. `docs/diseno-mockups.md` al día con la barra, el pie, P2, P5 y U3 (Carlos lo confirmó el 2026-10-10). Pendiente de Carlos: revisar en Supabase que `/comprar-tokens` esté permitida como dirección de regreso de Google (ver «Pendientes de Carlos»). Rama `feature/inicio-rediseno`, la misma de FEAT-32 (decisión 1).**
 
 **Contexto.** Después de la página de inicio (FEAT-32), Carlos pidió el 2026-10-10 rediseñar las demás páginas públicas, la barra superior y el pie para que queden como las maquetas de `docs/referencia-diseno/`. El detalle de cada página (secciones, imágenes, textos) y las reglas comunes de textos, SEO, rendimiento e inicio de sesión están en [`docs/referencia-diseno/INSTRUCCIONES-REDISENO-PAGINAS.md`](../referencia-diseno/INSTRUCCIONES-REDISENO-PAGINAS.md): aquí no se repiten. Las maquetas son referencia visual; no se copia su HTML. La página de inicio no se toca, salvo la barra y el pie, que son compartidos.
 
@@ -83,6 +83,24 @@ Decisión de Carlos al revisar las US A2 y A4 (2026-10-10):
 Decisión de Carlos tras ver los paquetes en las dos páginas (2026-10-10):
 
 39. **Beneficios ya no muestra los paquetes de tokens: solo se ven en Comprar tokens**, para no repetirlos. En su lugar va un recuadro «¿Cuánto cuesta?» con el precio «desde» por foto, cuatro puntos y el botón «Ver paquetes de tokens» (US A7). La decisión 38 queda vigente para la tarjeta de Comprar tokens; lo que decía de Beneficios ya no aplica. La cantidad de fotos gratis del recuadro se lee del sitio, como en la decisión 16; si es 0 o no se puede leer, esa línea no sale.
+
+Ajuste pedido por Carlos tras el commit (2026-10-10):
+
+40. **Comprar tokens sin sesión:** los botones «Entrar con Google» y «Crear tu cuenta» del recuadro del encabezado se veían muy grandes en computadora (no cabían lado a lado y se apilaban a todo el ancho). Ahora ese recuadro usa una versión compacta de los botones.
+
+Ajustes de Claude al construir la US A5 (2026-10-10), avisados a Carlos al entregar:
+
+41. **«Se recomiendan al menos 24 cartas» pasó a «el Modo Clásico pide al menos 24 cartas».** En `contexto-negocio.md` 24 es el mínimo, no una recomendación. Los números 15 y 24 no están escritos en los textos: salen de la misma regla que usa el generador de tableros.
+42. **El Chorro se dibuja con la segunda fila marcada.** La maqueta no se leyó casilla por casilla; las otras tres jugadas no admiten duda (centro, esquinas, todo).
+43. **Los versos tradicionales no se traducen al inglés**; el resto de la página sí.
+44. **La imagen para compartir en redes sigue siendo `comosejuega.png`**, así que ese archivo no se borró aunque la página ya no lo muestre. El título y la descripción para buscadores no cambiaron: siguen describiendo bien la página.
+45. **Colores:** la etiqueta «Modo Kids» usa el lila de la paleta; los frijoles y el bloque «¡Buenas!», el café oscuro.
+46. **El acomodo de celular se resolvió con el de escritorio**; no se leyó la maqueta de celular.
+
+Detalle pedido por Carlos para la US A5 ya construida (2026-10-10):
+
+47. **«Paso a paso» sin tarjetas:** título centrado y los cuatro pasos en dos columnas en computadora y una en celular, cada uno como una fila con su círculo naranja de 44 px y, a la derecha, título y texto.
+48. **Los tableritos de «Jugadas y premios» llevan casillas de colores:** ocho colores pastel que van rotando (la casilla *i* usa el color (*i* × 3) mod 8), apagadas las que no son de la jugada y con un frijol café las que sí. El Chorro marca la segunda fila (confirma el ajuste 42). Tablero Lleno lleva borde naranja y la etiqueta «Premio mayor». Cuatro tarjetas por fila en computadora y dos en celular. Los ocho colores entran a la paleta como «casillas de tablero»; Claude agregó además los dos cafés del frijol, para no dejar colores sueltos. Los radios de 4, 10 y 20 px son los que Carlos pidió, no los del sistema de diseño.
 
 ## Decisiones pendientes
 
@@ -180,22 +198,22 @@ Se le preguntan a Carlos, una por una, al empezar la historia que las necesita.
   - [x] Google solo puede regresar a una dirección del propio sitio. (Prueba automática.)
   - [ ] Al entrar con Google desde Comprar tokens se regresa a Comprar tokens. (Depende de la configuración de Supabase: ver «Pendientes de Carlos».)
 
-### US A5 — P3 ¿Cómo se juega?   ·   Estado: por hacer
+### US A5 — P3 ¿Cómo se juega?   ·   Estado: construida el 2026-10-10, pendiente de la demo de Carlos y de su sí para `docs/diseno-mockups.md` (P3)
 
 - **Historia** — Como persona que busca cómo se juega la lotería, quiero una guía completa y clara, para poder organizar una partida.
 - **Entrega demostrable** — La página con sus nueve secciones: héroe con `mesa-loteria.jpg`, lo que necesitas, paso a paso, cómo cantar las cartas (cuatro versos en tarjetas con Arvo), jugadas y premios con cuatro tableros dibujados por el sitio, «¡Buenas!» y la apuesta, Modo Kids y cuántos tableros, seis preguntas y llamada final. Los números (15 y 24 cartas) son los de `contexto-negocio.md`.
-- **Construido** — —
+- **Construido** — 2026-10-10. `HowToPlay.tsx` y su `.css` se rehicieron. Los tableros de las jugadas son una cuadrícula de 16 casillas con el frijol dibujado en CSS y una descripción para lectores de pantalla. Los mínimos de cartas se toman de `minCardsForGrid` (`src/utils/gridRules.ts`). Compartido con la US A6: `PageHero.css` (héroe naranja con imagen) y `src/fonts/arvoCarta.css` (la letra Arvo, que antes se declaraba solo en las ocasiones de inicio). Preguntas con `FaqSection`. Textos en `howToPlay`. Pruebas en `tests/src/publicPagesPrerender.test.ts`.
 - **Depende de** — nada.
 - **Cómo se prueba (guion de demo)** — Abre «¿Cómo se juega?» → héroe con la foto de la mesa → baja por las secciones → en «Jugadas y premios» hay cuatro tableros de 4×4 con frijoles marcando cada jugada, y «Premio mayor» en Tablero Lleno → abre una pregunta frecuente → al final, «Crear mi lotería» lleva a crear cartas y «Ver temáticas» al catálogo.
 - **Escenarios cubiertos**:
   - [ ] Las nueve secciones, en computadora y en celular.
-  - [ ] Los tableros de las jugadas son HTML y CSS, sin imágenes, y se entienden con lector de pantalla.
-  - [ ] Los mínimos de cartas coinciden con `contexto-negocio.md`.
-  - [ ] Enlaces internos a Crear lotería y a Temáticas.
-  - [ ] Un solo `<h1>`; título y descripción de la página al día; la dirección no cambia.
-  - [ ] Preguntas con `<details>` y datos `FAQPage` idénticos al texto visible. (Prueba automática.)
-  - [ ] La página pre-generada trae su texto completo.
-  - [ ] Textos en español y en inglés.
+  - [x] Los tableros de las jugadas son HTML y CSS, sin imágenes, y llevan su descripción para lector de pantalla. (Prueba automática.)
+  - [x] Los mínimos de cartas (15 y 24) salen de la regla del generador de tableros. (Prueba automática.)
+  - [x] Enlaces internos a Crear lotería y a Temáticas. (Prueba automática.)
+  - [x] Un solo `<h1>`; el título y la descripción para buscadores siguen valiendo y no se cambiaron; la dirección no cambia. (Prueba automática del `<h1>`.)
+  - [x] Preguntas con `<details>` y datos `FAQPage` idénticos al texto visible. (Prueba automática.)
+  - [x] La página pre-generada trae su texto completo. (Prueba automática.)
+  - [x] Textos en español y en inglés.
 
 ### US A6 — P4 ¿Qué es la lotería?   ·   Estado: por hacer
 

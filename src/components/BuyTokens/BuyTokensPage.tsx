@@ -294,7 +294,7 @@ export const BuyTokensPage: React.FC = () => {
                   {t('buyTokens.guestNeedAccount')}
                 </span>
               </p>
-              <AuthChoice tone="onLight" showLogin returnPath={RETURN_PATH} />
+              <AuthChoice tone="onLight" showLogin returnPath={RETURN_PATH} compact />
             </div>
           )}
         </div>
