@@ -33,6 +33,14 @@ describe('cartas listas para dibujarse en el PDF (FEAT-29, US A1 y A2)', () => {
     expect(compose).toHaveBeenCalledWith({ photo: 'guardada:c2', name: 'La Dama', framed: false });
   });
 
+  it('la carta se compone con su número (FEAT-30)', async () => {
+    const { prepare, compose } = preparer();
+
+    await prepare({ ...photoCard, number: 7 });
+
+    expect(compose).toHaveBeenCalledWith({ photo: 'guardada:c1', name: 'El Gallo', framed: true, number: 7 });
+  });
+
   it('cada carta se compone una sola vez, aunque salga en varios tableros y en la baraja', async () => {
     const { prepare, compose } = preparer();
 

@@ -6,6 +6,8 @@ export interface ComposeCardInput {
   name: string;
   /** Con margen crema y marco negro (foto normal) o sin ellos (ilustración que ya trae su marco). */
   framed: boolean;
+  /** Número de carta, arriba a la izquierda. Sin número no se dibuja nada ahí. */
+  number?: number;
 }
 
 /** Devuelve la carta terminada (foto, marco y nombre) como data URL de un JPEG. */
@@ -16,4 +18,5 @@ export const composeInputFor = (card: Card, photo: string): ComposeCardInput => 
   photo,
   name: card.title,
   framed: !card.isAiGenerated,
+  number: card.number,
 });

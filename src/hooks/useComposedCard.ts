@@ -19,6 +19,7 @@ export const useComposedCard = (card: Card | null, enabled: boolean = true): str
   const image = card?.image;
   const isAiGenerated = card?.isAiGenerated;
   const imagePath = card?.imagePath;
+  const number = card?.number;
   const [composed, setComposed] = useState<{ card: Card; url: string | null } | null>(null);
 
   useEffect(() => {
@@ -33,14 +34,14 @@ export const useComposedCard = (card: Card | null, enabled: boolean = true): str
     if (!enabled || id === undefined || title === undefined) return;
 
     let cancelled = false;
-    const current: Card = { id, title, image, isAiGenerated, imagePath };
+    const current: Card = { id, title, image, isAiGenerated, imagePath, number };
     store.get(current).then((url) => {
       if (!cancelled) setComposed({ card: current, url });
     });
     return () => {
       cancelled = true;
     };
-  }, [enabled, id, title, image, isAiGenerated, imagePath]);
+  }, [enabled, id, title, image, isAiGenerated, imagePath, number]);
 
   if (!enabled || !card) return null;
 
@@ -51,6 +52,7 @@ export const useComposedCard = (card: Card | null, enabled: boolean = true): str
     composed.card.title === title &&
     composed.card.image === image &&
     composed.card.isAiGenerated === isAiGenerated &&
-    composed.card.imagePath === imagePath;
+    composed.card.imagePath === imagePath &&
+    composed.card.number === number;
   return isCurrent ? composed.url : store.peek(card);
 };

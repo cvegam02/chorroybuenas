@@ -10,6 +10,7 @@ import { createCardPreparer } from './pdf/prepareCards';
 import { composeCard } from './cardCompose/compose';
 import type { CardComposer } from './cardCompose/input';
 import { readStoredCardImage } from './cardImage';
+import { withCardNumbers, withNumbersFrom } from '../utils/cardNumbers';
 
 export { downloadPDF } from './pdf/download';
 export { pdfFileName } from './pdf/fileName';
@@ -46,8 +47,14 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
     finishedCards,
   });
 
+  // Cartas de la baraja: las que se pasan (usuario con sesión) o las del navegador (invitados).
+  // El número de cada carta es su lugar en esa lista; las de temporada ya vienen terminadas y no llevan.
+  const deckSource: Card[] = options?.allCards ?? (await loadCards());
+  const deckCards = finishedCards ? deckSource : withCardNumbers(deckSource);
+  const numbered = (cards: Card[]) => (finishedCards ? cards : withNumbersFrom(cards, deckCards));
+
   const refreshedBoards: Board[] = await Promise.all(
-    boards.map(async (board) => ({ ...board, cards: await Promise.all(board.cards.map(prepareCard)) }))
+    boards.map(async (board) => ({ ...board, cards: await Promise.all(numbered(board.cards).map(prepareCard)) }))
   );
 
   // Caché por card.id: cada imagen se decodifica/embebe una sola vez (evita 160+ decodificaciones cuando hay 10 tableros)
@@ -61,9 +68,8 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
     failedCards.push(...(await drawBoardOnPage(page, board, i + 1, pdfDoc, embedCache, finishedCards)));
   }
 
-  // Optionally add pages with all cards (full deck)
-  // Usar allCards pasadas (usuario logueado) o loadCards() (invitados)
-  const allCards: Card[] = await Promise.all((options?.allCards ?? (await loadCards())).map(prepareCard));
+  // Páginas con todas las cartas (baraja completa)
+  const allCards: Card[] = await Promise.all(deckCards.map(prepareCard));
 
   failedCards.push(...(await drawDeckPages(pdfDoc, allCards, embedCache, finishedCards)));
 

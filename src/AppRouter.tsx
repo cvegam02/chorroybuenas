@@ -34,6 +34,7 @@ import { BoardRepository } from './repositories/BoardRepository';
 import { Board, GridSize } from './types';
 import { logger } from './utils/logger';
 import { pdfErrorMessage } from './utils/pdfErrorMessage';
+import { withNumbersFrom } from './utils/cardNumbers';
 
 type AppStep = 'cards' | 'board-count' | 'preview' | 'confirmation';
 
@@ -190,7 +191,8 @@ function AppContent() {
   const boardsWithHydratedImages = useMemo(() => {
     return boards.map((board) => ({
       ...board,
-      cards: board.cards.map((boardCard) => {
+      // Las cartas de un tablero son copias: toman de la lista su número y su imagen ya hidratada.
+      cards: withNumbersFrom(board.cards, cards).map((boardCard) => {
         const hydratedCard = cards.find((c) => c.id === boardCard.id);
         return {
           ...boardCard,

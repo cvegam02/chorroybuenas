@@ -11,6 +11,8 @@ export interface Card {
   originalImagePath?: string;
   isAiGenerated?: boolean;
   isProcessing?: boolean;
+  /** Lugar de la carta en el orden de subida (1, 2, 3…). Se calcula al cargar la lista; no se guarda. */
+  number?: number;
 }
 
 // Board can have either full cards or just card IDs (for storage optimization)
