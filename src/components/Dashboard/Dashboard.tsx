@@ -334,7 +334,7 @@ export const Dashboard = () => {
               </span>
               <div className="dashboard__action-text">
                 <strong>{isCreatingSet ? t('common.loading') : t('dashboard.createNew')}</strong>
-                <span>{t('landing.hero.description')}</span>
+                <span>{t('dashboard.createNewDescription')}</span>
               </div>
               <FaArrowRight className="dashboard__action-arrow" />
             </button>

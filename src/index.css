@@ -53,6 +53,15 @@
   /* Medium Brown */
   --color-text-inverted: #ffffff;
 
+  /* Carta de lotería dibujada por el sitio (FEAT-32): mismos valores que la carta real
+     (src/services/cardCompose/constants.ts) */
+  --color-card-cream: #f4ead4;
+  --color-card-ink: #14100a;
+  /* Fondos de las cartas de ocasiones de inicio (FEAT-32) */
+  --color-card-pink: #e8a3b8;
+  --color-card-blue: #93c5fd;
+  --color-card-lilac: #c4b5fd;
+
   /* Shadows - Organic & Warm */
   --shadow-sm: 0 2px 4px rgba(234, 88, 12, 0.08);
   --shadow-md: 0 4px 12px -2px rgba(234, 88, 12, 0.12);

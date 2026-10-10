@@ -1,45 +1,70 @@
-import { FaEnvelope, FaPaypal } from 'react-icons/fa';
+import { FaEnvelope, FaHeart, FaPaypal } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { ABOUT_SECTION_ID } from '../LandingPage/anchors';
 import './Footer.css';
+
+const CONTACT_EMAIL = 'carlos.tests01@gmail.com';
+const PAYPAL_URL = 'https://paypal.me/cavegam';
+
+/** Redes del sitio. Un enlace solo se muestra cuando tiene su URL (FEAT-32, decisión 9). */
+const SOCIAL_LINKS: readonly { label: string; url: string }[] = [
+    { label: 'Instagram', url: '' },
+    { label: 'TikTok', url: '' },
+];
 
 export const Footer = () => {
     const { t } = useTranslation();
+    const { user } = useAuth();
     const currentYear = new Date().getFullYear();
+    const socialLinks = SOCIAL_LINKS.filter(({ url }) => url !== '');
 
     return (
-        <footer className="footer--compact">
-            <div className="container footer__container">
-                <div className="footer__main">
-                    <div className="footer__info">
-                        <h3 className="footer__logo">{t('landing.hero.title')} {t('landing.hero.titleHighlight')}</h3>
-                        <p className="footer__creator">
-                            {t('footer.creator')} <strong>Carlos Vega</strong>
-                        </p>
-                    </div>
-
-                    <div className="footer__dev-offer">
-                        <p>{t('footer.devOffer')} <a href="mailto:carlos.tests01@gmail.com" className="footer__email-link">{t('footer.letTalk')}</a></p>
-                        <div className="footer__actions">
-                            <div className="footer__contact-item">
-                                <FaEnvelope className="footer__icon" />
-                                <span>carlos.tests01@gmail.com</span>
-                            </div>
-                            <a href="https://paypal.me/cavegam" target="_blank" rel="noopener noreferrer" className="footer__paypal-link">
-                                <FaPaypal />
-                                <span>{t('footer.support')}</span>
-                            </a>
-                        </div>
-                    </div>
+        <footer className="footer">
+            <div className="footer__inner footer__main">
+                <div className="footer__brand">
+                    <strong className="footer__name">chorroybuenas.com.mx</strong>
+                    <span>
+                        {t('footer.madeWith')} <FaHeart className="footer__heart" aria-hidden="true" />{' '}
+                        {t('footer.tradition')}
+                    </span>
+                    <span>
+                        {t('footer.creator')} <strong>Carlos Vega</strong>
+                    </span>
                 </div>
 
-                <div className="footer__bottom">
-                    <p className="footer__copyright">
-                        &copy; {currentYear} Lotería Personalizada
-                    </p>
-                    <Link to="/privacidad" className="footer__legal-link">{t('footer.privacy')}</Link>
-                    <p className="footer__slogan">{t('footer.slogan')}</p>
-                </div>
+                <nav className="footer__links" aria-label={t('footer.linksLabel')}>
+                    {/* Con sesión iniciada, inicio lleva al panel: el enlace no tendría a dónde llegar. */}
+                    {!user && <Link to={{ pathname: '/', hash: `#${ABOUT_SECTION_ID}` }}>{t('footer.about')}</Link>}
+                    <Link to="/como-se-juega">{t('footer.howToPlay')}</Link>
+                    <Link to="/que-es-la-loteria">{t('footer.whatIsLoteria')}</Link>
+                    <Link to="/privacidad">{t('footer.privacy')}</Link>
+                    {socialLinks.map(({ label, url }) => (
+                        <a key={label} href={url} target="_blank" rel="noopener noreferrer">
+                            {label}
+                        </a>
+                    ))}
+                </nav>
+            </div>
+
+            <div className="footer__inner footer__contact">
+                <span>
+                    {t('footer.devOffer')} <a href={`mailto:${CONTACT_EMAIL}`}>{t('footer.letTalk')}</a>
+                </span>
+                <span className="footer__contact-item">
+                    <FaEnvelope aria-hidden="true" />
+                    {CONTACT_EMAIL}
+                </span>
+                <a href={PAYPAL_URL} target="_blank" rel="noopener noreferrer" className="footer__contact-item">
+                    <FaPaypal aria-hidden="true" />
+                    {t('footer.support')}
+                </a>
+            </div>
+
+            <div className="footer__inner footer__bottom">
+                <span>&copy; {currentYear} Lotería Personalizada</span>
+                <span>{t('footer.slogan')}</span>
             </div>
         </footer>
     );

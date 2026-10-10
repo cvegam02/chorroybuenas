@@ -1,0 +1,164 @@
+/* Dos caminos de la página de inicio: IA y temáticas (FEAT-32, P1) */
+
+.landing-paths {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 44px 16px 8px;
+}
+
+.landing-paths__title {
+  margin: 0 0 4px;
+  color: var(--color-text-main);
+  font-size: 24px;
+  text-align: center;
+}
+
+.landing-paths__card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.landing-paths__card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.landing-paths__card:focus-visible {
+  outline: 3px solid var(--color-primary-dark);
+  outline-offset: 3px;
+}
+
+.landing-paths__card--ai,
+.landing-paths__card--ai:hover {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-text-inverted);
+}
+
+.landing-paths__card--themed,
+.landing-paths__card--themed:hover {
+  border: 2px solid var(--color-primary-lighter);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-main);
+}
+
+.landing-paths__media {
+  flex: 0 0 auto;
+  width: 104px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+
+.landing-paths__body {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.landing-paths__card-title {
+  margin: 0;
+  color: inherit;
+  font-size: 19px;
+  line-height: 1.2;
+}
+
+.landing-paths__description {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.landing-paths__card--ai .landing-paths__description {
+  color: var(--color-primary-lightest);
+}
+
+.landing-paths__card--themed .landing-paths__description {
+  color: var(--color-text-muted);
+}
+
+.landing-paths__price {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-main);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.landing-paths__card--ai .landing-paths__price {
+  background: var(--color-accent-light);
+}
+
+.landing-paths__card--themed .landing-paths__price {
+  border: 1px solid var(--color-primary-lighter);
+  background: var(--color-bg-surface);
+}
+
+.landing-paths__cta {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.landing-paths__card--themed .landing-paths__cta {
+  color: var(--color-primary-dark);
+}
+
+@media (min-width: 769px) {
+  .landing-paths {
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 24px;
+    padding: 48px 24px 16px;
+  }
+
+  /* En escritorio el título no se ve, pero sigue ahí para los lectores de pantalla. */
+  .landing-paths__title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .landing-paths__card {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+  }
+
+  .landing-paths__media {
+    width: 200px;
+  }
+
+  .landing-paths__body {
+    flex: 1 1 200px;
+    gap: 10px;
+  }
+
+  .landing-paths__card-title {
+    font-size: 26px;
+    line-height: 1.15;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-paths__card {
+    transition: none;
+  }
+
+  .landing-paths__card:hover {
+    transform: none;
+  }
+}

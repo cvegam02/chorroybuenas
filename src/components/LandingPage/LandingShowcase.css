@@ -1,0 +1,66 @@
+/* «Así quedan tus cartas» (FEAT-32, P1) */
+
+.landing-showcase {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.landing-showcase__row {
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 8px 4px 16px;
+  overflow-x: auto;
+  list-style: none;
+}
+
+.landing-showcase__row:focus-visible {
+  outline: 3px solid var(--color-primary-dark);
+  outline-offset: 3px;
+}
+
+.landing-showcase__item {
+  flex: 0 0 auto;
+}
+
+.landing-showcase__card {
+  display: block;
+  width: 130px;
+  height: 195px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+}
+
+.landing-showcase__item:nth-child(8n + 1) .landing-showcase__card,
+.landing-showcase__item:nth-child(8n + 7) .landing-showcase__card {
+  transform: rotate(-3deg);
+}
+
+.landing-showcase__item:nth-child(8n + 2) .landing-showcase__card,
+.landing-showcase__item:nth-child(8n + 6) .landing-showcase__card {
+  transform: rotate(2deg);
+}
+
+.landing-showcase__item:nth-child(8n + 3) .landing-showcase__card {
+  transform: rotate(-1deg);
+}
+
+.landing-showcase__item:nth-child(8n + 4) .landing-showcase__card {
+  transform: rotate(3deg);
+}
+
+.landing-showcase__item:nth-child(8n + 5) .landing-showcase__card {
+  transform: rotate(-2deg);
+}
+
+.landing-showcase__item:nth-child(8n) .landing-showcase__card {
+  transform: rotate(1deg);
+}
+
+@media (min-width: 769px) {
+  .landing-showcase__card {
+    width: 170px;
+    height: 255px;
+  }
+}

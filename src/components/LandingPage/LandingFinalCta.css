@@ -1,0 +1,46 @@
+/* «¿Listo para comenzar?» (FEAT-32, P1) */
+
+.landing-final-cta {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px 36px;
+}
+
+.landing-final-cta__box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px 20px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-text-inverted);
+  text-align: center;
+}
+
+.landing-final-cta__title {
+  margin: 0;
+  color: inherit;
+  font-size: clamp(28px, 4.5vw, 40px);
+}
+
+.landing-final-cta__description {
+  max-width: 560px;
+  margin: 0;
+  color: var(--color-primary-lightest);
+  font-size: 16px;
+}
+
+@media (min-width: 769px) {
+  .landing-final-cta {
+    padding: 0 24px 56px;
+  }
+
+  .landing-final-cta__box {
+    padding: 48px 32px;
+  }
+
+  .landing-final-cta__description {
+    font-size: 19px;
+  }
+}

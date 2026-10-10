@@ -1,0 +1,148 @@
+/* «Perfecta para cualquier ocasión», como cartas de lotería (FEAT-32, P1) */
+
+/* La misma letra de las cartas reales (src/services/cardCompose/font.ts), aquí para usarla en CSS. */
+@font-face {
+  font-family: 'ArvoCarta';
+  font-weight: 700;
+  font-display: swap;
+  src: url('../../fonts/Arvo-Bold.ttf') format('truetype');
+}
+
+.landing-occasions {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.landing-occasions__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-occasions__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.landing-occasions__card {
+  width: 100%;
+  max-width: 180px;
+  aspect-ratio: 2 / 3;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-card-cream);
+  box-shadow: var(--shadow-lg);
+}
+
+.landing-occasions__item:nth-child(6n + 1) .landing-occasions__card {
+  transform: rotate(-3deg);
+}
+
+.landing-occasions__item:nth-child(6n + 2) .landing-occasions__card {
+  transform: rotate(2deg);
+}
+
+.landing-occasions__item:nth-child(6n + 3) .landing-occasions__card {
+  transform: rotate(-1deg);
+}
+
+.landing-occasions__item:nth-child(6n + 4) .landing-occasions__card {
+  transform: rotate(3deg);
+}
+
+.landing-occasions__item:nth-child(6n + 5) .landing-occasions__card {
+  transform: rotate(-2deg);
+}
+
+.landing-occasions__item:nth-child(6n) .landing-occasions__card {
+  transform: rotate(1deg);
+}
+
+.landing-occasions__face {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border: 3px solid var(--color-card-ink);
+  color: var(--color-card-ink);
+}
+
+.landing-occasions__face--pink {
+  background: var(--color-card-pink);
+}
+
+.landing-occasions__face--teal {
+  background: var(--color-secondary);
+}
+
+.landing-occasions__face--yellow {
+  background: var(--color-accent);
+}
+
+.landing-occasions__face--orange {
+  background: var(--color-primary-light);
+}
+
+.landing-occasions__face--blue {
+  background: var(--color-card-blue);
+}
+
+.landing-occasions__face--lilac {
+  background: var(--color-card-lilac);
+}
+
+.landing-occasions__number,
+.landing-occasions__name {
+  position: absolute;
+  margin: 0;
+  color: var(--color-text-inverted);
+  font-family: 'ArvoCarta', serif;
+  font-weight: 700;
+  paint-order: stroke fill;
+  text-shadow: 0 2px 3px color-mix(in srgb, var(--color-card-ink) 35%, transparent);
+  -webkit-text-stroke: 1.5px var(--color-card-ink);
+}
+
+.landing-occasions__number {
+  top: 6px;
+  left: 9px;
+  font-size: 24px;
+}
+
+.landing-occasions__name {
+  right: 4px;
+  bottom: 8px;
+  left: 4px;
+  font-size: 17px;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.landing-occasions__icon {
+  width: 78px;
+  height: 78px;
+}
+
+.landing-occasions__description {
+  max-width: 180px;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+@media (min-width: 769px) {
+  .landing-occasions__list {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 28px 20px;
+  }
+}

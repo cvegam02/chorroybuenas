@@ -74,6 +74,14 @@ export class TokenPricingRepository {
    * Precio por token en una moneda. Fallback 200 centavos MXN.
    */
   static async getPricing(currency = 'MXN'): Promise<number> {
+    return (await TokenPricingRepository.getPricingOrNull(currency)) ?? FALLBACK_MXN_CENTS;
+  }
+
+  /**
+   * Precio por token tal como está guardado, o null si no se pudo leer. Para quien prefiere no
+   * mostrar un precio antes que mostrar uno supuesto (la página de inicio, FEAT-32).
+   */
+  static async getPricingOrNull(currency = 'MXN'): Promise<number | null> {
     const { data, error } = await supabase
       .from('token_pricing')
       .select('price_per_token_cents')
@@ -81,7 +89,7 @@ export class TokenPricingRepository {
       .maybeSingle();
 
     if (error || !data) {
-      return FALLBACK_MXN_CENTS;
+      return null;
     }
     return data.price_per_token_cents;
   }
