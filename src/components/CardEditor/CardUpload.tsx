@@ -4,6 +4,7 @@ import { convertFileToBase64, validateImageFile, compressImage, adjustImageToCar
 import { ImageEditor } from './ImageEditor';
 import './CardUpload.css';
 import { logger } from '../../utils/logger';
+import { isPrintableCardTitle } from '../../utils/cardTitle';
 
 
 interface CardUploadProps {
@@ -67,6 +68,9 @@ export const CardUpload = ({
       alert(t('cardUpload.errorDuplicate'));
       return;
     }
+
+    // El aviso ya está a la vista bajo el campo.
+    if (!isPrintableCardTitle(title)) return;
 
     if (!imagePreview) {
       alert(t('cardUpload.errorNoImage'));
@@ -165,6 +169,7 @@ export const CardUpload = ({
   const isDuplicateTitle = Boolean(title.trim()) &&
     normalizeTitle(title) !== normalizeTitle(initialTitle) &&
     existingTitleSet.has(normalizeTitle(title));
+  const isInvalidTitle = !isPrintableCardTitle(title);
 
 
 
@@ -237,6 +242,11 @@ export const CardUpload = ({
                 {t('cardUpload.errorDuplicate')}
               </p>
             )}
+            {isInvalidTitle && (
+              <p className="card-upload__error-text" role="alert">
+                {t('cardUpload.errorInvalidTitle')}
+              </p>
+            )}
             <p className="card-upload__help-text">
               {t('cardUpload.helpText')}
             </p>
@@ -266,7 +276,7 @@ export const CardUpload = ({
             )}
             <button
               type="submit"
-              disabled={!title.trim() || !imagePreview || isUploading}
+              disabled={!title.trim() || isInvalidTitle || !imagePreview || isUploading}
               className="card-upload__submit"
             >
               {isUploading ? t('cardUpload.status.processing') : (submitLabel || t('cardUpload.actions.addCard'))}

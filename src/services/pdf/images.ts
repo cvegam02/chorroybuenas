@@ -1,6 +1,7 @@
 import { PDFDocument, type PDFImage } from 'pdf-lib';
 import { blobToBase64 } from '../../utils/indexedDB';
 import { logger } from '../../utils/logger';
+import { ensureJpegBytes } from './jpeg';
 
 export interface ImageData {
   data: Uint8Array;
@@ -26,51 +27,6 @@ export const urlToBase64 = async (url: string): Promise<string> => {
 };
 
 export const blobURLToBase64 = async (blobURL: string): Promise<string> => urlToBase64(blobURL);
-
-/** Convierte cualquier imagen (data URL) a PNG vía canvas. Útil para WebP y otros formatos que pdf-lib no soporta. */
-export const dataURLToPngBytes = (dataUrl: string): Promise<Uint8Array> => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        reject(new Error('No canvas context'));
-        return;
-      }
-      ctx.drawImage(img, 0, 0);
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            reject(new Error('Canvas toBlob failed'));
-            return;
-          }
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const result = reader.result;
-            if (typeof result !== 'string') {
-              reject(new Error('Expected string from FileReader'));
-              return;
-            }
-            const base64 = result.includes(',') ? result.split(',')[1] : result;
-            const binary = atob(base64);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-            resolve(bytes);
-          };
-          reader.readAsDataURL(blob);
-        },
-        'image/png',
-        0.95
-      );
-    };
-    img.onerror = () => reject(new Error('Failed to load image for conversion'));
-    img.src = dataUrl;
-  });
-};
 
 export const loadImageAsUint8Array = async (imageSrc: string): Promise<ImageData> => {
   let base64Image: string;
@@ -157,30 +113,9 @@ export const embedImageInPDF = async (
 
     const imageData = await loadImageAsUint8Array(base64Image);
 
-    let image;
-    // Determine image format from magic bytes (more reliable than MIME/prefix).
-    // This fixes cases where Storage sets a wrong Content-Type (e.g. JPG bytes served as image/png).
-    const bytes = imageData.data;
-    const isPng =
-      bytes.length >= 8 &&
-      bytes[0] === 0x89 &&
-      bytes[1] === 0x50 &&
-      bytes[2] === 0x4e &&
-      bytes[3] === 0x47 &&
-      bytes[4] === 0x0d &&
-      bytes[5] === 0x0a &&
-      bytes[6] === 0x1a &&
-      bytes[7] === 0x0a;
-    const isJpg = bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
-
-    if (isPng) {
-      image = await pdfDoc.embedPng(bytes);
-    } else if (isJpg) {
-      image = await pdfDoc.embedJpg(bytes);
-    } else {
-      const pngBytes = await dataURLToPngBytes(base64Image.startsWith('data:') ? base64Image : `data:image/png;base64,${base64Image}`);
-      image = await pdfDoc.embedPng(pngBytes);
-    }
+    // El formato se decide por los primeros bytes, no por el tipo declarado: Storage a veces sirve
+    // un JPEG como image/png. Lo que no es JPEG se convierte antes de entrar al PDF.
+    const image = await pdfDoc.embedJpg(await ensureJpegBytes(imageData.data));
 
     const { width, height } = image.scale(1);
     const result: EmbedResult = { image, width, height };

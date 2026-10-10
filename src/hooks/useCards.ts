@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Card } from '../types';
 import { saveCards, loadCards } from '../utils/storage';
 import { saveImage as saveImageToIndexedDB, cacheImageBlob, blobURLToBlob, getImage } from '../utils/indexedDB';
@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useSetContext } from '../contexts/SetContext';
 import { CardRepository } from '../repositories/CardRepository';
 import { logger } from '../utils/logger';
+import { withCardNumbers } from '../utils/cardNumbers';
 
 /** Tiempo (ms) que el botón "Generar con IA" permanece deshabilitado tras añadir una carta (evita race con Supabase) */
 const SYNC_COOLDOWN_MS = 2500;
@@ -591,8 +592,11 @@ export const useCards = () => {
     }
   };
 
+  // El número de cada carta es su lugar en la lista (FEAT-30): se calcula aquí y no se guarda.
+  const numberedCards = useMemo(() => withCardNumbers(cards), [cards]);
+
   return {
-    cards,
+    cards: numberedCards,
     isLoading,
     addCard,
     addCards,

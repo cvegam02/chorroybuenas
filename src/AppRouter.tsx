@@ -1,5 +1,5 @@
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LandingPage } from './components/LandingPage/LandingPage';
 import { CardEditor } from './components/CardEditor/CardEditor';
@@ -26,12 +26,15 @@ import { useAuth } from './contexts/AuthContext';
 import { useSetContext } from './contexts/SetContext';
 import { SetRepository } from './repositories/SetRepository';
 import { useBoard } from './hooks/useBoard';
+import { CardRepository } from './repositories/CardRepository';
 import { useCards } from './hooks/useCards';
-import { generatePDF, downloadPDF } from './services/PDFService';
+import { generatePDF, downloadPDF, pdfFileName } from './services/PDFService';
 import { saveBoards, saveBoardCount, loadBoards, clearAllData } from './utils/storage';
 import { BoardRepository } from './repositories/BoardRepository';
 import { Board, GridSize } from './types';
 import { logger } from './utils/logger';
+import { pdfErrorMessage } from './utils/pdfErrorMessage';
+import { withNumbersFrom } from './utils/cardNumbers';
 
 type AppStep = 'cards' | 'board-count' | 'preview' | 'confirmation';
 
@@ -57,6 +60,9 @@ function AppContent() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  // El estado tarda un render en llegar: la referencia frena una segunda pulsación inmediata.
+  const isGeneratingPDFRef = useRef(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
   const { generateBoards, isGenerating } = useBoard();
 
   // Initialize step based on current route
@@ -170,11 +176,13 @@ function AppContent() {
   };
 
   const handlePreviewModify = () => {
+    setPdfError(null);
     setCurrentStep('cards');
     navigate('/cards');
   };
 
   const handlePreviewRegenerate = () => {
+    setPdfError(null);
     setCurrentStep('board-count');
     navigate('/board-count');
   };
@@ -183,7 +191,8 @@ function AppContent() {
   const boardsWithHydratedImages = useMemo(() => {
     return boards.map((board) => ({
       ...board,
-      cards: board.cards.map((boardCard) => {
+      // Las cartas de un tablero son copias: toman de la lista su número y su imagen ya hidratada.
+      cards: withNumbersFrom(board.cards, cards).map((boardCard) => {
         const hydratedCard = cards.find((c) => c.id === boardCard.id);
         return {
           ...boardCard,
@@ -194,15 +203,27 @@ function AppContent() {
   }, [boards, cards]);
 
   const handlePreviewConfirm = async () => {
+    if (isGeneratingPDFRef.current) return;
+    isGeneratingPDFRef.current = true;
+    setPdfError(null);
     setIsGeneratingPDF(true);
     try {
-      const pdfBlob = await generatePDF(boardsWithHydratedImages, user && currentSetId ? { allCards: cards } : undefined);
-      downloadPDF(pdfBlob);
+      // Con sesión, la baraja se lee de la lotería en este momento: `cards` se cargó al abrirla y no ve
+      // las cartas agregadas después en la pantalla de cartas.
+      const deckCards = user && currentSetId ? await CardRepository.getCards(user.id, currentSetId) : undefined;
+      // La lotería del visitante sin sesión no tiene nombre: su archivo lleva el nombre por defecto.
+      const setName = user && currentSetId ? sets.find(s => s.id === currentSetId)?.name : undefined;
+      const pdfBlob = await generatePDF(boardsWithHydratedImages, {
+        ...(deckCards ? { allCards: deckCards } : {}),
+        title: setName,
+      });
+      downloadPDF(pdfBlob, pdfFileName(setName));
       setShowConfirmation(true);
     } catch (error) {
       logger.error('Error generating PDF:', error);
-      alert(t('boardGenerator.errors.pdfError'));
+      setPdfError(pdfErrorMessage(error, t));
     } finally {
+      isGeneratingPDFRef.current = false;
       setIsGeneratingPDF(false);
     }
   };
@@ -342,6 +363,7 @@ function AppContent() {
                 onModify={handlePreviewModify}
                 onConfirm={handlePreviewConfirm}
                 onRegenerate={handlePreviewRegenerate}
+                error={pdfError}
               />
             ) : (
               <div style={{ padding: '48px', textAlign: 'center' }}>
@@ -358,14 +380,14 @@ function AppContent() {
       <Footer />
 
       {isGenerating && (
-        <div className="app__loading">
+        <div className="app__loading" role="status" aria-live="polite">
           <div className="app__loading-spinner"></div>
           <p>{t('boardGenerator.status.generatingBoards')}</p>
         </div>
       )}
 
       {isGeneratingPDF && (
-        <div className="app__loading">
+        <div className="app__loading" role="status" aria-live="polite">
           <div className="app__loading-spinner"></div>
           <p>{t('boardGenerator.status.generatingPDF')}</p>
         </div>

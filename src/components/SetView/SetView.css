@@ -228,7 +228,8 @@
 .set-view__card-img-wrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 1;
+  /* La carta entera, como sale impresa (2:3) */
+  aspect-ratio: 2 / 3;
 }
 
 .set-view__card-img {

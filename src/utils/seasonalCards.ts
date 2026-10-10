@@ -4,7 +4,7 @@
  */
 
 import type { GridSize } from '../types';
-import { minCardsForGrid } from './gridRules';
+import { MIN_CARDS_BY_GRID } from './gridRules';
 
 export const SEASONAL_EXPECTED_CARDS = 54;
 export const SEASONAL_CARD_RATIO = 2 / 3;
@@ -65,9 +65,19 @@ export function cardCountStatus(count: number, expected: number = SEASONAL_EXPEC
   return { kind: 'exact', difference: 0 };
 }
 
-/** El mismo mínimo que la lotería normal para generar tableros (contexto-negocio §4). */
+/**
+ * Mínimo de cartas de una lotería temática. Kids (3×3) baja a 9, una carta por casilla
+ * (FEAT-24, US A5); Clásico (4×4) conserva el de la lotería normal (contexto-negocio §4).
+ */
+export const SEASONAL_MIN_CARDS_BY_GRID: Record<GridSize, number> = {
+  9: 9,
+  16: MIN_CARDS_BY_GRID[16],
+};
+
+export const seasonalMinCards = (gridSize: GridSize): number => SEASONAL_MIN_CARDS_BY_GRID[gridSize];
+
 export function hasEnoughCards(count: number, gridSize: GridSize): boolean {
-  return count >= minCardsForGrid(gridSize);
+  return count >= seasonalMinCards(gridSize);
 }
 
 export function validateCardFile(file: { type: string; size: number }): string | null {

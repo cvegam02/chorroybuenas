@@ -60,6 +60,24 @@
 }
 
 /* ============================================
+   PDF ERROR
+   ============================================ */
+
+.board-preview__error {
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin: 0 0 24px;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--color-text-main);
+  text-align: center;
+}
+
+/* ============================================
    ACTIONS
    ============================================ */
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SeasonalRepository, type AdminSeasonalLoteria } from '../../../repositories/SeasonalRepository';
 import { generatePDF } from '../../../services/PDFService';
+import { PdfCardsFailedError, formatFailedCardNames } from '../../../services/pdf/failedCards';
 import type { Board, Card } from '../../../types';
 import { logger } from '../../../utils/logger';
 import {
@@ -31,6 +32,14 @@ const STAGE_LABELS: Record<Exclude<SaveStage, 'idle'>, string> = {
 /** Las cartas ya traen su nombre dibujado: van al PDF sin título. */
 const toPdfCard = (card: SeasonalCard): Card => ({ id: card.id, title: '', image: card.url });
 
+/** Las cartas de temporada no llevan nombre: en el aviso se identifican por el nombre de su archivo. */
+const failedCardsMessage = (error: PdfCardsFailedError, cards: readonly SeasonalCard[]): string => {
+  const fileNames = error.failedCards.map((failed) => cards.find((card) => card.id === failed.id)?.fileName ?? failed.id);
+  const count = fileNames.length;
+  const summary = count === 1 ? '1 carta no cargó' : `${count} cartas no cargaron`;
+  return `No se pudo crear el PDF: ${summary} (${formatFailedCardNames(fileNames)}). Revisa tu conexión e inténtalo de nuevo.`;
+};
+
 /** Paso 3: armar el PDF y dejarlo guardado en la ficha, con el número de cartas y de tableros. */
 export const SeasonalBuilderSave = ({ loteria, cards, boards, onBack }: SeasonalBuilderSaveProps) => {
   const navigate = useNavigate();
@@ -54,10 +63,18 @@ export const SeasonalBuilderSave = ({ loteria, cards, boards, onBack }: Seasonal
         cards: board.map(toPdfCard),
         gridSize: loteria.grid_size,
       }));
-      const blob = await generatePDF(pdfBoards, { allCards: cards.map(toPdfCard), finishedCards: true });
+      const blob = await generatePDF(pdfBoards, {
+        allCards: cards.map(toPdfCard),
+        finishedCards: true,
+        title: loteria.name_es,
+      });
       file = new File([blob], seasonalPdfFileName(loteria.name_es), { type: SEASONAL_PDF_MIME_TYPE });
     } catch (buildError) {
       logger.error('Lotería de temporada: no se pudo armar el PDF:', buildError);
+      if (buildError instanceof PdfCardsFailedError) {
+        fail(failedCardsMessage(buildError, cards));
+        return;
+      }
       fail('No se pudo armar el PDF. Tus cartas y tableros siguen aquí: intenta de nuevo.');
       return;
     }
