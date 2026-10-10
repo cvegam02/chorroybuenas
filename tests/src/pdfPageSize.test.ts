@@ -9,6 +9,7 @@ vi.mock('../../src/utils/indexedDB', () => ({
   blobToBase64: vi.fn(),
   cacheImageBlob: vi.fn(),
 }));
+vi.mock('../../src/services/cardCompose/compose', () => ({ composeCard: vi.fn(async ({ photo }: { photo: string }) => photo) }));
 vi.mock('../../src/utils/storage', () => ({ loadCards: vi.fn(async () => []) }));
 vi.mock('../../src/repositories/CardRepository', () => ({ CardRepository: { downloadImage: vi.fn() } }));
 // El logo no se puede leer fuera del navegador; el tablero se dibuja sin él y lo avisa por el logger.

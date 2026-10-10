@@ -50,9 +50,9 @@ Recorrido en tres pasos. No requiere cuenta (principio central, `contexto-negoci
 
 | Código | Pantalla | Ruta | Qué muestra y qué permite |
 |---|---|---|---|
-| C1 | Cartas | `/cards` | Lista de cartas de la lotería. Agregar una carta o varias, editarlas, borrarlas, ver una en grande (en teléfono, desde el menú de la carta), elegir el modo (Clásico o Kids), ver cuántas faltan para el mínimo, transformar con IA (una o todas) y renombrar la lotería. Botón para pasar al paso siguiente. |
+| C1 | Cartas | `/cards` | Lista de cartas de la lotería. Agregar una carta o varias, editarlas, borrarlas, ver una en grande (en teléfono, desde el menú de la carta), elegir el modo (Clásico o Kids), ver cuántas faltan para el mínimo, transformar con IA (una o todas) y renombrar la lotería. Botón para pasar al paso siguiente. Desde el 2026-10-09 (FEAT-29), cada carta se muestra como sale impresa, con el nombre dentro de la imagen: la de foto normal con margen crema y marco, la convertida con IA entera; mientras se convierte con IA se ve la foto. |
 | C2 | Cantidad de tableros | `/board-count` | Cuántos tableros generar, con la cantidad sugerida. Avisa si faltan cartas. |
-| C3 | Vista previa | `/preview` | Los tableros generados, uno por uno, y la descarga del PDF. |
+| C3 | Vista previa | `/preview` | Los tableros generados, uno por uno, y la descarga del PDF. Desde el 2026-10-09 (FEAT-29), las cartas de los tableros se muestran como salen impresas, con el nombre dentro de la imagen. |
 
 `/crear` redirige a C1.
 
@@ -63,7 +63,7 @@ Requiere sesión.
 | Código | Pantalla | Ruta | Qué muestra y qué permite |
 |---|---|---|---|
 | U1 | Mi cuenta (panel) | `/dashboard` | Nombre y foto de perfil (editables), saldo y resumen de tokens, lista de loterías guardadas (crear, renombrar, borrar, abrir), historial de compras y cambio de contraseña. Por construir (FEAT-17): sección «Mis loterías temáticas», bajo las loterías guardadas, con la descarga de cada una y la etiqueta «Pago en proceso» en las pendientes. |
-| U2 | Lotería guardada | `/loteria/:setId` | Las cartas y tableros de una lotería guardada, con acceso a editarla y a su PDF. _(por confirmar)_ |
+| U2 | Lotería guardada | `/loteria/:setId` | Las cartas y tableros de una lotería guardada, con acceso a editarla y a su PDF. Desde el 2026-10-09 (FEAT-29), sus cartas y sus tableros se muestran como salen impresos, con el nombre dentro de la imagen. _(por confirmar)_ |
 | U3 | Comprar tokens | `/comprar-tokens` | Paquetes y cantidad libre, campo de código promocional, aviso de primera compra, y el resultado al volver de Mercado Pago (éxito, pendiente o cancelado). Visible sin sesión, pero comprar la requiere. |
 
 ## Zona Administración
@@ -94,8 +94,8 @@ Requiere ser administrador.
 | M6 | Subida en lote | C1 | Subir varias imágenes y revisar sus títulos. |
 | M7 | Progreso de subida | C1 | Barra de avance al guardar imágenes. |
 | M8 | Transformación con IA en lote | C1 | Cuántas cartas, cuántos tokens, avance y resultado. |
-| M9 | Tablero ampliado | C3 | Ver un tablero en grande y pasar al siguiente. |
-| M10 | Vista previa de carta | U2; C1 (solo en teléfono, desde el menú de la carta — 2026-10-06, FEAT-14); P6, para las cartas de muestra (2026-10-06, FEAT-17) | Ver una carta en grande. _(por confirmar en U2)_ |
+| M9 | Tablero ampliado | C3; U2 | Ver un tablero en grande y pasar al siguiente. Desde el 2026-10-09 (FEAT-29), las cartas de los tableros se muestran como salen impresas, con el nombre dentro de la imagen. |
+| M10 | Vista previa de carta | U2; C1 (solo en teléfono, desde el menú de la carta — 2026-10-06, FEAT-14); P6, para las cartas de muestra (2026-10-06, FEAT-17) | Ver una carta en grande. Desde el 2026-10-09 (FEAT-29), la carta se muestra como sale impresa, con el nombre dentro de la imagen; las cartas de muestra de P6 no cambian. _(por confirmar en U2)_ |
 | M11 | Historial de compras y regalos | U1 | Lista de compras del usuario y, mezclados por fecha, los regalos de tokens que recibió. Por construir (FEAT-17): también sus compras de loterías temáticas. |
 | M12 | Confirmación y advertencia | Varias | Confirmar acciones que no se deshacen (borrar, vaciar) y avisar de errores. |
 

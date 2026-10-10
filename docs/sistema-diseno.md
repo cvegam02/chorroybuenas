@@ -51,6 +51,10 @@ Todos están definidos como variables en `:root`, en `src/index.css`. Se usan co
 
 Una sola familia, Quicksand, cargada desde Google Fonts en `index.html` con pesos de 300 a 700. No hay tokens de tamaño de letra: cada componente define los suyos.
 
+### La carta impresa no es parte del sitio
+
+La carta de lotería que el sitio produce tiene su propio aspecto, que no usa estos tokens: margen crema `#F4EAD4`, marco y contorno de letra `#14100A`, nombre en blanco y letra Arvo Bold (guardada en `src/fonts/`, con su licencia OFL). Esos valores viven en `src/services/cardCompose/constants.ts` y solo se usan para componer la imagen de la carta; no se usan en botones, textos ni pantallas del sitio (FEAT-29, decisión 9).
+
 ### Espaciado, radios y sombras
 
 | Token | Valor |
@@ -113,3 +117,4 @@ Unificar esto es una feature pendiente; no se corrige de paso al tocar una panta
 | Fecha | Cambio |
 |---|---|
 | 2026-10-06 | Documento creado a partir de `src/index.css`. Sin cambios de diseño. |
+| 2026-10-09 | Se anota que la carta impresa tiene colores y letra propios, fuera de la paleta del sitio (FEAT-29). Sin cambios en el sitio. |

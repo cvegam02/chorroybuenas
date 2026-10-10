@@ -11,6 +11,7 @@ import { TokenPricingRepository } from '../../repositories/TokenPricingRepositor
 import { BoardThumbnail } from '../BoardGenerator/BoardThumbnail';
 import { BoardModal } from '../BoardGenerator/BoardModal';
 import { CardPreviewModal } from './CardPreviewModal';
+import { SetCardThumb } from './SetCardThumb';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
 import { generatePDF, downloadPDF, pdfFileName } from '../../services/PDFService';
 import { Card, GridSize } from '../../types';
@@ -283,30 +284,13 @@ export const SetView = () => {
             ) : (
               <div className="set-view__cards-grid">
                 {cards.slice(0, 24).map((card) => (
-                  <button
+                  <SetCardThumb
                     key={card.id}
-                    type="button"
-                    className="set-view__card-thumb set-view__card-thumb--clickable"
-                    onClick={() => setSelectedCard(card)}
-                  >
-                    {card.image ? (
-                      <div className="set-view__card-img-wrapper">
-                        {!loadedImages.has(card.id) && (
-                          <div className="set-view__card-skeleton" aria-hidden="true" />
-                        )}
-                        <img
-                          src={card.image}
-                          alt={card.title}
-                          className="set-view__card-img"
-                          style={loadedImages.has(card.id) ? undefined : { opacity: 0 }}
-                          onLoad={() => setLoadedImages((prev) => new Set(prev).add(card.id))}
-                        />
-                      </div>
-                    ) : (
-                      <div className="set-view__card-placeholder">{t('setView.noImage')}</div>
-                    )}
-                    <span className="set-view__card-title">{card.title}</span>
-                  </button>
+                    card={card}
+                    loaded={loadedImages.has(card.id)}
+                    onLoaded={() => setLoadedImages((prev) => new Set(prev).add(card.id))}
+                    onOpen={() => setSelectedCard(card)}
+                  />
                 ))}
                 {cards.length > 24 && (
                   <div className="set-view__card-more">+{cards.length - 24}</div>

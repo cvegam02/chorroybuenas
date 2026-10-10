@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '../../types';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
 import { CardPreviewModal } from '../SetView/CardPreviewModal';
+import { useComposedCard } from '../../hooks/useComposedCard';
 import './CardPreview.css';
 
 type PendingAction = 'regenerate' | 'delete' | 'revert' | null;
@@ -30,6 +31,9 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [showLargeView, setShowLargeView] = useState(false);
+  // La carta como sale impresa, con el nombre dentro. Mientras se convierte con IA se ve la foto, como siempre.
+  const composedUrl = useComposedCard(card, !card.isProcessing && !isTransforming);
+  const shownImage = composedUrl ?? card.image;
 
   useEffect(() => {
     const mq = window.matchMedia('(hover: none)');
@@ -142,8 +146,8 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
         }}
       >
         <div className="card-preview__image-container">
-          {card.image ? (
-            <img src={card.image} alt={card.title} className="card-preview__image" />
+          {shownImage ? (
+            <img src={shownImage} alt={card.title} className="card-preview__image" />
           ) : (
             <div className="card-preview__image-placeholder">{t('setView.noImage')}</div>
           )}
@@ -194,7 +198,7 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
             </button>
           )}
         </div>
-        <div className="card-preview__title">{card.title}</div>
+        {!composedUrl && <div className="card-preview__title">{card.title}</div>}
         {!isTouchDevice && !disabledDuringBatch && (
           <button
             className="card-preview__remove"

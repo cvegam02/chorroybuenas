@@ -1,38 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { placeImageInCard, titleBaselineOffset, titleSpaceFor } from '../../src/services/pdf/layout';
+import { placeImageInCard } from '../../src/services/pdf/layout';
 import { seasonalPdfFileName, withBuiltCounts } from '../../src/utils/seasonalLoteria';
-
-describe('franja del nombre al pie de la carta (FEAT-25)', () => {
-  const cell = { width: 96, height: 145.6 };
-
-  it('la foto cubre su espacio hasta donde empieza la franja, en tableros de 4 × 4 y de 3 × 3', () => {
-    for (const [titleSize, expectedSpace] of [[11, 19], [14, 22]]) {
-      const titleSpace = titleSpaceFor(titleSize);
-      expect(titleSpace).toBe(expectedSpace);
-      const placed = placeImageInCard(512, 768, cell.width, cell.height, titleSpace, 'cover');
-      expect(placed.offsetY).toBeLessThanOrEqual(titleSpace + 0.001);
-      expect(placed.offsetY + placed.height).toBeGreaterThanOrEqual(cell.height - 0.001);
-    }
-  });
-
-  it('el nombre queda centrado dentro de la franja, también con la letra más chica de un nombre largo', () => {
-    const titleSpace = titleSpaceFor(11);
-    for (const fontSize of [10, 8, 6]) {
-      const baseline = titleBaselineOffset(titleSpace, fontSize);
-      const capHeight = fontSize * 0.718;
-      expect(baseline).toBeGreaterThan(0);
-      expect(baseline + capHeight).toBeLessThan(titleSpace);
-      expect(baseline).toBeCloseTo(titleSpace - (baseline + capHeight));
-    }
-  });
-});
 
 describe('imagen de una carta dentro de su casilla del PDF', () => {
   const cell = { width: 96, height: 145.6 };
 
   it('una carta terminada (FEAT-23) cabe entera en la casilla, sin recortarse', () => {
     for (const [imgWidth, imgHeight] of [[1000, 1500], [1000, 1000], [1500, 1000]]) {
-      const placed = placeImageInCard(imgWidth, imgHeight, cell.width, cell.height, 0, 'contain');
+      const placed = placeImageInCard(imgWidth, imgHeight, cell.width, cell.height, 'contain');
       expect(placed.width).toBeLessThanOrEqual(cell.width + 0.001);
       expect(placed.height).toBeLessThanOrEqual(cell.height + 0.001);
       expect(placed.offsetX).toBeGreaterThanOrEqual(-0.001);
@@ -42,17 +17,27 @@ describe('imagen de una carta dentro de su casilla del PDF', () => {
   });
 
   it('una carta terminada queda centrada', () => {
-    const placed = placeImageInCard(1000, 1500, cell.width, cell.height, 0, 'contain');
+    const placed = placeImageInCard(1000, 1500, cell.width, cell.height, 'contain');
     expect(placed.offsetX).toBeCloseTo((cell.width - placed.width) / 2);
     expect(placed.offsetY).toBeCloseTo((cell.height - placed.height) / 2);
   });
 
-  it('la carta normal sigue llenando la casilla por encima del espacio del título', () => {
-    const titleSpace = 19;
-    const placed = placeImageInCard(512, 768, cell.width, cell.height, titleSpace, 'cover');
+  it('la carta normal llena toda la casilla, ya sin franja para el nombre (FEAT-29)', () => {
+    const placed = placeImageInCard(512, 768, cell.width, cell.height, 'cover');
     expect(placed.width).toBeGreaterThanOrEqual(cell.width - 0.001);
-    expect(placed.height).toBeGreaterThanOrEqual(cell.height - titleSpace - 0.001);
-    expect(placed.offsetY + placed.height / 2).toBeCloseTo(titleSpace + (cell.height - titleSpace) / 2);
+    expect(placed.height).toBeGreaterThanOrEqual(cell.height - 0.001);
+    expect(placed.offsetY + placed.height / 2).toBeCloseTo(cell.height / 2);
+  });
+
+  it('una ilustración 2:3 casi no se recorta en las casillas de tableros y baraja (FEAT-29, US A2)', () => {
+    // Casillas de un tablero de 4 × 4, de uno de 3 × 3 y de la baraja, en puntos.
+    for (const [width, height] of [[96.04, 145.65], [129.47, 195.62], [141.75, 212.63]]) {
+      const placed = placeImageInCard(512, 768, width, height, 'cover');
+      const cutPerSideMm = ((placed.width - width) / 2 / 72) * 25.4;
+      expect(cutPerSideMm).toBeGreaterThanOrEqual(-0.001);
+      expect(cutPerSideMm).toBeLessThan(0.2);
+      expect(placed.height).toBeCloseTo(height, 1);
+    }
   });
 });
 

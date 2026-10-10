@@ -2,16 +2,21 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Card } from '../../types';
+import { useComposedCard } from '../../hooks/useComposedCard';
 import './CardPreviewModal.css';
 
 interface CardPreviewModalProps {
   card: Card | null;
   isOpen: boolean;
   onClose: () => void;
+  /** Carta que ya trae su nombre dibujado (lotería temática): se muestra tal cual, sin componer. */
+  finishedCard?: boolean;
 }
 
-export const CardPreviewModal = ({ card, isOpen, onClose }: CardPreviewModalProps) => {
+export const CardPreviewModal = ({ card, isOpen, onClose, finishedCard = false }: CardPreviewModalProps) => {
   const { t } = useTranslation();
+  // La carta como sale impresa, con el nombre dentro; mientras no está lista se ve la foto con su nombre.
+  const composedUrl = useComposedCard(card, isOpen && !finishedCard);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -24,6 +29,7 @@ export const CardPreviewModal = ({ card, isOpen, onClose }: CardPreviewModalProp
   }, [isOpen, onClose]);
 
   if (!isOpen || !card) return null;
+  const shownImage = composedUrl ?? card.image;
 
   const modalContent = (
     <div
@@ -46,9 +52,9 @@ export const CardPreviewModal = ({ card, isOpen, onClose }: CardPreviewModalProp
         </button>
         <div className="card-preview-modal__card">
           <div className="card-preview-modal__image-wrap">
-            {card.image ? (
+            {shownImage ? (
               <img
-                src={card.image}
+                src={shownImage}
                 alt={card.title}
                 className="card-preview-modal__image"
               />
@@ -58,7 +64,7 @@ export const CardPreviewModal = ({ card, isOpen, onClose }: CardPreviewModalProp
               </div>
             )}
           </div>
-          <div className="card-preview-modal__title">{card.title}</div>
+          {!composedUrl && <div className="card-preview-modal__title">{card.title}</div>}
         </div>
       </div>
     </div>
