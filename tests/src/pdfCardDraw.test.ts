@@ -49,7 +49,7 @@ describe('las cartas del PDF ya no llevan franja con el nombre (FEAT-29, US A1 y
   it('el PDF no escribe el nombre de la carta: va dentro de su imagen', async () => {
     const { texts } = await drawBoard([photoCard, aiCard]);
 
-    expect(texts).toEqual(['Tablero 1']);
+    expect(texts).toEqual(['TABLERO 1']);
   });
 
   it('todas las cartas llevan el borde negro por fuera: foto normal, convertida con IA y temática', async () => {
