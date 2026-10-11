@@ -20,6 +20,7 @@ import { AdminPanel } from './components/AdminPanel/AdminPanel';
 import { SeasonalBuilder } from './components/AdminPanel/SeasonalBuilder/SeasonalBuilder';
 import { Navbar } from './components/Navbar/Navbar';
 import { PageMeta } from './components/PageMeta/PageMeta';
+import { CreateSteps } from './components/CreateSteps/CreateSteps';
 import { Footer } from './components/Footer/Footer';
 import { SetNewPasswordModal } from './components/Auth/SetNewPasswordModal';
 import { useAuth } from './contexts/AuthContext';
@@ -270,6 +271,7 @@ function AppContent() {
     <>
       <PageMeta />
       <Navbar />
+      <CreateSteps />
       <Routes>
         <Route
           path="/"

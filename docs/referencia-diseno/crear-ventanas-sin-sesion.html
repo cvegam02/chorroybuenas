@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Crear lotería — ventanas</title>
+
+</head>
+<body>
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;family=Arvo:wght@700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f5efe8}
+a{color:#c2410c}a:hover{color:#9a3412}
+</style>
+
+<div style="font-family: 'Quicksand', system-ui, sans-serif; color: #431407; background: #f5efe8; width: 100%; ">
+
+<div style="padding: 40px; display: flex; flex-direction: column; gap: 40px; background: #f5efe8;">
+  <div><h1 style="margin: 0 0 6px; font-size: 32px;">Crear lotería — ventanas</h1><p style="margin: 0; font-size: 17px; color: #78350f;">Agregar una carta, subir varias fotos, la descarga del PDF y el panel de IA con sesión.</p></div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start;">
+    <div><div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;">Agregar una carta<span style="font-size: 15px; color: #78350f; font-weight: 500;"> — con vista previa de la carta</span></div><div style="background: rgba(67,20,7,0.55); border-radius: 20px; padding: 36px; display: flex; justify-content: center;"><div style="width: 100%; max-width: 100%; background: #fff; border-radius: 24px; box-shadow: 0 30px 80px rgba(67,20,7,0.35); overflow: hidden;">
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid #fde4cc; background: #fffbf7;">
+      <div><h3 style="margin: 0; font-size: 21px;">Agregar una carta</h3></div>
+      <span style="width: 38px; height: 38px; border-radius: 999px; background: #fff7ed; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></span>
+    </div><div style="display: flex; gap: 20px; padding: 20px;">
+      <div style="flex: 0 0 210px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 3 / 4;"><img src="crear-img/foto-sombrero.jpg" alt="" style="width: 100%; height: 100%; object-fit: cover; display: block;"></div>
+        <div style="display: flex; gap: 8px;"><a href="#" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; text-decoration: none; border-radius: 999px; font-size: 16px; background: #fff; color: #c2410c; border: 2px solid #fdba74; padding: 11px 20px; flex: 1; font-size: 14px; padding: 9px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>Ajustar</a><a href="#" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; text-decoration: none; border-radius: 999px; font-size: 16px; background: transparent; color: #78350f; padding: 11px 14px; flex: 1; font-size: 14px;">Cambiar foto</a></div>
+      </div>
+      <div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 18px;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-weight: 700; font-size: 15px;">Nombre de la carta</label>
+        <input type="text" value="LA DEL SOMBRERO" style="font: inherit; font-size: 18px; font-weight: 700; padding: 12px 14px; border: 2px solid #ea580c; border-radius: 12px; text-transform: uppercase; color: #431407;">
+        <span style="font-size: 13px; color: #78350f;">Corto y fácil de cantar. Máximo 18 letras.</span>
+      </div>
+        <div style="display: flex; align-items: center; gap: 14px; background: #fff7ed; border-radius: 14px; padding: 12px;">
+        <img src="crear-img/c13.jpg" alt="" style="width: 72px; height: 108px; border-radius: 5px; box-shadow: 0 4px 10px rgba(67,20,7,0.2);">
+        <div style="display: flex; flex-direction: column; gap: 4px;"><strong style="font-size: 15px;">Así se verá</strong><span style="font-size: 13px; color: #78350f; line-height: 1.45;">Número y nombre se ponen solos, con el estilo de la lotería.</span></div>
+      </div>
+        <span style="flex: 1 1 auto;"></span>
+        <a href="#" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; text-decoration: none; border-radius: 999px; font-size: 16px; background: #ea580c; color: #fff; padding: 13px 22px; box-shadow: 0 6px 16px rgba(234,88,12,0.28);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Agregar carta</a>
+      </div>
+    </div></div></div></div>
+    <div><div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;">Subir varias fotos<span style="font-size: 15px; color: #78350f; font-weight: 500;"> — una por una, con miniaturas</span></div><div style="background: rgba(67,20,7,0.55); border-radius: 20px; padding: 36px; display: flex; justify-content: center;"><div style="width: 100%; max-width: 100%; background: #fff; border-radius: 24px; box-shadow: 0 30px 80px rgba(67,20,7,0.35); overflow: hidden;">
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid #fde4cc; background: #fffbf7;">
+      <div><h3 style="margin: 0; font-size: 21px;">Nombra tus fotos</h3><span style="font-size: 14px; color: #78350f;">Ponle nombre a cada una; puedes cambiarlo después.</span></div>
+      <span style="width: 38px; height: 38px; border-radius: 999px; background: #fff7ed; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></span>
+    </div><div style="padding: 16px 22px 0; display: flex; align-items: center; gap: 14px;">
+      <div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 6px;"><div style="height: 8px; background: #fde4cc; border-radius: 999px;"><div style="width: 33%; height: 100%; background: #ea580c; border-radius: 999px;"></div></div><span style="font-size: 13px; color: #78350f;">Foto 1 de 3 · WhatsApp Image 2026-10-09.jpeg</span></div>
+      <div style="display: flex; gap: 6px;"><div style="position: relative;"><img src="crear-img/foto-sombrero.jpg" alt="" style="width: 54px; height: 72px; object-fit: cover; border-radius: 8px; border: 3px solid #ea580c; opacity: 1;"></div><div style="position: relative;"><img src="crear-img/foto-vaquero.jpg" alt="" style="width: 54px; height: 72px; object-fit: cover; border-radius: 8px; border: 3px solid transparent; opacity: 0.6;"></div><div style="position: relative;"><img src="crear-img/foto-consentida.jpg" alt="" style="width: 54px; height: 72px; object-fit: cover; border-radius: 8px; border: 3px solid transparent; opacity: 0.6;"></div></div>
+    </div>
+    <div style="display: flex; gap: 24px; padding: 18px 22px 22px;">
+      <div style="flex: 0 0 210px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="border-radius: 16px; overflow: hidden; aspect-ratio: 3 / 4;"><img src="crear-img/foto-sombrero.jpg" alt="" style="width: 100%; height: 100%; object-fit: cover; display: block;"></div>
+        <a href="#" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; text-decoration: none; border-radius: 999px; font-size: 16px; background: #fff; color: #c2410c; border: 2px solid #fdba74; padding: 11px 20px; font-size: 14px; padding: 9px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>Ajustar recorte</a>
+      </div>
+      <div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 18px;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-weight: 700; font-size: 15px;">Nombre de la carta</label>
+        <input type="text" value="LA DEL SOMBRERO" style="font: inherit; font-size: 18px; font-weight: 700; padding: 12px 14px; border: 2px solid #ea580c; border-radius: 12px; text-transform: uppercase; color: #431407;">
+        <span style="font-size: 13px; color: #78350f;">Corto y fácil de cantar. Máximo 18 letras.</span>
+      </div>
+        <div style="display: flex; align-items: center; gap: 14px; background: #fff7ed; border-radius: 14px; padding: 12px;">
+        <img src="crear-img/c13.jpg" alt="" style="width: 72px; height: 108px; border-radius: 5px; box-shadow: 0 4px 10px rgba(67,20,7,0.2);">
+        <div style="display: flex; flex-direction: column; gap: 4px;"><strong style="font-size: 15px;">Así se verá</strong><span style="font-size: 13px; color: #78350f; line-height: 1.45;">Número y nombre se ponen solos, con el estilo de la lotería.</span></div>
+      </div>
+        <span style="flex: 1 1 auto;"></span>
+        <div style="display: flex; gap: 10px;"><a href="#" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; text-decoration: none; border-radius: 999px; font-size: 16px; background: transparent; color: #78350f; padding: 11px 14px; flex: 0 0 auto;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5l7 7-7 7M13 5l7 7-7 7"/></svg>Omitir</a><a href="#" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; text-decoration: none; border-radius: 999px; font-size: 16px; background: #ea580c; color: #fff; padding: 13px 22px; box-shadow: 0 6px 16px rgba(234,88,12,0.28); flex: 1 1 auto;">Siguiente foto <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      </div>
+    </div></div></div></div>
+  </div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start;">
+    <div><div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;">PDF descargado<span style="font-size: 15px; color: #78350f; font-weight: 500;"> — sin sesión</span></div><div style="background: rgba(67,20,7,0.55); border-radius: 20px; padding: 36px; display: flex; justify-content: center;"><div style="width: 520px; max-width: 100%; background: #fff; border-radius: 24px; box-shadow: 0 30px 80px rgba(67,20,7,0.35); overflow: hidden;">
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid #fde4cc; background: #fffbf7;">
+      <div><h3 style="margin: 0; font-size: 21px;">Descarga lista</h3></div>
+      <span style="width: 38px; height: 38px; border-radius: 999px; background: #fff7ed; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></span>
+    </div><div style="padding: 26px; display: flex; flex-direction: column; gap: 18px;">
+      <div style="display: flex; align-items: center; gap: 14px;"><span style="width: 56px; height: 56px; border-radius: 999px; background: #16a34a; color: #fff; display: flex; align-items: center; justify-content: center;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>
+        <div><h3 style="margin: 0; font-size: 24px;">¡Tu PDF ya se descargó!</h3><span style="font-size: 15px; color: #78350f;">12 tableros y la baraja, listos para imprimir.</span></div></div>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; gap: 12px; align-items: flex-start;"><span style="flex: 0 0 auto; width: 38px; height: 38px; border-radius: 12px; background: #ffedd5; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg></span><div><strong style="font-size: 15px;">Imprime en tamaño carta</strong><p style="margin: 2px 0 0; font-size: 14px; color: #78350f; line-height: 1.45;">En papel grueso o cartulina duran más.</p></div></div>
+        <div style="display: flex; gap: 12px; align-items: flex-start;"><span style="flex: 0 0 auto; width: 38px; height: 38px; border-radius: 12px; background: #ffedd5; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg></span><div><strong style="font-size: 15px;">Recorta la baraja</strong><p style="margin: 2px 0 0; font-size: 14px; color: #78350f; line-height: 1.45;">Son las últimas hojas del PDF.</p></div></div>
+        <div style="display: flex; gap: 12px; align-items: flex-start;"><span style="flex: 0 0 auto; width: 38px; height: 38px; border-radius: 12px; background: #ffedd5; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5V21h16"/></svg></span><div><strong style="font-size: 15px;">¿Primera vez jugando?</strong><p style="margin: 2px 0 0; font-size: 14px; color: #78350f; line-height: 1.45;"><a href="#">Mira cómo se juega</a> en 5 minutos.</p></div></div>
+      </div>
+      <div style="background: #fff7ed; border: 1px solid #fdba74; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; gap: 10px; align-items: center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a5 5 0 0 1-.6-9.96A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/></svg><strong style="font-size: 15px;">¿Quieres guardar esta lotería?</strong></div>
+        <span style="font-size: 14px; color: #78350f;">Con una cuenta la abres desde cualquier dispositivo y te regalamos 5 tokens.</span>
+        <div style="display: flex; gap: 8px;"><a href="#" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; text-decoration: none; border-radius: 999px; font-size: 16px; flex: 1; background: #fff; color: #431407; border: 1px solid #fdba74; padding: 10px; font-size: 14px;"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Entrar con Google</a><a href="#" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; text-decoration: none; border-radius: 999px; font-size: 16px; flex: 1; background: #ea580c; color: #fff; padding: 10px; font-size: 14px;">Crear tu cuenta</a></div>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;"><a href="#" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; text-decoration: none; border-radius: 999px; font-size: 16px; background: #fff; color: #c2410c; border: 2px solid #fdba74; padding: 11px 20px; flex: 1;">Seguir editando</a><a href="#" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; text-decoration: none; border-radius: 999px; font-size: 16px; background: #ea580c; color: #fff; padding: 13px 22px; box-shadow: 0 6px 16px rgba(234,88,12,0.28); flex: 1;">Terminar</a></div>
+      <span style="font-size: 13px; color: #78350f; text-align: center;">Si terminas sin cuenta, esta lotería se borra de este navegador.</span>
+    </div></div></div></div>
+    <div><div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;">Panel de IA<span style="font-size: 15px; color: #78350f; font-weight: 500;"> — con sesión, en lugar de la invitación a crear cuenta</span></div><div style="background: #fffbf7; border: 1px solid #fde4cc; border-radius: 20px; padding: 36px; display: flex; justify-content: center;"><div style="width: 320px; background: linear-gradient(160deg, #fff7ed, #ffedd5); border: 1px solid #fdba74; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px;"><span style="width: 40px; height: 40px; border-radius: 12px; background: #fff; color: #7c3aed; display: flex; align-items: center; justify-content: center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></span>
+        <div><strong style="font-size: 15px; display: block;">Transforma con IA</strong><span style="font-size: 13px; color: #78350f;">1 token por foto · tienes <strong>3 tokens</strong></span></div></div>
+      <a href="#" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; text-decoration: none; border-radius: 999px; font-size: 16px; background: #ea580c; color: #fff; padding: 13px 22px; box-shadow: 0 6px 16px rgba(234,88,12,0.28); padding: 11px; font-size: 15px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>Transformar todas (15)</a>
+      <span style="font-size: 13px; color: #78350f; text-align: center;">Te faltan 12 tokens · <a href="#">Comprar tokens</a></span>
+    </div></div>
+      <div style="margin-top: 24px; font-size: 16px; line-height: 1.6; color: #78350f;"><p style="margin: 0 0 8px;"><strong style="color: #431407;">Con sesión, el PDF descargado</strong> no muestra el recuadro de crear cuenta, sino «Tu lotería está guardada en Mi cuenta», y no aparece el aviso de que se borra.</p></div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+</body>
+</html>
