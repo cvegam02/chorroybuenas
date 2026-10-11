@@ -71,9 +71,34 @@ export class TokenPricingRepository {
   }
 
   /**
+   * Paquetes activos tal como están guardados, o null si no se pudieron leer. Para quien prefiere
+   * no mostrar la sección antes que mostrar paquetes supuestos (Beneficios, FEAT-33).
+   */
+  static async getPacksOrNull(): Promise<TokenPack[] | null> {
+    const { data, error } = await supabase
+      .from('token_packs')
+      .select('id, base_tokens, bonus_tokens, price_cents, sort_order, is_active, created_at')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+
+    if (error || !data?.length) {
+      return null;
+    }
+    return data as TokenPack[];
+  }
+
+  /**
    * Precio por token en una moneda. Fallback 200 centavos MXN.
    */
   static async getPricing(currency = 'MXN'): Promise<number> {
+    return (await TokenPricingRepository.getPricingOrNull(currency)) ?? FALLBACK_MXN_CENTS;
+  }
+
+  /**
+   * Precio por token tal como está guardado, o null si no se pudo leer. Para quien prefiere no
+   * mostrar un precio antes que mostrar uno supuesto (la página de inicio, FEAT-32).
+   */
+  static async getPricingOrNull(currency = 'MXN'): Promise<number | null> {
     const { data, error } = await supabase
       .from('token_pricing')
       .select('price_per_token_cents')
@@ -81,7 +106,7 @@ export class TokenPricingRepository {
       .maybeSingle();
 
     if (error || !data) {
-      return FALLBACK_MXN_CENTS;
+      return null;
     }
     return data.price_per_token_cents;
   }

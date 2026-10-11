@@ -12,9 +12,11 @@ interface EmailAuthModalProps {
     isOpen: boolean;
     onClose: () => void;
     initialMode?: 'login' | 'signup';
+    /** Ruta del sitio a la que regresa quien entra con Google desde esta ventana; sin ella, Mi cuenta. */
+    googleReturnPath?: string;
 }
 
-export const EmailAuthModal: React.FC<EmailAuthModalProps> = ({ isOpen, onClose, initialMode = 'login' }) => {
+export const EmailAuthModal: React.FC<EmailAuthModalProps> = ({ isOpen, onClose, initialMode = 'login', googleReturnPath }) => {
     const { t } = useTranslation();
     const { signInWithEmail, signUpWithEmail, signInWithGoogle, resetPasswordForEmail } = useAuth();
     const [isLogin, setIsLogin] = useState(initialMode === 'login');
@@ -103,7 +105,7 @@ export const EmailAuthModal: React.FC<EmailAuthModalProps> = ({ isOpen, onClose,
         setIsLoading(true);
         try {
             // Si sale bien, el navegador se va a Google: no hay nada más que hacer aquí.
-            await signInWithGoogle();
+            await signInWithGoogle(googleReturnPath);
         } catch (err: unknown) {
             logger.error('Google auth error:', err);
             setError(t('common.auth.errors.googleFailed'));

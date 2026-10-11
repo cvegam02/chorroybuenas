@@ -1,140 +1,114 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
-import { FaCloud, FaSync, FaImage, FaCoins, FaEnvelope } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
+import { useWelcomeTokens } from '../../hooks/useWelcomeTokens';
+import type { FaqItem } from '../../utils/faqJsonLd';
+import { AuthChoice } from '../Auth/AuthChoice';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
+import { FaqSection } from '../Faq/FaqSection';
+import { PromoVideo } from '../LandingPage/PromoVideo';
+import { BenefitsCost } from './BenefitsCost';
+import { BenefitsAccount, BenefitsBeforeAfter, BenefitsGallery, BenefitsHow } from './BenefitsSections';
+import '../LandingPage/LandingPage.css';
+import '../LandingPage/LandingShowcase.css';
+import '../LandingPage/LandingFinalCta.css';
 import './BenefitsPage.css';
 
-const BenefitsPage: React.FC = () => {
-    const { t } = useTranslation();
-    const navigate = useNavigate();
-    const { user, isLoading } = useAuth();
-    const [isEmailModalOpen, setIsEmailModalOpen] = React.useState(false);
+const FAQ_IDS = ['needAi', 'badResult', 'pay', 'privacy', 'notAllowed'] as const;
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, []);
+/** P2 Beneficios (FEAT-33, US A2): qué se gana con una cuenta y cómo queda una foto con IA. */
+const BenefitsPage = () => {
+  const { t } = useTranslation();
+  const { user, isLoading } = useAuth();
+  const welcomeTokens = useWelcomeTokens();
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  const isLoggedIn = !isLoading && !!user;
 
-    if (user && !isLoading) {
-        // If already logged in, no need to show this page as a "why register" pitch
-        // But we might want to show it as a "features" page. For now, let's keep it simple.
-    }
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
-    return (
-        <div className="benefits-page">
-            <header className="benefits-page__header">
-                <div className="benefits-page__container">
-                    <h1 className="benefits-page__title">{t('landing.benefitsPage.title')}</h1>
-                    <p className="benefits-page__subtitle">{t('landing.benefitsPage.subtitle')}</p>
-                </div>
-            </header>
+  const faqItems: FaqItem[] = FAQ_IDS.map((id) => ({
+    question: t(`landing.benefitsPage.faq.${id}.question`),
+    answer: t(`landing.benefitsPage.faq.${id}.answer`),
+    ...(id === 'privacy' && { linkLabel: t('landing.benefitsPage.faq.privacy.linkLabel'), linkTo: '/privacidad' }),
+  }));
 
-            <main className="benefits-page__main">
-                <div className="benefits-page__container">
-                    {/* Antes / Después - Transformación con IA (video izquierda, texto derecha) */}
-                    <section className="benefits-page__before-after">
-                        <div className="benefits-page__before-after-inner">
-                            <div className="benefits-page__comparison">
-                                <div className="benefits-page__comparison-image-wrap">
-                                    <video
-                                        src="/videopromo.mp4"
-                                        className="benefits-page__comparison-video"
-                                        autoPlay
-                                        muted
-                                        loop
-                                        playsInline
-                                        aria-label={t('landing.benefitsPage.beforeAfter.imageAlt')}
-                                    />
-                                </div>
-                            </div>
-                            <div className="benefits-page__ai-content benefits-page__ai-content--right">
-                                <h2>{t('landing.benefitsPage.beforeAfter.title')}</h2>
-                                <p>{t('landing.benefitsPage.beforeAfter.description')}</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section className="benefits-page__section benefits-page__section--benefits">
-                        <h2 className="benefits-page__section-title">{t('landing.benefitsPage.moreBenefitsTitle')}</h2>
-                        <div className="benefits-page__grid">
-                            {/* AI Transform - Principal */}
-                            <div className="benefits-page__card benefits-page__card--featured">
-                                <div className="benefits-page__icon benefits-page__icon--ai">
-                                    <FaImage />
-                                </div>
-                                <div className="benefits-page__card-content">
-                                    <h3>{t('landing.benefitsPage.aiTransform.title')}</h3>
-                                    <p>{t('landing.benefitsPage.aiTransform.description')}</p>
-                                </div>
-                            </div>
-
-                            {/* Cloud Storage */}
-                            <div className="benefits-page__card">
-                                <div className="benefits-page__icon benefits-page__icon--cloud">
-                                    <FaCloud />
-                                </div>
-                                <div className="benefits-page__card-content">
-                                    <h3>{t('landing.benefitsPage.cloud.title')}</h3>
-                                    <p>{t('landing.benefitsPage.cloud.description')}</p>
-                                </div>
-                            </div>
-
-                            {/* Sync */}
-                            <div className="benefits-page__card">
-                                <div className="benefits-page__icon benefits-page__icon--sync">
-                                    <FaSync />
-                                </div>
-                                <div className="benefits-page__card-content">
-                                    <h3>{t('landing.benefitsPage.sync.title')}</h3>
-                                    <p>{t('landing.benefitsPage.sync.description')}</p>
-                                </div>
-                            </div>
-
-                            {/* AI Credits */}
-                            <div className="benefits-page__card">
-                                <div className="benefits-page__icon benefits-page__icon--credits">
-                                    <FaCoins />
-                                </div>
-                                <div className="benefits-page__card-content">
-                                    <h3>{t('landing.benefitsPage.credits.title')}</h3>
-                                    <p>{t('landing.benefitsPage.credits.description')}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {!user && !isLoading && (
-                        <section className="benefits-page__cta-section benefits-page__cta-section--bottom">
-                            <div className="benefits-page__cta-card">
-                                <h2>{t('landing.benefitsPage.cta')}</h2>
-                                <div className="benefits-page__auth-options">
-                                    <button
-                                        onClick={() => setIsEmailModalOpen(true)}
-                                        className="benefits-page__email-btn"
-                                    >
-                                        <FaEnvelope />
-                                        {t('common.auth.titleSignUp')}
-                                    </button>
-                                </div>
-                                <button
-                                    onClick={() => navigate('/')}
-                                    className="benefits-page__back-btn"
-                                >
-                                    {t('landing.benefitsPage.backToHome')}
-                                </button>
-                            </div>
-                        </section>
-                    )}
-                </div>
-            </main>
-            <EmailAuthModal
-                isOpen={isEmailModalOpen}
-                onClose={() => setIsEmailModalOpen(false)}
-                initialMode="signup"
-            />
+  return (
+    <main className="landing-page benefits-page">
+      <section className="benefits-hero">
+        <div className="benefits-hero__inner">
+          <div className="benefits-hero__content">
+            {!isLoggedIn && welcomeTokens !== null && (
+              <span className="benefits-hero__badge">{t('landing.benefitsPage.hero.badge', { count: welcomeTokens })}</span>
+            )}
+            <h1 className="benefits-hero__title">
+              {t('landing.benefitsPage.hero.titleBefore')}{' '}
+              <span className="benefits-hero__title-highlight">{t('landing.benefitsPage.hero.titleHighlight')}</span>{' '}
+              {t('landing.benefitsPage.hero.titleAfter')}
+            </h1>
+            <p className="benefits-hero__description">{t('landing.benefitsPage.hero.description')}</p>
+            {isLoggedIn ? (
+              <div className="benefits-hero__actions">
+                <Link to="/cards" className="landing-cta-button benefits-hero__link">
+                  {t('landing.benefitsPage.hero.create')}
+                </Link>
+                <Link to="/comprar-tokens" className="benefits-hero__link benefits-hero__link--outline">
+                  {t('landing.benefitsPage.hero.buyTokens')}
+                </Link>
+              </div>
+            ) : (
+              <AuthChoice tone="onPrimary" />
+            )}
+            <span className="benefits-hero__note">{t('landing.benefitsPage.hero.freeNote')}</span>
+          </div>
+          <div className="benefits-hero__media">
+            <PromoVideo name="hero-cartas" alt={t('landing.benefitsPage.hero.videoAlt')} className="benefits-hero__video" />
+          </div>
         </div>
-    );
+      </section>
+
+      <BenefitsBeforeAfter />
+      <BenefitsHow welcomeTokens={welcomeTokens} />
+      <BenefitsCost welcomeTokens={welcomeTokens} />
+      <BenefitsGallery />
+      <BenefitsAccount />
+      <FaqSection title={t('landing.benefitsPage.faq.title')} items={faqItems} openFirst />
+
+      <section className="landing-final-cta">
+        <div className="landing-final-cta__box">
+          {isLoggedIn ? (
+            <>
+              <h2 className="landing-final-cta__title">{t('landing.benefitsPage.cta.loggedTitle')}</h2>
+              <p className="landing-final-cta__description">{t('landing.benefitsPage.cta.loggedDescription')}</p>
+              <Link to="/comprar-tokens" className="landing-cta-button benefits-hero__link">
+                {t('landing.benefitsPage.cta.loggedButton')}
+              </Link>
+            </>
+          ) : (
+            <>
+              <h2 className="landing-final-cta__title">
+                {welcomeTokens !== null
+                  ? t('landing.benefitsPage.cta.title', { count: welcomeTokens })
+                  : t('landing.benefitsPage.cta.titleNoGift')}
+              </h2>
+              <p className="landing-final-cta__description">
+                {welcomeTokens !== null
+                  ? t('landing.benefitsPage.cta.description', { count: welcomeTokens })
+                  : t('landing.benefitsPage.cta.descriptionNoGift')}
+              </p>
+              <button type="button" className="landing-cta-button" onClick={() => setIsSignUpOpen(true)}>
+                {t('landing.benefitsPage.cta.button')} <span aria-hidden="true">→</span>
+              </button>
+            </>
+          )}
+        </div>
+      </section>
+
+      <EmailAuthModal isOpen={isSignUpOpen} onClose={() => setIsSignUpOpen(false)} initialMode="signup" />
+    </main>
+  );
 };
 
 export default BenefitsPage;

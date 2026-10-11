@@ -1,169 +1,100 @@
-.footer--compact {
-    background: var(--color-bg-subtle);
-    border-top: 1px solid var(--color-border);
-    padding: 32px 0;
+/* Pie de página, el mismo en todo el sitio (FEAT-32) */
+
+.footer {
     margin-top: auto;
+    /* Café oscuro del texto principal, aquí como fondo. */
+    background: var(--color-text-main);
+    color: var(--color-primary-lightest);
     font-family: var(--font-body);
+    font-size: 15px;
 }
 
-.footer__container {
+.footer a {
+    color: var(--color-primary-lightest);
+}
+
+.footer a:hover {
+    color: var(--color-text-inverted);
+}
+
+.footer a:focus-visible {
+    outline: 2px solid var(--color-accent-light);
+    outline-offset: 3px;
+}
+
+.footer__inner {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 18px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
 }
 
 .footer__main {
+    padding-top: 28px;
+    padding-bottom: 20px;
+}
+
+.footer__brand {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.footer__name {
+    color: var(--color-text-inverted);
+    font-size: 17px;
+}
+
+.footer__brand strong {
+    color: var(--color-text-inverted);
+}
+
+.footer__heart {
+    color: var(--color-primary-light);
+    vertical-align: -2px;
+}
+
+.footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 18px;
     align-items: center;
-    gap: 24px;
 }
 
-.footer__info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.footer__logo {
-    font-family: var(--font-display);
-    font-size: 1.25rem;
-    color: var(--color-primary);
-    margin: 0;
-}
-
-.footer__creator {
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
-}
-
-.footer__creator strong {
-    color: var(--color-text-main);
-}
-
-.footer__dev-offer {
-    text-align: right;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.footer__actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: flex-end;
-}
-
-.footer__dev-offer p {
-    font-size: 0.95rem;
-    color: var(--color-text-muted);
-    margin: 0;
-}
-
-.footer__email-link {
-    color: var(--color-primary);
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.footer__email-link:hover {
-    text-decoration: underline;
-}
-
-.footer__paypal-link {
-    display: inline-flex;
+.footer__contact,
+.footer__bottom {
+    flex-flow: row wrap;
+    gap: 10px 24px;
     align-items: center;
-    gap: 8px;
-    background: #0070ba;
-    color: white;
-    padding: 6px 14px;
-    border-radius: var(--radius-full);
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 112, 186, 0.2);
-}
-
-.footer__paypal-link:hover {
-    background: #005ea6;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 112, 186, 0.3);
+    padding-top: 16px;
+    padding-bottom: 16px;
+    border-top: 1px solid color-mix(in srgb, var(--color-primary-lightest) 20%, transparent);
 }
 
 .footer__contact-item {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: flex-end;
     gap: 8px;
-    font-size: 0.85rem;
-    color: var(--color-text-muted);
-}
-
-.footer__icon {
-    color: var(--color-primary);
-    font-size: 1rem;
 }
 
 .footer__bottom {
-    display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding-top: 20px;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding-bottom: 24px;
+    font-size: 14px;
 }
 
-.footer__copyright {
-    font-size: 0.8rem;
-    color: var(--color-text-muted);
-    margin: 0;
-}
-
-.footer__legal-link {
-    font-size: 0.8rem;
-    color: var(--color-text-muted);
-    text-decoration: underline;
-}
-
-.footer__legal-link:hover {
-    color: var(--color-primary);
-}
-
-.footer__slogan {
-    font-size: 0.8rem;
-    font-style: italic;
-    color: var(--color-text-muted);
-    margin: 0;
-}
-
-@media (max-width: 768px) {
-    .footer--compact {
-        padding: 24px 0;
+@media (min-width: 769px) {
+    .footer__inner {
+        padding-right: 24px;
+        padding-left: 24px;
     }
 
     .footer__main {
-        flex-direction: column;
-        text-align: center;
-        gap: 20px;
-    }
-
-    .footer__dev-offer {
-        text-align: center;
-        align-items: center;
-    }
-
-    .footer__actions {
-        align-items: center;
-    }
-
-    .footer__contact-item {
-        justify-content: center;
-    }
-
-    .footer__bottom {
-        flex-direction: column;
-        gap: 8px;
-        text-align: center;
+        flex-flow: row wrap;
+        gap: 24px;
+        justify-content: space-between;
+        padding-top: 32px;
     }
 }

@@ -1,0 +1,8 @@
+/* La letra de las cartas reales (src/services/cardCompose/font.ts), para usarla en CSS: números y
+   nombres que imitan cartas en las páginas públicas (FEAT-32 y FEAT-33). */
+@font-face {
+  font-family: 'ArvoCarta';
+  font-weight: 700;
+  font-display: swap;
+  src: url('./Arvo-Bold.ttf') format('truetype');
+}
