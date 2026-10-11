@@ -208,35 +208,6 @@
   box-shadow: 0 8px 24px rgba(234, 88, 12, 0.4);
 }
 
-.image-editor__help-text {
-  background: var(--color-bg-secondary);
-  border: 2px solid var(--color-primary-lightest);
-  border-radius: 8px;
-  padding: 16px;
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-  line-height: 1.7;
-}
-
-.image-editor__help-text p {
-  margin: 8px 0;
-}
-
-.image-editor__help-text p:first-child {
-  margin-top: 0;
-  margin-bottom: 12px;
-}
-
-.image-editor__help-text p:first-child strong {
-  color: var(--color-primary);
-  font-size: 0.9375rem;
-}
-
-.image-editor__help-text p strong {
-  color: var(--color-text-main);
-  font-weight: 600;
-}
-
 /* Móvil - una columna */
 @media (max-width: 640px) {
   .image-editor__layout {

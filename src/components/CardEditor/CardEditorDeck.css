@@ -1,0 +1,438 @@
+/* C1 Cartas, rediseño (FEAT-34, US A2). Las ventanas y el renombrado siguen en CardEditor.css. */
+
+.deck {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 140px);
+  background: var(--color-bg-base);
+  color: var(--color-text-main);
+  font-family: var(--font-body);
+}
+
+.deck__columns {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 20px 16px 32px;
+  box-sizing: border-box;
+}
+
+.deck__wide-only {
+  display: none;
+}
+
+/* Columna izquierda */
+
+.deck__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.deck__kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.deck__title {
+  margin: 0 0 6px;
+  color: var(--color-text-main);
+  font-size: 28px;
+}
+
+.deck__subtitle {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.deck__progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+}
+
+.deck__progress-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.deck__progress-count {
+  font-size: 18px;
+}
+
+.deck__progress-min {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.deck__progress-missing {
+  color: var(--color-primary-dark);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.deck__progress-check {
+  color: var(--color-secondary-dark);
+}
+
+.deck__progress-bar {
+  height: 10px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-lightest);
+}
+
+.deck__progress-bar span {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+}
+
+.deck__progress-note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.deck__add {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.deck__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.deck__button--primary {
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+}
+
+.deck__button--primary:hover:not(:disabled) {
+  border-color: var(--color-primary-dark);
+  background: var(--color-primary-dark);
+}
+
+.deck__button--secondary {
+  background: var(--color-bg-surface);
+  color: var(--color-primary-dark);
+}
+
+.deck__button--secondary:hover:not(:disabled) {
+  background: var(--color-bg-subtle);
+}
+
+.deck__button--ai {
+  border-color: var(--color-ai);
+  background: var(--color-ai);
+  color: var(--color-text-inverted);
+  font-size: 15px;
+}
+
+.deck__button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Tarjeta de IA */
+
+.deck__ai {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.deck__ai-pair {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-primary-dark);
+}
+
+.deck__ai-pair img {
+  width: 64px;
+  height: auto;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  object-fit: cover;
+}
+
+.deck__ai-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 15px;
+}
+
+.deck__ai-text span {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+/* Con sesión: panel «Cartas con IA» */
+
+.deck__ai--panel {
+  border: 1px solid color-mix(in srgb, var(--color-ai) 30%, transparent);
+  background: color-mix(in srgb, var(--color-ai) 7%, var(--color-bg-surface));
+}
+
+.deck__ai--panel .deck__ai-text strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-ai);
+}
+
+.deck__ai-balance {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  font-weight: 700;
+}
+
+.deck__ai-balance a {
+  color: var(--color-primary-dark);
+  font-size: 14px;
+}
+
+.deck__ai-done {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.deck__ai-count {
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background: var(--color-ai);
+  color: var(--color-text-inverted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.deck__tips {
+  padding: 12px 16px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+}
+
+.deck__tips summary {
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.deck__tips p {
+  margin: 10px 0 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.deck__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+}
+
+.deck__link {
+  padding: 4px 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.deck__link--danger {
+  color: var(--color-danger);
+}
+
+.deck__link:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Columna derecha */
+
+.deck__main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.deck__cards-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+.deck__cards-title {
+  margin: 0;
+  color: var(--color-text-main);
+  font-size: 22px;
+}
+
+.deck__hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.deck__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.deck__dropzone {
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 28px 16px;
+  border: 2px dashed var(--color-primary-lighter);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.deck__dropzone strong {
+  color: var(--color-text-main);
+  font-size: 17px;
+}
+
+.deck__dropzone svg {
+  color: var(--color-primary);
+  font-size: 22px;
+}
+
+.deck__dropzone:hover:not(:disabled),
+.deck__dropzone--over {
+  border-color: var(--color-primary);
+  background: var(--color-primary-lightest);
+}
+
+/* Barra inferior: se queda pegada abajo mientras se ve la pantalla de cartas */
+
+/* «Siguiente: tableros» va dentro del recuadro de avance, arriba, para que se vea sin bajar. */
+.deck__next {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+  padding: 12px 22px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.deck__next:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+/* Si faltan cartas el botón se ve apagado. */
+.deck__next:disabled {
+  background: var(--color-primary-lightest);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.deck button:focus-visible,
+.deck a:focus-visible,
+.deck summary:focus-visible {
+  outline: 3px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
+
+@media (min-width: 769px) {
+  .deck__narrow-only {
+    display: none;
+  }
+
+  .deck__wide-only {
+    display: revert;
+  }
+
+  .deck__dropzone.deck__wide-only {
+    display: flex;
+  }
+
+  .deck__columns {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 32px;
+    padding: 28px 24px 48px;
+  }
+
+  .deck__aside {
+    flex: 0 0 320px;
+  }
+
+  .deck__main {
+    flex: 1 1 0;
+  }
+
+  .deck__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+}
+
+@media (min-width: 1200px) {
+  .deck__grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}

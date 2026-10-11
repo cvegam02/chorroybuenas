@@ -1,0 +1,448 @@
+/* «Editar carta» (FEAT-34, US A8). El marco está en CardUploadModal.css y el campo del nombre en CardForm.css. */
+
+.card-edit {
+  --card-edit-ai-soft: color-mix(in srgb, var(--color-ai) 7%, var(--color-bg-surface));
+  --card-edit-ai-line: color-mix(in srgb, var(--color-ai) 35%, var(--color-bg-surface));
+  max-width: 760px;
+}
+
+.card-edit__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+}
+
+.card-edit__position {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.card-edit__body {
+  display: flex;
+  gap: 28px;
+  padding: 24px;
+}
+
+/* Vista previa: la carta final */
+
+.card-edit__media {
+  flex: 0 0 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-edit__card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.card-edit__card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-edit__card img.card-edit__card-image--busy {
+  filter: blur(3px) saturate(0.6);
+}
+
+.card-edit__ai-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  background: var(--color-ai);
+  color: var(--color-text-inverted);
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: var(--shadow-md);
+}
+
+.card-edit__creating {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--color-ai) 45%, color-mix(in srgb, var(--color-text-main) 70%, transparent));
+  color: var(--color-text-inverted);
+  font-size: 15px;
+  text-align: center;
+}
+
+.card-edit__creating span {
+  font-size: 12px;
+}
+
+.card-edit__spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid color-mix(in srgb, var(--color-text-inverted) 35%, transparent);
+  border-top-color: var(--color-text-inverted);
+  border-radius: var(--radius-full);
+  animation: card-edit-spin 0.9s linear infinite;
+}
+
+@keyframes card-edit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.card-edit__media-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-edit__note {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.card-edit__media-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.card-edit__outline-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0 6px;
+  border: 1px solid var(--color-primary-lighter);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-primary-dark);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  /* Un solo renglón: con el texto en dos renglones los dos botones crecían de alto. */
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.card-edit__outline-button svg {
+  flex: 0 0 auto;
+}
+
+.card-edit__outline-button:hover:not(:disabled) {
+  background: var(--color-bg-subtle);
+}
+
+/* Controles */
+
+.card-edit__controls {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+
+.card-edit__image-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-edit__choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.card-edit__choice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 2px solid var(--color-primary-lightest);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.card-edit__choice[aria-checked='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-bg-subtle);
+}
+
+.card-edit__choice--ai[aria-checked='true'] {
+  border-color: var(--color-ai);
+  background: var(--card-edit-ai-soft);
+}
+
+.card-edit__choice--empty {
+  border-style: dashed;
+  border-color: var(--card-edit-ai-line);
+  color: var(--color-ai);
+  cursor: default;
+}
+
+.card-edit__choice-thumb {
+  flex: 0 0 auto;
+  width: 48px;
+  aspect-ratio: 2 / 3;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.card-edit__choice-thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--card-edit-ai-soft);
+  font-size: 18px;
+}
+
+.card-edit__choice-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 15px;
+}
+
+.card-edit__choice-status {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.card-edit__choice[aria-checked='true'] .card-edit__choice-status {
+  color: var(--color-primary-dark);
+}
+
+.card-edit__choice--ai[aria-checked='true'] .card-edit__choice-status,
+.card-edit__choice--empty .card-edit__choice-status {
+  color: var(--color-ai);
+}
+
+.card-edit__choice-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  font-size: 10px;
+}
+
+.card-edit__choice--ai .card-edit__choice-check {
+  background: var(--color-ai);
+}
+
+.card-edit__ai-button {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 2px solid var(--card-edit-ai-line);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-ai);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.card-edit__ai-button:hover:not(:disabled) {
+  background: var(--card-edit-ai-soft);
+}
+
+.card-edit__no-tokens {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.card-edit__buy {
+  padding: 0 14px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.card-edit__buy:hover {
+  background: var(--color-primary-dark);
+  color: var(--color-text-inverted);
+}
+
+/* Barra inferior */
+
+.card-edit__footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px;
+  border-top: 1px solid var(--color-primary-lightest);
+  background: var(--color-bg-base);
+}
+
+.card-edit__cancel {
+  padding: 0 20px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.card-edit__cancel:hover {
+  color: var(--color-text-main);
+}
+
+.card-edit .card-edit__save {
+  padding: 0 28px;
+}
+
+/* Todos los botones de la ventana miden lo mismo de alto. */
+.card-edit__outline-button,
+.card-edit__ai-button,
+.card-edit__cancel,
+.card-edit .card-edit__save,
+.card-edit__buy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.card-edit button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.card-edit button:focus-visible,
+.card-edit a:focus-visible {
+  outline: 3px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-edit__spinner {
+    animation: none;
+  }
+}
+
+/* Celular: pantalla completa, con la carta chica y sus botones al lado, y Guardar fijo abajo */
+@media (max-width: 768px) {
+  .card-edit__overlay {
+    padding: 0;
+  }
+
+  .card-edit {
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+  }
+
+  .card-edit__body {
+    flex-direction: column;
+    gap: 18px;
+    padding: 18px 16px;
+  }
+
+  .card-edit__media {
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 14px;
+  }
+
+  .card-edit__card {
+    flex: 0 0 150px;
+    width: 150px;
+  }
+
+  .card-edit__media-side {
+    flex: 1 1 auto;
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .card-edit__note {
+    font-size: 12px;
+    text-align: left;
+  }
+
+  .card-edit__media-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .card-edit__choices {
+    gap: 10px;
+  }
+
+  .card-edit__choice {
+    padding: 8px;
+  }
+
+  .card-edit__choice-thumb {
+    width: 36px;
+  }
+
+  .card-edit__ai-button {
+    align-self: stretch;
+    justify-content: center;
+  }
+
+  .card-edit__footer {
+    padding: 12px 16px 18px;
+  }
+
+  .card-edit__save {
+    flex: 1 1 auto;
+  }
+}

@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { FaCamera, FaCropAlt, FaPlus } from 'react-icons/fa';
 import { convertFileToBase64, validateImageFile, compressImage, adjustImageToCardAspectRatio } from '../../utils/imageUtils';
 import { ImageEditor } from './ImageEditor';
+import { CardLivePreview } from './CardLivePreview';
+import './CardForm.css';
 import './CardUpload.css';
 import { logger } from '../../utils/logger';
 import { isPrintableCardTitle } from '../../utils/cardTitle';
@@ -10,17 +13,14 @@ import { isPrintableCardTitle } from '../../utils/cardTitle';
 interface CardUploadProps {
   onCardAdd: (image: string, title: string) => Promise<boolean>;
   existingTitles: string[];
-  initialTitle?: string;
-  initialImage?: string;
-  submitLabel?: string;
+  /** Número que se dibuja en «Así se verá». */
+  previewNumber?: number;
 }
 
 export const CardUpload = ({
   onCardAdd,
   existingTitles,
-  initialTitle = '',
-  initialImage,
-  submitLabel
+  previewNumber
 }: CardUploadProps) => {
   const { t } = useTranslation();
   const normalizeTitle = (value: string) => value.replace(/\s+/g, ' ').trim().toLowerCase();
@@ -28,9 +28,9 @@ export const CardUpload = ({
     () => new Set(existingTitles.map(normalizeTitle)),
     [existingTitles]
   );
-  const [title, setTitle] = useState(initialTitle);
+  const [title, setTitle] = useState('');
   /* imageFile removed */
-  const [imagePreview, setImagePreview] = useState<string | null>(initialImage ?? null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showEditor, setShowEditor] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [wasEdited, setWasEdited] = useState(false); // Track if image was edited/cropped
@@ -62,9 +62,7 @@ export const CardUpload = ({
       return;
     }
 
-    const isTitleChanged = normalizedTitle !== normalizeTitle(initialTitle);
-
-    if (isTitleChanged && existingTitleSet.has(normalizedTitle)) {
+    if (existingTitleSet.has(normalizedTitle)) {
       alert(t('cardUpload.errorDuplicate'));
       return;
     }
@@ -166,9 +164,7 @@ export const CardUpload = ({
     }
   };
 
-  const isDuplicateTitle = Boolean(title.trim()) &&
-    normalizeTitle(title) !== normalizeTitle(initialTitle) &&
-    existingTitleSet.has(normalizeTitle(title));
+  const isDuplicateTitle = Boolean(title.trim()) && existingTitleSet.has(normalizeTitle(title));
   const isInvalidTitle = !isPrintableCardTitle(title);
 
 
@@ -198,93 +194,83 @@ export const CardUpload = ({
       <div className="card-upload__layout">
         <div className="card-upload__media">
           {imagePreview ? (
-            <div className="card-upload__preview-container">
-              <img src={imagePreview} alt="Preview" className="card-upload__preview" />
-              <div className="card-upload__edit-overlay">
-                <span role="img" aria-label="edit">✏️</span>
-                <p>{t('cardUpload.status.clickToAdjust')}</p>
+            <>
+              <div className="card-form__photo">
+                <img src={imagePreview} alt="" />
               </div>
-            </div>
+              <div className="card-upload__media-actions">
+                <button
+                  type="button"
+                  onClick={() => setShowEditor(true)}
+                  className="card-form__button card-form__button--secondary card-form__button--small"
+                  disabled={isUploading}
+                >
+                  <FaCropAlt aria-hidden="true" />
+                  {t('cardUpload.actions.adjustImage')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="card-form__button card-form__button--ghost card-form__button--small"
+                  disabled={isUploading}
+                >
+                  {t('cardUpload.actions.changePhoto')}
+                </button>
+              </div>
+            </>
           ) : (
-            <div
+            <button
+              type="button"
               className="card-upload__dropzone"
               onDragOver={handleDragOver}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
             >
-              <div className="card-upload__placeholder">
-                <span className="card-upload__placeholder-icon">📷</span>
-                <p className="card-upload__placeholder-main">{t('cardUpload.placeholder.main')}</p>
-                <p className="card-upload__placeholder-sub">{t('cardUpload.placeholder.sub')}</p>
-              </div>
-            </div>
+              <FaCamera className="card-upload__dropzone-icon" aria-hidden="true" />
+              <span className="card-upload__dropzone-main">{t('cardUpload.placeholder.main')}</span>
+              <span className="card-upload__dropzone-sub">{t('cardUpload.placeholder.sub')}</span>
+            </button>
           )}
         </div>
 
         <div className="card-upload__form">
-          <div className="card-upload__title-group">
-            <label className="card-upload__label">
+          <div className="card-form__field">
+            <label htmlFor="card-upload-title" className="card-form__label">
               {t('cardUpload.label')}
             </label>
             <input
+              id="card-upload-title"
               ref={titleInputRef}
               type="text"
               placeholder={t('cardUpload.inputPlaceholder')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               onKeyDown={handleTitleKeyDown}
-              className="card-upload__title-input"
+              className="card-form__input"
               maxLength={100}
               disabled={!imagePreview}
             />
-            {isDuplicateTitle && (
-              <p className="card-upload__error-text">
-                {t('cardUpload.errorDuplicate')}
-              </p>
-            )}
+            {isDuplicateTitle && <p className="card-form__error">{t('cardUpload.errorDuplicate')}</p>}
             {isInvalidTitle && (
-              <p className="card-upload__error-text" role="alert">
+              <p className="card-form__error" role="alert">
                 {t('cardUpload.errorInvalidTitle')}
               </p>
             )}
-            <p className="card-upload__help-text">
-              {t('cardUpload.helpText')}
-            </p>
+            <p className="card-form__help">{t('cardUpload.helpText')}</p>
           </div>
 
-          <div className="card-upload__actions">
-            {imagePreview && (
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="card-upload__change-button"
-                disabled={isUploading}
-              >
-                {t('cardUpload.actions.changePhoto')}
-              </button>
-            )}
-            {imagePreview && (
-              <button
-                type="button"
-                onClick={() => setShowEditor(true)}
-                className="card-upload__edit-button"
-                disabled={isUploading}
-              >
-                <span role="img" aria-label="edit">✏️</span>
-                <span>{t('cardUpload.actions.adjustImage')}</span>
-              </button>
-            )}
-            <button
-              type="submit"
-              disabled={!title.trim() || isInvalidTitle || !imagePreview || isUploading}
-              className="card-upload__submit"
-            >
-              {isUploading ? t('cardUpload.status.processing') : (submitLabel || t('cardUpload.actions.addCard'))}
-            </button>
-          </div>
+          <CardLivePreview photo={imagePreview} title={title} number={previewNumber} />
+
+          <button
+            type="submit"
+            disabled={!title.trim() || isInvalidTitle || !imagePreview || isUploading}
+            className="card-form__button card-form__button--primary card-upload__submit"
+          >
+            {!isUploading && <FaPlus aria-hidden="true" />}
+            {isUploading ? t('cardUpload.status.processing') : t('cardUpload.actions.addCard')}
+          </button>
         </div>
       </div>
     </form>
   );
 };
-

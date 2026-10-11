@@ -99,7 +99,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 ### 9. Generar tableros
 - **Actor(es)**: Visitante o usuario registrado.
 - **Precondiciones**: La lotería tiene al menos el mínimo de cartas de su modo (§4).
-- **Flujo principal**: (1) Ve la cantidad de tableros sugerida y puede cambiarla (§4). (2) Genera los tableros. (3) Los revisa uno por uno.
+- **Flujo principal**: (1) Ve la cantidad de tableros sugerida y puede cambiarla (§4). (2) Genera los tableros. (3) Los revisa uno por uno. (4) Desde la vista previa puede revolverlos: se genera otra vez la misma cantidad, en el mismo modo; con sesión se le pide confirmar, porque reemplaza los tableros guardados (2026-10-11, FEAT-34).
 - **Excepciones**: Faltan cartas para el mínimo (24 en Clásico, 15 en Kids): no puede generar y se le dice cuántas faltan. Si pide más tableros distintos de los que sus cartas permiten, no todos saldrán diferentes.
 - **Resultado**: La lotería tiene sus tableros, armados al azar y sin repetidos (§4).
 - **Estados afectados**: Tableros (§11).
@@ -123,18 +123,18 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 ### 11. Transformar una carta
 - **Actor(es)**: Usuario registrado con al menos 1 token.
 - **Precondiciones**: Sesión iniciada; la carta tiene imagen.
-- **Flujo principal**: (1) Pide transformar la carta. (2) El servidor descuenta 1 token (§6). (3) Se genera la imagen en estilo de lotería tradicional. (4) La carta muestra la imagen nueva y conserva la original. (5) El saldo en pantalla se actualiza.
-- **Excepciones**: La carta ya estaba transformada: se transforma de nuevo y cuesta otro token (§6). Sin sesión: se le pide iniciar sesión. Sin tokens: se le avisa y se le invita a comprar. La imagen no se pudo generar, o tardó demasiado: se le devuelve el token y se le avisa (§6). El filtro de contenido rechaza la foto: se le avisa y no se le cobra. Más de 10 transformaciones en un minuto: se le pide esperar (§6).
+- **Flujo principal**: (1) Pide transformar la carta. (2) El servidor descuenta 1 token (§6). (3) Se genera la imagen en estilo de lotería tradicional. (4) La carta muestra la imagen nueva y conserva la original. (5) El saldo en pantalla se actualiza. Desde «Editar carta» (2026-10-11, FEAT-34) la ventana sigue abierta mientras se genera; al pedir otra versión, la nueva queda guardada en la carta al momento y, hasta cerrar la ventana, puede elegir quedarse con la anterior o con la foto original.
+- **Excepciones**: La carta ya estaba transformada: se transforma de nuevo y cuesta otro token (§6). Sin sesión: no se le ofrece transformar; ve la invitación a crear su cuenta (2026-10-11, FEAT-34). Sin tokens: se le avisa y se le invita a comprar. La imagen no se pudo generar, o tardó demasiado: se le devuelve el token y se le avisa (§6). El filtro de contenido rechaza la foto: se le avisa y no se le cobra. Más de 10 transformaciones en un minuto: se le pide esperar (§6).
 - **Resultado**: Carta transformada y 1 token menos; o carta sin cambios y saldo intacto.
 - **Estados afectados**: Carta, saldo y uso (§11).
 - **Notificaciones**: Ninguna.
 - **Auditoría**: Se registra cada token gastado, con el usuario y la lotería (§11).
 
 ### 12. Transformar todas las cartas en lote
-- **Actor(es)**: Usuario registrado con tokens suficientes para las cartas que faltan.
+- **Actor(es)**: Usuario registrado con al menos 1 token.
 - **Precondiciones**: La lotería tiene cartas sin transformar.
 - **Flujo principal**: (1) Ve cuántas cartas se transformarán y cuántos tokens costará. (2) Inicia el lote. (3) Las cartas se transforman una por una, con el avance a la vista. (4) Al terminar ve cuántas se transformaron y cuántas se omitieron.
-- **Excepciones**: Todas las cartas ya están transformadas: se le avisa. El filtro de contenido rechaza una foto: esa se omite y el lote continúa (§6). Cualquier otro fallo (sin tokens, demasiadas solicitudes, error del servicio): el lote se detiene con su aviso; lo ya transformado se conserva.
+- **Excepciones**: Todas las cartas ya están transformadas: se le avisa. Los tokens no alcanzan para todas (2026-10-11, FEAT-34): se le dice cuántos faltan y puede comprar más o transformar solo las primeras para las que alcancen, en el orden de la baraja, viendo antes la cuenta de esas cartas; sin ningún token, solo puede comprar. El filtro de contenido rechaza una foto: esa se omite y el lote continúa (§6). Cualquier otro fallo (sin tokens, demasiadas solicitudes, error del servicio): el lote se detiene con su aviso; lo ya transformado se conserva.
 - **Resultado**: Las cartas transformadas con éxito quedan cobradas a 1 token cada una; las demás, sin cobro.
 - **Estados afectados**: Cartas, saldo y uso (§11).
 - **Notificaciones**: Ninguna.
@@ -143,7 +143,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 ### 13. Revertir una carta transformada
 - **Actor(es)**: Usuario registrado.
 - **Precondiciones**: La carta fue transformada con IA.
-- **Flujo principal**: (1) Pide volver a la foto original. (2) La carta muestra de nuevo la original.
+- **Flujo principal**: (1) Pide volver a la foto original; en «Editar carta», eligiendo «Foto original» y guardando (2026-10-11, FEAT-34). (2) Confirma, porque la versión con IA se borra. (3) La carta muestra de nuevo la original.
 - **Excepciones**: Ninguna.
 - **Resultado**: La carta vuelve a su foto original. No cuesta y no devuelve el token (§6).
 - **Estados afectados**: Carta (§11).

@@ -77,6 +77,11 @@
   /* Papel de la hoja de lotería dibujada en «¿Qué es la lotería?» (FEAT-33) */
   --color-paper-cream: #fbf3e2;
 
+  /* Peligro: borrar o vaciar (FEAT-34). Es el rojo que el sitio ya usaba escrito a mano. */
+  --color-danger: #dc2626;
+  /* Inteligencia artificial: botones y etiquetas de transformar con IA (FEAT-34) */
+  --color-ai: #7c3aed;
+
   /* Shadows - Organic & Warm */
   --shadow-sm: 0 2px 4px rgba(234, 88, 12, 0.08);
   --shadow-md: 0 4px 12px -2px rgba(234, 88, 12, 0.12);

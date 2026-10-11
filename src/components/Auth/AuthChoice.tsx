@@ -15,13 +15,15 @@ interface AuthChoiceProps {
   returnPath?: string;
   /** Botones más chicos, para recuadros angostos. */
   compact?: boolean;
+  /** Texto del botón de Google; por defecto «Entrar con Google». */
+  googleLabel?: string;
 }
 
 /**
  * «Entrar con Google» y «Crear tu cuenta», con el mismo peso (FEAT-33): Google no es la opción por
  * defecto. La segunda abre el registro por correo.
  */
-export const AuthChoice = ({ tone, showLogin = false, returnPath, compact = false }: AuthChoiceProps) => {
+export const AuthChoice = ({ tone, showLogin = false, returnPath, compact = false, googleLabel }: AuthChoiceProps) => {
   const { t } = useTranslation();
   const { signInWithGoogle } = useAuth();
   const [modalMode, setModalMode] = useState<'login' | 'signup' | null>(null);
@@ -41,7 +43,7 @@ export const AuthChoice = ({ tone, showLogin = false, returnPath, compact = fals
       <div className="auth-choice__buttons">
         <button type="button" className="auth-choice__button auth-choice__button--google" onClick={handleGoogle}>
           <FaGoogle aria-hidden="true" />
-          {t('navbar.loginWithGoogle')}
+          {googleLabel ?? t('navbar.loginWithGoogle')}
         </button>
         <button type="button" className="auth-choice__button auth-choice__button--signup" onClick={() => setModalMode('signup')}>
           {t('navbar.createAccount')}
