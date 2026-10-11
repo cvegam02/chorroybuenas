@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { buildTokenHistory, type SeasonalHistoryPurchase, type TokenGift } from '../../src/utils/tokenHistory';
+import {
+  buildTokenHistory,
+  latestTokenMovements,
+  type SeasonalHistoryPurchase,
+  type TokenGift,
+} from '../../src/utils/tokenHistory';
 import type { TokenPurchase } from '../../src/repositories/TokenPricingRepository';
+import es from '../../src/locales/es/translation.json';
+import en from '../../src/locales/en/translation.json';
 
 const purchase = (id: string, createdAt: string): TokenPurchase => ({
   id,
@@ -137,5 +144,72 @@ describe('historial con compras de loterías de temporada (FEAT-17, C4)', () => 
     const history = buildTokenHistory([purchase('t', '2026-10-06T10:00:00Z')], []);
 
     expect(history.map((entry) => entry.kind)).toEqual(['purchase']);
+  });
+});
+
+describe('últimos movimientos de tokens en Mi cuenta (FEAT-35, US A4)', () => {
+  const seasonal = (id: string, createdAt: string): SeasonalHistoryPurchase => ({
+    id,
+    name_es: 'Lotería de Halloween',
+    name_en: null,
+    amount_cents: 9900,
+    payment_provider: 'mercadopago',
+    status: 'approved',
+    created_at: createdAt,
+  });
+
+  it('trae los cuatro más recientes, en el mismo orden del historial', () => {
+    const history = buildTokenHistory(
+      [1, 2, 3].map((day) => purchase(`c${day}`, `2026-10-0${day}T10:00:00Z`)),
+      [4, 5, 6].map((day) => gift(`r${day}`, `2026-10-0${day}T10:00:00Z`)),
+    );
+
+    expect(latestTokenMovements(history).map((entry) => entry.id)).toEqual(['r6', 'r5', 'r4', 'c3']);
+  });
+
+  it('deja fuera las compras de temáticas: no mueven tokens', () => {
+    const history = buildTokenHistory(
+      [purchase('c1', '2026-10-01T10:00:00Z')],
+      [gift('r1', '2026-10-02T10:00:00Z')],
+      [seasonal('t1', '2026-10-03T10:00:00Z')],
+    );
+
+    expect(latestTokenMovements(history).map((entry) => entry.kind)).toEqual(['gift', 'purchase']);
+  });
+
+  it('deja fuera las compras que no se acreditaron', () => {
+    const history = buildTokenHistory(
+      [
+        { ...purchase('pendiente', '2026-10-04T10:00:00Z'), payment_status: 'pending' },
+        { ...purchase('rechazada', '2026-10-03T10:00:00Z'), payment_status: 'rejected' },
+        { ...purchase('aprobada', '2026-10-02T10:00:00Z'), payment_status: 'approved' },
+        { ...purchase('antigua', '2026-10-01T10:00:00Z'), payment_status: null },
+      ],
+      [],
+    );
+
+    expect(latestTokenMovements(history).map((entry) => entry.id)).toEqual(['aprobada', 'antigua']);
+  });
+
+  it('respeta el límite que se le pida y no modifica el historial', () => {
+    const history = buildTokenHistory([purchase('c1', '2026-10-01T10:00:00Z')], [gift('r1', '2026-10-02T10:00:00Z')]);
+    const before = [...history];
+
+    expect(latestTokenMovements(history, 1).map((entry) => entry.id)).toEqual(['r1']);
+    expect(latestTokenMovements([])).toEqual([]);
+    expect(history).toEqual(before);
+  });
+});
+
+describe('textos de «Mis temáticas» y «Movimientos de tokens» (FEAT-35, US A4)', () => {
+  const keysOf = (value: Record<string, unknown>): string[] => Object.keys(value).sort();
+
+  it('son los mismos en español y en inglés', () => {
+    expect(keysOf(en.dashboard.movements)).toEqual(keysOf(es.dashboard.movements));
+    expect(keysOf(en.dashboard.seasonal)).toEqual(keysOf(es.dashboard.seasonal));
+  });
+
+  it('una temática sin pagar dice «Esperando pago»', () => {
+    expect(es.dashboard.seasonal.pending).toBe('Esperando pago');
   });
 });

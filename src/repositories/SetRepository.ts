@@ -1,5 +1,6 @@
 import { supabase } from '../utils/supabaseClient';
 import { logger } from '../utils/logger';
+import { PREVIEW_CARD_COUNT, parseSetSummaryRows, type SetSummaryRow } from '../utils/setSummary';
 
 const SETS_CACHE_TTL_MS = 15 * 1000; // 15 segundos
 const setsCache = new Map<string, { sets: LoteriaSet[]; expiresAt: number }>();
@@ -57,6 +58,24 @@ export class SetRepository {
 
     if (error) throw error;
     return data ?? [];
+  }
+
+  /**
+   * Resumen de todas las loterías del usuario en una sola consulta: cuántas cartas y cuántos tableros tiene
+   * cada una y sus primeras cartas (por orden de subida), para dibujarlas en Mi cuenta sin abrirlas.
+   */
+  static async getSetSummaries(userId: string): Promise<SetSummaryRow[]> {
+    const { data, error } = await supabase
+      .from('loteria_sets')
+      .select(
+        'id, card_count:cards(count), board_count:boards(count), preview:cards(id, title, image_path, is_ai_generated)'
+      )
+      .eq('user_id', userId)
+      .order('created_at', { referencedTable: 'preview', ascending: true })
+      .limit(PREVIEW_CARD_COUNT, { referencedTable: 'preview' });
+
+    if (error) throw error;
+    return parseSetSummaryRows(data);
   }
 
   static async getSet(setId: string, userId: string): Promise<LoteriaSet | null> {
