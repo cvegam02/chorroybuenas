@@ -86,6 +86,42 @@
   background: var(--color-bg-tertiary);
 }
 
+/* Aviso cuando no se pudieron leer los paquetes o el precio (US A8) */
+
+.buy-tokens__load-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 22px;
+  border: 2px solid var(--color-primary-lighter);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-subtle);
+}
+
+.buy-tokens__load-error p {
+  flex: 1 1 260px;
+  margin: 0;
+  color: var(--color-text-main);
+  font-weight: 600;
+}
+
+.buy-tokens__retry {
+  padding: 10px 22px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.buy-tokens__retry:hover {
+  background: var(--color-primary-dark);
+}
+
 /* Encabezado: saldo, o invitación a crear cuenta */
 
 .buy-tokens__hero {
