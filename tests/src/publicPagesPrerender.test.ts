@@ -1,4 +1,28 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+// Al pre-generar no hay sesión ni datos: basta un cliente que no devuelve nada. Así la prueba no
+// depende de las variables de Supabase, que en la verificación automática no existen.
+vi.mock('../../src/utils/supabaseClient', () => {
+  const noRows = { data: null, error: null };
+  const query = {
+    select: () => query,
+    eq: () => query,
+    order: () => query,
+    single: async () => noRows,
+    maybeSingle: async () => noRows,
+    then: (resolve: (value: typeof noRows) => unknown) => Promise.resolve(noRows).then(resolve),
+  };
+  return {
+    supabase: {
+      from: () => query,
+      rpc: () => query,
+      auth: {
+        getSession: async () => ({ data: { session: null }, error: null }),
+        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+      },
+    },
+  };
+});
 import es from '../../src/locales/es/translation.json';
 import { render } from '../../src/entry-server';
 
