@@ -3,15 +3,11 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FaCoins, FaGoogle, FaTimes } from 'react-icons/fa';
 import logoImage from '../../img/logo.png';
+import { LANGUAGES, currentLanguageCode } from '../../utils/languages';
 import { ALL_SETS_PATH, isNavLinkActive, navLinksFor } from './navLinks';
 import { UserAvatar } from './UserAvatar';
 
 export const MOBILE_MENU_ID = 'navbar-mobile-menu';
-
-const LANGUAGES = [
-  { code: 'es', label: 'Español' },
-  { code: 'en', label: 'English' },
-] as const;
 
 const FOCUSABLE = 'a[href], button:not([disabled])';
 
@@ -38,7 +34,7 @@ interface MobileMenuProps {
 export const MobileMenu = ({ pathname, user, onClose, onGoogle, onSignUp, onLogin, onSignOut }: MobileMenuProps) => {
   const { t, i18n } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
-  const currentLanguage = i18n.language?.startsWith('en') ? 'en' : 'es';
+  const currentLanguage = currentLanguageCode(i18n.language);
 
   // Mientras está abierto la página de atrás no se mueve, Escape lo cierra y el tabulador no se sale.
   useEffect(() => {

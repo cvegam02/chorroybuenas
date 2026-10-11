@@ -1,0 +1,172 @@
+/* «Movimientos de tokens» de Mi cuenta (U1) */
+
+.token-movements {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  color: var(--color-text-main);
+}
+
+.token-movements__card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+}
+
+.token-movements__summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.token-movements__total {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+}
+
+.token-movements__total--in {
+  background: color-mix(in srgb, var(--color-secondary-light) 35%, var(--color-bg-surface));
+}
+
+.token-movements__total--out {
+  background: var(--color-bg-subtle);
+}
+
+.token-movements__total-label {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.token-movements__total-value {
+  font-size: 24px;
+}
+
+.token-movements__total--out .token-movements__total-value,
+.token-movements__amount--out {
+  color: var(--color-primary-dark);
+}
+
+.token-movements__list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.token-movements__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-primary-lightest);
+}
+
+.token-movements__row:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.token-movements__icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-secondary-light) 35%, var(--color-bg-surface));
+  color: var(--color-secondary-dark);
+  font-size: 16px;
+}
+
+.token-movements__text {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.token-movements__name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.token-movements__detail {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.token-movements__amount {
+  flex: 0 0 auto;
+  font-size: 16px;
+}
+
+.token-movements__empty {
+  margin: 0;
+  padding: 8px 0;
+  color: var(--color-text-muted);
+  font-size: 15px;
+}
+
+/* «Ver todos»: arriba en computadora, al pie de la tarjeta en celular */
+.token-movements__view-all--bottom {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .token-movements {
+    gap: 12px;
+  }
+
+  .token-movements__card {
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+  }
+
+  .token-movements__summary {
+    gap: 8px;
+  }
+
+  .token-movements__total {
+    padding: 10px 12px;
+  }
+
+  .token-movements__total-label {
+    font-size: 12px;
+  }
+
+  .token-movements__total-value {
+    font-size: 22px;
+  }
+
+  .token-movements__row {
+    gap: 10px;
+    padding: 9px 0;
+  }
+
+  .token-movements__icon {
+    display: none;
+  }
+
+  .token-movements__detail {
+    font-size: 12px;
+  }
+
+  .token-movements__view-all--top {
+    display: none;
+  }
+
+  .token-movements__view-all--bottom {
+    display: block;
+    align-self: center;
+  }
+}

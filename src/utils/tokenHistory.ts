@@ -70,6 +70,30 @@ export const buildTokenHistory = (
     .map(({ entry }) => entry);
 };
 
+/** Un movimiento que cambió el saldo de tokens: una compra acreditada o un regalo. */
+export type TokenMovement = Extract<TokenHistoryEntry, { kind: 'purchase' | 'gift' }>;
+
+/** Cuántos movimientos muestra Mi cuenta sin abrir el historial completo. */
+export const LATEST_MOVEMENTS_COUNT = 4;
+
+/**
+ * Los últimos movimientos de tokens del historial, en su mismo orden. Solo entra lo que movió el saldo:
+ * las compras de temáticas se pagan en pesos y no dan tokens, y una compra de tokens solo cuenta si se
+ * acreditó (aprobada, o sin estado en los registros antiguos). No modifica la lista recibida.
+ */
+export const latestTokenMovements = (
+  entries: readonly TokenHistoryEntry[],
+  limit: number = LATEST_MOVEMENTS_COUNT,
+): TokenMovement[] =>
+  entries
+    .filter((entry): entry is TokenMovement => {
+      if (entry.kind === 'gift') return true;
+      if (entry.kind !== 'purchase') return false;
+      const status = entry.purchase.payment_status;
+      return status === null || status === 'approved';
+    })
+    .slice(0, limit);
+
 export const sumGiftTokens = (gifts: readonly TokenGift[]): number =>
   gifts.reduce((sum, gift) => sum + gift.amount, 0);
 

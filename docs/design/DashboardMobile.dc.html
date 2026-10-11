@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Mi cuenta chorroybuenas — celular</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;family=Arvo:wght@700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#fffbf7}
+a{color:#c2410c}a:hover{color:#9a3412}
+</style>
+</helmet>
+<div style="font-family: 'Quicksand', system-ui, sans-serif; color: #431407; background: #fffbf7; width: 390px; overflow: hidden;">
+
+  <!-- NAV -->
+  <header style="background: #ffffff; border-bottom: 1px solid #fde4cc;">
+    <nav style="padding: 8px 14px; display: flex; align-items: center; gap: 10px;">
+      <a href="#" style="flex: 1 1 auto; display: flex;"><img src="/_blob/d7801622bd0948908ee8484baca4ddcd" alt="chorroybuenas.com.mx" style="height: 44px;"></a>
+      <a href="#" style="display: flex; align-items: center; gap: 6px; background: #fef3c7; color: #92400e; font-weight: 700; font-size: 14px; padding: 8px 12px; border-radius: 999px; text-decoration: none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1.2 1.1-2 2.5-2s2.5.8 2.5 2-1.1 1.8-2.5 2.3-2.5 1-2.5 2.2 1.1 2 2.5 2 2.5-.8 2.5-2"/></svg>125</a><span style="width: 38px; height: 38px; border-radius: 999px; background: #ea580c; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center;">C</span>
+      <button type="button" aria-label="Abrir menú" style="width: 42px; height: 42px; border: 1px solid #fde4cc; background: #fff; color: #431407; border-radius: 12px; display: flex; align-items: center; justify-content: center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </nav>
+  </header>
+
+  <!-- HEADER -->
+  <section style="background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); color: #ffffff;">
+    <div style="padding: 28px 16px; display: flex; flex-direction: column; gap: 20px;">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="position: relative; flex: 0 0 auto;">
+          <span style="width: 64px; height: 64px; border-radius: 999px; background: #ffffff; color: #c2410c; font-size: 28px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 3px rgba(255,255,255,0.35);">C</span>
+          <button type="button" aria-label="Cambiar foto de perfil" style="position: absolute; right: -6px; bottom: -6px; width: 30px; height: 30px; border-radius: 999px; border: 2px solid #ea580c; background: #431407; color: #ffffff; display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="4"/></svg></button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <h1 style="margin: 0; font-size: 30px; line-height: 1.1;">Hola, Carlos</h1>
+          <p style="margin: 0; font-size: 15px; line-height: 1.4;">Tus loterías, tokens y datos.</p>
+        </div>
+      </div>
+      <div style="background: #ffffff; color: #431407; border-radius: 20px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 10px 26px rgba(67,20,7,0.25);">
+        <span style="width: 48px; height: 48px; flex: 0 0 auto; border-radius: 14px; background: #fef3c7; display: flex; align-items: center; justify-content: center;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1.2 1.1-2 2.5-2s2.5.8 2.5 2-1.1 1.8-2.5 2.3-2.5 1-2.5 2.2 1.1 2 2.5 2 2.5-.8 2.5-2"/></svg></span>
+        <div style="flex: 1 1 auto; display: flex; flex-direction: column;"><span style="font-size: 13px; color: #78350f;">Tu saldo</span><strong style="font-size: 26px; line-height: 1.1;">125 tokens</strong></div>
+        <a href="#" style="background: #ea580c; color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none; padding: 11px 16px; border-radius: 999px;">Comprar</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- MIS LOTERIAS -->
+  <section id="mis-loterias" style="padding: 28px 16px 12px; display: flex; flex-direction: column; gap: 16px;">
+    <div style="display: flex; align-items: baseline; gap: 8px;"><h2 style="margin: 0; font-size: 24px;">Mis loterías</h2><span style="font-size: 15px; font-weight: 600; color: #78350f;">5</span></div>
+    <a href="#" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #ea580c; color: #ffffff; font-weight: 700; font-size: 16px; text-decoration: none; padding: 13px 22px; border-radius: 999px; box-shadow: 0 4px 12px rgba(234,88,12,0.3);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Crear nueva lotería</a>
+
+    <article style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 18px; padding: 12px; display: flex; gap: 12px; box-shadow: 0 6px 18px rgba(234,88,12,0.07);">
+      <a href="#" aria-label="Abrir Cumpleaños de Sofi" style="flex: 0 0 104px; height: 118px; background: #fff7ed; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+        <img src="/_blob/e7fd813384dcb18d22c9c90a5b9156ad" alt="" style="width: 46px; height: 69px; border-radius: 4px; transform: rotate(-9deg) translateY(4px); box-shadow: 0 4px 10px rgba(194,65,12,0.22);">
+        <img src="/_blob/c08bbf2b34d6b08ffa378af14f67fad8" alt="" style="width: 46px; height: 69px; border-radius: 4px; margin-left: -16px; position: relative; z-index: 1; box-shadow: 0 4px 10px rgba(194,65,12,0.22);">
+        <img src="/_blob/aa7c11be20253fd9cfd1cbaa1263fe34" alt="" style="width: 46px; height: 69px; border-radius: 4px; margin-left: -16px; transform: rotate(9deg) translateY(4px); box-shadow: 0 4px 10px rgba(194,65,12,0.22);">
+      </a>
+      <div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; align-items: flex-start; gap: 6px;">
+          <h3 style="margin: 0; font-size: 17px; flex: 1 1 auto;">Cumpleaños de Sofi</h3>
+          <button type="button" aria-label="Más acciones para Cumpleaños de Sofi" style="width: 44px; height: 44px; margin: -10px -8px 0 0; flex: 0 0 auto; border-radius: 999px; border: none; background: transparent; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+        </div>
+        <span style="font-size: 13px; color: #78350f;">24 cartas · 4×4 · 8 tokens</span>
+        <span style="align-self: flex-start; background: #ccfbf1; color: #115e59; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px;">Lista para imprimir</span>
+        <div style="display: flex; gap: 8px; margin-top: auto;">
+          <a href="#" style="flex: 1 1 auto; text-align: center; background: #fff7ed; color: #c2410c; border: 2px solid #ea580c; font-weight: 700; font-size: 14px; text-decoration: none; padding: 7px 10px; border-radius: 999px;">Abrir</a>
+          <a href="#" style="flex: 1 1 auto; display: flex; align-items: center; justify-content: center; gap: 4px; background: #ea580c; color: #ffffff; font-weight: 700; font-size: 14px; text-decoration: none; padding: 9px 10px; border-radius: 999px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>PDF</a>
+        </div>
+      </div>
+    </article>
+
+    <article style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 18px; padding: 12px; display: flex; gap: 12px; box-shadow: 0 6px 18px rgba(234,88,12,0.07);">
+      <a href="#" aria-label="Abrir Posada familiar" style="flex: 0 0 104px; height: 118px; background: #fff7ed; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+        <img src="/_blob/7d489fd950e7549de88c6ac84eb7f825" alt="" style="width: 46px; height: 69px; border-radius: 4px; transform: rotate(-9deg) translateY(4px); box-shadow: 0 4px 10px rgba(194,65,12,0.22);">
+        <img src="/_blob/7c74d60f2afa97feed0476bacf7bbf3d" alt="" style="width: 46px; height: 69px; border-radius: 4px; margin-left: -16px; position: relative; z-index: 1; box-shadow: 0 4px 10px rgba(194,65,12,0.22);">
+        <img src="/_blob/6a941123d94ee0921bc8c7a73544ff08" alt="" style="width: 46px; height: 69px; border-radius: 4px; margin-left: -16px; transform: rotate(9deg) translateY(4px); box-shadow: 0 4px 10px rgba(194,65,12,0.22);">
+      </a>
+      <div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; align-items: flex-start; gap: 6px;">
+          <h3 style="margin: 0; font-size: 17px; flex: 1 1 auto;">Posada familiar</h3>
+          <button type="button" aria-label="Más acciones para Posada familiar" style="width: 44px; height: 44px; margin: -10px -8px 0 0; flex: 0 0 auto; border-radius: 999px; border: none; background: transparent; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+        </div>
+        <span style="font-size: 13px; color: #78350f;">30 cartas · 4×4 · 7 tokens</span>
+        <span style="align-self: flex-start; background: #ccfbf1; color: #115e59; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px;">Lista para imprimir</span>
+        <div style="display: flex; gap: 8px; margin-top: auto;">
+          <a href="#" style="flex: 1 1 auto; text-align: center; background: #fff7ed; color: #c2410c; border: 2px solid #ea580c; font-weight: 700; font-size: 14px; text-decoration: none; padding: 7px 10px; border-radius: 999px;">Abrir</a>
+          <a href="#" style="flex: 1 1 auto; display: flex; align-items: center; justify-content: center; gap: 4px; background: #ea580c; color: #ffffff; font-weight: 700; font-size: 14px; text-decoration: none; padding: 9px 10px; border-radius: 999px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>PDF</a>
+        </div>
+      </div>
+    </article>
+
+    <article style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 18px; padding: 12px; display: flex; gap: 12px; box-shadow: 0 6px 18px rgba(234,88,12,0.07);">
+      <a href="#" aria-label="Abrir Mi primera lotería" style="flex: 0 0 104px; height: 118px; background: #fff7ed; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+        <img src="/_blob/35651e802b80bd8774a87bfb4d8329b3" alt="" style="width: 46px; height: 69px; border-radius: 4px; transform: rotate(-9deg) translateY(4px); box-shadow: 0 4px 10px rgba(194,65,12,0.22);">
+        <img src="/_blob/717be2c43ab452b8e78371921d348ea9" alt="" style="width: 46px; height: 69px; border-radius: 4px; margin-left: -16px; position: relative; z-index: 1; box-shadow: 0 4px 10px rgba(194,65,12,0.22);">
+        <img src="/_blob/15b7f56e7903c2f5a97409968f7246b8" alt="" style="width: 46px; height: 69px; border-radius: 4px; margin-left: -16px; transform: rotate(9deg) translateY(4px); box-shadow: 0 4px 10px rgba(194,65,12,0.22);">
+      </a>
+      <div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; align-items: flex-start; gap: 6px;">
+          <h3 style="margin: 0; font-size: 17px; flex: 1 1 auto;">Mi primera lotería</h3>
+          <button type="button" aria-label="Más acciones para Mi primera lotería" style="width: 44px; height: 44px; margin: -10px -8px 0 0; flex: 0 0 auto; border-radius: 999px; border: none; background: transparent; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+        </div>
+        <span style="font-size: 13px; color: #78350f;">6 cartas · Niños 3×3 · 1 token</span>
+        <span style="align-self: flex-start; background: #fef3c7; color: #92400e; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px;">Te faltan [N] cartas</span>
+        <a href="#" style="margin-top: auto; text-align: center; background: #ea580c; color: #ffffff; font-weight: 700; font-size: 14px; text-decoration: none; padding: 9px 10px; border-radius: 999px;">Seguir editando</a>
+      </div>
+    </article>
+
+    <article style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 18px; padding: 12px; display: flex; gap: 12px; box-shadow: 0 6px 18px rgba(234,88,12,0.07);">
+      <a href="#" aria-label="Abrir Nueva lotería 2" style="flex: 0 0 104px; height: 118px; background: #fff7ed; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+        <img src="/_blob/c08bbf2b34d6b08ffa378af14f67fad8" alt="" style="width: 46px; height: 69px; border-radius: 4px; transform: rotate(-5deg); box-shadow: 0 4px 10px rgba(194,65,12,0.22);">
+        <span style="width: 42px; height: 66px; box-sizing: border-box; border: 2px dashed #fdba74; border-radius: 5px; display: flex; align-items: center; justify-content: center; color: #ea580c; transform: rotate(5deg);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
+      </a>
+      <div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; align-items: flex-start; gap: 6px;">
+          <h3 style="margin: 0; font-size: 17px; flex: 1 1 auto;">Nueva lotería 2</h3>
+          <button type="button" aria-label="Más acciones para Nueva lotería 2" style="width: 44px; height: 44px; margin: -10px -8px 0 0; flex: 0 0 auto; border-radius: 999px; border: none; background: transparent; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+        </div>
+        <span style="font-size: 13px; color: #78350f;">1 carta · 4×4</span>
+        <span style="align-self: flex-start; background: #fef3c7; color: #92400e; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px;">Te faltan [N] cartas</span>
+        <a href="#" style="margin-top: auto; text-align: center; background: #ea580c; color: #ffffff; font-weight: 700; font-size: 14px; text-decoration: none; padding: 9px 10px; border-radius: 999px;">Seguir editando</a>
+      </div>
+    </article>
+
+    <article style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 18px; padding: 12px; display: flex; gap: 12px; box-shadow: 0 6px 18px rgba(234,88,12,0.07);">
+      <a href="#" aria-label="Abrir Nueva lotería" style="flex: 0 0 104px; height: 118px; background: #fff7ed; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #9a3412; text-decoration: none;">
+        <span style="width: 42px; height: 62px; box-sizing: border-box; border: 2px dashed #fdba74; border-radius: 5px; display: flex; align-items: center; justify-content: center; color: #ea580c;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 8"/></svg></span>
+        <span style="font-size: 12px; font-weight: 700;">Aún sin fotos</span>
+      </a>
+      <div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; align-items: flex-start; gap: 6px;">
+          <h3 style="margin: 0; font-size: 17px; flex: 1 1 auto;">Nueva lotería</h3>
+          <button type="button" aria-label="Más acciones para Nueva lotería" style="width: 44px; height: 44px; margin: -10px -8px 0 0; flex: 0 0 auto; border-radius: 999px; border: none; background: transparent; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+        </div>
+        <span style="font-size: 13px; color: #78350f;">0 cartas · 4×4</span>
+        <a href="#" style="margin-top: auto; text-align: center; background: #ea580c; color: #ffffff; font-weight: 700; font-size: 14px; text-decoration: none; padding: 9px 10px; border-radius: 999px;">Subir fotos</a>
+      </div>
+    </article>
+  </section>
+
+  <!-- TEMATICAS -->
+  <section style="padding: 20px 16px 12px; display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;"><h2 style="margin: 0; font-size: 22px;">Mis temáticas</h2><a href="#" style="font-weight: 700; font-size: 14px;">Ver catálogo →</a></div>
+    <div style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 18px; padding: 6px; display: flex; flex-direction: column;">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px;">
+        <img src="/_blob/47b3412b61796492218fadf9faafa1e7" alt="Portada de la Lotería de Halloween" style="width: 56px; height: 56px; border-radius: 12px; object-fit: cover; flex: 0 0 auto;">
+        <div style="flex: 1 1 160px; min-width: 0; display: flex; flex-direction: column; gap: 2px;"><strong style="font-size: 16px;">Lotería de Halloween</strong><span style="font-size: 13px; color: #78350f;">Comprada el 6 oct 2026</span></div>
+        <a href="#" style="flex: 1 1 100%; display: flex; align-items: center; justify-content: center; gap: 6px; background: #ea580c; color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none; padding: 11px 16px; border-radius: 999px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Descargar PDF</a>
+      </div>
+      <div style="height: 1px; background: #fde4cc; margin: 0 10px;"></div>
+      <div style="display: flex; align-items: center; gap: 12px; padding: 10px;">
+        <span style="width: 56px; height: 56px; border-radius: 12px; background: #fff7ed; flex: 0 0 auto; display: flex; align-items: center; justify-content: center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+        <div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px;"><strong style="font-size: 16px;">[Otra temática]</strong><span style="align-self: flex-start; background: #fef3c7; color: #92400e; font-weight: 700; font-size: 12px; padding: 3px 9px; border-radius: 999px;">Esperando pago</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MOVIMIENTOS -->
+  <section style="padding: 20px 16px 12px; display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;"><h2 style="margin: 0; font-size: 22px;">Movimientos de tokens</h2></div>
+    <div style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div style="background: #f0fdfa; border-radius: 12px; padding: 10px 12px;"><span style="font-size: 12px; color: #115e59;">Has recibido</span><div style="font-size: 22px; font-weight: 700; color: #0f766e;">+141</div></div>
+        <div style="background: #fff7ed; border-radius: 12px; padding: 10px 12px;"><span style="font-size: 12px; color: #9a3412;">Has usado</span><div style="font-size: 22px; font-weight: 700; color: #c2410c;">−16</div></div>
+      </div>
+      <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column;">
+        <li style="display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #fef3e8;"><div style="flex: 1 1 auto; display: flex; flex-direction: column;"><span style="font-weight: 600; font-size: 15px;">3 fotos transformadas</span><span style="font-size: 12px; color: #78350f;">Cumpleaños de Sofi · hoy</span></div><strong style="font-size: 16px; color: #c2410c;">−3</strong></li>
+        <li style="display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #fef3e8;"><div style="flex: 1 1 auto; display: flex; flex-direction: column;"><span style="font-weight: 600; font-size: 15px;">Compra · Para varias loterías</span><span style="font-size: 12px; color: #78350f;">8 oct 2026 · $100 MXN</span></div><strong style="font-size: 16px; color: #0f766e;">+70</strong></li>
+        <li style="display: flex; align-items: center; gap: 10px; padding: 9px 0 0;"><div style="flex: 1 1 auto; display: flex; flex-direction: column;"><span style="font-weight: 600; font-size: 15px;">Regalo de chorroybuenas</span><span style="font-size: 12px; color: #78350f;">2 oct 2026</span></div><strong style="font-size: 16px; color: #0f766e;">+[N]</strong></li>
+      </ul>
+      <a href="#" style="text-align: center; font-weight: 700; font-size: 15px; padding: 8px 0;">Ver todos los movimientos</a>
+    </div>
+  </section>
+
+  <!-- MIS DATOS -->
+  <section style="padding: 20px 16px 32px; display: flex; flex-direction: column; gap: 12px;">
+    <h2 style="margin: 0; font-size: 22px;">Mis datos</h2>
+    <div style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 18px; padding: 4px 16px; display: flex; flex-direction: column;">
+      <div style="display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #fef3e8;"><div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;"><span style="font-size: 12px; color: #78350f;">Nombre</span><span style="font-weight: 600; font-size: 16px;">Carlos Vega</span></div><button type="button" style="font: inherit; font-weight: 700; font-size: 15px; color: #c2410c; background: transparent; border: none; padding: 12px 4px;">Cambiar</button></div>
+      <div style="display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #fef3e8;"><div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;"><span style="font-size: 12px; color: #78350f;">Correo</span><span style="font-weight: 600; font-size: 15px; overflow-wrap: anywhere;">carlos.tests01@gmail.com</span></div></div>
+      <div style="display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #fef3e8;"><div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;"><span style="font-size: 12px; color: #78350f;">Contraseña</span><span style="font-weight: 600; font-size: 16px; letter-spacing: 2px;">••••••••</span></div><button type="button" style="font: inherit; font-weight: 700; font-size: 15px; color: #c2410c; background: transparent; border: none; padding: 12px 4px;">Cambiar</button></div>
+      <div style="display: flex; align-items: center; gap: 10px; padding: 12px 0;"><span style="flex: 1 1 auto; font-size: 12px; color: #78350f;">Idioma</span><div style="display: flex; gap: 6px;"><button type="button" style="font: inherit; font-weight: 700; font-size: 14px; padding: 8px 12px; border-radius: 999px; border: 1px solid #ea580c; background: #ffedd5; color: #9a3412;">ES</button><button type="button" style="font: inherit; font-weight: 700; font-size: 14px; padding: 8px 12px; border-radius: 999px; border: 1px solid #fde4cc; background: #ffffff; color: #9a3412;">EN</button></div></div>
+    </div>
+    <button type="button" style="align-self: flex-start; display: flex; align-items: center; gap: 8px; font: inherit; font-weight: 700; font-size: 15px; color: #78350f; background: transparent; border: none; padding: 12px 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Cerrar sesión</button>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="background: #431407; color: #ffedd5;">
+    <div style="padding: 28px 16px; display: flex; flex-direction: column; gap: 18px; font-size: 15px;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <strong style="color: #ffffff; font-size: 17px;">chorroybuenas.com.mx</strong>
+        <span>Hecho con <svg width="14" height="14" viewBox="0 0 24 24" fill="#fb923c" aria-hidden="true" style="vertical-align: -2px;"><path d="M12 21s-7-4.35-9.5-8.5C.6 9.1 2.6 5 6.5 5c2.1 0 3.6 1.2 4.5 2.6C11.9 6.2 13.4 5 15.5 5 19.4 5 21.4 9.1 19.5 12.5 17 16.65 12 21 12 21z"/></svg> para mantener viva la tradición mexicana</span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px 18px;">
+        <a href="#" style="color: #ffedd5;">¿Qué es chorroybuenas?</a>
+        <a href="#" style="color: #ffedd5;">¿Cómo se juega?</a>
+        <a href="#" style="color: #ffedd5;">¿Qué es la lotería?</a>
+        <a href="#" style="color: #ffedd5;">Aviso de privacidad</a>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":3300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

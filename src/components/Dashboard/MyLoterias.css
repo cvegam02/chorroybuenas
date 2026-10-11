@@ -1,0 +1,680 @@
+/* «Mis loterías» de Mi cuenta (U1): sección, tarjeta de lotería y abanico de cartas */
+
+.my-loterias {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-bottom: 48px;
+  color: var(--color-text-main);
+  /* Al llegar por el ancla, el título no queda pegado al borde */
+  scroll-margin-top: 24px;
+}
+
+.my-loterias__narrow {
+  display: none;
+}
+
+.my-loterias__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.my-loterias__heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.my-loterias__title {
+  margin: 0;
+  font-size: 30px;
+}
+
+.my-loterias__count {
+  color: var(--color-text-muted);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.my-loterias__create {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+}
+
+.my-loterias__create:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.my-loterias__create:disabled,
+.my-loterias__new:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.my-loterias__error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: 15px;
+}
+
+.my-loterias__retry {
+  padding: 6px 4px;
+  border: none;
+  background: transparent;
+  color: var(--color-primary-dark);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.my-loterias__dismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-left: auto;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Aviso mientras se arma un PDF */
+.my-loterias__notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.my-loterias__spinner {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 18px;
+  height: 18px;
+  border: 2px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-top-color: currentColor;
+  border-radius: var(--radius-full);
+  animation: dashboard-spin 0.8s linear infinite;
+}
+
+.my-loterias__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+/* Tarjeta punteada para crear otra */
+.my-loterias__new {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 240px;
+  padding: 24px;
+  border: 2px dashed var(--color-primary-lighter);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-subtle);
+  color: var(--color-primary-dark);
+  font: inherit;
+  font-size: 18px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.my-loterias__new:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.my-loterias__new-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  font-size: 24px;
+  box-shadow: var(--shadow-md);
+}
+
+.my-loterias__new-hint {
+  max-width: 200px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Cuenta nueva */
+.my-loterias__gift {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-secondary-light) 55%, var(--color-bg-surface));
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.my-loterias__gift svg {
+  flex: 0 0 auto;
+  color: var(--color-secondary-dark);
+  font-size: 20px;
+}
+
+.my-loterias__welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 40px 24px;
+  border: 2px dashed var(--color-primary-lighter);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-subtle);
+  text-align: center;
+}
+
+.my-loterias__welcome-cards {
+  display: flex;
+}
+
+.my-loterias__welcome-cards img {
+  width: 70px;
+  height: 105px;
+  border-radius: 5px;
+  object-fit: cover;
+  transform: rotate(-7deg);
+  box-shadow: var(--shadow-md);
+}
+
+.my-loterias__welcome-cards img + img {
+  margin-left: -14px;
+  transform: rotate(6deg);
+}
+
+.my-loterias__welcome-title {
+  margin: 0;
+  font-size: 20px;
+}
+
+.my-loterias__welcome-text {
+  max-width: 300px;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ---------- Tarjeta de una lotería ---------- */
+
+.loteria-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.loteria-card__fan {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 168px;
+  /* La tarjeta no recorta su contenido (el menú «⋮» se sale de ella): el abanico redondea sus esquinas */
+  border-radius: calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px) 0 0;
+  background: var(--color-bg-subtle);
+  color: var(--color-primary-dark);
+  text-decoration: none;
+}
+
+.loteria-card__type {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-primary-dark);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.loteria-card__type--kids {
+  background: color-mix(in srgb, var(--color-ai) 14%, var(--color-bg-surface));
+  color: var(--color-ai);
+}
+
+.loteria-card__body {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px 18px 18px;
+}
+
+.loteria-card__name {
+  margin: 0;
+  font-size: 19px;
+  overflow-wrap: anywhere;
+}
+
+.loteria-card__meta {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.loteria-card__status {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.loteria-card__status svg {
+  flex: 0 0 auto;
+  font-size: 11px;
+}
+
+.loteria-card__status--ready {
+  background: color-mix(in srgb, var(--color-secondary-light) 55%, var(--color-bg-surface));
+}
+
+.loteria-card__status--ready svg {
+  color: var(--color-secondary-dark);
+}
+
+.loteria-card__status--pending {
+  background: var(--color-accent-light);
+  color: var(--color-text-muted);
+}
+
+.loteria-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.loteria-card__button {
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  padding: 9px 12px;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  color: var(--color-primary-dark);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.loteria-card__button:hover {
+  background: var(--color-primary-lightest);
+  color: var(--color-primary-dark);
+}
+
+.loteria-card__button--primary {
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+}
+
+.loteria-card__button--primary:hover {
+  border-color: var(--color-primary-dark);
+  background: var(--color-primary-dark);
+  color: var(--color-text-inverted);
+}
+
+/* Descargar el PDF de una lotería lista: redondo en computadora, con texto en celular */
+.loteria-card__download {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.loteria-card__download:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.loteria-card__download:disabled {
+  cursor: progress;
+}
+
+/* Botón «⋮» */
+.loteria-card__menu {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.loteria-card__menu-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-text-muted);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.loteria-card__menu-trigger:hover,
+.loteria-card__menu-trigger[aria-expanded='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary-lightest);
+  color: var(--color-primary-dark);
+}
+
+.my-loterias__create:focus-visible,
+.my-loterias__retry:focus-visible,
+.my-loterias__dismiss:focus-visible,
+.loteria-card__download:focus-visible,
+.my-loterias__new:focus-visible,
+.loteria-card__fan:focus-visible,
+.loteria-card__button:focus-visible,
+.loteria-card__menu-trigger:focus-visible {
+  outline: 3px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
+
+/* ---------- Abanico de cartas ---------- */
+
+.card-fan {
+  --fan-card-width: 76px;
+  --fan-overlap: -22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-fan__card {
+  position: relative;
+  flex: 0 0 auto;
+  width: var(--fan-card-width);
+  aspect-ratio: 2 / 3;
+  border-radius: 5px;
+  background: var(--color-bg-surface);
+  object-fit: cover;
+  box-shadow: var(--shadow-md);
+}
+
+.card-fan__slot {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: calc(var(--fan-card-width) - 4px);
+  aspect-ratio: 2 / 3;
+  border: 2px dashed var(--color-primary-lighter);
+  border-radius: 6px;
+  color: var(--color-primary);
+  font-size: 22px;
+}
+
+/* Tres cartas: las de los lados se abren y la del centro queda encima */
+.card-fan--3 .card-fan__card:nth-child(1) {
+  transform: rotate(-9deg) translateY(6px);
+}
+
+.card-fan--3 .card-fan__card:nth-child(2) {
+  z-index: 1;
+  margin-left: var(--fan-overlap);
+}
+
+.card-fan--3 .card-fan__card:nth-child(3) {
+  margin-left: var(--fan-overlap);
+  transform: rotate(9deg) translateY(6px);
+}
+
+/* Dos cartas y el hueco de la tercera */
+.card-fan--2 .card-fan__card:nth-child(1) {
+  transform: rotate(-9deg) translateY(6px);
+}
+
+.card-fan--2 .card-fan__card:nth-child(2) {
+  z-index: 1;
+  margin-left: var(--fan-overlap);
+}
+
+.card-fan--2 .card-fan__slot {
+  margin-left: 6px;
+  transform: rotate(7deg) translateY(4px);
+}
+
+/* Una carta y el hueco de la siguiente */
+.card-fan--1 {
+  gap: 10px;
+}
+
+.card-fan--1 .card-fan__card {
+  transform: rotate(-5deg);
+}
+
+.card-fan--1 .card-fan__slot {
+  transform: rotate(5deg);
+}
+
+.card-fan--empty {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-fan__empty-label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .my-loterias {
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .my-loterias__wide {
+    display: none;
+  }
+
+  .my-loterias__narrow {
+    display: inline;
+  }
+
+  .my-loterias__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .my-loterias__heading {
+    gap: 8px;
+  }
+
+  .my-loterias__title {
+    font-size: 24px;
+  }
+
+  .my-loterias__count {
+    font-size: 15px;
+  }
+
+  .my-loterias__create {
+    padding: 13px 22px;
+  }
+
+  .my-loterias__grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* En celular se crea con el botón de arriba */
+  .my-loterias__new {
+    display: none;
+  }
+
+  .my-loterias__welcome {
+    padding: 28px 16px;
+  }
+
+  .loteria-card {
+    flex-direction: row;
+    gap: 12px;
+    padding: 12px;
+    border-radius: var(--radius-md);
+  }
+
+  .loteria-card__fan {
+    flex: 0 0 104px;
+    height: 118px;
+    border-radius: 12px;
+  }
+
+  .loteria-card__type {
+    display: none;
+  }
+
+  .loteria-card__body {
+    gap: 5px;
+    padding: 0;
+  }
+
+  /* El «⋮» sube junto al nombre */
+  .loteria-card__name {
+    padding-right: 34px;
+    font-size: 17px;
+  }
+
+  .loteria-card__meta {
+    font-size: 13px;
+  }
+
+  .loteria-card__status {
+    padding: 3px 9px;
+    font-size: 12px;
+  }
+
+  .loteria-card__actions {
+    padding-top: 4px;
+  }
+
+  .loteria-card__button {
+    padding: 7px 10px;
+    font-size: 14px;
+  }
+
+  .loteria-card__download {
+    flex: 1 1 auto;
+    width: auto;
+    height: auto;
+    padding: 9px 10px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .loteria-card__menu {
+    position: absolute;
+    top: -10px;
+    right: -8px;
+  }
+
+  .loteria-card__menu-trigger,
+  .loteria-card__menu-trigger:hover,
+  .loteria-card__menu-trigger[aria-expanded='true'] {
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .card-fan {
+    --fan-card-width: 46px;
+    --fan-overlap: -16px;
+  }
+
+  .card-fan__card {
+    border-radius: 4px;
+  }
+
+  .card-fan__slot {
+    border-radius: 5px;
+    font-size: 16px;
+  }
+
+  .card-fan--1 {
+    gap: 6px;
+  }
+
+  /* En chico las cartas de los lados bajan menos: se suma al giro de arriba */
+  .card-fan--3 .card-fan__card:nth-child(1),
+  .card-fan--3 .card-fan__card:nth-child(3),
+  .card-fan--2 .card-fan__card:nth-child(1) {
+    translate: 0 -2px;
+  }
+
+  /* Dos cartas ya llenan el recuadro: el hueco de la tercera no cabe */
+  .card-fan--2 .card-fan__slot {
+    display: none;
+  }
+
+  .card-fan__empty-label {
+    font-size: 12px;
+  }
+}

@@ -1,46 +1,64 @@
+/* «Mis temáticas» de Mi cuenta (U1) */
+
 .my-seasonal {
-  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  color: var(--color-text-main);
+}
+
+.my-seasonal__card {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
 }
 
 .my-seasonal__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .my-seasonal__row {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  gap: 14px;
+  margin: 0 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-primary-lightest);
+}
+
+.my-seasonal__row:last-child {
+  border-bottom: none;
 }
 
 .my-seasonal__cover {
-  flex-shrink: 0;
+  flex: 0 0 auto;
   width: 64px;
   height: 64px;
-  border-radius: var(--radius-sm);
-  background: var(--color-bg-tertiary);
+  border-radius: 12px;
+  background: var(--color-bg-subtle);
   object-fit: cover;
 }
 
 .my-seasonal__info {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 2px;
+  min-width: 0;
 }
 
 .my-seasonal__name {
-  font-weight: 700;
   color: var(--color-text-main);
+  font-size: 17px;
+  font-weight: 700;
   text-decoration: none;
   overflow-wrap: anywhere;
 }
@@ -52,30 +70,100 @@
 }
 
 .my-seasonal__meta {
-  font-size: 0.9rem;
   color: var(--color-text-muted);
+  font-size: 14px;
 }
 
 .my-seasonal__pending {
-  flex-shrink: 0;
-  padding: var(--spacing-xs) var(--spacing-md);
-  border: 1px solid var(--color-accent);
+  flex: 0 0 auto;
+  padding: 6px 12px;
   border-radius: var(--radius-full);
   background: var(--color-accent-light);
-  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  font-size: 13px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
-@media (max-width: 600px) {
-  .my-seasonal__row {
-    flex-wrap: wrap;
+.my-seasonal__row .seasonal-download {
+  flex: 0 0 auto;
+}
+
+.my-seasonal__row .seasonal-download__button {
+  padding: 10px 16px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+/* Cargando, sin compras o con error */
+.my-seasonal__state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 16px;
+  text-align: center;
+}
+
+.my-seasonal__state.dashboard__loading-inline {
+  flex-direction: row;
+  justify-content: center;
+}
+
+.my-seasonal__state-text {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 15px;
+}
+
+.my-seasonal__note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .my-seasonal {
+    gap: 12px;
   }
 
+  .my-seasonal__card {
+    padding: 6px;
+    border-radius: var(--radius-md);
+  }
+
+  .my-seasonal__row {
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0 10px;
+    padding: 10px 0;
+  }
+
+  .my-seasonal__cover {
+    width: 56px;
+    height: 56px;
+  }
+
+  .my-seasonal__info {
+    flex: 1 1 160px;
+  }
+
+  .my-seasonal__name {
+    font-size: 16px;
+  }
+
+  .my-seasonal__meta {
+    font-size: 13px;
+  }
+
+  /* El botón de descarga baja a su propio renglón, a todo lo ancho */
   .my-seasonal__row .seasonal-download {
-    width: 100%;
+    flex: 1 1 100%;
   }
 
   .my-seasonal__row .seasonal-download__button {
     width: 100%;
+    padding: 11px 16px;
   }
 }

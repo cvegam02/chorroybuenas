@@ -1,0 +1,174 @@
+/* Ventanas de Mi cuenta (U1) para cambiar el nombre de una lotería y para eliminarla */
+
+.loteria-dialog__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 24px;
+  background: color-mix(in srgb, var(--color-text-main) 45%, transparent);
+}
+
+.loteria-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 360px;
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 26px;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  font-family: var(--font-body);
+  box-shadow: 0 20px 40px color-mix(in srgb, var(--color-text-main) 30%, transparent);
+}
+
+.loteria-dialog__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-danger) 12%, var(--color-bg-surface));
+  color: var(--color-danger);
+  font-size: 22px;
+}
+
+.loteria-dialog__title {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.loteria-dialog__label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.loteria-dialog__input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.loteria-dialog__hint {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.loteria-dialog__text {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.loteria-dialog__keep {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.loteria-dialog__keep svg {
+  flex: 0 0 auto;
+  color: var(--color-primary-dark);
+  font-size: 16px;
+}
+
+.loteria-dialog__keep-action {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-primary-dark);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.loteria-dialog__keep-action:disabled {
+  text-decoration: none;
+  cursor: progress;
+}
+
+.loteria-dialog__error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.loteria-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.loteria-dialog__button {
+  min-height: 44px;
+  padding: 12px 18px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.loteria-dialog__button--primary {
+  padding: 12px 22px;
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+}
+
+.loteria-dialog__button--primary:hover:not(:disabled) {
+  border-color: var(--color-primary-dark);
+  background: var(--color-primary-dark);
+}
+
+.loteria-dialog__button--danger {
+  padding: 12px 22px;
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+  color: var(--color-text-inverted);
+}
+
+.loteria-dialog__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loteria-dialog__button:focus-visible,
+.loteria-dialog__keep-action:focus-visible,
+.loteria-dialog__input:focus-visible {
+  outline: 2px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
