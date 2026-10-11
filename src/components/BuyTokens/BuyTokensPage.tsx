@@ -32,9 +32,11 @@ export const BuyTokensPage: React.FC = () => {
   const { balance, refreshBalance } = useTokenBalance();
   const welcomeTokens = useWelcomeTokens();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [packs, setPacks] = useState<TokenPack[]>([]);
+  // null: no se pudieron leer. Nunca se muestran paquetes ni precios supuestos (FEAT-33, US A8).
+  const [packs, setPacks] = useState<TokenPack[] | null>(null);
   const [usdRate, setUsdRate] = useState<number | null>(null);
-  const [pricePerTokenCents, setPricePerTokenCents] = useState<number>(200);
+  const [pricePerTokenCents, setPricePerTokenCents] = useState<number | null>(null);
+  const [reloadCount, setReloadCount] = useState(0);
   const [isFirstPurchase, setIsFirstPurchase] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
@@ -102,9 +104,9 @@ export const BuyTokensPage: React.FC = () => {
 
     async function load() {
       const [packsData, rate, pricePerToken, promos] = await Promise.all([
-        TokenPricingRepository.getPacks(),
+        TokenPricingRepository.getPacksOrNull(),
         showUsd ? TokenPricingRepository.getExchangeRateMxnUsd() : Promise.resolve(null),
-        TokenPricingRepository.getPricing('MXN'),
+        TokenPricingRepository.getPricingOrNull('MXN'),
         TokenPricingRepository.getPromoSummary(),
       ]);
       if (cancelled) return;
@@ -126,7 +128,7 @@ export const BuyTokensPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, showUsd]);
+  }, [user?.id, showUsd, reloadCount]);
 
   const formatPriceMxn = (cents: number): string => {
     return `$${(cents / 100).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} MXN`;
@@ -199,7 +201,7 @@ export const BuyTokensPage: React.FC = () => {
   };
 
   const customTokensClamped = clampCustomTokens(customTokens);
-  const customPriceCents = customTokensClamped * pricePerTokenCents;
+  const customPriceCents = customTokensClamped * (pricePerTokenCents ?? 0);
   const customValid = customTokens >= CUSTOM_MIN && customTokens <= CUSTOM_MAX;
 
   const promoCodeTrimmed = promoCode.trim().toUpperCase();
@@ -218,8 +220,14 @@ export const BuyTokensPage: React.FC = () => {
   }
 
   const isLoggedIn = !!user;
-  const highlightedPack = highlightedPackIndex(packs.length);
-  const showPackNames = packs.length === PACK_NAME_KEYS.length;
+  const packList = packs ?? [];
+  const loadFailed = packs === null || pricePerTokenCents === null;
+  const highlightedPack = highlightedPackIndex(packList.length);
+  const showPackNames = packList.length === PACK_NAME_KEYS.length;
+  const retryLoad = () => {
+    setLoading(true);
+    setReloadCount((count) => count + 1);
+  };
   const openSignUp = () => setIsEmailModalOpen(true);
 
   return (
@@ -309,129 +317,145 @@ export const BuyTokensPage: React.FC = () => {
         </div>
       )}
 
-      <section className="buy-tokens__block buy-tokens__packs" aria-labelledby="buy-tokens-packs-title">
-        <h2 id="buy-tokens-packs-title" className="buy-tokens__section-title">
-          {t('buyTokens.choosePack')}
-        </h2>
-        <TokenPackList>
-          {packs.map((pack, index) => (
-            <TokenPackCard
-              key={pack.id}
-              pack={pack}
-              promoPercent={appliedPromoPercent}
-              name={showPackNames ? t(PACK_NAME_KEYS[index]) : undefined}
-              highlighted={index === highlightedPack}
-              priceNote={showUsd ? formatPriceUsdRef(pack.price_cents) : undefined}
-            >
+      {loadFailed && (
+        <div className="buy-tokens__block">
+          <div className="buy-tokens__load-error" role="alert">
+            <p>{t('buyTokens.loadError')}</p>
+            <button type="button" className="buy-tokens__retry" onClick={retryLoad}>
+              {t('seasonal.retry')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {packList.length > 0 && (
+        <section className="buy-tokens__block buy-tokens__packs" aria-labelledby="buy-tokens-packs-title">
+          <h2 id="buy-tokens-packs-title" className="buy-tokens__section-title">
+            {t('buyTokens.choosePack')}
+          </h2>
+          <TokenPackList>
+            {packList.map((pack, index) => (
+              <TokenPackCard
+                key={pack.id}
+                pack={pack}
+                promoPercent={appliedPromoPercent}
+                name={showPackNames ? t(PACK_NAME_KEYS[index]) : undefined}
+                highlighted={index === highlightedPack}
+                priceNote={showUsd ? formatPriceUsdRef(pack.price_cents) : undefined}
+              >
+                {isLoggedIn ? (
+                  <button
+                    type="button"
+                    className="token-pack__action"
+                    onClick={() => handleBuy(pack)}
+                    disabled={buyLoading}
+                  >
+                    {t('tokenPacks.buy')}
+                  </button>
+                ) : (
+                  <button type="button" className="token-pack__action" onClick={openSignUp}>
+                    {t('buyTokens.guestBuy')}
+                  </button>
+                )}
+              </TokenPackCard>
+            ))}
+          </TokenPackList>
+        </section>
+      )}
+
+      <section className="buy-tokens__block buy-tokens__extras">
+        {pricePerTokenCents !== null && (
+          <div className="buy-tokens__custom">
+            <div>
+              <h2 className="buy-tokens__custom-title">{t('buyTokens.customTitle')}</h2>
+              <p className="buy-tokens__custom-range">
+                {t('buyTokens.customRange', { min: CUSTOM_MIN, max: CUSTOM_MAX, price: formatPriceMxn(pricePerTokenCents) })}
+                {showUsd && <span className="buy-tokens__usd">{formatPriceUsdRef(pricePerTokenCents)}</span>}
+              </p>
+            </div>
+            <div className="buy-tokens__stepper">
+              <button
+                type="button"
+                className="buy-tokens__step"
+                aria-label={t('buyTokens.less')}
+                onClick={() => setCustomTokens((current) => stepCustomTokens(current, -1))}
+                disabled={customTokensClamped <= CUSTOM_MIN}
+              >
+                −
+              </button>
+              <label className="buy-tokens__amount">
+                <input
+                  type="number"
+                  min={CUSTOM_MIN}
+                  max={CUSTOM_MAX}
+                  value={customTokens}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value, 10);
+                    if (!Number.isNaN(v)) setCustomTokens(v);
+                    else if (e.target.value === '') setCustomTokens(0);
+                  }}
+                  onBlur={() => setCustomTokens((prev) => clampCustomTokens(prev))}
+                  className="buy-tokens__amount-input"
+                  aria-label={t('buyTokens.customTitle')}
+                />
+                <span className="buy-tokens__amount-unit">{t('buyTokens.tokens')}</span>
+              </label>
+              <button
+                type="button"
+                className="buy-tokens__step"
+                aria-label={t('buyTokens.more')}
+                onClick={() => setCustomTokens((current) => stepCustomTokens(current, 1))}
+                disabled={customTokensClamped >= CUSTOM_MAX}
+              >
+                +
+              </button>
+            </div>
+            <div className="buy-tokens__shortcuts">
+              {CUSTOM_SHORTCUTS.map((amount) => (
+                <button
+                  key={amount}
+                  type="button"
+                  className={`buy-tokens__shortcut ${customTokens === amount ? 'buy-tokens__shortcut--current' : ''}`}
+                  aria-pressed={customTokens === amount}
+                  onClick={() => setCustomTokens(clampCustomTokens(amount))}
+                >
+                  {amount}
+                </button>
+              ))}
+            </div>
+            {isLoggedIn && appliedPromoPercent > 0 && (
+              <p className="buy-tokens__custom-bonus">
+                {codePromoPercent > 0
+                  ? t('buyTokens.promoCodeBonus', { percent: codePromoPercent })
+                  : t('buyTokens.customBonus', { percent: appliedPromoPercent })}
+              </p>
+            )}
+            <div className="buy-tokens__custom-footer">
+              <div className="buy-tokens__custom-total">
+                <span className="buy-tokens__custom-total-label">{t('buyTokens.customTotal')}</span>
+                <strong className="buy-tokens__custom-total-amount">
+                  {formatPriceMxn(customPriceCents)}
+                  {showUsd && <span className="buy-tokens__usd">{formatPriceUsdRef(customPriceCents)}</span>}
+                </strong>
+              </div>
               {isLoggedIn ? (
                 <button
                   type="button"
-                  className="token-pack__action"
-                  onClick={() => handleBuy(pack)}
-                  disabled={buyLoading}
+                  className="buy-tokens__custom-buy"
+                  onClick={handleBuyCustom}
+                  disabled={!customValid || buyLoading}
                 >
-                  {t('tokenPacks.buy')}
+                  {t('buyTokens.customBuy', { count: customTokensClamped })}
                 </button>
               ) : (
-                <button type="button" className="token-pack__action" onClick={openSignUp}>
+                <button type="button" className="buy-tokens__custom-buy" onClick={openSignUp}>
                   {t('buyTokens.guestBuy')}
                 </button>
               )}
-            </TokenPackCard>
-          ))}
-        </TokenPackList>
-      </section>
-
-      <section className="buy-tokens__block buy-tokens__extras">
-        <div className="buy-tokens__custom">
-          <div>
-            <h2 className="buy-tokens__custom-title">{t('buyTokens.customTitle')}</h2>
-            <p className="buy-tokens__custom-range">
-              {t('buyTokens.customRange', { min: CUSTOM_MIN, max: CUSTOM_MAX, price: formatPriceMxn(pricePerTokenCents) })}
-              {showUsd && <span className="buy-tokens__usd">{formatPriceUsdRef(pricePerTokenCents)}</span>}
-            </p>
-          </div>
-          <div className="buy-tokens__stepper">
-            <button
-              type="button"
-              className="buy-tokens__step"
-              aria-label={t('buyTokens.less')}
-              onClick={() => setCustomTokens((current) => stepCustomTokens(current, -1))}
-              disabled={customTokensClamped <= CUSTOM_MIN}
-            >
-              −
-            </button>
-            <label className="buy-tokens__amount">
-              <input
-                type="number"
-                min={CUSTOM_MIN}
-                max={CUSTOM_MAX}
-                value={customTokens}
-                onChange={(e) => {
-                  const v = parseInt(e.target.value, 10);
-                  if (!Number.isNaN(v)) setCustomTokens(v);
-                  else if (e.target.value === '') setCustomTokens(0);
-                }}
-                onBlur={() => setCustomTokens((prev) => clampCustomTokens(prev))}
-                className="buy-tokens__amount-input"
-                aria-label={t('buyTokens.customTitle')}
-              />
-              <span className="buy-tokens__amount-unit">{t('buyTokens.tokens')}</span>
-            </label>
-            <button
-              type="button"
-              className="buy-tokens__step"
-              aria-label={t('buyTokens.more')}
-              onClick={() => setCustomTokens((current) => stepCustomTokens(current, 1))}
-              disabled={customTokensClamped >= CUSTOM_MAX}
-            >
-              +
-            </button>
-          </div>
-          <div className="buy-tokens__shortcuts">
-            {CUSTOM_SHORTCUTS.map((amount) => (
-              <button
-                key={amount}
-                type="button"
-                className={`buy-tokens__shortcut ${customTokens === amount ? 'buy-tokens__shortcut--current' : ''}`}
-                aria-pressed={customTokens === amount}
-                onClick={() => setCustomTokens(clampCustomTokens(amount))}
-              >
-                {amount}
-              </button>
-            ))}
-          </div>
-          {isLoggedIn && appliedPromoPercent > 0 && (
-            <p className="buy-tokens__custom-bonus">
-              {codePromoPercent > 0
-                ? t('buyTokens.promoCodeBonus', { percent: codePromoPercent })
-                : t('buyTokens.customBonus', { percent: appliedPromoPercent })}
-            </p>
-          )}
-          <div className="buy-tokens__custom-footer">
-            <div className="buy-tokens__custom-total">
-              <span className="buy-tokens__custom-total-label">{t('buyTokens.customTotal')}</span>
-              <strong className="buy-tokens__custom-total-amount">
-                {formatPriceMxn(customPriceCents)}
-                {showUsd && <span className="buy-tokens__usd">{formatPriceUsdRef(customPriceCents)}</span>}
-              </strong>
             </div>
-            {isLoggedIn ? (
-              <button
-                type="button"
-                className="buy-tokens__custom-buy"
-                onClick={handleBuyCustom}
-                disabled={!customValid || buyLoading}
-              >
-                {t('buyTokens.customBuy', { count: customTokensClamped })}
-              </button>
-            ) : (
-              <button type="button" className="buy-tokens__custom-buy" onClick={openSignUp}>
-                {t('buyTokens.guestBuy')}
-              </button>
-            )}
           </div>
-        </div>
+
+        )}
 
         <div className="buy-tokens__side">
           {promoSummary.hasCodePromos && isLoggedIn && (

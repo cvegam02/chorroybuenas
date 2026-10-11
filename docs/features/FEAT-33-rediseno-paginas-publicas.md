@@ -1,6 +1,6 @@
 # FEAT-33 — Rediseño de las páginas públicas, la barra superior y el pie
 
-**Estado: Carlos dio el visto bueno a las seis historias el 2026-10-10 y ese mismo día se construyeron todas, más la US A7, que surgió al revisar. Carlos las fue viendo en su servidor local y pidiendo ajustes. Van a `dev` junto con FEAT-32, en el PR de la rama `feature/inicio-rediseno`; falta que Carlos siga los guiones de demo en dev.chorroybuenas.com.mx y lo confirme antes de pasar a `main`. No lleva migraciones ni funciones de Supabase. `docs/diseno-mockups.md` está al día (barra, pie y P1 a P5 y U3, con el sí de Carlos). Pendiente de Carlos: revisar en Supabase que `/comprar-tokens` esté permitida como dirección de regreso de Google y volver a exportar las imágenes fijas de los videos (ver «Pendientes de Carlos»). Rama `feature/inicio-rediseno`, la misma de FEAT-32 (decisión 1).**
+**Estado: Carlos dio el visto bueno a las seis historias el 2026-10-10 y ese mismo día se construyeron todas, más la US A7, que surgió al revisar. Carlos las fue viendo en su servidor local y pidiendo ajustes. El 2026-10-11 se sumó la US A8 (Comprar tokens sin precios de respaldo), en el mismo PR. Van a `dev` junto con FEAT-32, en el PR de la rama `feature/inicio-rediseno`; falta que Carlos siga los guiones de demo en dev.chorroybuenas.com.mx y lo confirme antes de pasar a `main`. No lleva migraciones ni funciones de Supabase. `docs/diseno-mockups.md` está al día (barra, pie y P1 a P5 y U3, con el sí de Carlos). Pendiente de Carlos: revisar en Supabase que `/comprar-tokens` esté permitida como dirección de regreso de Google y volver a exportar las imágenes fijas de los videos (ver «Pendientes de Carlos»). Rama `feature/inicio-rediseno`, la misma de FEAT-32 (decisión 1).**
 
 **Contexto.** Después de la página de inicio (FEAT-32), Carlos pidió el 2026-10-10 rediseñar las demás páginas públicas, la barra superior y el pie para que queden como las maquetas de `docs/referencia-diseno/`. El detalle de cada página (secciones, imágenes, textos) y las reglas comunes de textos, SEO, rendimiento e inicio de sesión están en [`docs/referencia-diseno/INSTRUCCIONES-REDISENO-PAGINAS.md`](../referencia-diseno/INSTRUCCIONES-REDISENO-PAGINAS.md): aquí no se repiten. Las maquetas son referencia visual; no se copia su HTML. La página de inicio no se toca, salvo la barra y el pie, que son compartidos.
 
@@ -118,6 +118,8 @@ Cambio pedido por Carlos para la US A6 ya construida (2026-10-10):
 56. **«¿Qué es la lotería?» ya no tiene la sección «Tu propia lotería»** (2026-10-10, pedido por Carlos). La página pasa de ocho a siete secciones; la invitación a crear la propia queda en la llamada final y en la última pregunta frecuente. El ajuste 49 deja de aplicar.
 
 57. **La barra lleva «Inicio» cuando no hay sesión** (2026-10-10, pedido por Carlos), como primer enlace, para regresar a la página principal. Con sesión no aparece, porque ahí Inicio lleva a Mi cuenta. Sin sesión son seis enlaces: en pantallas de 1201 a 1320 px la barra se aprieta un poco (letra y espacios más chicos) para que quepan.
+
+58. **Comprar tokens ya no muestra paquetes ni precios de respaldo** (2026-10-11, pedido por Carlos; US A8). El código traía tres paquetes fijos, con precios distintos a los reales ($24, $48 y $140 en vez de $20, $40 y $100), y un precio por token fijo de $2.00, que la pantalla mostraba cuando no lograba leer los de la base. El cobro siempre lo decidió el servidor, pero la pantalla podía enseñar un precio que no era. Ahora, si no se pueden leer, sale un aviso con «Reintentar». _(Descartada: anotarlo en pendientes para después.)_
 
 ## Decisiones pendientes
 
@@ -272,4 +274,19 @@ Se le preguntan a Carlos, una por una, al empezar la historia que las necesita.
   - [x] La dirección, el título y la descripción de la página no cambian; la página pre-generada trae el texto del recuadro. (Prueba automática.)
   - [x] Se borraron los textos de las tarjetas que ya no se usan, en los dos idiomas.
   - [x] `docs/diseno-mockups.md` (P2, y de paso P5 y U3) al día, con el sí de Carlos (2026-10-10).
+
+### US A8 — Comprar tokens: sin precios de respaldo   ·   Estado: construida el 2026-10-11, pendiente de la demo de Carlos
+
+- **Historia** — Como persona que va a comprar tokens, quiero ver solo precios leídos del sitio, para no encontrarme un precio distinto al que me van a cobrar.
+- **Entrega demostrable** — Si Comprar tokens no puede leer los paquetes o el precio por token, muestra un aviso con el botón «Reintentar» en lugar de los paquetes y de «¿Otra cantidad?». Si sí puede y no hay paquetes activos, muestra solo «¿Otra cantidad?». El cobro y la acreditación no cambian.
+- **Construido** — 2026-10-11. En `TokenPricingRepository` se borraron los tres paquetes fijos, el precio fijo de $2.00 y las dos lecturas que los usaban (`getPacks` y `getPricing`); quedan `getPacksOrNull` (lista vacía si no hay paquetes activos, null si falla) y `getPricingOrNull`. `BuyTokensPage` muestra el aviso con «Reintentar» cuando falta cualquiera de los dos, y solo pinta los paquetes y «¿Otra cantidad?» con datos leídos. No se tocó nada de `src/services/` ni de `supabase/`. Pruebas, escritas antes del código, en `tests/src/tokenPricingLoad.test.ts`.
+- **Depende de** — US A4.
+- **Cómo se prueba (guion de demo)** — Abre Comprar tokens con conexión: paquetes y precios como siempre → corta la conexión (o bloquea la red en el navegador) y recarga: en lugar de paquetes sale el aviso «No pudimos cargar los paquetes y precios» con «Reintentar» → vuelve la conexión y pulsa «Reintentar»: aparecen los paquetes reales.
+- **Escenarios cubiertos**:
+  - [x] Si los paquetes no se pueden leer, no hay paquetes que mostrar; ya no existen los de respaldo. (Prueba automática, escrita antes del código.)
+  - [x] Si no hay paquetes activos, la lista viene vacía y no es un error. (Prueba automática, escrita antes del código.)
+  - [x] Si el precio por token no se puede leer, no hay precio que mostrar. (Prueba automática.)
+  - [ ] Con el aviso a la vista no se puede iniciar ninguna compra; «Reintentar» vuelve a leer.
+  - [ ] Beneficios e inicio siguen ocultando su precio cuando no se puede leer.
+  - [x] El código que crea el pago y acredita no cambió.
 
