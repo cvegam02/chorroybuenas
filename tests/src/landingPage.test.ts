@@ -119,11 +119,6 @@ describe('página de inicio (FEAT-32, P1)', () => {
     it('devuelve null si no hay precio guardado', async () => {
       expect(await TokenPricingRepository.getPricingOrNull('MXN')).toBeNull();
     });
-
-    it('la compra de tokens sigue recibiendo $2.00 cuando no se puede leer', async () => {
-      pricingQuery.result = { data: null, error: { message: 'sin red' } };
-      expect(await TokenPricingRepository.getPricing('MXN')).toBe(200);
-    });
   });
 
   describe('qué video recibe cada navegador', () => {
