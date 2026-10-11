@@ -1,6 +1,6 @@
 # FEAT-35 — Rediseño de «Mi cuenta» (U1)
 
-**Estado: construidas las US A1 a A4 el 2026-10-11, en la rama `feature/rediseno-mi-cuenta`, creada desde `dev`; falta la A5 (limpieza de estilos y textos viejos). Las A1 a A4 llegan a dev.chorroybuenas.com.mx con el primer PR de esta rama hacia `dev`, pedido por Carlos el 2026-10-11 tras verlas en su máquina; falta su demo ahí. La A5 irá en un segundo PR de la misma rama. A producción pasa después, con el PR de `dev` a `main`, cuando Carlos lo confirme. Sin migraciones ni funciones que desplegar.**
+**Estado: construidas las cinco historias (US A1 a A5) el 2026-10-11, en la rama `feature/rediseno-mi-cuenta`, creada desde `dev`. Las A1 a A4 llegaron a dev.chorroybuenas.com.mx con el PR #55, pedido por Carlos tras verlas en su máquina; falta su demo ahí. La A5 (limpieza, sin cambios a la vista) va en un segundo PR de la misma rama hacia `dev`. A producción pasa después, con el PR de `dev` a `main`, cuando Carlos lo confirme. Sin migraciones ni funciones que desplegar.**
 
 **Contexto.** Carlos pidió el 2026-10-11 rediseñar el panel de Mi cuenta (U1, `/dashboard`) para que quede como las maquetas `docs/design/Dashboard.dc.html` (escritorio), `DashboardMobile.dc.html` (celular, 768 px o menos) y `DashboardEstados.dc.html` (menú «⋮», hoja inferior, renombrar, eliminar, editar nombre y cuenta nueva). Las maquetas son referencia visual: no se copia su HTML y sus imágenes `/_blob/` son de ejemplo; el sitio muestra las cartas reales de cada lotería.
 
@@ -168,14 +168,14 @@ Se le preguntan a Carlos, una por una, al empezar la historia que las necesita.
   - [ ] En computadora y en celular.
   - [x] Textos en español y en inglés. (Prueba automática.)
 
-### US A5 — Limpieza y documentos   ·   Estado: en curso (documentos al día el 2026-10-11; falta la limpieza)
+### US A5 — Limpieza y documentos   ·   Estado: construida el 2026-10-11, pendiente de la demo de Carlos
 
 - **Historia** — Como quien mantiene el sitio, quiero que no queden estilos ni textos del panel anterior, para que el siguiente cambio no tropiece con ellos.
 - **Entrega demostrable** — Sin cambios a la vista. Se borran los estilos y los textos del panel anterior que ya nadie usa, en español y en inglés, y `docs/diseno-mockups.md` describe U1 como quedó (con la confirmación de Carlos sobre los 4 puntos).
-- **Construido** — 2026-10-11, la parte de documentos: `docs/diseno-mockups.md` describe U1, M11, M14 y M15 como quedaron, con la confirmación de Carlos (decisión 48). Falta borrar los estilos del panel anterior en `Dashboard.css` y las claves de texto sin uso.
+- **Construido** — 2026-10-11, la parte de documentos: `docs/diseno-mockups.md` describe U1, M11, M14 y M15 como quedaron, con la confirmación de Carlos (decisión 48). Limpieza, el mismo día: `Dashboard.css` pasó de 1249 a unas 130 líneas y conserva solo la página, la carga y las dos columnas (se comprobó clase por clase cuáles seguían en uso); se borraron, en español y en inglés, 13 textos de `dashboard` que ya nadie usa (insignia de bienvenida, tarjetas de estadísticas, lista anterior, tarjetas grandes y «Ver historial») y los tres de la ventana de eliminar anterior (`modals.deleteLoteria`, de la que solo queda «Sí, eliminar»). No se tocó `dashboard.purchaseHistory.tokens`, que ya estaba sin uso antes de esta feature.
 - **Depende de** — US A1 a A4.
 - **Cómo se prueba (guion de demo)** — Recorre Mi cuenta en computadora y en celular: todo se ve igual que al cerrar la US A4.
 - **Escenarios cubiertos**:
-  - [ ] Ningún archivo del panel pasa de 800 líneas.
-  - [ ] No quedan claves de texto sin uso del panel anterior.
+  - [x] Ningún archivo del panel pasa de 800 líneas. (El mayor es `MyLoterias.css`, con 680.)
+  - [x] No quedan claves de texto sin uso del panel anterior. (Comprobado buscando cada clave en `src/` y en las pruebas.)
   - [x] `docs/diseno-mockups.md` al día (U1 y sus ventanas).
