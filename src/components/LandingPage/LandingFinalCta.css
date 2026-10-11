@@ -31,6 +31,41 @@
   font-size: 16px;
 }
 
+/* Dos botones (páginas informativas): el blanco de siempre y uno con borde. */
+
+.landing-final-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.landing-final-cta__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.landing-final-cta__link--outline {
+  padding: 14px 24px;
+  border: 2px solid color-mix(in srgb, var(--color-text-inverted) 75%, transparent);
+  border-radius: var(--radius-full);
+  color: var(--color-text-inverted);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.landing-final-cta__link--outline:hover {
+  background: color-mix(in srgb, var(--color-text-inverted) 12%, transparent);
+  color: var(--color-text-inverted);
+}
+
+.landing-final-cta__link:focus-visible {
+  outline: 3px solid var(--color-accent-light);
+  outline-offset: 3px;
+}
+
 @media (min-width: 769px) {
   .landing-final-cta {
     padding: 0 24px 56px;

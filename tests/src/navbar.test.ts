@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import es from '../../src/locales/es/translation.json';
 import en from '../../src/locales/en/translation.json';
-import { NAV_LINKS, displayFirstName, isNavLinkActive, userInitial } from '../../src/components/Navbar/navLinks';
+import {
+  NAV_LINKS,
+  displayFirstName,
+  isNavLinkActive,
+  navLinksFor,
+  userInitial,
+} from '../../src/components/Navbar/navLinks';
 
 const link = (to: string) => {
   const found = NAV_LINKS.find((item) => item.to === to);
@@ -18,6 +24,24 @@ describe('barra superior (FEAT-33, US A1)', () => {
       '/como-se-juega',
       '/que-es-la-loteria',
     ]);
+  });
+
+  it('sin sesión, «Inicio» va primero; con sesión no aparece', () => {
+    expect(navLinksFor(false).map((item) => item.to)).toEqual([
+      '/',
+      '/cards',
+      '/tematicas',
+      '/beneficios',
+      '/como-se-juega',
+      '/que-es-la-loteria',
+    ]);
+    expect(navLinksFor(true)).toEqual(NAV_LINKS);
+  });
+
+  it('«Inicio» solo se marca en la página principal', () => {
+    const home = navLinksFor(false)[0];
+    expect(isNavLinkActive(home, '/')).toBe(true);
+    expect(isNavLinkActive(home, '/beneficios')).toBe(false);
   });
 
   it('marca como actual el enlace de la página abierta', () => {

@@ -1,6 +1,6 @@
 # FEAT-33 — Rediseño de las páginas públicas, la barra superior y el pie
 
-**Estado: Carlos dio el visto bueno a las seis historias el 2026-10-10. Construidas ese día las US A1 a A4 y la US A7, que surgió al revisar (Beneficios ya no repite los paquetes); están guardadas en la rama. Construida y guardada también la US A5, con el detalle que Carlos pidió para sus pasos y sus tableritos; la fila P3 de `docs/diseno-mockups.md` se actualiza junto con P4 al cerrar la US A6, con su sí. Carlos las ha ido viendo en su servidor local y pidiendo ajustes; no hay PR a `dev` ni demo completa todavía. Falta A6. `docs/diseno-mockups.md` al día con la barra, el pie, P2, P5 y U3 (Carlos lo confirmó el 2026-10-10). Pendiente de Carlos: revisar en Supabase que `/comprar-tokens` esté permitida como dirección de regreso de Google (ver «Pendientes de Carlos»). Rama `feature/inicio-rediseno`, la misma de FEAT-32 (decisión 1).**
+**Estado: Carlos dio el visto bueno a las seis historias el 2026-10-10 y ese mismo día se construyeron todas, más la US A7, que surgió al revisar. Carlos las fue viendo en su servidor local y pidiendo ajustes. Van a `dev` junto con FEAT-32, en el PR de la rama `feature/inicio-rediseno`; falta que Carlos siga los guiones de demo en dev.chorroybuenas.com.mx y lo confirme antes de pasar a `main`. No lleva migraciones ni funciones de Supabase. `docs/diseno-mockups.md` está al día (barra, pie y P1 a P5 y U3, con el sí de Carlos). Pendiente de Carlos: revisar en Supabase que `/comprar-tokens` esté permitida como dirección de regreso de Google y volver a exportar las imágenes fijas de los videos (ver «Pendientes de Carlos»). Rama `feature/inicio-rediseno`, la misma de FEAT-32 (decisión 1).**
 
 **Contexto.** Después de la página de inicio (FEAT-32), Carlos pidió el 2026-10-10 rediseñar las demás páginas públicas, la barra superior y el pie para que queden como las maquetas de `docs/referencia-diseno/`. El detalle de cada página (secciones, imágenes, textos) y las reglas comunes de textos, SEO, rendimiento e inicio de sesión están en [`docs/referencia-diseno/INSTRUCCIONES-REDISENO-PAGINAS.md`](../referencia-diseno/INSTRUCCIONES-REDISENO-PAGINAS.md): aquí no se repiten. Las maquetas son referencia visual; no se copia su HTML. La página de inicio no se toca, salvo la barra y el pie, que son compartidos.
 
@@ -102,6 +102,23 @@ Detalle pedido por Carlos para la US A5 ya construida (2026-10-10):
 47. **«Paso a paso» sin tarjetas:** título centrado y los cuatro pasos en dos columnas en computadora y una en celular, cada uno como una fila con su círculo naranja de 44 px y, a la derecha, título y texto.
 48. **Los tableritos de «Jugadas y premios» llevan casillas de colores:** ocho colores pastel que van rotando (la casilla *i* usa el color (*i* × 3) mod 8), apagadas las que no son de la jugada y con un frijol café las que sí. El Chorro marca la segunda fila (confirma el ajuste 42). Tablero Lleno lleva borde naranja y la etiqueta «Premio mayor». Cuatro tarjetas por fila en computadora y dos en celular. Los ocho colores entran a la paleta como «casillas de tablero»; Claude agregó además los dos cafés del frijol, para no dejar colores sueltos. Los radios de 4, 10 y 20 px son los que Carlos pidió, no los del sistema de diseño.
 
+Ajustes de Claude al construir la US A6 (2026-10-10), avisados a Carlos al entregar:
+
+49. **Las cartas del abanico del héroe y de «Tu propia lotería» son decorativas** (sin texto alternativo), como en la maqueta: son las cartas de ejemplo de inicio.
+50. **Los nombres de las 54 cartas no se traducen al inglés**; la lista va marcada como texto en español.
+51. **La imagen para compartir en redes sigue siendo `public/quees.jpg`**; la copia de `src/img/`, que solo usaba la página anterior, se borró. El título y la descripción para buscadores no cambiaron.
+52. **La llamada final con dos botones** de las dos páginas informativas usa los mismos estilos, ahora en `LandingFinalCta.css`.
+53. **Limpieza de cierre:** se quitaron de `SeasonalCatalog.css` las 30 reglas del catálogo anterior que ya nadie usaba (pendiente desde la US A3).
+54. **El acomodo de celular se resolvió con el de escritorio**; no se leyó la maqueta de celular.
+
+Cambio pedido por Carlos para la US A6 ya construida (2026-10-10):
+
+55. **«¿Qué es la lotería?» usa doce cartas clásicas con ilustraciones propias** (`public/media/que-es-la-loteria/`, de El Gallo a El Valiente), hechas por Carlos y su equipo. No son las de la baraja comercial, así que la decisión 5 se mantiene. Van en tres lugares: el abanico del héroe (El Gallo, La Dama, El Catrín y La Sirena, en lugar de las cartas con fotos); una hoja dibujada con HTML y CSS en «Historia y origen», que sustituye a la imagen del tablero (fondo crema, «LOTERÍA» en Arvo entre dos líneas y una cuadrícula de 3×3); y una fila de las doce, en orden, entre la introducción y la lista de las 54. «Tu propia lotería» conserva las cartas con fotos. Todas llevan texto alternativo, así que el ajuste 49 ya solo aplica a «Tu propia lotería». El crema de la hoja entra a la paleta.
+
+56. **«¿Qué es la lotería?» ya no tiene la sección «Tu propia lotería»** (2026-10-10, pedido por Carlos). La página pasa de ocho a siete secciones; la invitación a crear la propia queda en la llamada final y en la última pregunta frecuente. El ajuste 49 deja de aplicar.
+
+57. **La barra lleva «Inicio» cuando no hay sesión** (2026-10-10, pedido por Carlos), como primer enlace, para regresar a la página principal. Con sesión no aparece, porque ahí Inicio lleva a Mi cuenta. Sin sesión son seis enlaces: en pantallas de 1201 a 1320 px la barra se aprieta un poco (letra y espacios más chicos) para que quepan.
+
 ## Decisiones pendientes
 
 Se le preguntan a Carlos, una por una, al empezar la historia que las necesita.
@@ -144,6 +161,8 @@ Se le preguntan a Carlos, una por una, al empezar la historia que las necesita.
   - [x] El pie no tiene enlaces a redes ni enlaces vacíos.
   - [x] `docs/diseno-mockups.md` al día, con el sí de Carlos (2026-10-10).
   - [x] Textos en español y en inglés.
+  - [ ] Sin sesión, «Inicio» es el primer enlace, en la barra y en el menú de celular; con sesión no aparece (decisión 57). (Prueba automática de qué enlaces tocan.)
+  - [ ] Con los seis enlaces, entre 1201 y 1320 px de ancho nada se encima.
 
 ### US A2 — P2 Beneficios   ·   Estado: construida el 2026-10-10; al entregarla, Carlos respondió «se ve super bien»
 
@@ -166,7 +185,7 @@ Se le preguntan a Carlos, una por una, al empezar la historia que las necesita.
 
 - **Historia** — Como visitante, quiero ver las loterías temáticas con su portada, sus cartas de muestra y su precio, para elegir una y comprarla.
 - **Entrega demostrable** — El catálogo con héroe naranja y abanico de tres cartas, «Cómo funciona», el catálogo en `#catalogo` (tarjeta grande si la temática tiene una sola lotería, cuadrícula si tiene varias), «¿Prefieres una con tus fotos?» y las siete preguntas actuales. Sin aviso «Muy pronto» (decisión 23). Los datos siguen viniendo de la base y se conserva «Ya es tuya».
-- **Construido** — 2026-10-10. `SeasonalCatalog.tsx` se rehízo conservando cómo lee el catálogo, las compras de la cuenta y el tipo de cambio. `catalogLayout` (`src/utils/seasonalCatalog.ts`) decide tarjeta grande o cuadrícula. Estilos nuevos en `SeasonalCatalogPage.css`; los de carga, error y catálogo vacío siguen en `SeasonalCatalog.css`, que también usan la ficha y Mi cuenta. Las preguntas usan `FaqSection`. Textos nuevos en `seasonal.catalog`; el título y la descripción para buscadores no cambiaron. **Queda por limpiar:** en `SeasonalCatalog.css` hay reglas del catálogo anterior que ya nadie usa.
+- **Construido** — 2026-10-10. `SeasonalCatalog.tsx` se rehízo conservando cómo lee el catálogo, las compras de la cuenta y el tipo de cambio. `catalogLayout` (`src/utils/seasonalCatalog.ts`) decide tarjeta grande o cuadrícula. Estilos nuevos en `SeasonalCatalogPage.css`; los de carga, error y catálogo vacío siguen en `SeasonalCatalog.css`, que también usan la ficha y Mi cuenta. Las preguntas usan `FaqSection`. Textos nuevos en `seasonal.catalog`; el título y la descripción para buscadores no cambiaron. Las reglas del catálogo anterior que quedaban en `SeasonalCatalog.css` se quitaron al cerrar la US A6.
 - **Depende de** — nada.
 - **Cómo se prueba (guion de demo)** — Abre Temáticas → héroe naranja con tres etiquetas y un abanico de cartas → «Ver el catálogo ↓» baja al catálogo → una temática con una sola lotería se ve como tarjeta grande, con su tira de cartas de muestra y «Pago único» → «Ver lotería →» abre su ficha → con sesión, una que ya compraste dice «Ya es tuya» → al final, las siete preguntas, cerradas.
 - **Escenarios cubiertos**:
@@ -198,7 +217,7 @@ Se le preguntan a Carlos, una por una, al empezar la historia que las necesita.
   - [x] Google solo puede regresar a una dirección del propio sitio. (Prueba automática.)
   - [ ] Al entrar con Google desde Comprar tokens se regresa a Comprar tokens. (Depende de la configuración de Supabase: ver «Pendientes de Carlos».)
 
-### US A5 — P3 ¿Cómo se juega?   ·   Estado: construida el 2026-10-10, pendiente de la demo de Carlos y de su sí para `docs/diseno-mockups.md` (P3)
+### US A5 — P3 ¿Cómo se juega?   ·   Estado: construida el 2026-10-10, pendiente de la demo de Carlos
 
 - **Historia** — Como persona que busca cómo se juega la lotería, quiero una guía completa y clara, para poder organizar una partida.
 - **Entrega demostrable** — La página con sus nueve secciones: héroe con `mesa-loteria.jpg`, lo que necesitas, paso a paso, cómo cantar las cartas (cuatro versos en tarjetas con Arvo), jugadas y premios con cuatro tableros dibujados por el sitio, «¡Buenas!» y la apuesta, Modo Kids y cuántos tableros, seis preguntas y llamada final. Los números (15 y 24 cartas) son los de `contexto-negocio.md`.
@@ -215,22 +234,26 @@ Se le preguntan a Carlos, una por una, al empezar la historia que las necesita.
   - [x] La página pre-generada trae su texto completo. (Prueba automática.)
   - [x] Textos en español y en inglés.
 
-### US A6 — P4 ¿Qué es la lotería?   ·   Estado: por hacer
+### US A6 — P4 ¿Qué es la lotería?   ·   Estado: construida el 2026-10-10, pendiente de la demo de Carlos
 
 - **Historia** — Como persona curiosa por la lotería mexicana, quiero conocer su historia y sus 54 cartas, para entender la tradición y animarme a hacer la mía.
-- **Entrega demostrable** — La página con sus ocho secciones: héroe con abanico de cuatro cartas, datos rápidos, historia como línea del tiempo, «Más que un juego, una tradición», tu propia lotería, la lista numerada de las 54 cartas como texto, cinco preguntas y llamada final. Se quitan de las historias A5 y A6 las imágenes que ya no se usen.
-- **Construido** — —
+- **Entrega demostrable** — La página con sus siete secciones: héroe con abanico de cuatro cartas, datos rápidos, historia como línea del tiempo, «Más que un juego, una tradición», la lista numerada de las 54 cartas como texto, cinco preguntas y llamada final. (La sección «Tu propia lotería» se quitó: decisión 56.) Se quitan de las historias A5 y A6 las imágenes que ya no se usen.
+- **Construido** — 2026-10-10. `AboutLoteria.tsx` y su `.css` se rehicieron. Los 54 nombres están en `src/utils/traditionalDeck.ts` y se pintan como lista numerada de texto. Datos rápidos y lista de cartas en la letra Arvo. Preguntas con `FaqSection`. Textos en `about`. Pruebas en `tests/src/traditionalDeck.test.ts` y `tests/src/publicPagesPrerender.test.ts`.
 - **Depende de** — nada.
 - **Cómo se prueba (guion de demo)** — Abre «¿Qué es la lotería?» → héroe con cuatro cartas en abanico → datos rápidos (54, 4×4, 1, ∞) → la historia en cuatro etapas, con sus párrafos completos → un bloque oscuro sobre la tradición → la lista de las 54 cartas, numerada y solo con nombres → enlace a «¿Cómo se juega?» → preguntas frecuentes y llamada final.
 - **Escenarios cubiertos**:
-  - [ ] Las ocho secciones, en computadora y en celular.
-  - [ ] Las 54 cartas son una lista numerada de texto, con todos los nombres originales y sin ilustraciones de la baraja comercial.
-  - [ ] Enlace interno a «¿Cómo se juega?».
-  - [ ] Un solo `<h1>`; la dirección, el título y la descripción no cambian.
-  - [ ] Preguntas con `<details>` y datos `FAQPage` idénticos al texto visible. (Prueba automática.)
-  - [ ] La página pre-generada trae su texto completo.
-  - [ ] No quedan imágenes, estilos ni textos de las versiones anteriores sin usar.
-  - [ ] Textos en español y en inglés.
+  - [ ] Las siete secciones, en computadora y en celular; sin «Tu propia lotería» (decisión 56).
+  - [x] Las 54 cartas son una lista numerada de texto, con todos los nombres originales y sin ilustraciones de la baraja comercial. (Prueba automática.)
+  - [x] Enlace interno a «¿Cómo se juega?». (Prueba automática.)
+  - [x] Un solo `<h1>`; la dirección, el título y la descripción no cambian. (Prueba automática del `<h1>`.)
+  - [x] Preguntas con `<details>` y datos `FAQPage` idénticos al texto visible. (Prueba automática.)
+  - [x] La página pre-generada trae su texto completo. (Prueba automática.)
+  - [x] No quedan estilos ni textos de las versiones anteriores sin usar; se conservan `public/quees.jpg` y `public/comosejuega.png` porque son las imágenes para compartir en redes.
+  - [x] Textos en español y en inglés.
+  - [ ] El abanico del héroe usa las cartas clásicas 01, 03, 04 y 06 (decisión 55).
+  - [ ] «Historia y origen» muestra la hoja «LOTERÍA» con su cuadrícula de 3×3 en lugar de la imagen del tablero.
+  - [ ] Entre la introducción y la lista de las 54 hay una fila con las doce cartas clásicas, en orden, que se desliza de lado; en celular va de orilla a orilla.
+  - [ ] Cada carta clásica lleva su texto alternativo con su nombre. (Prueba automática.)
 
 ### US A7 — Beneficios: recuadro «¿Cuánto cuesta?» en lugar de los paquetes   ·   Estado: construida el 2026-10-10, pendiente de la demo de Carlos
 

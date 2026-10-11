@@ -191,11 +191,11 @@ export const HowToPlay = () => {
         <div className="landing-final-cta__box">
           <h2 className="landing-final-cta__title">{t('howToPlay.cta.title')}</h2>
           <p className="landing-final-cta__description">{t('howToPlay.cta.text')}</p>
-          <div className="how-to-play__cta-actions">
-            <Link to="/cards" className="landing-cta-button how-to-play__cta-link">
+          <div className="landing-final-cta__actions">
+            <Link to="/cards" className="landing-cta-button landing-final-cta__link">
               {t('howToPlay.cta.create')} <span aria-hidden="true">→</span>
             </Link>
-            <Link to="/tematicas" className="how-to-play__cta-link how-to-play__cta-link--outline">
+            <Link to="/tematicas" className="landing-final-cta__link landing-final-cta__link--outline">
               {t('howToPlay.cta.themed')}
             </Link>
           </div>

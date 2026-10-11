@@ -635,3 +635,30 @@
     display: none;
   }
 }
+
+/* Sin sesión la barra lleva seis enlaces («Inicio» por delante): en pantallas anchas pero justas se
+   aprieta un poco para que quepan sin encimarse. */
+@media (min-width: 1201px) and (max-width: 1320px) {
+  .navbar--guest .navbar__container {
+    gap: 18px;
+  }
+
+  .navbar--guest .navbar__links {
+    gap: 14px;
+  }
+
+  .navbar--guest .navbar__link,
+  .navbar--guest .navbar__sign-in {
+    font-size: 14px;
+  }
+
+  .navbar--guest .navbar__actions {
+    gap: 12px;
+  }
+
+  .navbar--guest .navbar__cta {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+}
+

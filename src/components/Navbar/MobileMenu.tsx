@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FaCoins, FaGoogle, FaTimes } from 'react-icons/fa';
 import logoImage from '../../img/logo.png';
-import { ALL_SETS_PATH, NAV_LINKS, isNavLinkActive } from './navLinks';
+import { ALL_SETS_PATH, isNavLinkActive, navLinksFor } from './navLinks';
 import { UserAvatar } from './UserAvatar';
 
 export const MOBILE_MENU_ID = 'navbar-mobile-menu';
@@ -121,7 +121,7 @@ export const MobileMenu = ({ pathname, user, onClose, onGoogle, onSignUp, onLogi
         )}
 
         <ul className="mobile-menu__links">
-          {NAV_LINKS.map((link) => {
+          {navLinksFor(user !== null).map((link) => {
             const isActive = isNavLinkActive(link, pathname);
             return (
               <li key={link.to}>

@@ -128,3 +128,51 @@ describe('¿Cómo se juega? pre-generada (FEAT-33, US A5)', () => {
   });
 });
 
+describe('¿Qué es la lotería? pre-generada (FEAT-33, US A6)', () => {
+  it('trae su texto completo y un solo título principal', async () => {
+    const { html } = await render('/que-es-la-loteria');
+    const page = es.about;
+    expect(countOf(html, 'h1')).toBe(1);
+    expect(html).toContain(page.hero.title);
+    expect(html).toContain(page.stats.generations);
+    expect(html).toContain(page.history.mexican.text);
+    expect(html).toContain(page.history.today.text);
+    expect(html).toContain(page.culture.title);
+    expect(html).not.toContain('Tu propia lotería');
+    expect(html).toContain(page.cta.title);
+  });
+
+  it('lista las 54 cartas como texto, en una lista numerada', async () => {
+    const { html } = await render('/que-es-la-loteria');
+    expect(html.split('about-loteria__deck-card').length - 1).toBe(54);
+    expect(html).toContain('El Gallo');
+    expect(html).toContain('El Violoncello');
+    expect(html).toContain('La Rana');
+    expect(html).toMatch(/<ol class="about-loteria__deck-list"/);
+  });
+
+  it('muestra las cartas clásicas con su nombre en el texto alternativo', async () => {
+    const { html } = await render('/que-es-la-loteria');
+    expect(html).toContain('alt="Carta El Gallo de la lotería tradicional"');
+    expect(html).toContain('alt="Carta El Valiente de la lotería tradicional"');
+    expect(html).toContain('/media/que-es-la-loteria/carta-06-la-sirena.jpg');
+    // 4 en el abanico, 9 en la hoja y 12 en la fila
+    expect(html.split('/media/que-es-la-loteria/').length - 1).toBe(4 + 9 + 12);
+    expect(html).toContain('LOTERÍA');
+  });
+
+  it('enlaza a «¿Cómo se juega?» y a crear la lotería', async () => {
+    const { html } = await render('/que-es-la-loteria');
+    expect(html).toContain('href="/como-se-juega"');
+    expect(html).toContain('href="/cards"');
+  });
+
+  it('sus datos FAQPage dicen lo mismo que las cinco preguntas visibles', async () => {
+    const { html } = await render('/que-es-la-loteria');
+    const data = faqPageOf(html);
+    expect(data.mainEntity).toHaveLength(5);
+    expect(data.mainEntity[1].name).toBe(es.about.faq.bingo.question);
+    expect(data.mainEntity[4].acceptedAnswer.text).toBe(es.about.faq.own.answer);
+  });
+});
+

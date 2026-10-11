@@ -336,41 +336,6 @@
   background: var(--color-card-lilac);
 }
 
-/* Llamada final: dos botones */
-
-.how-to-play__cta-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-}
-
-.how-to-play__cta-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-}
-
-.how-to-play__cta-link--outline {
-  padding: 14px 24px;
-  border: 2px solid color-mix(in srgb, var(--color-text-inverted) 75%, transparent);
-  border-radius: var(--radius-full);
-  color: var(--color-text-inverted);
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.how-to-play__cta-link--outline:hover {
-  background: color-mix(in srgb, var(--color-text-inverted) 12%, transparent);
-  color: var(--color-text-inverted);
-}
-
-.how-to-play__cta-link:focus-visible {
-  outline: 3px solid var(--color-accent-light);
-  outline-offset: 3px;
-}
-
 @media (min-width: 769px) {
   .how-to-play__steps {
     grid-template-columns: repeat(2, minmax(0, 1fr));

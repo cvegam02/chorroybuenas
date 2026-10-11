@@ -12,7 +12,7 @@ import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import { logger } from '../../utils/logger';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { MOBILE_MENU_ID, MobileMenu } from './MobileMenu';
-import { NAV_LINKS, displayFirstName, isNavLinkActive } from './navLinks';
+import { displayFirstName, isNavLinkActive, navLinksFor } from './navLinks';
 import { UserAvatar } from './UserAvatar';
 import { UserMenuPanel } from './UserMenuPanel';
 import './Navbar.css';
@@ -121,14 +121,14 @@ export const Navbar = () => {
   };
 
   return (
-    <header className="navbar">
+    <header className={`navbar ${user ? '' : 'navbar--guest'}`}>
       <nav className="navbar__container" aria-label={t('navbar.mainLabel')}>
         <Link to="/" className="navbar__logo">
           <img src={logoImage} alt="chorroybuenas.com.mx" className="navbar__logo-image" />
         </Link>
 
         <ul className="navbar__links navbar__wide-only">
-          {NAV_LINKS.map((link) => {
+          {navLinksFor(!!user).map((link) => {
             const isActive = isNavLinkActive(link, pathname);
             return (
               <li key={link.to}>

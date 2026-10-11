@@ -74,6 +74,8 @@
   /* El frijol que marca una casilla */
   --color-bean-light: #a16207;
   --color-bean-dark: #5b2a0a;
+  /* Papel de la hoja de lotería dibujada en «¿Qué es la lotería?» (FEAT-33) */
+  --color-paper-cream: #fbf3e2;
 
   /* Shadows - Organic & Warm */
   --shadow-sm: 0 2px 4px rgba(234, 88, 12, 0.08);
