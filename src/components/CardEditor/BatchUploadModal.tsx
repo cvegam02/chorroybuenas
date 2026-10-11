@@ -1,10 +1,15 @@
 import { useState, useEffect, useRef, useMemo, type FC } from 'react';
 import { createPortal } from 'react-dom';
-import { FaEdit, FaForward } from 'react-icons/fa';
+import { FaArrowRight, FaCropAlt, FaForward, FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { ImageEditor } from './ImageEditor';
+import { CardLivePreview } from './CardLivePreview';
 import { convertFileToBase64, validateImageFile, compressImage, adjustImageToCardAspectRatio } from '../../utils/imageUtils';
+import './CardUploadModal.css';
+import './CardForm.css';
 import './BatchUploadModal.css';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { nextCardNumber, queueItemState, queuePercent } from '../../utils/uploadQueue';
 import { logger } from '../../utils/logger';
 import { isPrintableCardTitle } from '../../utils/cardTitle';
 
@@ -208,11 +213,22 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
     }
   };
 
+  /** Cerrar a medias: se confirma, y las cartas ya nombradas se guardan. */
+  const requestClose = () => {
+    if (!confirm(t('modals.batchCancel.message'))) return;
+    const allCards = [...completedCardsRef.current];
+    if (allCards.length > 0) {
+      onCardsAdd(allCards);
+    }
+    completedCardsRef.current = [];
+    onClose();
+  };
+  useEscapeKey(requestClose, isOpen && pendingImages.length > 0);
+
   if (!isOpen || pendingImages.length === 0) return null;
 
   const currentFile = pendingImages[currentIndex];
-  const progress = ((currentIndex + 1) / pendingImages.length) * 100;
-  const remaining = pendingImages.length - currentIndex - 1;
+  const isLastPhoto = currentIndex === pendingImages.length - 1;
   const isDuplicateTitle =
     Boolean(currentTitle.trim()) &&
     (existingTitleSet.has(normalizeTitle(currentTitle)) ||
@@ -221,138 +237,132 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
 
   const modalContent = (
     <div
-      className="batch-upload-modal__overlay"
+      className="card-modal__overlay"
       onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          // Allow closing only if user wants to cancel
-          if (confirm(t('modals.batchCancel.message'))) {
-            const allCards = [...completedCardsRef.current];
-            if (allCards.length > 0) {
-              onCardsAdd(allCards);
-            }
-            completedCardsRef.current = [];
-            onClose();
-          }
-        }
+        if (e.target === e.currentTarget) requestClose();
       }}
     >
-      <div className="batch-upload-modal__content">
-        <div className="batch-upload-modal__header">
-          <h2 className="batch-upload-modal__title">
-            {t('batchUpload.title', { current: currentIndex + 1, total: pendingImages.length })}
-          </h2>
-          <button
-            className="batch-upload-modal__close"
-            onClick={() => {
-              if (confirm(t('modals.batchCancel.message'))) {
-                const allCards = [...completedCardsRef.current];
-                if (allCards.length > 0) {
-                  onCardsAdd(allCards);
-                }
-                completedCardsRef.current = [];
-                onClose();
-              }
-            }}
-            aria-label={t('common.close')}
-          >
-            ×
+      <div
+        className="card-modal__content card-modal__content--wide"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="batch-upload-modal-title"
+      >
+        <div className="card-modal__header">
+          <div>
+            <h2 id="batch-upload-modal-title" className="card-modal__title">{t('batchUpload.title')}</h2>
+            <span className="card-modal__subtitle">{t('batchUpload.subtitle')}</span>
+          </div>
+          <button type="button" className="card-modal__close" onClick={requestClose} aria-label={t('common.close')}>
+            <FaTimes aria-hidden="true" />
           </button>
         </div>
 
-        <div className="batch-upload-modal__progress">
-          <div className="batch-upload-modal__progress-bar">
-            <div
-              className="batch-upload-modal__progress-fill"
-              style={{ width: `${progress}%` }}
-            />
+        <div className="batch-upload__progress">
+          <div className="batch-upload__progress-main">
+            <div className="batch-upload__bar" aria-hidden="true">
+              <span style={{ width: `${queuePercent(currentIndex, pendingImages.length)}%` }} />
+            </div>
+            <p className="batch-upload__progress-text" aria-live="polite">
+              {t('batchUpload.progress', {
+                current: currentIndex + 1,
+                total: pendingImages.length,
+                name: currentFile.file.name,
+              })}
+            </p>
           </div>
-          <p className="batch-upload-modal__progress-text">
-            {remaining > 0 ? t('batchUpload.remaining.other', { count: remaining }) : t('batchUpload.remaining.last')}
-          </p>
+          <div className="batch-upload__queue" aria-hidden="true">
+            {pendingImages.map((image, index) => {
+              const state = queueItemState(index, currentIndex);
+              return (
+                <img
+                  key={image.id}
+                  ref={state === 'current' ? (el) => el?.scrollIntoView({ block: 'nearest', inline: 'nearest' }) : undefined}
+                  src={image.preview}
+                  alt=""
+                  className={`batch-upload__thumb batch-upload__thumb--${state}`}
+                />
+              );
+            })}
+          </div>
         </div>
 
-        <div className="batch-upload-modal__current-file">
-          <p className="batch-upload-modal__file-name">{currentFile.file.name}</p>
-        </div>
-
-        {showEditor && currentImage ? (
-          <div className="batch-upload-modal__editor-container">
+        <div className="card-modal__body">
+          {showEditor && currentImage ? (
             <ImageEditor
               imageSrc={currentImage}
               onCrop={handleImageCrop}
               onCancel={() => setShowEditor(false)}
             />
-          </div>
-        ) : (
-          <div className="batch-upload-modal__form">
-            <div className="batch-upload-modal__layout">
-              <div className="batch-upload-modal__preview-wrap">
-                <img src={currentImage} alt="Preview" className="batch-upload-modal__preview-img" />
+          ) : (
+            <div className="batch-upload__layout">
+              <div className="batch-upload__media">
+                <div className="card-form__photo">
+                  <img src={currentImage} alt="" />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowEditor(true)}
+                  className="card-form__button card-form__button--secondary card-form__button--small"
+                >
+                  <FaCropAlt aria-hidden="true" />
+                  {t('cardUpload.actions.adjustImage')}
+                </button>
               </div>
-              <div className="batch-upload-modal__form-side">
-                <div className="batch-upload-modal__title-input-group">
-                  <label className="batch-upload-modal__label">
+
+              <div className="batch-upload__form">
+                <div className="card-form__field">
+                  <label htmlFor="batch-upload-title" className="card-form__label">
                     {t('cardUpload.label')}
                   </label>
                   <input
+                    id="batch-upload-title"
                     ref={titleInputRef}
                     type="text"
                     placeholder={t('cardUpload.inputPlaceholder')}
                     value={currentTitle}
                     onChange={(e) => setCurrentTitle(e.target.value)}
                     onKeyDown={handleTitleKeyDown}
-                    className="batch-upload-modal__title-input"
+                    className="card-form__input"
                     maxLength={100}
                   />
-                  {isDuplicateTitle && (
-                    <p className="batch-upload-modal__error-text">
-                      {t('cardUpload.errorDuplicate')}
-                    </p>
-                  )}
+                  {isDuplicateTitle && <p className="card-form__error">{t('cardUpload.errorDuplicate')}</p>}
                   {isInvalidTitle && (
-                    <p className="batch-upload-modal__error-text" role="alert">
+                    <p className="card-form__error" role="alert">
                       {t('cardUpload.errorInvalidTitle')}
                     </p>
                   )}
-                  <p className="batch-upload-modal__help-text">
-                    {t('cardUpload.helpText')}
-                  </p>
+                  <p className="card-form__help">{t('cardUpload.helpText')}</p>
                 </div>
 
-                <div className="batch-upload-modal__actions">
-              <button
-                type="button"
-                onClick={handleSkip}
-                className="batch-upload-modal__skip-button"
-              >
-                <FaForward />
-                {t('batchUpload.actions.skip')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowEditor(true)}
-                className="batch-upload-modal__edit-button"
-              >
-                <FaEdit />
-                <span>{t('batchUpload.actions.adjust')}</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={!currentTitle.trim() || isInvalidTitle}
-                className="batch-upload-modal__next-button"
+                <CardLivePreview
+                  photo={currentImage || null}
+                  title={currentTitle}
+                  number={nextCardNumber(existingTitles.length, completedCardsRef.current.length)}
+                />
+
+                <div className="batch-upload__actions">
+                  <button type="button" onClick={handleSkip} className="card-form__button card-form__button--ghost">
+                    <FaForward aria-hidden="true" />
+                    {t('batchUpload.actions.skip')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={!currentTitle.trim() || isInvalidTitle}
+                    className="card-form__button card-form__button--primary batch-upload__next"
                   >
-                    {remaining > 0 ? t('batchUpload.actions.next', { count: remaining }) : t('batchUpload.actions.finish')}
+                    {isLastPhoto ? t('batchUpload.actions.finish') : t('batchUpload.actions.next')}
+                    {!isLastPhoto && <FaArrowRight aria-hidden="true" />}
                   </button>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
 
   return createPortal(modalContent, document.body);
 };
-

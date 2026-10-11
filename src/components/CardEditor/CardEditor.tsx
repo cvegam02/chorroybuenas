@@ -1,14 +1,10 @@
 import { useState, useRef, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  FaInfoCircle,
-  FaChevronDown,
   FaCheckCircle,
   FaUpload,
   FaArrowRight,
-  FaImage,
-  FaEdit,
-  FaTag,
   FaPlus,
   FaMagic,
   FaExclamationTriangle,
@@ -30,7 +26,11 @@ import { Card, GridSize } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSetContext } from '../../contexts/SetContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
+import { AuthChoice } from '../Auth/AuthChoice';
+import { useWelcomeTokens } from '../../hooks/useWelcomeTokens';
+import { aiDeckSummary, deckProgress, pickImageFiles } from '../../utils/deckProgress';
 import './CardEditor.css';
+import './CardEditorDeck.css';
 import { logger } from '../../utils/logger';
 import { minCardsForGrid } from '../../utils/gridRules';
 
@@ -53,7 +53,6 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState('');
   const [isSavingName, setIsSavingName] = useState(false);
-  const [isInstructionsCollapsed, setIsInstructionsCollapsed] = useState(true);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
@@ -66,7 +65,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
     aiBatchStatus,
     aiBatchCurrentIndex,
     aiBatchTotalCount,
-    aiBatchCurrentTitle,
+    aiBatchCardIds,
     aiBatchSkippedCount,
     aiBatchError,
     showBatchCompleteMessage,
@@ -80,6 +79,8 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
     handleAIStart,
   } = useCardAI({ cards, updateCard, userId: user?.id, currentSetId, refreshBalance, t, isAIModalOpen });
   const [editingCard, setEditingCard] = useState<Card | null>(null);
+  // La carta como está ahora: la ventana de editar ve al momento una versión con IA recién guardada.
+  const liveEditingCard = editingCard ? cards.find(card => card.id === editingCard.id) ?? editingCard : null;
   const [showUploadProgress, setShowUploadProgress] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(-1);
   const [showAllTransformedModal, setShowAllTransformedModal] = useState(false);
@@ -87,8 +88,11 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
   // Mínimo de cartas según el modo (ver utils/gridRules)
   const minCards = minCardsForGrid(gridSize);
   const hasMinimumCards = cardCount >= minCards;
+  const progress = deckProgress(cardCount, minCards);
+  const aiSummary = aiDeckSummary(cards);
+  const welcomeTokens = useWelcomeTokens();
+  const [isDraggingFiles, setIsDraggingFiles] = useState(false);
   const noTokensForSingle = user && tokenBalance !== null && tokenBalance < 1;
-  const noTokensForBulk = user && tokenBalance !== null && tokenBalance < cardsToTransform.length;
 
   const normalizeTitle = (value: string) => value.replace(/\s+/g, ' ').trim().toLowerCase();
 
@@ -161,16 +165,27 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
     batchInputRef.current?.click();
   };
 
-  const handleBatchFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
+  const openBatchWith = (files: File[]) => {
     if (files.length > 0) {
       setBatchFiles(files);
       setIsBatchModalOpen(true);
     }
+  };
+
+  const handleBatchFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    openBatchWith(Array.from(event.target.files || []));
     // Reset input so same files can be selected again
     if (batchInputRef.current) {
       batchInputRef.current.value = '';
     }
+  };
+
+  // Arrastrar fotos al recuadro lleva a la misma ventana que «Subir fotos».
+  const handleFilesDrop = (event: React.DragEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    setIsDraggingFiles(false);
+    if (waitingForSet) return;
+    openBatchWith(pickImageFiles(Array.from(event.dataTransfer.files)));
   };
 
   const handleClearCards = async () => {
@@ -182,29 +197,11 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
   };
 
   const handleEditCard = (card: Card) => {
+    // Mientras la IA pinta la carta no se abre: al terminar, la carta ya trae su versión nueva.
+    if (card.isProcessing || transformingCardId === card.id) return;
     setEditingCard(card);
   };
 
-  const handleUpdateCard = async (image: string, title: string) => {
-    if (!editingCard) return false;
-
-    // Check for duplicates (excluding current card)
-    const normalizedTitle = normalizeTitle(title);
-    const isDuplicate = cards.some(c =>
-      c.id !== editingCard.id && normalizeTitle(c.title) === normalizedTitle
-    );
-
-    if (isDuplicate) {
-      alert(t('cardEditor.errors.duplicateTitle'));
-      return false;
-    }
-
-    const success = await updateCard(editingCard.id, { image, title });
-    if (success) {
-      setEditingCard(null);
-    }
-    return success;
-  };
 
   const handleRevertCard = async (id: string) => {
     const card = cards.find(c => c.id === id);
@@ -263,270 +260,251 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
       setShowAllTransformedModal(true);
       return;
     }
-    if (noTokensForBulk) return;
+    // Sin tokens suficientes también se abre la ventana, que dice cuántos faltan (FEAT-34, US A3).
     setIsAIModalOpen(true);
   };
 
   return (
-    <div className="card-editor">
-      <aside className="card-editor__sidebar">
-        <div className="card-editor__header">
-          {user && currentSet ? (
-            isRenaming ? (
-              <div className="card-editor__rename">
-                <input
-                  type="text"
-                  className="card-editor__rename-input"
-                  value={renameValue}
-                  onChange={(e) => setRenameValue(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleRenameSave();
-                    if (e.key === 'Escape') handleRenameCancel();
-                  }}
-                  placeholder={t('setView.renamePlaceholder')}
-                  autoFocus
-                  disabled={isSavingName}
-                  aria-label={t('setView.renameSet')}
-                />
-                <div className="card-editor__rename-actions">
-                  <button type="button" onClick={handleRenameCancel} disabled={isSavingName} className="card-editor__rename-cancel">
-                    {t('common.cancel')}
-                  </button>
-                  <button type="button" onClick={handleRenameSave} disabled={isSavingName || !renameValue.trim()} className="card-editor__rename-save">
-                    {isSavingName ? t('common.loading') : t('common.save')}
+    <div className="deck">
+      <div className="deck__columns">
+        <aside className="deck__aside">
+          <div className="deck__header">
+            {user && currentSet && <span className="deck__kicker">{t('cardEditor.deck.yourLoteria')}</span>}
+            {user && currentSet ? (
+              isRenaming ? (
+                <div className="card-editor__rename">
+                  <input
+                    type="text"
+                    className="card-editor__rename-input"
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleRenameSave();
+                      if (e.key === 'Escape') handleRenameCancel();
+                    }}
+                    placeholder={t('setView.renamePlaceholder')}
+                    autoFocus
+                    disabled={isSavingName}
+                    aria-label={t('setView.renameSet')}
+                  />
+                  <div className="card-editor__rename-actions">
+                    <button type="button" onClick={handleRenameCancel} disabled={isSavingName} className="card-editor__rename-cancel">
+                      {t('common.cancel')}
+                    </button>
+                    <button type="button" onClick={handleRenameSave} disabled={isSavingName || !renameValue.trim()} className="card-editor__rename-save">
+                      {isSavingName ? t('common.loading') : t('common.save')}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="card-editor__title-row">
+                  <h1 className="deck__title">{currentSet.name}</h1>
+                  <button type="button" className="card-editor__rename-btn" onClick={handleRenameStart} aria-label={t('setView.renameSet')} title={t('setView.renameSet')}>
+                    <FaPencilAlt />
                   </button>
                 </div>
-              </div>
+              )
             ) : (
-              <div className="card-editor__title-row">
-                <h1 className="card-editor__title">{currentSet.name}</h1>
-                <button type="button" className="card-editor__rename-btn" onClick={handleRenameStart} aria-label={t('setView.renameSet')} title={t('setView.renameSet')}>
-                  <FaPencilAlt />
-                </button>
+              <h1 className="deck__title">{t('cardEditor.title')}</h1>
+            )}
+            {user && currentSet ? (
+              <p className="deck__subtitle">
+                <span className="deck__wide-only">{t('cardEditor.deck.autosave')}</span>
+                <span className="deck__narrow-only">{t('createSteps.saved')}</span>
+              </p>
+            ) : (
+              <p className="deck__subtitle">{t('cardEditor.subtitle')}</p>
+            )}
+          </div>
+
+          <GridModeSelector selectedSize={gridSize} onChange={handleGridSizeChange} t={t} />
+
+          <div className="deck__progress">
+            <div className="deck__progress-head">
+              <span className="deck__progress-count">
+                <strong>{t('cardEditor.deck.barCards', { count: cardCount })}</strong>{' '}
+                <span className="deck__progress-min">{t('cardEditor.deck.minimum', { min: minCards })}</span>
+              </span>
+              {progress.isComplete ? (
+                <FaCheckCircle className="deck__progress-check" aria-hidden="true" />
+              ) : (
+                <span className="deck__progress-missing">{t('cardEditor.deck.missing', { count: progress.missing })}</span>
+              )}
+            </div>
+            <div
+              className="deck__progress-bar"
+              role="progressbar"
+              aria-label={t('cardEditor.deck.progressLabel')}
+              aria-valuemin={0}
+              aria-valuemax={minCards}
+              aria-valuenow={Math.min(cardCount, minCards)}
+            >
+              <span style={{ width: `${progress.percent}%` }} />
+            </div>
+            <p className="deck__progress-note">
+              {progress.isComplete
+                ? t('cardEditor.deck.ready')
+                : t(gridSize === 9 ? 'cardEditor.deck.needKids' : 'cardEditor.deck.needClassic', { min: minCards })}
+            </p>
+            <button type="button" onClick={onNext} disabled={!hasMinimumCards} className="deck__next">
+              {t('cardEditor.deck.next')}
+              <FaArrowRight aria-hidden="true" />
+            </button>
+          </div>
+
+          <div className="deck__add">
+            <button type="button" onClick={handleBatchClick} className="deck__button deck__button--primary" disabled={Boolean(waitingForSet)}>
+              <FaUpload aria-hidden="true" />
+              {t('cardEditor.deck.uploadPhotos')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsUploadModalOpen(true)}
+              className="deck__button deck__button--secondary"
+              disabled={Boolean(waitingForSet)}
+            >
+              <FaPlus aria-hidden="true" />
+              {t('cardEditor.deck.addOne')}
+            </button>
+          </div>
+
+          {user ? (
+            cardCount > 0 && (
+              <div className="deck__ai deck__ai--panel">
+                <div className="deck__ai-text">
+                  <strong>
+                    <FaMagic aria-hidden="true" /> {t('cardEditor.deck.aiPanelTitle')}
+                  </strong>
+                  <span>
+                    {t('cardEditor.deck.aiPanelStatus', { transformed: aiSummary.transformed, total: aiSummary.total })}
+                  </span>
+                </div>
+                <p className="deck__ai-balance">
+                  {tokenBalance !== null ? t('cardEditor.deck.tokens', { count: tokenBalance }) : t('common.loading')}
+                  <Link to="/comprar-tokens">{t('cardEditor.deck.buy')}</Link>
+                </p>
+                {aiSummary.remaining > 0 ? (
+                  <button type="button" onClick={handleAIBulkClick} className="deck__button deck__button--ai">
+                    {t('cardEditor.deck.transformRest', { count: aiSummary.remaining })}
+                  </button>
+                ) : (
+                  <p className="deck__ai-done">{t('cardEditor.deck.aiAllDone')}</p>
+                )}
               </div>
             )
           ) : (
-            <h1 className="card-editor__title">{t('cardEditor.title')}</h1>
-          )}
-          <p className="card-editor__subtitle">{t('cardEditor.subtitle')}</p>
-        </div>
-
-        <div className="card-editor__sidebar-section">
-          <GridModeSelector selectedSize={gridSize} onChange={handleGridSizeChange} t={t} />
-        </div>
-
-        <div className="card-editor__stats">
-          <div className="card-editor__stat">
-            <div className="card-editor__stat-value">
-              {cardCount}
-              {hasMinimumCards && <FaCheckCircle className="card-editor__stat-check" />}
-            </div>
-            <div className="card-editor__stat-label">{t('cardEditor.stats.loaded')}</div>
-            {!hasMinimumCards && (
-              <div className="card-editor__stat-minimum">
-                {t('cardEditor.stats.minimum', { mode: gridSize === 9 ? 'Kids' : 'Clásico', min: minCards })}
+            <div className="deck__ai">
+              <div className="deck__ai-pair">
+                <img src="/media/beneficios/antes-la-chata.jpg" alt={t('cardEditor.deck.aiBeforeAlt')} width={64} height={85} loading="lazy" />
+                <FaArrowRight aria-hidden="true" />
+                <img src="/media/beneficios/ia-la-chata.jpg" alt={t('cardEditor.deck.aiAfterAlt')} width={64} height={96} loading="lazy" />
               </div>
+              <div className="deck__ai-text">
+                <strong>{t('cardEditor.deck.aiTitle')}</strong>
+                <span>
+                  {welcomeTokens !== null
+                    ? t('cardEditor.deck.aiGift', { count: welcomeTokens })
+                    : t('cardEditor.deck.aiNoGift')}
+                </span>
+              </div>
+              <AuthChoice tone="onLight" compact googleLabel={t('cardEditor.deck.google')} />
+            </div>
+          )}
+
+          <details className="deck__tips">
+            <summary>{t('cardEditor.deck.tipsTitle')}</summary>
+            <p>{t('cardEditor.deck.tipsText')}</p>
+          </details>
+
+          <div className="deck__links">
+            {cardCount > 0 && (
+              <button
+                type="button"
+                onClick={() => !isAIBatchProcessing && setIsClearModalOpen(true)}
+                className="deck__link deck__link--danger"
+                disabled={Boolean(isAIBatchProcessing)}
+                title={isAIBatchProcessing ? t('cardEditor.batchProcessingBlockClear') : undefined}
+              >
+                {t('cardEditor.deck.clear')}
+              </button>
+            )}
+            {user ? (
+              // Con sesión todo está guardado: salir no borra nada.
+              <Link to="/dashboard#mis-loterias" className="deck__link">
+                {t('cardEditor.deck.goToMine')}
+              </Link>
+            ) : (
+              <button type="button" onClick={onCancel} className="deck__link">
+                {t('cardEditor.deck.exit')}
+              </button>
             )}
           </div>
-          {user && (
-            <div className="card-editor__stat card-editor__stat--tokens">
-              <div className="card-editor__stat-value">{tokenBalance ?? '...'}</div>
-              <div className="card-editor__stat-label">{t('landing.benefits.feature3.title')}</div>
-              <button
-                className="card-editor__refresh-tokens"
-                onClick={() => refreshBalance()}
-                title="Actualizar balance"
-              >
-                🔄
-              </button>
+        </aside>
+
+        <section className="deck__main" aria-labelledby="deck-cards-title">
+          {waitingForSet && (
+            <div className="card-editor__waiting-banner" role="status">
+              <div className="spinner" style={{ width: 24, height: 24, borderWidth: 2 }} />
+              <span>{t('common.loading')}</span>
             </div>
           )}
-        </div>
-
-        <div className="card-editor__info-section">
-              <button
-                className={`card-editor__info-toggle ${!isInstructionsCollapsed ? 'card-editor__info-toggle--open' : ''}`}
-                onClick={() => setIsInstructionsCollapsed(!isInstructionsCollapsed)}
-                type="button"
-              >
-                <div className="card-editor__info-toggle-content">
-                  <FaInfoCircle className="card-editor__info-icon" />
-                  <span className="card-editor__info-title">{t('cardEditor.instructions.title')}</span>
-                </div>
-                <FaChevronDown className={`card-editor__info-chevron ${isInstructionsCollapsed ? '' : 'card-editor__info-chevron--open'}`} />
-              </button>
-              <div className={`card-editor__info-content ${isInstructionsCollapsed ? 'card-editor__info-content--collapsed' : ''}`}>
-                <div className="card-editor__steps">
-                  <div className="card-editor__step">
-                    <div className="card-editor__step-number">1</div>
-                    <div className="card-editor__step-content">
-                      <div className="card-editor__step-icon"><FaImage /></div>
-                      <div>
-                        <strong>{t('cardEditor.instructions.step1.title')}</strong>
-                        <p>{t('cardEditor.instructions.step1.text')}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="card-editor__step">
-                    <div className="card-editor__step-number">2</div>
-                    <div className="card-editor__step-content">
-                      <div className="card-editor__step-icon"><FaEdit /></div>
-                      <div>
-                        <strong>{t('cardEditor.instructions.step2.title')}</strong>
-                        <p>{t('cardEditor.instructions.step2.text')}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="card-editor__step">
-                    <div className="card-editor__step-number">3</div>
-                    <div className="card-editor__step-content">
-                      <div className="card-editor__step-icon"><FaTag /></div>
-                      <div>
-                        <strong>{t('cardEditor.instructions.step3.title')}</strong>
-                        <p>{t('cardEditor.instructions.step3.text')}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="card-editor__step">
-                    <div className="card-editor__step-number">4</div>
-                    <div className="card-editor__step-content">
-                      <div className="card-editor__step-icon"><FaPlus /></div>
-                      <div>
-                        <strong>{t('cardEditor.instructions.step4.title')}</strong>
-                        <p>{t('cardEditor.instructions.step4.text')}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-        <div className="card-editor__actions">
-          <button
-            onClick={onNext}
-            disabled={!hasMinimumCards}
-            className="card-editor__next-button card-editor__next-button--enabled"
-          >
-            <span>{t('cardEditor.actions.nextStep')}</span>
-            <FaArrowRight />
-          </button>
-        </div>
-
-        <div className="card-editor__sidebar-actions">
-          <button type="button" onClick={handleBatchClick} className="card-editor__batch-button" disabled={Boolean(waitingForSet)}>
-            <FaUpload />
-            <span>{t('cardEditor.actions.uploadBatch')}</span>
-          </button>
-          {cardCount > 0 && (
-            <button
-              type="button"
-              onClick={() => !isAIBatchProcessing && setIsClearModalOpen(true)}
-              className="card-editor__clear-button"
-              disabled={Boolean(isAIBatchProcessing)}
-              title={isAIBatchProcessing ? t('cardEditor.batchProcessingBlockClear') : undefined}
-            >
-              {t('cardEditor.actions.clearAll')}
-            </button>
-          )}
-          <button type="button" onClick={onCancel} className="card-editor__cancel-process-button">
-            {t('cardEditor.actions.cancelProcess')}
-          </button>
-        </div>
-      </aside>
-
-      <main className="card-editor__main">
-        {waitingForSet && (
-          <div className="card-editor__waiting-banner" role="status">
-            <div className="spinner" style={{ width: 24, height: 24, borderWidth: 2 }} />
-            <span>{t('common.loading')}</span>
+          <div className="deck__cards-head">
+            <h2 id="deck-cards-title" className="deck__cards-title">
+              {t('cardEditor.deck.cardsTitle', { count: cardCount })}
+            </h2>
+            {user && aiSummary.transformed > 0 && (
+              <span className="deck__ai-count">{t('cardEditor.deck.withAi', { count: aiSummary.transformed })}</span>
+            )}
+            {cardCount > 0 && (
+              <>
+                <p className="deck__hint deck__wide-only">
+                  {t(user ? 'cardEditor.deck.hoverHintUser' : 'cardEditor.deck.hoverHint')}
+                </p>
+                <p className="deck__hint deck__narrow-only">
+                  {t(user ? 'cardEditor.deck.tapHintUser' : 'cardEditor.deck.tapHint')}
+                </p>
+              </>
+            )}
           </div>
-        )}
-        <div className="card-editor__cards-toolbar">
-          {cards.length > 0 && (
-            <>
-              <div className="card-editor__cards-header-left">
-                <h2 className="card-editor__cards-title">{t('cardEditor.cardsList.title')}</h2>
-                <span className="card-editor__cards-count">({cardCount})</span>
-                {!hasMinimumCards && (
-                  <span className="card-editor__cards-missing">
-                    {t('cardEditor.cardsList.missing', { count: minCards - cardCount })}
-                  </span>
-                )}
-              </div>
-              {cardCount > 0 && (
-                user ? (
-                  <button
-                    type="button"
-                    onClick={handleAIBulkClick}
-                    className="card-editor__ai-bulk-button card-editor__ai-bulk-button--toolbar"
-                    disabled={!!noTokensForBulk}
-                    title={noTokensForBulk ? t('aiBatchModal.insufficientTokens', { needed: cardsToTransform.length, have: tokenBalance ?? 0, missing: cardsToTransform.length - (tokenBalance ?? 0) }) : undefined}
-                  >
-                    <FaMagic />
-                    <span>{t('cardEditor.actions.aiBulkTransform')}</span>
-                  </button>
-                ) : (
-                  <span className="card-editor__login-to-use-ai" title={t('cardEditor.loginToUseAI')}>
-                    {t('cardEditor.loginToUseAI')}
-                  </span>
-                )
-              )}
-            </>
-          )}
-        </div>
 
-        <div className="card-editor__cards-wrapper">
-          <div className="card-editor__cards-grid">
+          <div className="deck__grid">
+            {/* En celular la cuadrícula empieza con la casilla «Agregar»; en computadora está el recuadro de abajo. */}
+            <div className="deck__add-tile deck__narrow-only">
+              <CardUploadThumb onSingleClick={() => !waitingForSet && setIsUploadModalOpen(true)} />
+            </div>
             {cards.map((card) => (
               <CardPreview
                 key={card.id}
                 card={card}
                 onRemove={removeCard}
-                onRevert={handleRevertCard}
+                onRevert={user ? handleRevertCard : undefined}
                 onTransform={user ? handleSingleAI : undefined}
                 disableTransformButton={!!(user && (isCardRecentlySynced(card.id) || noTokensForSingle))}
-                transformButtonTitle={noTokensForSingle ? t('cardEditor.noTokensForTransform') : undefined}
                 onClick={handleEditCard}
                 disabledDuringBatch={isAIBatchProcessing && cardsToTransformIds.has(card.id)}
                 isTransforming={transformingCardId === card.id}
               />
             ))}
-            <CardUploadThumb onSingleClick={() => !waitingForSet && setIsUploadModalOpen(true)} />
           </div>
-        </div>
 
-        <div className="card-editor__mobile-actions">
-          <button type="button" onClick={handleBatchClick} className="card-editor__batch-button" disabled={Boolean(waitingForSet)}>
-            <FaUpload />
-            <span>{t('cardEditor.actions.uploadBatch')}</span>
-          </button>
-          {cardCount > 0 && (
-            <button
-              type="button"
-              onClick={() => !isAIBatchProcessing && setIsClearModalOpen(true)}
-              className="card-editor__clear-button"
-              disabled={Boolean(isAIBatchProcessing)}
-              title={isAIBatchProcessing ? t('cardEditor.batchProcessingBlockClear') : undefined}
-            >
-              {t('cardEditor.actions.clearAll')}
-            </button>
-          )}
-          <button type="button" onClick={onCancel} className="card-editor__cancel-process-button">
-            {t('cardEditor.actions.cancelProcess')}
-          </button>
-        </div>
-
-        <div className="card-editor__main-next">
           <button
-            onClick={onNext}
-            disabled={!hasMinimumCards}
-            className="card-editor__next-button card-editor__next-button--enabled"
+            type="button"
+            className={`deck__dropzone deck__wide-only ${isDraggingFiles ? 'deck__dropzone--over' : ''}`}
+            onClick={handleBatchClick}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setIsDraggingFiles(true);
+            }}
+            onDragLeave={() => setIsDraggingFiles(false)}
+            onDrop={handleFilesDrop}
+            disabled={Boolean(waitingForSet)}
           >
-            <span>{t('cardEditor.actions.nextStep')}</span>
-            <FaArrowRight />
+            <FaUpload aria-hidden="true" />
+            <strong>{t('cardEditor.deck.dropTitle')}</strong>
+            <span>{t('cardEditor.deck.dropText')}</span>
           </button>
-        </div>
-      </main>
+        </section>
+      </div>
 
       <CardUploadModal
         isOpen={isUploadModalOpen}
@@ -537,14 +515,17 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
 
       <UploadProgressModal isOpen={showUploadProgress} progress={uploadProgress} />
 
-      {editingCard && (
+      {liveEditingCard && (
         <CardEditModal
-          isOpen={!!editingCard}
+          key={liveEditingCard.id}
+          card={liveEditingCard}
+          totalCards={cards.length}
+          otherTitles={cards.filter(card => card.id !== liveEditingCard.id).map(card => card.title)}
           onClose={() => setEditingCard(null)}
-          onCardUpdate={handleUpdateCard}
-          existingTitles={cards.map(card => card.title)}
-          initialTitle={editingCard.title}
-          initialImage={editingCard.image || ''}
+          onSave={async (updates) => Boolean(await updateCard(liveEditingCard.id, updates))}
+          onGenerate={user ? handleSingleAI : undefined}
+          tokenBalance={tokenBalance}
+          aiBlockedNote={isCardRecentlySynced(liveEditingCard.id) ? t('cardEditor.syncingMessage') : undefined}
         />
       )}
 
@@ -564,16 +545,14 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
         onClose={() => setIsAIModalOpen(false)}
         onCloseAndContinue={() => { batchModalClosedDuringProcessingRef.current = true; }}
         cards={cardsToTransform}
-        totalCards={cards.length}
-        totalToProcess={aiBatchTotalCount || cardsToTransform.length}
-        currentCardTitle={aiBatchCurrentTitle}
-        onStart={handleAIStart}
+        allCards={cards}
+        batchCardIds={aiBatchCardIds}
+        onStart={(limit) => handleAIStart(limit)}
         status={aiBatchStatus}
         currentIndex={aiBatchCurrentIndex}
         skippedCount={aiBatchSkippedCount}
         error={aiBatchError}
         tokenBalance={tokenBalance}
-        hasEnoughTokens={user ? (tokenBalance !== null && tokenBalance >= cardsToTransform.length) : true}
       />
 
       <input
@@ -645,14 +624,17 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
               <FaCheckCircle />
             </div>
             <h2 id="card-editor-batch-complete-title" className="card-editor__batch-complete-title">
-              {t('aiBatchModal.complete')}
+              {aiBatchTotalCount - aiBatchSkippedCount > 0
+                ? t('aiBatchModal.done', { count: aiBatchTotalCount - aiBatchSkippedCount })
+                : t('aiBatchModal.doneNone')}
             </h2>
             <p className="card-editor__batch-complete-message">
-              {t('aiBatchModal.batchCompleteBackground')}
+              {t('aiBatchModal.revertHint')}
             </p>
             {aiBatchSkippedCount > 0 && (
               <p className="card-editor__batch-complete-skipped">
-                ⚠️ {t('aiBatchModal.skippedMessage', { count: aiBatchSkippedCount })}
+                {t('aiBatchModal.rejected', { count: aiBatchSkippedCount })}{' '}
+                {t('aiBatchModal.refunded', { count: aiBatchSkippedCount })}
               </p>
             )}
             <button

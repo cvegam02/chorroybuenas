@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Editar carta</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;family=Arvo:wght@700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f5efe8}
+a{color:#c2410c}a:hover{color:#9a3412}
+</style>
+</helmet>
+<div style="font-family: 'Quicksand', system-ui, sans-serif; color: #431407; background: #f5efe8; width: 1440px; box-sizing: border-box; padding: 40px; display: flex; flex-direction: column; gap: 36px;">
+  <div><h1 style="margin: 0 0 6px; font-size: 32px;">Editar carta — propuesta</h1><p style="margin: 0; font-size: 17px; color: #78350f;">Una sola vista previa que ya es la carta final, la imagen como una elección (foto original o IA) y Guardar siempre abajo a la derecha.</p></div>
+
+  <div style="display: grid; grid-template-columns: 1fr 430px; gap: 32px; align-items: start;">
+
+    <!-- 1. ESCRITORIO -->
+    <div>
+      <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;">1 · Escritorio<span style="font-weight: 500; color: #78350f;"> — estado normal</span></div>
+      <div style="background: rgba(67,20,7,0.55); border-radius: 20px; padding: 36px; display: flex; justify-content: center;">
+        <div role="dialog" aria-labelledby="ec-t" style="width: 760px; max-width: 100%; background: #ffffff; border-radius: 24px; box-shadow: 0 30px 80px rgba(67,20,7,0.35); overflow: hidden;">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid #fde4cc; background: #fffbf7;">
+            <div style="display: flex; align-items: baseline; gap: 10px;"><h3 id="ec-t" style="margin: 0; font-size: 21px;">Editar carta</h3><span style="font-size: 14px; color: #78350f;">Carta 5 de 24</span></div>
+            <button type="button" aria-label="Cerrar" style="width: 40px; height: 40px; border-radius: 999px; border: none; background: #fff7ed; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+          </div>
+
+          <div style="padding: 24px; display: flex; gap: 28px;">
+            <!-- Vista previa = carta final -->
+            <div style="flex: 0 0 240px; display: flex; flex-direction: column; gap: 12px;">
+              <div style="position: relative; width: 240px; aspect-ratio: 2 / 3; border-radius: 10px; background: #fff7ed; box-shadow: 0 10px 24px rgba(67,20,7,0.18);">
+                <img src="/_blob/15b7f56e7903c2f5a97409968f7246b8" alt="Vista previa de la carta La Chata" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px; display: block;">
+                <span style="position: absolute; top: 10px; right: 10px; background: #7c3aed; color: #fff; border-radius: 999px; padding: 3px 9px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.25);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/></svg>IA</span>
+              </div>
+              <span style="font-size: 13px; color: #78350f; text-align: center;">Así se imprime. El número y el nombre se ponen solos.</span>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <button type="button" style="display: flex; align-items: center; justify-content: center; gap: 6px; font: inherit; font-weight: 700; font-size: 14px; color: #c2410c; background: #ffffff; border: 1px solid #fdba74; border-radius: 999px; padding: 11px 8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14M18 22V8a2 2 0 0 0-2-2H2"/></svg>Recortar</button>
+                <button type="button" style="display: flex; align-items: center; justify-content: center; gap: 6px; font: inherit; font-weight: 700; font-size: 14px; color: #c2410c; background: #ffffff; border: 1px solid #fdba74; border-radius: 999px; padding: 11px 8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 8"/></svg>Otra foto</button>
+              </div>
+            </div>
+
+            <!-- Controles -->
+            <div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 22px;">
+              <label style="display: flex; flex-direction: column; gap: 6px;">
+                <span style="font-weight: 700; font-size: 15px;">Nombre de la carta</span>
+                <input type="text" value="LA CHATA" maxlength="20" style="font: inherit; font-size: 18px; font-weight: 700; color: #431407; padding: 12px 14px; border: 2px solid #ea580c; border-radius: 12px; text-transform: uppercase;">
+                <span style="display: flex; justify-content: space-between; font-size: 13px; color: #78350f;"><span>Corto y fácil de gritar.</span><span>8 / 20</span></span>
+              </label>
+
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <span style="font-weight: 700; font-size: 15px;">Imagen de la carta</span>
+                <div role="radiogroup" aria-label="Imagen de la carta" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                  <button type="button" role="radio" aria-checked="false" style="font: inherit; color: #431407; text-align: left; background: #ffffff; border: 1px solid #fde4cc; border-radius: 16px; padding: 10px; display: flex; gap: 10px; align-items: center;">
+                    <img src="/_blob/785e788879fd4baa5880034a78380471" alt="" style="width: 54px; height: 72px; object-fit: cover; border-radius: 6px; flex: 0 0 auto;">
+                    <span style="display: flex; flex-direction: column; gap: 2px;"><strong style="font-size: 15px;">Foto original</strong><span style="font-size: 13px; color: #0f766e; font-weight: 700;">Gratis</span></span>
+                  </button>
+                  <button type="button" role="radio" aria-checked="true" style="position: relative; font: inherit; color: #431407; text-align: left; background: #f5f3ff; border: 2px solid #7c3aed; border-radius: 16px; padding: 9px; display: flex; gap: 10px; align-items: center;">
+                    <img src="/_blob/15b7f56e7903c2f5a97409968f7246b8" alt="" style="width: 48px; height: 72px; object-fit: cover; border-radius: 5px; flex: 0 0 auto;">
+                    <span style="display: flex; flex-direction: column; gap: 2px;"><strong style="font-size: 15px;">Con IA</strong><span style="font-size: 13px; color: #6d28d9; font-weight: 700;">En uso</span></span>
+                    <span style="position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border-radius: 999px; background: #7c3aed; color: #fff; display: flex; align-items: center; justify-content: center;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></span>
+                  </button>
+                </div>
+                <button type="button" style="align-self: flex-start; display: flex; align-items: center; gap: 8px; font: inherit; font-weight: 700; font-size: 15px; color: #6d28d9; background: #ffffff; border: 2px solid #c4b5fd; border-radius: 999px; padding: 10px 16px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>Hacer otra versión con IA · 1 token</button>
+                <span style="font-size: 13px; color: #78350f; line-height: 1.5;">Cambiar entre la foto y la versión con IA es gratis. Tienes 125 tokens.</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 16px 22px; border-top: 1px solid #fde4cc; background: #fffbf7;">
+            <button type="button" style="font: inherit; font-weight: 700; font-size: 15px; padding: 12px 20px; border-radius: 999px; border: 1px solid #fde4cc; background: #ffffff; color: #78350f;">Cancelar</button>
+            <button type="button" style="font: inherit; font-weight: 700; font-size: 16px; padding: 12px 28px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff; box-shadow: 0 4px 12px rgba(234,88,12,0.3);">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. CELULAR -->
+    <div>
+      <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;">2 · Celular<span style="font-weight: 500; color: #78350f;"> — pantalla completa</span></div>
+      <div style="width: 390px; margin: 0 auto; background: #ffffff; border-radius: 28px; overflow: hidden; box-shadow: 0 20px 50px rgba(67,20,7,0.25); display: flex; flex-direction: column;">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 12px 12px 12px 16px; border-bottom: 1px solid #fde4cc; background: #fffbf7;">
+          <div style="flex: 1 1 auto; display: flex; flex-direction: column;"><h3 style="margin: 0; font-size: 19px;">Editar carta</h3><span style="font-size: 13px; color: #78350f;">Carta 5 de 24</span></div>
+          <button type="button" aria-label="Cerrar" style="width: 44px; height: 44px; border-radius: 999px; border: none; background: #fff7ed; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+        <div style="padding: 18px 16px; display: flex; flex-direction: column; gap: 18px;">
+          <div style="display: flex; gap: 14px; align-items: flex-end;">
+            <div style="position: relative; flex: 0 0 150px; aspect-ratio: 2 / 3; border-radius: 8px; box-shadow: 0 8px 18px rgba(67,20,7,0.18);">
+              <img src="/_blob/15b7f56e7903c2f5a97409968f7246b8" alt="Vista previa de la carta La Chata" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;">
+              <span style="position: absolute; top: 8px; right: 8px; background: #7c3aed; color: #fff; border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 700;">IA</span>
+            </div>
+            <div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 8px;">
+              <button type="button" style="display: flex; align-items: center; justify-content: center; gap: 6px; font: inherit; font-weight: 700; font-size: 14px; color: #c2410c; background: #ffffff; border: 1px solid #fdba74; border-radius: 999px; padding: 12px 8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14M18 22V8a2 2 0 0 0-2-2H2"/></svg>Recortar</button>
+              <button type="button" style="display: flex; align-items: center; justify-content: center; gap: 6px; font: inherit; font-weight: 700; font-size: 14px; color: #c2410c; background: #ffffff; border: 1px solid #fdba74; border-radius: 999px; padding: 12px 8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 8"/></svg>Otra foto</button>
+              <span style="font-size: 12px; color: #78350f; line-height: 1.4;">El número y el nombre se ponen solos.</span>
+            </div>
+          </div>
+          <label style="display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-weight: 700; font-size: 15px;">Nombre de la carta</span>
+            <input type="text" value="LA CHATA" maxlength="20" style="font: inherit; font-size: 17px; font-weight: 700; color: #431407; padding: 12px 14px; border: 2px solid #ea580c; border-radius: 12px;">
+            <span style="display: flex; justify-content: space-between; font-size: 12px; color: #78350f;"><span>Corto y fácil de gritar.</span><span>8 / 20</span></span>
+          </label>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <span style="font-weight: 700; font-size: 15px;">Imagen de la carta</span>
+            <div role="radiogroup" aria-label="Imagen de la carta" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <button type="button" role="radio" aria-checked="false" style="font: inherit; color: #431407; text-align: left; background: #ffffff; border: 1px solid #fde4cc; border-radius: 14px; padding: 8px; display: flex; gap: 8px; align-items: center;"><img src="/_blob/785e788879fd4baa5880034a78380471" alt="" style="width: 40px; height: 54px; object-fit: cover; border-radius: 5px;"><span style="display: flex; flex-direction: column;"><strong style="font-size: 14px;">Original</strong><span style="font-size: 12px; color: #0f766e; font-weight: 700;">Gratis</span></span></button>
+              <button type="button" role="radio" aria-checked="true" style="font: inherit; color: #431407; text-align: left; background: #f5f3ff; border: 2px solid #7c3aed; border-radius: 14px; padding: 7px; display: flex; gap: 8px; align-items: center;"><img src="/_blob/15b7f56e7903c2f5a97409968f7246b8" alt="" style="width: 36px; height: 54px; object-fit: cover; border-radius: 4px;"><span style="display: flex; flex-direction: column;"><strong style="font-size: 14px;">Con IA</strong><span style="font-size: 12px; color: #6d28d9; font-weight: 700;">En uso</span></span></button>
+            </div>
+            <button type="button" style="display: flex; align-items: center; justify-content: center; gap: 8px; font: inherit; font-weight: 700; font-size: 15px; color: #6d28d9; background: #ffffff; border: 2px solid #c4b5fd; border-radius: 999px; padding: 11px 14px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/></svg>Otra versión con IA · 1 token</button>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; padding: 12px 16px 18px; border-top: 1px solid #fde4cc; background: #fffbf7;">
+          <button type="button" style="flex: 0 0 auto; font: inherit; font-weight: 700; font-size: 15px; padding: 13px 18px; border-radius: 999px; border: 1px solid #fde4cc; background: #ffffff; color: #78350f;">Cancelar</button>
+          <button type="button" style="flex: 1 1 auto; font: inherit; font-weight: 700; font-size: 16px; padding: 13px 18px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff;">Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTADOS -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start;">
+
+    <!-- 3. Generando -->
+    <div>
+      <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;">3 · Haciendo otra versión<span style="font-weight: 500; color: #78350f;"> — sin cerrar la ventana</span></div>
+      <div style="background: #ffffff; border-radius: 24px; padding: 24px; display: flex; gap: 24px; box-shadow: 0 10px 30px rgba(67,20,7,0.12);">
+        <div style="position: relative; flex: 0 0 180px; aspect-ratio: 2 / 3; border-radius: 10px; overflow: hidden;">
+          <img src="/_blob/15b7f56e7903c2f5a97409968f7246b8" alt="" style="width: 100%; height: 100%; object-fit: cover; display: block; filter: blur(3px) saturate(0.6);">
+          <div style="position: absolute; inset: 0; background: rgba(46,16,101,0.55); color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 12px;">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/></svg>
+            <strong style="font-size: 15px;">Creando otra versión…</strong>
+            <span style="font-size: 12px;">Unos segundos</span>
+          </div>
+        </div>
+        <div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 12px; font-size: 15px; line-height: 1.5; color: #78350f;">
+          <strong style="color: #431407; font-size: 17px;">La carta se transforma ahí mismo</strong>
+          <p style="margin: 0;">El nombre que escribiste se guarda antes, así ya no hace falta el aviso de «guarda primero».</p>
+          <p style="margin: 0;">Al terminar aparece una tercera opción, «Con IA (nueva)», y la persona elige con cuál se queda. Las versiones anteriores no se pierden hasta que guarda.</p>
+          <p style="margin: 0;">Si falla, el token se devuelve y la carta queda como estaba.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Sin tokens -->
+    <div>
+      <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;">4 · Sin tokens<span style="font-weight: 500; color: #78350f;"> — en lugar del botón de IA</span></div>
+      <div style="background: #ffffff; border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 30px rgba(67,20,7,0.12);">
+        <span style="font-weight: 700; font-size: 15px;">Imagen de la carta</span>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <button type="button" role="radio" aria-checked="true" style="position: relative; font: inherit; color: #431407; text-align: left; background: #fff7ed; border: 2px solid #ea580c; border-radius: 16px; padding: 9px; display: flex; gap: 10px; align-items: center;"><img src="/_blob/785e788879fd4baa5880034a78380471" alt="" style="width: 54px; height: 72px; object-fit: cover; border-radius: 6px;"><span style="display: flex; flex-direction: column;"><strong style="font-size: 15px;">Foto original</strong><span style="font-size: 13px; color: #c2410c; font-weight: 700;">En uso</span></span></button>
+          <div style="border: 2px dashed #e9d5ff; border-radius: 16px; padding: 10px; display: flex; gap: 10px; align-items: center; color: #6d28d9;"><span style="width: 54px; height: 72px; border-radius: 6px; background: #f5f3ff; display: flex; align-items: center; justify-content: center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/></svg></span><span style="display: flex; flex-direction: column;"><strong style="font-size: 15px;">Con IA</strong><span style="font-size: 13px;">Aún no</span></span></div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; background: #fef3c7; border-radius: 14px; padding: 12px 14px; flex-wrap: wrap;">
+          <span style="flex: 1 1 200px; font-size: 14px; color: #78350f; line-height: 1.5;">Necesitas 1 token para hacerla con IA. Tienes 0.</span>
+          <a href="#" style="background: #ea580c; color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none; padding: 10px 18px; border-radius: 999px;">Comprar tokens</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1480}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

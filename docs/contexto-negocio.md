@@ -71,12 +71,12 @@ El principio habla de la lotería que cada quien hace con sus fotos. Las loterí
 - **Cuesta 1 token por imagen transformada.** _(confirmado el 2026-10-06)_
 - El cobro lo hace el servidor antes de generar. **DEFINIDO** (2026-10-06)
 - Si la imagen no se pudo generar, el token se devuelve: solo se paga por resultados entregados. **DEFINIDO** (2026-10-06)
-- Requiere cuenta. Un visitante que la pide ve el aviso de iniciar sesión. **DEFINIDO** (2026-10-06)
+- Requiere cuenta. **DEFINIDO** (2026-10-06) Sin sesión no se ofrece ninguna acción de IA (transformar, otra versión, volver a la foto original): el visitante ve solo la invitación a crear su cuenta. _(decidido el 2026-10-11, FEAT-34; antes veía un aviso de iniciar sesión)_
 - Máximo 10 transformaciones por minuto por usuario. **DEFINIDO** (2026-10-06)
-- Se puede transformar una carta o todas las que falten de una lotería, en lote. Si el filtro de contenido rechaza una foto del lote, esa se omite y el lote continúa. _(confirmado el 2026-10-06)_
+- Se puede transformar una carta o todas las que falten de una lotería, en lote. Si el filtro de contenido rechaza una foto del lote, esa se omite y el lote continúa. _(confirmado el 2026-10-06)_ Si los tokens no alcanzan para todas, se puede transformar solo las primeras para las que alcancen, en el orden de la baraja, viendo antes cuántos tokens son y cuánto saldo queda. _(decidido el 2026-10-11, FEAT-34)_
 - **Contenido no permitido:** no se aceptan ni se generan desnudos, contenido sexual o íntimo, ni fotos de personas sin su permiso. La regla se dice en la página de inicio. El bloqueo automático es el filtro de contenido del modelo de IA: una foto subida sin usar la IA no pasa por ningún filtro, y ahí la regla es norma de uso. _(decidido el 2026-10-07, FEAT-22)_
 - La IA usa un solo modelo, elegido en el servidor. Una foto que su filtro de contenido rechaza no se transforma ni se intenta con otro modelo; el token se devuelve. _(decidido el 2026-10-07, FEAT-22)_
-- El usuario puede revertir una carta transformada a su foto original, sin costo y sin recuperar el token. _(confirmado el 2026-10-06)_
+- El usuario puede revertir una carta transformada a su foto original, sin costo y sin recuperar el token. _(confirmado el 2026-10-06)_ Al revertir, la versión con IA se borra. Al pedir otra versión desde «Editar carta», la nueva se guarda en la carta al momento y la anterior se puede recuperar solo mientras esa ventana siga abierta. _(decidido el 2026-10-11, FEAT-34)_
 - Volver a transformar una carta ya transformada cuesta otro token: cada transformación se cobra. **DEFINIDO** (2026-10-06)
 
 ## 7. Tokens

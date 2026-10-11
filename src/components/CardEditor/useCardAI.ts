@@ -1,3 +1,4 @@
+import { cardsForBatch } from '../../utils/aiBatchPlan';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { TFunction } from 'i18next';
 import { AIService } from '../../services/AIService';
@@ -27,6 +28,8 @@ export function useCardAI({ cards, updateCard, userId, currentSetId, refreshBala
   const [aiBatchStatus, setAiBatchStatus] = useState<'idle' | 'processing' | 'complete' | 'error'>('idle');
   const [aiBatchCurrentIndex, setAiBatchCurrentIndex] = useState(0);
   const [aiBatchTotalCount, setAiBatchTotalCount] = useState(0);
+  /** Cartas del lote en curso, en su orden: la ventana dibuja con ellas el avance y el resultado. */
+  const [aiBatchCardIds, setAiBatchCardIds] = useState<string[]>([]);
   const [aiBatchCurrentTitle, setAiBatchCurrentTitle] = useState<string>('');
   const [aiBatchSkippedCount, setAiBatchSkippedCount] = useState(0);
   const [aiBatchError, setAiBatchError] = useState<string | null>(null);
@@ -41,11 +44,12 @@ export function useCardAI({ cards, updateCard, userId, currentSetId, refreshBala
   const isAIBatchProcessingRef = useRef(isAIBatchProcessing);
   isAIBatchProcessingRef.current = isAIBatchProcessing;
 
-  const handleSingleAI = async (card: Card) => {
+  /** Transforma una carta y la guarda. Devuelve la imagen nueva, o `null` si no se pudo (FEAT-34, US A8). */
+  const handleSingleAI = async (card: Card): Promise<string | null> => {
     const imageToProcess = card.originalImage || card.image || '';
     if (!imageToProcess.trim()) {
       alert(t('cardEditor.errors.generalAddError'));
-      return;
+      return null;
     }
     setTransformingCardId(card.id);
     await updateCard(card.id, { isProcessing: true });
@@ -70,12 +74,14 @@ export function useCardAI({ cards, updateCard, userId, currentSetId, refreshBala
         isProcessing: false
       });
       refreshBalance();
+      return normalizedImage;
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error ?? '');
       logger.error('[CardEditor] fallo transformación individual:', errMsg);
       setAiErrorMessage(t(aiErrorToI18nKey(errMsg)));
       await updateCard(card.id, { isProcessing: false });
       refreshBalance();
+      return null;
     } finally {
       setTransformingCardId(null);
     }
@@ -84,6 +90,7 @@ export function useCardAI({ cards, updateCard, userId, currentSetId, refreshBala
   const runAIBatchTransformation = async (cardsToProcess: Card[]) => {
     setAiBatchStatus('processing');
     setAiBatchTotalCount(cardsToProcess.length);
+    setAiBatchCardIds(cardsToProcess.map(card => card.id));
     setAiBatchSkippedCount(0);
     setAiBatchError(null);
     const strength = 0.30;
@@ -143,8 +150,11 @@ export function useCardAI({ cards, updateCard, userId, currentSetId, refreshBala
     }
   };
 
-  const handleAIStart = () => {
-    runAIBatchTransformation(cardsToTransform);
+  /** Empieza el lote: todas las cartas sin IA o, con `limit`, solo las primeras (FEAT-34, US A6). */
+  const handleAIStart = (limit?: number) => {
+    const batch = cardsForBatch(cardsToTransform, limit);
+    if (batch.length === 0) return;
+    runAIBatchTransformation(batch);
   };
 
   useEffect(() => {
@@ -152,6 +162,7 @@ export function useCardAI({ cards, updateCard, userId, currentSetId, refreshBala
       setAiBatchStatus('idle');
       setAiBatchCurrentIndex(0);
       setAiBatchTotalCount(0);
+      setAiBatchCardIds([]);
       setAiBatchSkippedCount(0);
       setAiBatchError(null);
       batchModalClosedDuringProcessingRef.current = false;
@@ -173,6 +184,7 @@ export function useCardAI({ cards, updateCard, userId, currentSetId, refreshBala
     aiBatchStatus,
     aiBatchCurrentIndex,
     aiBatchTotalCount,
+    aiBatchCardIds,
     aiBatchCurrentTitle,
     aiBatchSkippedCount,
     aiBatchError,

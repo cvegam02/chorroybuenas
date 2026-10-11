@@ -17,7 +17,7 @@ El sitio tiene cuatro zonas. Toda pantalla nueva debe pertenecer a una de ellas.
 | Zona | Quién la ve | Qué contiene |
 |---|---|---|
 | **Pública** | Cualquiera | Inicio, páginas informativas y el catálogo de loterías temáticas |
-| **Crear** | Cualquiera | El recorrido de tres pasos para hacer una lotería: cartas → tableros → vista previa |
+| **Crear** | Cualquiera | El recorrido de tres pasos para hacer una lotería: cartas → tableros → vista previa. Desde el 2026-10-11 (FEAT-34), una barra bajo la barra superior marca el paso («1 Tus cartas — 2 Tableros — 3 Descarga») y dice dónde se guarda el trabajo |
 | **Mi cuenta** | Usuario registrado | Panel, loterías guardadas, loterías temáticas compradas y compra de tokens |
 | **Administración** | Administrador | Panel de administración con sus pestañas |
 
@@ -50,9 +50,9 @@ Recorrido en tres pasos. No requiere cuenta (principio central, `contexto-negoci
 
 | Código | Pantalla | Ruta | Qué muestra y qué permite |
 |---|---|---|---|
-| C1 | Cartas | `/cards` | Lista de cartas de la lotería. Agregar una carta o varias, editarlas, borrarlas, ver una en grande (en teléfono, desde el menú de la carta), elegir el modo (Clásico o Kids), ver cuántas faltan para el mínimo, transformar con IA (una o todas) y renombrar la lotería. Botón para pasar al paso siguiente. Desde el 2026-10-09 (FEAT-29), cada carta se muestra como sale impresa, con el nombre y el número de carta (FEAT-30) dentro de la imagen: la de foto normal con margen crema y marco, la convertida con IA entera; mientras se convierte con IA se ve la foto. |
-| C2 | Cantidad de tableros | `/board-count` | Cuántos tableros generar, con la cantidad sugerida. Avisa si faltan cartas. |
-| C3 | Vista previa | `/preview` | Los tableros generados, uno por uno, y la descarga del PDF. Desde el 2026-10-09 (FEAT-29), las cartas de los tableros se muestran como salen impresas, con el nombre y el número de carta (FEAT-30) dentro de la imagen. |
+| C1 | Cartas | `/cards` | Lista de cartas de la lotería. Agregar una carta o varias, editarlas, borrarlas, ver una en grande (en teléfono, desde el menú de la carta), elegir el modo (Clásico o Kids), ver cuántas faltan para el mínimo, transformar con IA (una o todas) y renombrar la lotería. Botón para pasar al paso siguiente. Desde el 2026-10-09 (FEAT-29), cada carta se muestra como sale impresa, con el nombre y el número de carta (FEAT-30) dentro de la imagen: la de foto normal con margen crema y marco, la convertida con IA entera; mientras se convierte con IA se ve la foto. Desde el 2026-10-11 (FEAT-34): dos columnas. A la izquierda, el nombre de la lotería (con sesión), el tipo de lotería, el avance («15 cartas · mínimo 24») con el botón «Siguiente: tableros» ahí mismo, «Subir fotos» y «Agregar una carta», y el panel «Cartas con IA» con el saldo (con sesión) o la invitación a crear cuenta (sin sesión, donde no se ofrece ninguna acción de IA). A la derecha, la cuadrícula de cartas y el recuadro para arrastrar fotos. Al pasar el mouse sobre una carta salen editar y borrar; lo de la IA de cada carta está en «Editar carta» (M5). En teléfono, tocar una carta abre su hoja de acciones. |
+| C2 | Cantidad de tableros | `/board-count` | Cuántos tableros generar, con la cantidad sugerida. Avisa si faltan cartas. Desde el 2026-10-11 (FEAT-34): «¿Cuántos tableros imprimimos?», con botones − y +, atajos (el sugerido marcado), el recuadro de sugerencia y una muestra de tableros armada con las cartas del usuario, que crece con el número. «← Volver a mis cartas» regresa sin borrar nada. |
+| C3 | Vista previa | `/preview` | Los tableros generados, uno por uno, y la descarga del PDF. Desde el 2026-10-09 (FEAT-29), las cartas de los tableros se muestran como salen impresas, con el nombre y el número de carta (FEAT-30) dentro de la imagen. Desde el 2026-10-11 (FEAT-34): «¡Tus N tableros están listos!», con «Descargar PDF», «Revolver tableros» (misma cantidad, otro acomodo; con sesión confirma antes) y «Editar cartas» arriba. Cada tablero se ve como hoja del PDF, con una lupa para abrirlo en grande, y al final va la tarjeta de la baraja para recortar. Tras descargar sale «PDF descargado» (M13). |
 
 `/crear` redirige a C1.
 
@@ -89,15 +89,16 @@ Requiere ser administrador.
 | M1 | Iniciar sesión / Crear cuenta | Barra de navegación, y donde se pida sesión | Entrar o registrarse con correo o con Google; recuperar contraseña. |
 | M2 | Definir contraseña nueva | Al abrir el enlace de recuperación | Poner la contraseña nueva. |
 | M3 | Cambiar contraseña | U1 | Cambiar la contraseña con sesión iniciada. |
-| M4 | Subir carta | C1 | Elegir imagen, ajustarla y poner título. |
-| M5 | Editar carta | C1 | Cambiar imagen o título. |
-| M6 | Subida en lote | C1 | Subir varias imágenes y revisar sus títulos. |
+| M4 | Subir carta | C1 | Elegir imagen, ajustarla y poner título. Desde el 2026-10-11 (FEAT-34): «Agregar una carta», con «Así se verá»: la carta con su número y su nombre mientras se escribe. |
+| M5 | Editar carta | C1 | Cambiar imagen o título. Desde el 2026-10-11 (FEAT-34): la vista previa es la carta final; «Recortar» y «Otra foto»; con sesión, «Imagen de la carta» para elegir entre la foto original y la versión con IA, y pedir otra versión sin cerrar la ventana; «Cancelar» y «Guardar cambios» fijos abajo. En teléfono, a pantalla completa. Maqueta: `docs/design/EditarCarta.dc.html`. |
+| M6 | Subida en lote | C1 | Subir varias imágenes y revisar sus títulos. Desde el 2026-10-11 (FEAT-34): «Nombra tus fotos», con avance, miniaturas de la cola y «Así se verá». |
 | M7 | Progreso de subida | C1 | Barra de avance al guardar imágenes. |
-| M8 | Transformación con IA en lote | C1 | Cuántas cartas, cuántos tokens, avance y resultado. |
+| M8 | Transformación con IA en lote | C1 | Cuántas cartas, cuántos tokens, avance y resultado. Desde el 2026-10-11 (FEAT-34): cuatro vistas — confirmar (fotos, tokens, saldo después y tiempo), avance carta por carta, resultado y «Te faltan N tokens», con «Comprar tokens» y «Transformar solo Y cartas». |
 | M9 | Tablero ampliado | C3; U2 | Ver un tablero en grande y pasar al siguiente. Desde el 2026-10-09 (FEAT-29), las cartas de los tableros se muestran como salen impresas, con el nombre y el número de carta (FEAT-30) dentro de la imagen. |
 | M10 | Vista previa de carta | U2; C1 (solo en teléfono, desde el menú de la carta — 2026-10-06, FEAT-14); P6, para las cartas de muestra (2026-10-06, FEAT-17) | Ver una carta en grande. Desde el 2026-10-09 (FEAT-29), la carta se muestra como sale impresa, con el nombre y el número de carta (FEAT-30) dentro de la imagen; las cartas de muestra de P6 no cambian. _(por confirmar en U2)_ |
 | M11 | Historial de compras y regalos | U1 | Lista de compras del usuario y, mezclados por fecha, los regalos de tokens que recibió. Por construir (FEAT-17): también sus compras de loterías temáticas. |
 | M12 | Confirmación y advertencia | Varias | Confirmar acciones que no se deshacen (borrar, vaciar) y avisar de errores. |
+| M13 | PDF descargado | C3 | Tras descargar el PDF: consejos para imprimir y recortar. Sin sesión, la invitación a guardar la lotería creando una cuenta, «Seguir editando» y «Terminar» (que la borra de este navegador). Con sesión, el aviso de que está guardada, «Seguir editando», «Ir a Mis loterías» y «+ Crear otra lotería». Rediseñada el 2026-10-11 (FEAT-34). |
 
 ---
 

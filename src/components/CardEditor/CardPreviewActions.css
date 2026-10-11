@@ -1,0 +1,234 @@
+/* La carta en C1: etiqueta de IA, «Pintando con IA…», botones al pasar el mouse y hoja de acciones en
+   celular (FEAT-34, US A3). La base de la carta sigue en CardPreview.css. */
+
+.card-preview__ai-tag {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-ai);
+  color: var(--color-text-inverted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.card-preview__image-container {
+  position: relative;
+}
+
+.card-preview__painting {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-ai) 82%, transparent),
+    color-mix(in srgb, var(--color-primary) 82%, transparent)
+  );
+  color: var(--color-text-inverted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.card-preview__painting strong {
+  font-size: 14px;
+}
+
+.card-preview__spinner {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border: 3px solid color-mix(in srgb, var(--color-text-inverted) 35%, transparent);
+  border-top-color: var(--color-text-inverted);
+  border-radius: var(--radius-full);
+  animation: card-preview-spin 0.9s linear infinite;
+}
+
+@keyframes card-preview-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Botones al pasar el mouse o al llegar con el teclado */
+
+.card-preview__hover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.card-preview:hover .card-preview__hover,
+.card-preview:focus-within .card-preview__hover {
+  opacity: 1;
+}
+
+.card-preview__hover-top {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.card-preview__round {
+  border: none;
+  box-shadow: var(--shadow-md);
+  font: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.card-preview__round {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  font-size: 13px;
+}
+
+.card-preview__round:hover {
+  background: var(--color-primary-lightest);
+}
+
+.card-preview__round--danger:hover {
+  background: var(--color-danger);
+  color: var(--color-text-inverted);
+}
+
+.card-preview__round:focus-visible {
+  outline: 3px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
+
+/* Hoja de acciones en celular */
+
+.card-sheet__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: flex-end;
+  background: color-mix(in srgb, var(--color-text-main) 55%, transparent);
+}
+
+.card-sheet {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 85vh;
+  padding: 12px 12px 20px;
+  overflow-y: auto;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  font-family: var(--font-body);
+}
+
+.card-sheet__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 4px 12px;
+  border-bottom: 1px solid var(--color-primary-lightest);
+}
+
+.card-sheet__thumb {
+  width: 44px;
+  height: 66px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
+.card-sheet__names {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.card-sheet__title {
+  overflow: hidden;
+  font-size: 17px;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.card-sheet__ai {
+  color: var(--color-ai);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.card-sheet__close {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  font-size: 16px;
+}
+
+.card-sheet__item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 15px 8px;
+  border: none;
+  border-bottom: 1px solid var(--color-primary-lightest);
+  background: transparent;
+  color: var(--color-text-main);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.card-sheet__item:last-child {
+  border-bottom: none;
+}
+
+.card-sheet__item--ai {
+  color: var(--color-ai);
+}
+
+.card-sheet__item--danger {
+  color: var(--color-danger);
+}
+
+.card-sheet__item:disabled {
+  opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-preview__spinner {
+    animation: none;
+  }
+
+  .card-preview__hover {
+    transition: none;
+  }
+}

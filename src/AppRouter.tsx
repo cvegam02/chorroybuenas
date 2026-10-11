@@ -50,7 +50,7 @@ function LegacySeasonalRedirect() {
 function AppContent() {
   const { t } = useTranslation();
   const { user, recoverySession, isLoading: authLoading } = useAuth();
-  const { currentSetId, sets, setSets } = useSetContext();
+  const { currentSetId, sets, setSets, setCurrentSetId, refreshSets } = useSetContext();
   const { cards } = useCards();
   const navigate = useNavigate();
   const location = useLocation();
@@ -60,9 +60,11 @@ function AppContent() {
   const [gridSize, setGridSize] = useState<GridSize>(16); // Default to 4x4 (Classic)
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showShuffleModal, setShowShuffleModal] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   // El estado tarda un render en llegar: la referencia frena una segunda pulsación inmediata.
   const isGeneratingPDFRef = useRef(false);
+  const isCreatingSetRef = useRef(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const { generateBoards, isGenerating } = useBoard();
 
@@ -152,7 +154,7 @@ function AppContent() {
     navigate('/board-count');
   };
 
-  const handleBoardCountGenerate = async (count: number) => {
+  const handleBoardCountGenerate = async (count: number, size: GridSize = gridSize) => {
     setBoardCount(count);
     try {
       // Pass gridSize to generateBoards if supported, otherwise it defaults to what logic?
@@ -163,12 +165,13 @@ function AppContent() {
       // Let's assume for now keeping existing signature and we'll fix useBoard in next steps if needed,
       // but waaaait, the previous task updated useBoard/PDFService.
       // Let's check useBoard usage again.
-      const generatedBoards = await generateBoards(count, gridSize);
+      const generatedBoards = await generateBoards(count, size);
       setBoards(generatedBoards);
       await saveBoards(generatedBoards, count);
       saveBoardCount(count);
       setCurrentStep('preview');
-      navigate('/preview');
+      // Al revolver ya se está en la vista previa: no se agrega otra entrada al historial.
+      if (location.pathname !== '/preview') navigate('/preview');
     } catch (error) {
       logger.error('Error generating boards:', error);
       const errorMessage = error instanceof Error ? error.message : t('common.error');
@@ -182,10 +185,22 @@ function AppContent() {
     navigate('/cards');
   };
 
+  /** «Revolver tableros» (FEAT-34, US A5): la misma cantidad y el mismo modo, con otro acomodo. */
+  const shuffleBoards = () => handleBoardCountGenerate(boards.length, boards[0]?.gridSize ?? gridSize);
+
   const handlePreviewRegenerate = () => {
     setPdfError(null);
-    setCurrentStep('board-count');
-    navigate('/board-count');
+    // Con sesión los tableros están guardados en la lotería: se confirma antes de reemplazarlos.
+    if (user) {
+      setShowShuffleModal(true);
+      return;
+    }
+    shuffleBoards();
+  };
+
+  const confirmShuffle = () => {
+    setShowShuffleModal(false);
+    shuffleBoards();
   };
 
   /** Tableros con cartas que usan imágenes desde IndexedDB (hidratadas) para vista previa al instante (usuario logueado). */
@@ -239,6 +254,44 @@ function AppContent() {
     navigate('/');
     // Force reload to clear any component state
     window.location.reload();
+  };
+
+  /** «PDF descargado», con sesión: lo guardado en la cuenta no se toca; solo se limpia lo de este navegador. */
+  const handleGoToLoterias = async () => {
+    await clearAllData();
+    setCurrentStep(null);
+    setBoards([]);
+    setBoardCount(8);
+    setGridSize(16);
+    setShowConfirmation(false);
+    navigate('/dashboard#mis-loterias');
+    // Igual que «Terminar»: se recarga para soltar lo que quedó en memoria de la lotería anterior.
+    window.location.reload();
+  };
+
+  /** «+ Crear otra lotería»: lo mismo que «Nueva lotería» en Mi cuenta, con su mismo nombre por defecto. */
+  const handleCreateAnother = async () => {
+    if (!user || isCreatingSetRef.current) return;
+    isCreatingSetRef.current = true;
+    try {
+      await clearAllData();
+      const name = sets.length === 0
+        ? t('navbar.newLoteriaName')
+        : `${t('navbar.newLoteriaName')} ${sets.length + 1}`;
+      const newSet = await SetRepository.createSet(user.id, name);
+      setSets(prev => [...prev, newSet]);
+      setCurrentSetId(newSet.id);
+      await refreshSets();
+      setBoards([]);
+      setShowConfirmation(false);
+      setCurrentStep('cards');
+      navigate('/cards');
+    } catch (error) {
+      logger.error('Error creating set:', error);
+      alert(t('common.error'));
+    } finally {
+      isCreatingSetRef.current = false;
+    }
   };
 
   const handleLandingStart = () => {
@@ -351,7 +404,7 @@ function AppContent() {
           element={
             <BoardCountSelector
               onGenerate={handleBoardCountGenerate}
-              onCancel={handleCancelProcess}
+              onBack={handlePreviewModify}
               gridSize={gridSize}
             />
           }
@@ -397,11 +450,26 @@ function AppContent() {
 
       {showConfirmation && (
         <ConfirmationModal
+          boardCount={boards.length}
+          isLoggedIn={!!user}
+          setName={user && currentSetId ? sets.find(s => s.id === currentSetId)?.name : undefined}
+          onClose={() => setShowConfirmation(false)}
           onComplete={handleConfirmationComplete}
           onModify={handleConfirmationModify}
-          isLoggedIn={!!user}
+          onGoToLoterias={handleGoToLoterias}
+          onCreateAnother={handleCreateAnother}
         />
       )}
+
+      <WarningModal
+        isOpen={showShuffleModal}
+        title={t('modals.regenerateBoards.title')}
+        message={t('modals.regenerateBoards.message')}
+        confirmText={t('modals.regenerateBoards.confirm')}
+        cancelText={t('modals.regenerateBoards.cancel')}
+        onConfirm={confirmShuffle}
+        onCancel={() => setShowShuffleModal(false)}
+      />
 
       <WarningModal
         isOpen={showCancelModal}
