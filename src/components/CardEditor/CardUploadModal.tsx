@@ -1,8 +1,11 @@
+import { useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { FaTimes } from 'react-icons/fa';
 import { CardUpload } from './CardUpload';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { usePageScrollLock } from '../../hooks/usePageScrollLock';
+import { useVisualViewportFit } from '../../hooks/useVisualViewportFit';
 import { nextCardNumber } from '../../utils/uploadQueue';
 import './CardUploadModal.css';
 
@@ -15,7 +18,10 @@ interface CardUploadModalProps {
 
 export const CardUploadModal = ({ isOpen, onClose, onCardAdd, existingTitles }: CardUploadModalProps) => {
   const { t } = useTranslation();
+  const overlayRef = useRef<HTMLDivElement>(null);
   useEscapeKey(onClose, isOpen);
+  usePageScrollLock(isOpen);
+  useVisualViewportFit(overlayRef, isOpen);
   if (!isOpen) return null;
 
   const handleCardAdd = async (image: string, title: string) => {
@@ -28,7 +34,8 @@ export const CardUploadModal = ({ isOpen, onClose, onCardAdd, existingTitles }: 
 
   const modalContent = (
     <div
-      className="card-modal__overlay"
+      ref={overlayRef}
+      className="card-modal__overlay card-modal__overlay--sheet"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -42,7 +49,7 @@ export const CardUploadModal = ({ isOpen, onClose, onCardAdd, existingTitles }: 
             <FaTimes aria-hidden="true" />
           </button>
         </div>
-        <div className="card-modal__body">
+        <div className="card-modal__body card-modal__body--fill">
           <CardUpload
             onCardAdd={handleCardAdd}
             existingTitles={existingTitles}

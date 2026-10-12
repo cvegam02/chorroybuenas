@@ -29,6 +29,7 @@ import { useTokenBalance } from '../../contexts/TokenContext';
 import { AuthChoice } from '../Auth/AuthChoice';
 import { useWelcomeTokens } from '../../hooks/useWelcomeTokens';
 import { aiDeckSummary, deckProgress, pickImageFiles } from '../../utils/deckProgress';
+import { newUuid } from '../../utils/newUuid';
 import './CardEditor.css';
 import './CardEditorDeck.css';
 import { logger } from '../../utils/logger';
@@ -111,7 +112,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
       return false;
     }
     const newCard: Card = {
-      id: crypto.randomUUID(),
+      id: newUuid(),
       title,
       image,
     };
@@ -146,7 +147,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
 
     // Create all new cards with unique UUIDs (required for Supabase cards table)
     const newCards: Card[] = cardsToAdd.map(({ image, title }) => ({
-      id: crypto.randomUUID(),
+      id: newUuid(),
       title,
       image,
     }));

@@ -43,6 +43,7 @@
 }
 
 .batch-upload__queue {
+  position: relative;
   flex: 0 1 auto;
   display: flex;
   gap: 6px;
@@ -107,20 +108,30 @@
   }
 }
 
+/* Celular: la carta chica a la izquierda y el nombre a la derecha; los botones van en el pie de la hoja (FEAT-39) */
 @media (max-width: 640px) {
   .batch-upload__progress {
-    padding: 14px 16px 0;
+    padding: 10px 16px 0;
+  }
+
+  .batch-upload__thumb {
+    width: 28px;
   }
 
   .batch-upload__layout {
-    flex-direction: column;
-    gap: 16px;
+    align-items: flex-start;
+    gap: 14px;
   }
 
   .batch-upload__media {
-    flex: 0 0 auto;
-    width: 100%;
-    max-width: 160px;
-    margin: 0 auto;
+    flex: 0 0 96px;
+  }
+
+  .batch-upload__form {
+    gap: 10px;
+  }
+
+  .batch-upload__adjust {
+    align-self: flex-start;
   }
 }

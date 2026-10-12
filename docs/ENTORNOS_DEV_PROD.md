@@ -208,7 +208,7 @@ Así, cuando pagues con credenciales de prueba, MP notificará al webhook de dev
 | `MERCADOPAGO_ACCESS_TOKEN` | Secret Supabase | Token sandbox | Token producción |
 | `MERCADOPAGO_WEBHOOK_SECRET` | Secret Supabase | Clave de la app de prueba | Clave de la app productiva |
 | `MP_USE_SANDBOX_CHECKOUT` | Secret Supabase | No definir | No definir |
-| `ALLOWED_ORIGINS` | Secret Supabase | `dev.chorroybuenas.com.mx` y localhost | Dominio con y sin `www` |
+| `ALLOWED_ORIGINS` | Secret Supabase | `dev.chorroybuenas.com.mx`, localhost y, desde el 2026-10-11 (FEAT-39), `http://192.168.1.22:5173` (la computadora de Carlos en su red, para probar desde el celular) | Dominio con y sin `www` |
 | `APP_URL` | Secret Supabase | Opcional | `https://chorroybuenas.com.mx` |
 | `SERVICE_ROLE_KEY` | Secret Supabase | Del proyecto dev | Del proyecto prod |
 | `REPLICATE_API_TOKEN` | Secret Supabase | Mismo (o distinto si quieres) | Mismo |
