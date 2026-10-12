@@ -55,7 +55,7 @@ El principio habla de la lotería que cada quien hace con sus fotos. Las loterí
   - Estos mínimos son los de la lotería que arma el usuario. Una lotería temática en modo Kids tiene el suyo, 9 cartas (§18; 2026-10-08, FEAT-24).
 - **Tableros:** se generan al azar con las cartas de la lotería. No se generan dos tableros iguales. _(confirmado el 2026-10-06)_
 - **Cantidad sugerida de tableros:** en Clásico, la que hace que cada carta aparezca unas 8 veces en total; en Kids, un tablero por cada 3 cartas. El usuario puede cambiarla. _(confirmado el 2026-10-06)_
-- **Al iniciar sesión**, lo que el visitante tenía guardado en su navegador se pasa a su cuenta, dentro de una lotería por defecto. _(confirmado el 2026-10-06)_
+- **Al iniciar sesión**, lo que el visitante tenía guardado en su navegador se pasa a su cuenta: a su primera lotería si está vacía o, si ya tenía cartas, a una lotería nueva, sin mezclarse con lo que había. Al terminar llega a esa lotería. _(decidido el 2026-10-12, FEAT-41; antes iba siempre a la primera lotería de la cuenta, confirmado el 2026-10-06)_
 - No hay límite de cartas por lotería, de loterías por usuario ni de tableros por lotería. **DEFINIDO** (2026-10-06). Se revisa cuando el almacenamiento empiece a pesar.
 
 ## 5. Imágenes y PDF

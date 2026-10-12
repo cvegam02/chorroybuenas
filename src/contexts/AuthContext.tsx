@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { googleRedirectUrl } from '../utils/authRedirect';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
-import { SyncService } from '../services/SyncService';
 import { AVATAR_BUCKET } from '../utils/avatar';
 import { EMAIL_ALREADY_REGISTERED_MESSAGE, isEmailAlreadyRegistered } from '../utils/signUpResult';
 
@@ -59,9 +58,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (event === 'PASSWORD_RECOVERY' && session) {
                 setRecoverySession(session);
-            }
-            if (event === 'SIGNED_IN' && session?.user) {
-                SyncService.syncLocalDataToCloud(session.user.id);
             }
             setIsLoading(false);
         });
