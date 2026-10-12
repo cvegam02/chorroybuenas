@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Mi primera lotería chorroybuenas</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;family=Arvo:wght@700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#fffbf7}
+a{color:#c2410c}a:hover{color:#9a3412}
+</style>
+</helmet>
+<div style="font-family: 'Quicksand', system-ui, sans-serif; color: #431407; background: #fffbf7; width: 100%;">
+
+  <!-- NAV -->
+  <header style="background: #ffffff; border-bottom: 1px solid #fde4cc; box-shadow: 0 2px 10px rgba(67,20,7,0.04);">
+    <nav style="max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; gap: 32px;">
+      <a href="#" style="display: flex; align-items: center;"><img src="/_blob/d7801622bd0948908ee8484baca4ddcd" alt="chorroybuenas.com.mx" style="height: 50px;"></a>
+      <div style="display: flex; gap: 26px; flex: 1 1 auto; justify-content: center;"><a href="#" style="color: #431407; font-weight: 600; text-decoration: none; font-size: 15px; padding: 6px 0;">Crear lotería</a><a href="#" style="color: #431407; font-weight: 600; text-decoration: none; font-size: 15px; padding: 6px 0;">Temáticas</a><a href="#" style="color: #431407; font-weight: 600; text-decoration: none; font-size: 15px; padding: 6px 0;">Beneficios</a><a href="#" style="color: #431407; font-weight: 600; text-decoration: none; font-size: 15px; padding: 6px 0;">¿Cómo se juega?</a><a href="#" style="color: #431407; font-weight: 600; text-decoration: none; font-size: 15px; padding: 6px 0;">¿Qué es la lotería?</a></div>
+      <div style="display: flex; align-items: center; gap: 16px;"><button type="button" style="display: flex; align-items: center; gap: 4px; border: none; background: transparent; font: inherit; font-weight: 700; font-size: 14px; color: #78350f; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>ES</button><a href="#" style="display: flex; align-items: center; gap: 6px; background: #fef3c7; color: #92400e; font-weight: 700; font-size: 14px; padding: 8px 12px; border-radius: 999px; text-decoration: none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1.2 1.1-2 2.5-2s2.5.8 2.5 2-1.1 1.8-2.5 2.3-2.5 1-2.5 2.2 1.1 2 2.5 2 2.5-.8 2.5-2"/></svg>125 tokens</a><button type="button" style="display: flex; align-items: center; gap: 8px; border: none; background: transparent; font: inherit; color: #431407; padding: 0; cursor: pointer;"><span style="width: 38px; height: 38px; border-radius: 999px; background: #ea580c; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center;">C</span><span style="font-weight: 600; font-size: 15px;">Carlos</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></div>
+    </nav>
+  </header>
+
+  <!-- ENCABEZADO -->
+  <section style="background: #ffffff; border-bottom: 1px solid #fde4cc;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 22px 24px 28px; display: flex; flex-direction: column; gap: 14px;">
+      <a href="#" style="align-self: flex-start; display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px; text-decoration: none; padding: 6px 0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Mis loterías</a>
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h1 style="margin: 0; font-size: 40px; line-height: 1.1;">Mi primera lotería</h1>
+            <button type="button" aria-label="Cambiar nombre de la lotería" style="width: 44px; height: 44px; border-radius: 999px; border: none; background: #fff7ed; color: #c2410c; display: flex; align-items: center; justify-content: center; cursor: pointer;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 14px; font-weight: 700;">
+            <span style="background: #ede9fe; color: #6d28d9; padding: 5px 12px; border-radius: 999px;">Niños 3×3</span>
+            <span style="background: #ffedd5; color: #9a3412; padding: 5px 12px; border-radius: 999px;">6 cartas</span>
+            <span style="background: #ffffff; border: 1px solid #fde4cc; color: #78350f; padding: 5px 12px; border-radius: 999px;">1 token usado</span>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <a href="#" style="display: flex; align-items: center; gap: 8px; background: #ea580c; color: #ffffff; font-weight: 700; font-size: 17px; text-decoration: none; padding: 14px 26px; border-radius: 999px; box-shadow: 0 6px 16px rgba(234,88,12,0.28);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Agregar fotos</a>
+          <button type="button" aria-label="Más acciones de la lotería" style="width: 48px; height: 48px; border-radius: 999px; border: 1px solid #fde4cc; background: #ffffff; color: #78350f; display: flex; align-items: center; justify-content: center; cursor: pointer;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div style="max-width: 1200px; margin: 0 auto; padding: 28px 24px 56px; display: flex; flex-direction: column; gap: 40px;">
+
+    <!-- PROGRESO -->
+    <div style="background: #fef3c7; color: #78350f; border-radius: 18px; padding: 18px 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 18px;">
+      <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;"><strong style="font-size: 18px; color: #431407;">Te faltan 9 cartas para armar los tableros</strong><span style="font-weight: 700; font-size: 15px;">6 de 15</span></div>
+        <div role="progressbar" aria-valuemin="0" aria-valuemax="15" aria-valuenow="6" aria-label="Cartas agregadas" style="height: 12px; border-radius: 999px; background: #ffffff; overflow: hidden;"><div style="width: 40%; height: 100%; background: #ea580c; border-radius: 999px;"></div></div>
+        <span style="font-size: 14px;">Niños 3×3 necesita al menos 15 cartas; Clásico 4×4, 24.</span>
+      </div>
+      <a href="#" style="background: #ea580c; color: #ffffff; font-weight: 700; font-size: 16px; text-decoration: none; padding: 12px 22px; border-radius: 999px;">Agregar fotos</a>
+    </div>
+
+    <!-- CARTAS -->
+    <section style="display: flex; flex-direction: column; gap: 18px;">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+        <div style="display: flex; align-items: baseline; gap: 10px;"><h2 style="margin: 0; font-size: 28px;">Cartas</h2><span style="font-size: 16px; font-weight: 600; color: #78350f;">6 · 1 con IA</span></div>
+        <a href="#" style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px; color: #c2410c; background: #ffffff; border: 1px solid #fdba74; border-radius: 999px; padding: 10px 16px; text-decoration: none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Editar cartas</a>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 14px;">
+        <sc-for list="{{cards}}" as="c" hint-placeholder-count="6">
+          <button type="button" aria-label="Ver carta {{c.n}}" style="position: relative; padding: 0; border: none; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(67,20,7,0.12); cursor: pointer; display: block;">
+            <img src="{{c.src}}" alt="" style="width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 8px; display: block;">
+            <sc-if value="{{c.ia}}" hint-placeholder-val="{{false}}"><span style="position: absolute; top: 6px; right: 6px; background: #7c3aed; color: #fff; border-radius: 999px; padding: 2px 7px; font-size: 11px; font-weight: 700;">IA</span></sc-if>
+          </button>
+        </sc-for>
+        <sc-for list="{{slots}}" as="s" hint-placeholder-count="9">
+          <a href="#" aria-label="Agregar carta {{s.n}}" style="aspect-ratio: 2 / 3; box-sizing: border-box; border: 2px dashed #fdba74; border-radius: 8px; background: #fff7ed; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #c2410c;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            <span style="font-size: 13px; font-weight: 700;">{{s.n}}</span>
+          </a>
+        </sc-for>
+      </div>
+      <p style="margin: 0; font-size: 14px; color: #78350f;">Cada espacio punteado es una carta que falta. Puedes agregar más de 15 si quieres más variedad en los tableros.</p>
+    </section>
+
+    <!-- TABLEROS BLOQUEADOS -->
+    <section style="display: flex; flex-direction: column; gap: 18px;">
+      <div style="display: flex; align-items: baseline; gap: 10px;"><h2 style="margin: 0; font-size: 28px;">Tableros</h2><span style="font-size: 16px; font-weight: 600; color: #78350f;">aún no</span></div>
+      <div style="border: 2px dashed #fde4cc; border-radius: 20px; background: #ffffff; padding: 28px; display: flex; flex-wrap: wrap; align-items: center; gap: 28px;">
+        <div aria-hidden="true" style="display: flex; gap: 12px; flex: 0 0 auto;">
+          <span style="width: 110px; height: 128px; box-sizing: border-box; border-radius: 6px; background: #fffbf0; border: 1px solid #f1e6d2; padding: 8px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; transform: rotate(-4deg);"><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span></span>
+          <span style="width: 110px; height: 128px; box-sizing: border-box; border-radius: 6px; background: #fffbf0; border: 1px solid #f1e6d2; padding: 8px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; transform: rotate(4deg);"><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span><span style="background: #fde4cc; border-radius: 2px;"></span></span>
+        </div>
+        <div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 8px;">
+          <strong style="font-size: 19px;">Los tableros se arman cuando tengas 15 cartas</strong>
+          <span style="font-size: 15px; color: #78350f; line-height: 1.5;">Después eliges cuántos quieres y los descargas en PDF junto con las cartas para recortar.</span>
+        </div>
+        <button type="button" disabled="" style="font: inherit; font-weight: 700; font-size: 16px; padding: 12px 22px; border-radius: 999px; border: none; background: #f3e8dc; color: #78350f; cursor: not-allowed;">Armar tableros</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- FOOTER -->
+  <footer style="background: #431407; color: #ffedd5;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 32px 24px; display: flex; flex-wrap: wrap; gap: 24px; justify-content: space-between; font-size: 15px;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <strong style="color: #ffffff; font-size: 17px;">chorroybuenas.com.mx</strong>
+        <span>Hecho con <svg width="14" height="14" viewBox="0 0 24 24" fill="#fb923c" aria-hidden="true" style="vertical-align: -2px;"><path d="M12 21s-7-4.35-9.5-8.5C.6 9.1 2.6 5 6.5 5c2.1 0 3.6 1.2 4.5 2.6C11.9 6.2 13.4 5 15.5 5 19.4 5 21.4 9.1 19.5 12.5 17 16.65 12 21 12 21z"/></svg> para mantener viva la tradición mexicana</span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: center;">
+        <a href="#" style="color: #ffedd5;">¿Qué es chorroybuenas?</a>
+        <a href="#" style="color: #ffedd5;">¿Cómo se juega?</a>
+        <a href="#" style="color: #ffedd5;">¿Qué es la lotería?</a>
+        <a href="#" style="color: #ffedd5;">Aviso de privacidad</a>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var ids = ['35651e802b80bd8774a87bfb4d8329b3','717be2c43ab452b8e78371921d348ea9','15b7f56e7903c2f5a97409968f7246b8','e7fd813384dcb18d22c9c90a5b9156ad','c08bbf2b34d6b08ffa378af14f67fad8','aa7c11be20253fd9cfd1cbaa1263fe34'];
+    var cards = ids.map(function (id, i) { return { src: '/_blob/' + id, n: i + 1, ia: i === 2 }; });
+    var slots = [];
+    for (var k = 7; k <= 15; k++) slots.push({ n: k });
+    return { cards: cards, slots: slots };
+  }
+}
+</script>
+</body>
+</html>

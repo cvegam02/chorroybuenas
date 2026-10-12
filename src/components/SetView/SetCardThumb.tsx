@@ -1,38 +1,39 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '../../types';
 import { useComposedCard } from '../../hooks/useComposedCard';
 
 interface SetCardThumbProps {
   card: Card;
-  /** La imagen ya cargó: mientras no, se muestra el esqueleto. */
-  loaded: boolean;
-  onLoaded: () => void;
   onOpen: () => void;
 }
 
 /** Una carta de la lista de la lotería guardada: como sale impresa; mientras no está lista, la foto con su nombre. */
-export const SetCardThumb = ({ card, loaded, onLoaded, onOpen }: SetCardThumbProps) => {
+export const SetCardThumb = ({ card, onOpen }: SetCardThumbProps) => {
   const { t } = useTranslation();
   const composedUrl = useComposedCard(card);
   const imageUrl = composedUrl ?? card.image;
+  // La imagen ya cargó: mientras no, se muestra el esqueleto
+  const [isLoaded, setIsLoaded] = useState(false);
 
   return (
-    <button type="button" className="set-view__card-thumb set-view__card-thumb--clickable" onClick={onOpen}>
+    <button type="button" className="set-cards__card" onClick={onOpen}>
       {imageUrl ? (
-        <div className="set-view__card-img-wrapper">
-          {!loaded && <div className="set-view__card-skeleton" aria-hidden="true" />}
+        <span className="set-cards__image-wrap">
+          {!isLoaded && <span className="set-cards__skeleton" aria-hidden="true" />}
           <img
             src={imageUrl}
             alt={card.title}
-            className="set-view__card-img"
-            style={loaded ? undefined : { opacity: 0 }}
-            onLoad={onLoaded}
+            className="set-cards__image"
+            style={isLoaded ? undefined : { opacity: 0 }}
+            onLoad={() => setIsLoaded(true)}
           />
-        </div>
+        </span>
       ) : (
-        <div className="set-view__card-placeholder">{t('setView.noImage')}</div>
+        <span className="set-cards__placeholder">{t('setView.noImage')}</span>
       )}
-      {!composedUrl && <span className="set-view__card-title">{card.title}</span>}
+      {card.isAiGenerated && <span className="set-cards__ai">{t('setView.aiBadge')}</span>}
+      {!composedUrl && <span className="set-cards__name">{card.title}</span>}
     </button>
   );
 };

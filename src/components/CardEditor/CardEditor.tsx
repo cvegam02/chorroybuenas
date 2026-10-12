@@ -1,5 +1,5 @@
-import { useState, useRef, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useRef, useMemo, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   FaCheckCircle,
@@ -79,6 +79,9 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
     handleAIStart,
   } = useCardAI({ cards, updateCard, userId: user?.id, currentSetId, refreshBalance, t, isAIModalOpen });
   const [editingCard, setEditingCard] = useState<Card | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const editCardIdFromRoute = (location.state as { editCardId?: string } | null)?.editCardId;
   // La carta como está ahora: la ventana de editar ve al momento una versión con IA recién guardada.
   const liveEditingCard = editingCard ? cards.find(card => card.id === editingCard.id) ?? editingCard : null;
   const [showUploadProgress, setShowUploadProgress] = useState(false);
@@ -195,6 +198,16 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
     setBatchFiles([]);
     setIsClearModalOpen(false);
   };
+
+  // Al llegar desde «Editar esta carta» de una lotería guardada, se abre esa carta en cuanto cargan las cartas.
+  // El encargo se borra de la navegación para que no se repita al recargar ni al regresar.
+  useEffect(() => {
+    if (!editCardIdFromRoute) return;
+    const card = cards.find(c => c.id === editCardIdFromRoute);
+    if (!card) return;
+    if (!card.isProcessing && transformingCardId !== card.id) setEditingCard(card);
+    navigate(location.pathname, { replace: true, state: { ...location.state, editCardId: undefined } });
+  }, [editCardIdFromRoute, cards, transformingCardId, location.pathname, location.state, navigate]);
 
   const handleEditCard = (card: Card) => {
     // Mientras la IA pinta la carta no se abre: al terminar, la carta ya trae su versión nueva.
