@@ -100,6 +100,7 @@ Los únicos componentes que se reutilizan entre pantallas:
 | Confirmación | `src/components/ConfirmationModal/ConfirmationModal.tsx` | Confirmar acciones que no se deshacen |
 | Advertencia | `src/components/ConfirmationModal/WarningModal.tsx` | Avisos y errores |
 | Iniciar sesión / Crear cuenta | `src/components/Auth/EmailAuthModal.tsx` | Entrada y registro |
+| Cascarón de ventana de cuenta | `src/components/Auth/AuthDialog.tsx` (campos en `AuthFields.tsx`, piezas en `AuthParts.tsx`) | Velo, caja de 420 px y hoja inferior en celular (640 px o menos); lo usan Iniciar sesión / Crear cuenta y Contraseña nueva (FEAT-38) |
 | Selector de modo | `src/components/BoardGenerator/GridModeSelector.tsx` | Clásico o Kids |
 
 Los íconos vienen de `react-icons` (familia `fa`).

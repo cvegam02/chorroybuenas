@@ -1,11 +1,11 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWelcomeTokens } from '../../hooks/useWelcomeTokens';
-import { AuthDialog } from './AuthDialog';
-import { AuthTextField } from './AuthFields';
+import { AuthDialog, type AuthDialogVariant } from './AuthDialog';
 import { LoginForm, SignUpForm } from './AuthForms';
-import { AuthDivider, AuthHeader, AuthTabs, GiftNotice, GoogleButton } from './AuthParts';
-import { useEmailAuthForm } from './useEmailAuthForm';
+import { AuthAlert, AuthDivider, AuthHeader, AuthTabs, GiftNotice, GoogleButton } from './AuthParts';
+import { CheckEmailView, ForgotView } from './AuthViews';
+import { useEmailAuthForm, type AuthView } from './useEmailAuthForm';
 import './EmailAuthModal.css';
 
 interface EmailAuthModalProps {
@@ -18,39 +18,63 @@ interface EmailAuthModalProps {
 
 type EmailAuthDialogProps = Omit<EmailAuthModalProps, 'isOpen'>;
 
+const VARIANT_BY_VIEW: Record<AuthView, AuthDialogVariant> = {
+  login: 'default',
+  signup: 'tall',
+  forgot: 'back',
+  forgotSent: 'notice',
+  signupSent: 'notice',
+};
+
 const EmailAuthDialog = ({ onClose, initialMode = 'login', googleReturnPath }: EmailAuthDialogProps) => {
   const { t } = useTranslation();
   const titleId = useId();
   const welcomeTokens = useWelcomeTokens();
   const form = useEmailAuthForm({ initialView: initialMode, googleReturnPath, onSignedIn: onClose });
-  const { view, goTo, isLoading } = form;
+  const { view, goTo, isLoading, alert } = form;
 
-  const errorAlert = form.error && (
-    <div className="auth-alert" role="alert">
-      {form.error}
-    </div>
+  const wrongCredentials = alert?.kind === 'credentials';
+  const emailTaken = alert?.kind === 'emailTaken';
+  const messageAlert = alert?.kind === 'message' ? alert : null;
+  const linkTo = (target: AuthView, label: string) => (
+    <button type="button" className="auth-link auth-link--alert" onClick={() => goTo(target)}>
+      {label}
+    </button>
   );
+
   const tabs = <AuthTabs active={view === 'signup' ? 'signup' : 'login'} onChange={goTo} disabled={isLoading} />;
-  const google = (
-    <>
-      <GoogleButton onClick={form.continueWithGoogle} disabled={isLoading} />
-      <AuthDivider>{t('common.auth.orEmail')}</AuthDivider>
-    </>
-  );
+  const googleButton = <GoogleButton onClick={form.continueWithGoogle} disabled={isLoading} />;
 
   return (
-    <AuthDialog titleId={titleId} onClose={onClose} focusKey={view} tall={view === 'signup'}>
+    <AuthDialog
+      titleId={titleId}
+      onClose={onClose}
+      focusKey={view}
+      variant={VARIANT_BY_VIEW[view]}
+      onBack={view === 'forgot' ? () => goTo('login') : undefined}
+    >
       {view === 'login' && (
         <>
           <AuthHeader
             titleId={titleId}
             title={t('common.auth.loginTitle')}
             subtitle={t('common.auth.loginSubtitle')}
-            showCards
+            showCards={!wrongCredentials}
           />
           {tabs}
-          {errorAlert}
-          {google}
+          {wrongCredentials && (
+            <AuthAlert title={t('common.auth.alerts.credentialsTitle')}>
+              {t('common.auth.alerts.credentialsLead')}{' '}
+              {linkTo('forgot', t('common.auth.alerts.credentialsRecover'))}.
+            </AuthAlert>
+          )}
+          {messageAlert && <AuthAlert title={messageAlert.text} />}
+          {!wrongCredentials && (
+            <>
+              {googleButton}
+              <AuthDivider>{t('common.auth.orEmail')}</AuthDivider>
+            </>
+          )}
           <LoginForm
             email={form.email}
             password={form.password}
@@ -59,16 +83,24 @@ const EmailAuthDialog = ({ onClose, initialMode = 'login', googleReturnPath }: E
             onSubmit={form.submitLogin}
             onForgot={() => goTo('forgot')}
             isLoading={isLoading}
+            passwordInvalid={wrongCredentials}
           />
-          <p className="auth-footnote">
-            {t('common.auth.noAccountLead')}{' '}
-            <button type="button" className="auth-link" onClick={() => goTo('signup')}>
-              {t('common.auth.createFree')}
-            </button>
-            {welcomeTokens !== null && (
-              <span className="auth-footnote__gift"> {t('common.auth.noAccountGift', { count: welcomeTokens })}</span>
-            )}
-          </p>
+          {wrongCredentials ? (
+            <>
+              <AuthDivider>{t('common.or')}</AuthDivider>
+              {googleButton}
+            </>
+          ) : (
+            <p className="auth-footnote">
+              {t('common.auth.noAccountLead')}{' '}
+              <button type="button" className="auth-link" onClick={() => goTo('signup')}>
+                {t('common.auth.createFree')}
+              </button>
+              {welcomeTokens !== null && (
+                <span className="auth-footnote__gift"> {t('common.auth.noAccountGift', { count: welcomeTokens })}</span>
+              )}
+            </p>
+          )}
         </>
       )}
 
@@ -84,10 +116,22 @@ const EmailAuthDialog = ({ onClose, initialMode = 'login', googleReturnPath }: E
               </>
             }
           />
-          {welcomeTokens !== null && <GiftNotice tokens={welcomeTokens} />}
+          {welcomeTokens !== null && !emailTaken && (
+            <GiftNotice>
+              {t('common.auth.giftLead')} <strong>{t('common.auth.giftAmount', { count: welcomeTokens })}</strong>{' '}
+              {t('common.auth.giftTail')}
+            </GiftNotice>
+          )}
           {tabs}
-          {errorAlert}
-          {google}
+          {emailTaken && (
+            <AuthAlert title={t('common.auth.alerts.emailTakenTitle')}>
+              {linkTo('login', t('common.auth.alerts.emailTakenLogin'))} {t('common.or')}{' '}
+              {linkTo('forgot', t('common.auth.alerts.emailTakenRecover'))}. {t('common.auth.alerts.emailTakenGoogle')}
+            </AuthAlert>
+          )}
+          {messageAlert && <AuthAlert title={messageAlert.text} />}
+          {googleButton}
+          <AuthDivider>{t('common.auth.orEmail')}</AuthDivider>
           <SignUpForm
             fullName={form.fullName}
             email={form.email}
@@ -99,6 +143,7 @@ const EmailAuthDialog = ({ onClose, initialMode = 'login', googleReturnPath }: E
             onConfirmPasswordChange={form.setConfirmPassword}
             onSubmit={form.submitSignUp}
             isLoading={isLoading}
+            invalidField={emailTaken ? 'email' : messageAlert?.field}
           />
           <p className="auth-footnote auth-footnote--small">
             {t('common.auth.privacyLead')}{' '}
@@ -110,63 +155,39 @@ const EmailAuthDialog = ({ onClose, initialMode = 'login', googleReturnPath }: E
         </>
       )}
 
-      {/* Recuperar contraseña y los avisos de «revisa tu correo»: se rediseñan en la US A4 de FEAT-38. */}
       {view === 'forgot' && (
-        <>
-          <AuthHeader
-            titleId={titleId}
-            title={t('common.auth.forgotPasswordTitle')}
-            subtitle={t('common.auth.forgotPasswordDescription')}
-          />
-          {errorAlert}
-          <form className="auth-form" onSubmit={form.submitForgot}>
-            <AuthTextField
-              id="auth-forgot-email"
-              label={t('common.auth.emailLabel')}
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              required
-              value={form.email}
-              onChange={form.setEmail}
-              disabled={isLoading}
-            />
-            <button type="submit" className="auth-submit" disabled={isLoading}>
-              {isLoading ? t('common.loading') : t('common.auth.sendResetLink')}
-            </button>
-          </form>
-          <p className="auth-footnote">
-            <button type="button" className="auth-link" onClick={() => goTo('login')}>
-              {t('common.auth.backToLogin')}
-            </button>
-          </p>
-        </>
+        <ForgotView
+          titleId={titleId}
+          email={form.email}
+          onEmailChange={form.setEmail}
+          onSubmit={form.submitForgot}
+          isLoading={isLoading}
+          errorText={messageAlert?.text ?? null}
+          emailInvalid={messageAlert?.field === 'email'}
+        />
       )}
 
       {view === 'forgotSent' && (
-        <>
-          <AuthHeader
-            titleId={titleId}
-            title={t('common.auth.forgotPasswordTitle')}
-            subtitle={t('common.auth.forgotPasswordSent')}
-          />
-          <button type="button" className="auth-submit" onClick={() => goTo('login')}>
-            {t('common.auth.backToLogin')}
-          </button>
-        </>
+        <CheckEmailView
+          titleId={titleId}
+          email={form.email.trim()}
+          instruction={t('common.auth.checkEmailReset')}
+          actionLabel={t('common.auth.backToLoginButton')}
+          onAction={() => goTo('login')}
+          onFixEmail={() => goTo('forgot')}
+        />
       )}
 
       {view === 'signupSent' && (
-        <>
-          <AuthHeader
-            titleId={titleId}
-            title={t('common.auth.signUpTitle')}
-            subtitle={t('common.auth.signUpConfirmationMessage')}
-          />
-          <button type="button" className="auth-submit" onClick={onClose}>
-            {t('common.auth.signUpConfirmationButton')}
-          </button>
-        </>
+        <CheckEmailView
+          titleId={titleId}
+          email={form.email.trim()}
+          instruction={t('common.auth.checkEmailConfirm')}
+          gift={welcomeTokens !== null ? t('common.auth.checkEmailGift', { count: welcomeTokens }) : undefined}
+          actionLabel={t('common.auth.understood')}
+          onAction={onClose}
+          onFixEmail={() => goTo('signup')}
+        />
       )}
     </AuthDialog>
   );

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { GiftIcon, GoogleIcon } from './AuthIcons';
+import { AlertIcon, GiftIcon, GoogleIcon } from './AuthIcons';
 
 /** Cartas de muestra del sitio (las mismas de Mi cuenta y Temáticas). */
 const HEADER_CARDS = ['/media/inicio/cartas/carta-05.jpg', '/media/inicio/cartas/carta-03.jpg'];
@@ -86,16 +86,65 @@ export const AuthDivider = ({ children }: { children: ReactNode }) => (
   </div>
 );
 
-/** «Te regalamos N tokens al crear tu cuenta», con la cantidad que configura el administrador. */
-export const GiftNotice = ({ tokens }: { tokens: number }) => {
-  const { t } = useTranslation();
-  return (
-    <div className="auth-gift">
-      <GiftIcon />
-      <span>
-        {t('common.auth.giftLead')} <strong>{t('common.auth.giftAmount', { count: tokens })}</strong>{' '}
-        {t('common.auth.giftTail')}
-      </span>
+/** Recuadro turquesa del regalo de tokens; `small` es el del aviso de «revisa tu correo». */
+export const GiftNotice = ({ children, small = false }: { children: ReactNode; small?: boolean }) => (
+  <div className={`auth-gift${small ? ' auth-gift--small' : ''}`}>
+    <GiftIcon />
+    <span>{children}</span>
+  </div>
+);
+
+/** Aviso de error. Se anuncia solo a lectores de pantalla (`role="alert"`). */
+export const AuthAlert = ({ title, children }: { title: string; children?: ReactNode }) => (
+  <div className="auth-alert" role="alert">
+    <AlertIcon />
+    <div className="auth-alert__body">
+      <strong>{title}</strong>
+      {children && <span>{children}</span>}
     </div>
-  );
-};
+  </div>
+);
+
+interface AuthLeadProps {
+  titleId: string;
+  title: string;
+  /** Ícono del cuadro naranja claro (llave, candado). */
+  icon: ReactNode;
+  /** En celular el texto va junto al ícono, no debajo (Nueva contraseña). */
+  inline?: boolean;
+  children: ReactNode;
+}
+
+/** Encabezado con ícono, alineado a la izquierda: Recuperar contraseña y Nueva contraseña. */
+export const AuthLead = ({ titleId, title, icon, inline = false, children }: AuthLeadProps) => (
+  <div className={`auth-lead${inline ? ' auth-lead--inline' : ''}`}>
+    <span className="auth-lead__badge" aria-hidden="true">
+      {icon}
+    </span>
+    <h2 id={titleId}>{title}</h2>
+    <p>{children}</p>
+  </div>
+);
+
+interface AuthNoticeProps {
+  titleId: string;
+  title: string;
+  /** Ícono del círculo (sobre, palomita). */
+  icon: ReactNode;
+  /** `good` pinta el círculo en turquesa («¡Listo!»). */
+  tone?: 'mail' | 'good';
+  children: ReactNode;
+}
+
+/** Encabezado centrado de los avisos: «Revisa tu correo» y «¡Listo! Contraseña guardada». */
+export const AuthNotice = ({ titleId, title, icon, tone = 'mail', children }: AuthNoticeProps) => (
+  <>
+    <span className={`auth-notice__badge auth-notice__badge--${tone}`} aria-hidden="true">
+      {icon}
+    </span>
+    <div className="auth-notice__text">
+      <h2 id={titleId}>{title}</h2>
+      <p>{children}</p>
+    </div>
+  </>
+);

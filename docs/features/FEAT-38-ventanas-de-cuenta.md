@@ -1,6 +1,6 @@
 # FEAT-38 — Rediseño de las ventanas de cuenta (iniciar sesión, crear cuenta y contraseña)
 
-**Estado: definida con Carlos el 2026-10-11, en la rama `feature/ventanas-de-cuenta`, creada desde `dev`. Construidas las US A1 y A2 ese mismo día y fusionadas a `dev` con un merge directo, sin PR, porque Carlos lo pidió así; se publican en dev.chorroybuenas.com.mx al subir `dev` a GitHub. Falta la demo de Carlos ahí, con el guion de cada historia, y faltan las US A3 a A6, que siguen en la misma rama. A producción pasa después, con el PR de `dev` a `main`, cuando la feature esté completa y Carlos confirme lo probado en dev.**
+**Estado: definida con Carlos el 2026-10-11, en la rama `feature/ventanas-de-cuenta`, creada desde `dev`. Construidas sus seis historias (US A1 a A6) ese mismo día y fusionadas a `dev` en dos merges directos, sin PR, porque Carlos lo pidió así: primero A1 y A2, después A3 a A6. Se publican en dev.chorroybuenas.com.mx al subir `dev` a GitHub. Falta la demo de Carlos en dev.chorroybuenas.com.mx, con el guion de cada historia. A producción pasa después, con el PR de `dev` a `main`, cuando Carlos confirme lo probado en dev.**
 
 **Contexto.** Carlos pidió el 2026-10-11 rediseñar las ventanas de iniciar sesión y crear cuenta para que queden como las maquetas aprobadas de `docs/design/`: `Auth.dc.html` y `AuthMobile.dc.html` (iniciar sesión, escritorio y celular) y `AuthEstados.dc.html` y `AuthEstadosMobile.dc.html` (los otros ocho estados). Las maquetas son la referencia exacta de textos, medidas y colores. Sus imágenes `/_blob/` salen rotas fuera del lienzo: las dos cartas del encabezado se toman de las cartas de muestra que ya usa el sitio (`/media/inicio/cartas/`, las mismas de Mi cuenta).
 
@@ -44,11 +44,26 @@ Ajustes de Claude al construir las US A1 y A2 (2026-10-11), avisados a Carlos al
 17. **Recuperar contraseña y los avisos de «revisa tu correo» ya usan el cascarón nuevo con sus textos de antes**, hasta la US A4. El aviso de error es provisional hasta la US A3.
 18. **Los campos llevan el radio de la maqueta (12 px)**, no el mediano del sistema (16 px), porque Carlos pidió las medidas exactas.
 
+Ajustes de Claude al construir las US A3 a A6 (2026-10-11), avisados a Carlos al entregar:
+
+19. **Con el aviso de «no coinciden» la ventana de entrar queda como el estado 3 de la maqueta:** sin las dos cartas, Google debajo del formulario tras una «o», y sin la línea «¿Aún no tienes cuenta?». Los demás errores al entrar (por ejemplo, que no abra Google) no mueven nada: solo sale el aviso.
+20. **El aviso se quita al cambiar de pestaña o de vista y al volver a enviar**, no al escribir: quitarlo al teclear movería el botón de Google mientras la persona escribe.
+21. **Con «Ese correo ya tiene una cuenta» no sale el recuadro del regalo**, como en la maqueta. La ayuda «Mínimo 6 caracteres» y la línea del Aviso de privacidad sí se quedan, aunque la maqueta del estado 2 no las dibuja.
+22. **El error de contraseña equivocada se reconoce por el código de Supabase** (`invalid_credentials`) o por su mensaje. Antes se buscaba ese código dentro del mensaje, que dice «Invalid login credentials», y la persona veía ese texto en inglés.
+23. **«Las dos coinciden» sale cuando la repetición ya tiene 6 caracteres o más y es igual a la contraseña.**
+24. **«¡Listo! Contraseña guardada» no lleva X, como en la maqueta**; se sale con «Continuar», con Escape o tocando fuera.
+25. **Los íconos son de `react-icons` (familia `fa`)**, como pide el sistema de diseño y como en las features anteriores; la maqueta los dibuja de línea. Solo el logo de Google va dibujado aparte, con sus cuatro colores. Las US A1 y A2 subieron a `dev` con íconos dibujados; se cambiaron aquí.
+26. **Se borró `SetNewPasswordModal.css`:** la ventana de contraseña nueva usa los estilos compartidos de `AuthDialog.css`.
+
+Confirmación de Carlos para la base de conocimiento (2026-10-11):
+
+27. **`docs/diseno-mockups.md`, ventanas M1 y M2:** se anota el rediseño. Carlos lo confirmó tras ver los cuatro puntos (qué cambia, dónde, impacto y confirmación). No cambia ninguna regla de negocio ni otra pantalla.
+
 ## Decisiones pendientes
 
 Ninguna.
 
-**Hallazgo para la US A3 (sin tocar todavía):** al entrar con una contraseña equivocada, el código busca el texto `invalid_credentials` dentro del mensaje del error; el mensaje de Supabase dice «Invalid login credentials», así que es probable que hoy la persona vea ese texto en inglés. Se confirma y se corrige en la A3, que de todos modos tiene que reconocer ese error para mostrar el aviso del estado 3.
+**Fuera de esta feature, visto al pasar:** los errores que no son de contraseña equivocada ni de correo repetido (por ejemplo, entrar sin haber confirmado el correo) siguen saliendo con el texto de Supabase, en inglés. No hay maqueta ni texto acordado para ellos.
 
 ## Diseño
 
@@ -104,24 +119,25 @@ Ninguna.
   - [ ] Quien abre la ventana directo en «Crear cuenta» (`initialMode="signup"`) la ve en esa pestaña.
   - [ ] En celular se desplaza sin que se mueva la página de atrás.
 
-### US A3 — Errores al entrar y al crear cuenta   ·   Estado: por construir
+### US A3 — Errores al entrar y al crear cuenta   ·   Estado: construida el 2026-10-11, pendiente de la demo de Carlos
 
 - **Historia** — Como persona que se equivocó, quiero que el aviso me diga qué pasó y qué hacer.
 - **Entrega demostrable** — Estado 2: «Ese correo ya tiene una cuenta», con «Inicia sesión» y «recupera tu contraseña» y la nota de Google. Estado 3: «El correo o la contraseña no coinciden», con «crea una contraseña nueva», y Google debajo del formulario tras una «o».
-- **Construido** — —
+- **Construido** — 2026-10-11. `authErrors.ts` dice qué error fue (`authErrorKind`); `useEmailAuthForm.ts` guarda el aviso como `AuthAlertState`; `AuthAlert` (en `AuthParts.tsx`) lo dibuja con `role="alert"`. `EmailAuthModal.tsx` acomoda la vista según el aviso y pasa a los formularios el campo equivocado. Prueba: `tests/src/authDialog.test.ts`.
 - **Depende de** — US A1, US A2.
 - **Cómo se prueba (guion de demo)** — Entra con una contraseña equivocada: aviso rojo arriba, los campos marcados y Google abajo del formulario → «crea una contraseña nueva» abre Recuperar con tu correo ya escrito → en Crear cuenta usa un correo que ya existe: aviso con «Inicia sesión» (cambia de pestaña con el correo) y «recupera tu contraseña».
 - **Escenarios cubiertos**:
   - [ ] El aviso se anuncia (`role="alert"`) y el campo lleva `aria-invalid`.
   - [ ] Los enlaces del aviso cambian de vista con el correo escrito.
-  - [ ] Al volver a escribir o cambiar de pestaña, el aviso se quita y Google regresa arriba.
+  - [ ] Al cambiar de pestaña o volver a enviar, el aviso se quita y Google regresa arriba.
   - [ ] Error al abrir Google: aviso propio.
+  - [x] Se reconoce la contraseña equivocada y el correo repetido; lo demás es un error cualquiera. (Prueba automática.)
 
-### US A4 — Recuperar contraseña y «Revisa tu correo»   ·   Estado: por construir
+### US A4 — Recuperar contraseña y «Revisa tu correo»   ·   Estado: construida el 2026-10-11, pendiente de la demo de Carlos
 
 - **Historia** — Como persona que olvidó su contraseña o acaba de registrarse, quiero saber a qué correo me escribieron y qué sigue.
 - **Entrega demostrable** — Estado 4: «¿Olvidaste tu contraseña?» con «Volver», el correo, «Enviar enlace» y la nota para quien entra con Google. Estados 5 y 6: «Revisa tu correo», el correo en grande, la instrucción, «¿No te llegó? Busca en spam o promociones», el botón («Entendido» / «Volver a iniciar sesión») y «¿Escribiste mal tu correo? Corrígelo».
-- **Construido** — —
+- **Construido** — 2026-10-11. `AuthViews.tsx`: `ForgotView` (estado 4) y `CheckEmailView` (estados 5 y 6). `AuthDialog` ganó la barra de «Volver» (`onBack`) y los acomodos `back` y `notice`. Textos de las decisiones 8 y 10.
 - **Depende de** — US A1.
 - **Cómo se prueba (guion de demo)** — «¿La olvidaste?» abre Recuperar con tu correo ya escrito → «Enviar enlace»: «Revisa tu correo» con tu correo → «Corrígelo» regresa a Recuperar con el correo escrito → crea una cuenta nueva: «Revisa tu correo» con la frase de los tokens de regalo → «Corrígelo» regresa a Crear cuenta con el correo escrito.
 - **Escenarios cubiertos**:
@@ -129,12 +145,13 @@ Ninguna.
   - [ ] «Corrígelo» regresa al formulario del que se vino, con el correo.
   - [ ] La frase de tokens del estado 5 usa la cantidad configurada o no sale.
   - [ ] Error al enviar el enlace: aviso.
+  - [x] Los textos de los estados 5 y 6 son los acordados. (Prueba automática.)
 
-### US A5 — Nueva contraseña y contraseña guardada   ·   Estado: por construir
+### US A5 — Nueva contraseña y contraseña guardada   ·   Estado: construida el 2026-10-11, pendiente de la demo de Carlos
 
 - **Historia** — Como persona que abrió el enlace del correo, quiero poner mi contraseña nueva y saber que quedó.
 - **Entrega demostrable** — Estado 7: «Crea tu contraseña nueva», «Para tu-correo», los dos campos con su ojo, «Mínimo 6 caracteres», «Las dos coinciden» cuando coinciden y «Guardar contraseña». Estado 8: «¡Listo! Contraseña guardada», la frase acordada y «Continuar».
-- **Construido** — —
+- **Construido** — 2026-10-11. `SetNewPasswordModal.tsx` sobre `AuthDialog` (acomodos `even` y `done`), con `AuthLead`, `AuthNotice` y `AuthPasswordField` (ayuda con palomita, `hintIsGood`). `updatePassword` y `clearRecovery` son los de antes. Texto de la decisión 9.
 - **Depende de** — US A1 (cascarón y campos).
 - **Cómo se prueba (guion de demo)** — Pide el enlace y ábrelo desde el correo: el sitio abre la ventana «Crea tu contraseña nueva» con tu correo → escribe dos contraseñas iguales: sale «Las dos coinciden» → «Guardar contraseña»: «¡Listo!» → «Continuar» cierra y sigues con sesión iniciada.
 - **Escenarios cubiertos**:
@@ -142,15 +159,16 @@ Ninguna.
   - [ ] Error al guardar: aviso.
   - [ ] Mismas reglas de accesibilidad que la otra ventana.
   - [ ] En celular, hoja inferior.
+  - [x] El texto del estado 8 es el acordado. (Prueba automática.)
 
-### US A6 — Limpieza y documentos   ·   Estado: por construir
+### US A6 — Limpieza y documentos   ·   Estado: construida el 2026-10-11, pendiente de la demo de Carlos
 
 - **Historia** — Como quien mantiene el sitio, quiero que no queden textos ni estilos viejos y que los documentos digan lo construido.
 - **Entrega demostrable** — Sin textos de `common.auth` que ya no se usen, sin estilos huérfanos, y los documentos al día.
-- **Construido** — —
+- **Construido** — 2026-10-11. Se quitaron de `common.auth` los 23 textos de las ventanas anteriores y `errors.emailTaken`, en los dos idiomas; se borró `SetNewPasswordModal.css`; `docs/sistema-diseno.md` lista el cascarón compartido y `docs/diseno-mockups.md` describe M1 y M2 rediseñadas (decisión 27). La prueba compara todas las claves de cuenta entre español e inglés.
 - **Depende de** — US A1 a A5.
 - **Cómo se prueba (guion de demo)** — `npm run typecheck`, `npm run lint` y `npm test` en verde → recorre los ocho estados en español y en inglés sin ver una clave de texto suelta.
 - **Escenarios cubiertos**:
-  - [ ] Textos en español e inglés con las mismas claves.
-  - [ ] `docs/diseno-mockups.md`: si hay que tocarlo, cuatro puntos y confirmación de Carlos antes.
-  - [ ] Este archivo con «Construido» y estado al día antes del commit.
+  - [x] Textos en español e inglés con las mismas claves. (Prueba automática.)
+  - [x] `docs/diseno-mockups.md`: cuatro puntos y confirmación de Carlos antes de editarlo.
+  - [x] Este archivo con «Construido» y estado al día antes del commit.
