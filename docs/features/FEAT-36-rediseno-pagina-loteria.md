@@ -1,6 +1,6 @@
 # FEAT-36 — Rediseño de la página de una lotería (U2)
 
-**Estado: definida con Carlos el 2026-10-11 y construidas sus seis historias (US A1 a A6) ese mismo día, en la rama `feature/rediseno-pagina-loteria`, creada desde `dev`. Falta la demo de Carlos. A `dev` pasa con un PR de esa rama cuando Carlos lo pida; a producción, después, con el PR de `dev` a `main`.**
+**Estado: definida con Carlos el 2026-10-11 y construidas sus seis historias (US A1 a A6) ese mismo día, en la rama `feature/rediseno-pagina-loteria`, creada desde `dev`. Fusionada a `dev` el 2026-10-11 con un merge directo, sin PR, porque Carlos lo pidió así; se publica en dev.chorroybuenas.com.mx cuando `dev` se sube a GitHub. Falta la demo de Carlos ahí. A producción pasa después, con el PR de `dev` a `main`.**
 
 **Contexto.** Carlos pidió el 2026-10-11 rediseñar la página de una lotería guardada (U2, `/loteria/:setId`) para que quede como las maquetas `docs/design/Loteria.dc.html` (lista para imprimir, escritorio), `LoteriaMobile.dc.html` (lista, celular de 768 px o menos), `LoteriaEnProgreso.dc.html` (faltan cartas) y `LoteriaVentanas.dc.html` (menú «⋮», aviso sin tableros, confirmaciones, preparando el PDF y ver carta grande). Las maquetas son referencia visual: no se copia su HTML y sus imágenes `/_blob/` son de ejemplo; la página muestra las cartas y los tableros reales.
 
