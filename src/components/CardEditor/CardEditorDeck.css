@@ -145,15 +145,6 @@
   background: var(--color-primary-dark);
 }
 
-.deck__button--secondary {
-  background: var(--color-bg-surface);
-  color: var(--color-primary-dark);
-}
-
-.deck__button--secondary:hover:not(:disabled) {
-  background: var(--color-bg-subtle);
-}
-
 .deck__button--ai {
   border-color: var(--color-ai);
   background: var(--color-ai);
@@ -166,7 +157,7 @@
   cursor: default;
 }
 
-/* Tarjeta de IA */
+/* Panel «Cartas con IA» (solo con sesión) */
 
 .deck__ai {
   display: flex;
@@ -175,21 +166,6 @@
   padding: 16px;
   border-radius: var(--radius-md);
   background: var(--color-bg-subtle);
-}
-
-.deck__ai-pair {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--color-primary-dark);
-}
-
-.deck__ai-pair img {
-  width: 64px;
-  height: auto;
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-md);
-  object-fit: cover;
 }
 
 .deck__ai-text {
@@ -203,8 +179,6 @@
   color: var(--color-text-muted);
   font-size: 14px;
 }
-
-/* Con sesión: panel «Cartas con IA» */
 
 .deck__ai--panel {
   border: 1px solid color-mix(in srgb, var(--color-ai) 30%, transparent);

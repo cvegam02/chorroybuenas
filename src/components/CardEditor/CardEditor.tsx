@@ -5,7 +5,6 @@ import {
   FaCheckCircle,
   FaUpload,
   FaArrowRight,
-  FaPlus,
   FaMagic,
   FaExclamationTriangle,
   FaPencilAlt
@@ -26,8 +25,6 @@ import { Card, GridSize } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSetContext } from '../../contexts/SetContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
-import { AuthChoice } from '../Auth/AuthChoice';
-import { useWelcomeTokens } from '../../hooks/useWelcomeTokens';
 import { aiDeckSummary, deckProgress, pickImageFiles } from '../../utils/deckProgress';
 import { newUuid } from '../../utils/newUuid';
 import './CardEditor.css';
@@ -94,7 +91,6 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
   const hasMinimumCards = cardCount >= minCards;
   const progress = deckProgress(cardCount, minCards);
   const aiSummary = aiDeckSummary(cards);
-  const welcomeTokens = useWelcomeTokens();
   const [isDraggingFiles, setIsDraggingFiles] = useState(false);
   const noTokensForSingle = user && tokenBalance !== null && tokenBalance < 1;
 
@@ -371,57 +367,29 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
               <FaUpload aria-hidden="true" />
               {t('cardEditor.deck.uploadPhotos')}
             </button>
-            <button
-              type="button"
-              onClick={() => setIsUploadModalOpen(true)}
-              className="deck__button deck__button--secondary"
-              disabled={Boolean(waitingForSet)}
-            >
-              <FaPlus aria-hidden="true" />
-              {t('cardEditor.deck.addOne')}
-            </button>
           </div>
 
-          {user ? (
-            cardCount > 0 && (
-              <div className="deck__ai deck__ai--panel">
-                <div className="deck__ai-text">
-                  <strong>
-                    <FaMagic aria-hidden="true" /> {t('cardEditor.deck.aiPanelTitle')}
-                  </strong>
-                  <span>
-                    {t('cardEditor.deck.aiPanelStatus', { transformed: aiSummary.transformed, total: aiSummary.total })}
-                  </span>
-                </div>
-                <p className="deck__ai-balance">
-                  {tokenBalance !== null ? t('cardEditor.deck.tokens', { count: tokenBalance }) : t('common.loading')}
-                  <Link to="/comprar-tokens">{t('cardEditor.deck.buy')}</Link>
-                </p>
-                {aiSummary.remaining > 0 ? (
-                  <button type="button" onClick={handleAIBulkClick} className="deck__button deck__button--ai">
-                    {t('cardEditor.deck.transformRest', { count: aiSummary.remaining })}
-                  </button>
-                ) : (
-                  <p className="deck__ai-done">{t('cardEditor.deck.aiAllDone')}</p>
-                )}
-              </div>
-            )
-          ) : (
-            <div className="deck__ai">
-              <div className="deck__ai-pair">
-                <img src="/media/beneficios/antes-la-chata.jpg" alt={t('cardEditor.deck.aiBeforeAlt')} width={64} height={85} loading="lazy" />
-                <FaArrowRight aria-hidden="true" />
-                <img src="/media/beneficios/ia-la-chata.jpg" alt={t('cardEditor.deck.aiAfterAlt')} width={64} height={96} loading="lazy" />
-              </div>
+          {user && cardCount > 0 && (
+            <div className="deck__ai deck__ai--panel">
               <div className="deck__ai-text">
-                <strong>{t('cardEditor.deck.aiTitle')}</strong>
+                <strong>
+                  <FaMagic aria-hidden="true" /> {t('cardEditor.deck.aiPanelTitle')}
+                </strong>
                 <span>
-                  {welcomeTokens !== null
-                    ? t('cardEditor.deck.aiGift', { count: welcomeTokens })
-                    : t('cardEditor.deck.aiNoGift')}
+                  {t('cardEditor.deck.aiPanelStatus', { transformed: aiSummary.transformed, total: aiSummary.total })}
                 </span>
               </div>
-              <AuthChoice tone="onLight" compact googleLabel={t('cardEditor.deck.google')} />
+              <p className="deck__ai-balance">
+                {tokenBalance !== null ? t('cardEditor.deck.tokens', { count: tokenBalance }) : t('common.loading')}
+                <Link to="/comprar-tokens">{t('cardEditor.deck.buy')}</Link>
+              </p>
+              {aiSummary.remaining > 0 ? (
+                <button type="button" onClick={handleAIBulkClick} className="deck__button deck__button--ai">
+                  {t('cardEditor.deck.transformRest', { count: aiSummary.remaining })}
+                </button>
+              ) : (
+                <p className="deck__ai-done">{t('cardEditor.deck.aiAllDone')}</p>
+              )}
             </div>
           )}
 
