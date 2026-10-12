@@ -49,6 +49,8 @@ Todos están definidos como variables en `:root`, en `src/index.css`. Se usan co
 | `--color-paper-cream` | `#fbf3e2` | Papel de la hoja de lotería dibujada en «¿Qué es la lotería?» (FEAT-33) |
 | `--color-danger` | `#dc2626` | Peligro: borrar o vaciar. Es el rojo que el sitio ya usaba escrito a mano; el código nuevo lo toma de aquí (FEAT-34) |
 | `--color-ai` | `#7c3aed` | Inteligencia artificial: botones y etiquetas de transformar con IA (FEAT-34) |
+| `--color-season` | `#6d28d9` | Temporada: texto de las etiquetas de la temática y del modo en el detalle de una lotería temática (FEAT-37) |
+| `--color-season-light` | `#ede9fe` | Temporada: fondo de esas etiquetas (FEAT-37) |
 
 `--color-bg-primary` y `--color-bg-secondary` son alias de `--color-bg-surface` y `--color-bg-base`.
 

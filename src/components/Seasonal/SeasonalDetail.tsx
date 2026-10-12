@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { FaRegClock } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import { SeasonalRepository, type SeasonalDetailResult } from '../../repositories/SeasonalRepository';
 import { TokenPricingRepository } from '../../repositories/TokenPricingRepository';
@@ -9,19 +10,19 @@ import { createSeasonalPreference } from '../../services/SeasonalPurchaseService
 import { localizedText, showsSampleNote } from '../../utils/seasonalCatalog';
 import { seasonalStatus } from '../../utils/seasonalPublishing';
 import { readSeasonalReturn } from '../../utils/seasonalPurchase';
+import { seasonalBuyStateOf, type SeasonalReturnNotice } from '../../utils/seasonalBuyState';
 import { applyPageMeta, seasonalDetailMeta } from '../../utils/pageMeta';
 import { formatUsdReference } from '../../utils/usdReference';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import { CardPreviewModal } from '../SetView/CardPreviewModal';
-import { SeasonalDownloadButton } from './SeasonalDownloadButton';
+import { SeasonalBuyPanel, SeasonalGuarantees } from './SeasonalBuyBox';
+import { SeasonalDetailLinks, SeasonalIncludes } from './SeasonalDetailExtras';
+import { SeasonalDetailNotice } from './SeasonalDetailNotice';
 import type { Card } from '../../types';
 import './SeasonalCatalog.css';
 import './SeasonalDetail.css';
 
 const PRICE_FORMAT = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
-
-/** Aviso al volver de Mercado Pago. `confirming` mientras el servidor registra el pago aprobado. */
-type ReturnNotice = 'confirming' | 'success' | 'pending' | 'cancel';
 
 export const SeasonalDetail = () => {
   const { id = '' } = useParams<{ id: string }>();
@@ -29,7 +30,7 @@ export const SeasonalDetail = () => {
   const { user } = useAuth();
   const [result, setResult] = useState<SeasonalDetailResult | null>(null);
   const [usdRate, setUsdRate] = useState<number | null>(null);
-  const [openSample, setOpenSample] = useState<Card | null>(null);
+  const [openSampleIndex, setOpenSampleIndex] = useState<number | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [isOwned, setIsOwned] = useState(false);
@@ -37,7 +38,7 @@ export const SeasonalDetail = () => {
   const [isPending, setIsPending] = useState(false);
   /** Falso hasta saber si la cuenta tiene esta lotería: evita decir «no disponible» a quien la compró. */
   const [ownedChecked, setOwnedChecked] = useState(false);
-  const [notice, setNotice] = useState<ReturnNotice | null>(null);
+  const [notice, setNotice] = useState<SeasonalReturnNotice | null>(null);
   const [isStartingPayment, setIsStartingPayment] = useState(false);
   const [buyFailed, setBuyFailed] = useState(false);
   const returnHandled = useRef(false);
@@ -75,7 +76,7 @@ export const SeasonalDetail = () => {
     };
   }, [showUsd]);
 
-  const closeSample = useCallback(() => setOpenSample(null), []);
+  const closeSample = useCallback(() => setOpenSampleIndex(null), []);
 
   /**
    * Pregunta a la base si la cuenta ya tiene esta lotería o un pago en proceso por ella.
@@ -138,25 +139,6 @@ export const SeasonalDetail = () => {
     else setBuyFailed(true);
   };
 
-  const renderNotice = () => {
-    if (notice === null) return null;
-    if (notice === 'confirming') {
-      return (
-        <div className="seasonal-detail__notice" role="status">
-          <p>{t('seasonal.detail.confirming')}</p>
-        </div>
-      );
-    }
-    return (
-      <div className={`seasonal-detail__notice seasonal-detail__notice--${notice}`} role="status">
-        <p>{t(`seasonal.detail.notice.${notice}`)}</p>
-        <button type="button" className="seasonal-detail__notice-close" onClick={() => setNotice(null)}>
-          {t('common.close')}
-        </button>
-      </div>
-    );
-  };
-
   const backLink = (
     <Link to="/tematicas" className="seasonal-detail__back">
       {t('seasonal.detail.back')}
@@ -167,9 +149,12 @@ export const SeasonalDetail = () => {
     if (result === null) {
       return (
         <div className="seasonal-detail__skeleton" role="status" aria-label={t('common.loading')}>
-          <div className="seasonal-detail__cover" />
-          <div className="seasonal-catalog__skeleton-line" />
-          <div className="seasonal-catalog__skeleton-line seasonal-catalog__skeleton-line--short" />
+          <div className="seasonal-detail__skeleton-cover" />
+          <div className="seasonal-detail__skeleton-lines">
+            <div className="seasonal-catalog__skeleton-line seasonal-catalog__skeleton-line--short" />
+            <div className="seasonal-catalog__skeleton-line" />
+            <div className="seasonal-catalog__skeleton-line" />
+          </div>
         </div>
       );
     }
@@ -191,11 +176,22 @@ export const SeasonalDetail = () => {
     // Quien la compró, o tiene un pago en proceso, la sigue viendo aunque ya no esté en el catálogo.
     if (result.status === 'missing' || (!isVisible && !isOwned && !isPending)) {
       return (
-        <div className="seasonal-catalog__notice">
-          <p>{t('seasonal.detail.unavailable')}</p>
-          <Link to="/tematicas" className="seasonal-catalog__button">
-            {t('seasonal.detail.toCatalog')}
-          </Link>
+        <div className="seasonal-detail__unavailable">
+          <span className="seasonal-detail__unavailable-icon" aria-hidden="true">
+            <FaRegClock />
+          </span>
+          <h1 className="seasonal-detail__unavailable-title">{t('seasonal.detail.unavailable')}</h1>
+          <p className="seasonal-detail__unavailable-text">{t('seasonal.detail.unavailableText')}</p>
+          <div className="seasonal-detail__unavailable-actions">
+            <Link to="/tematicas" className="seasonal-catalog__button">
+              {t('seasonal.detail.toCatalog')}
+            </Link>
+            {user && (
+              <Link to="/dashboard" className="seasonal-detail__unavailable-link">
+                {t('seasonal.detail.myAccount')}
+              </Link>
+            )}
+          </div>
         </div>
       );
     }
@@ -203,130 +199,131 @@ export const SeasonalDetail = () => {
     const { loteria, season } = result;
     const name = localizedText(loteria.name_es, loteria.name_en, language);
     const description = localizedText(loteria.description_es, loteria.description_en, language);
-    const mode = t(loteria.grid_size === 9 ? 'seasonal.modeKids' : 'seasonal.modeClassic');
+    const mode = t(loteria.grid_size === 9 ? 'dashboard.loterias.typeKids' : 'dashboard.loterias.typeClassic');
+    const sampleCount = loteria.sample_paths.length;
+    const buyState = seasonalBuyStateOf({ isOwned, isPending, isStartingPayment, buyFailed, notice });
+    const buyPanel = {
+      state: buyState,
+      loteriaId: loteria.id,
+      loteriaName: name,
+      price: loteria.price_cents !== null ? `${PRICE_FORMAT.format(loteria.price_cents / 100)} MXN` : null,
+      usdReference:
+        showUsd && usdRate !== null && loteria.price_cents !== null
+          ? formatUsdReference(loteria.price_cents, usdRate)
+          : null,
+      isLoggedIn: user !== null,
+      onBuy: handleBuy,
+      onLogin: () => setIsAuthOpen(true),
+    };
 
     return (
       <>
-        <header className="seasonal-detail__header">
-          <p className="seasonal-detail__season">{localizedText(season.name_es, season.name_en, language)}</p>
-          <h1 className="seasonal-detail__title">{name}</h1>
-        </header>
+        <div className="seasonal-detail__product">
+          {loteria.cover_path && (
+            <img
+              className="seasonal-detail__cover"
+              src={SeasonalRepository.previewUrl(loteria.cover_path)}
+              alt={t('seasonal.coverAlt', { name })}
+            />
+          )}
 
-        <div className="seasonal-detail__layout">
-          <div className="seasonal-detail__content">
-            {loteria.cover_path && (
-              <img
-                className="seasonal-detail__cover"
-                src={SeasonalRepository.previewUrl(loteria.cover_path)}
-                alt={t('seasonal.coverAlt', { name })}
-              />
-            )}
+          <aside className={`seasonal-detail__box ${buyState === 'owned' ? 'seasonal-detail__box--owned' : ''}`}>
+            <p className="seasonal-detail__season">{localizedText(season.name_es, season.name_en, language)}</p>
+            <h1 className="seasonal-detail__title">{name}</h1>
+            {description !== '' && <p className="seasonal-detail__description">{description}</p>}
+            <ul className="seasonal-detail__tags">
+              <li className="seasonal-detail__tag seasonal-detail__tag--mode">{mode}</li>
+              {loteria.card_count !== null && (
+                <li className="seasonal-detail__tag">{t('seasonal.cards', { count: loteria.card_count })}</li>
+              )}
+              {loteria.board_count !== null && (
+                <li className="seasonal-detail__tag">{t('seasonal.boards', { count: loteria.board_count })}</li>
+              )}
+            </ul>
+            <SeasonalBuyPanel variant="box" {...buyPanel} />
+            {showUsd && !isOwned && <p className="seasonal-detail__disclaimer">{t('buyTokens.disclaimerUsd')}</p>}
+            <SeasonalGuarantees placement="box" />
+          </aside>
 
-            {loteria.sample_paths.length > 0 && (
-              <section aria-labelledby="seasonal-detail-samples">
+          {sampleCount > 0 && (
+            <section className="seasonal-detail__samples-section" aria-labelledby="seasonal-detail-samples">
+              <div className="seasonal-detail__samples-head">
                 <h2 id="seasonal-detail-samples" className="seasonal-detail__heading">
                   {t('seasonal.detail.samplesTitle')}
                 </h2>
-                <ul className="seasonal-detail__samples">
-                  {loteria.sample_paths.map((path, index) => {
-                    const image = SeasonalRepository.previewUrl(path);
-                    const title = t('seasonal.detail.sampleTitle', { number: index + 1 });
-                    return (
-                      <li key={path}>
-                        <button
-                          type="button"
-                          className="seasonal-detail__sample"
-                          onClick={() => setOpenSample({ id: path, title, image })}
-                          aria-label={t('seasonal.detail.sampleOpen', { number: index + 1 })}
-                        >
-                          <img src={image} alt="" loading="lazy" />
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-                {showsSampleNote(loteria.sample_paths.length, loteria.card_count) && (
-                  <p className="seasonal-detail__note">
-                    {t('seasonal.detail.samplesNote', { count: loteria.card_count ?? 0 })}
-                  </p>
-                )}
-              </section>
-            )}
-
-            <section aria-labelledby="seasonal-detail-includes">
-              <h2 id="seasonal-detail-includes" className="seasonal-detail__heading">
-                {t('seasonal.detail.includesTitle')}
-              </h2>
-              <ul className="seasonal-detail__includes">
-                <li>{t('seasonal.detail.includesMode', { mode })}</li>
-                {loteria.card_count !== null && <li>{t('seasonal.cards', { count: loteria.card_count })}</li>}
-                {loteria.board_count !== null && <li>{t('seasonal.boards', { count: loteria.board_count })}</li>}
-                <li>{t('seasonal.detail.includesPdf')}</li>
-              </ul>
-            </section>
-
-            {description !== '' && (
-              <section aria-labelledby="seasonal-detail-description">
-                <h2 id="seasonal-detail-description" className="seasonal-detail__heading">
-                  {t('seasonal.detail.descriptionTitle')}
-                </h2>
-                <p className="seasonal-detail__description">{description}</p>
-              </section>
-            )}
-          </div>
-
-          <aside className="seasonal-detail__buy">
-            {!isOwned && loteria.price_cents !== null && (
-              <p className="seasonal-detail__price">
-                {PRICE_FORMAT.format(loteria.price_cents / 100)} MXN
-                {showUsd && usdRate !== null && (
-                  <span className="seasonal-detail__price-usd">
-                    {' '}
-                    ({formatUsdReference(loteria.price_cents, usdRate)})
+                {showsSampleNote(sampleCount, loteria.card_count) && (
+                  <span className="seasonal-detail__note">
+                    {t('seasonal.detail.samplesCount', { shown: sampleCount, count: loteria.card_count ?? 0 })}
                   </span>
                 )}
-              </p>
-            )}
-            {isOwned ? (
-              <>
-                <p className="seasonal-detail__owned">{t('seasonal.detail.owned')}</p>
-                <SeasonalDownloadButton loteriaId={loteria.id} loteriaName={name} />
-              </>
-            ) : isPending ? (
-              <p className="seasonal-detail__pending" role="status">
-                {t('seasonal.detail.notice.pending')}
-              </p>
-            ) : (
-              <button
-                type="button"
-                className="seasonal-catalog__button seasonal-detail__buy-button"
-                onClick={handleBuy}
-                disabled={isStartingPayment || notice === 'confirming'}
-              >
-                {t(isStartingPayment ? 'seasonal.detail.buying' : 'seasonal.detail.buy')}
-              </button>
-            )}
-            {buyFailed && (
-              <p className="seasonal-detail__buy-error" role="alert">
-                {t('seasonal.detail.buyError')}
-              </p>
-            )}
-            <p className="seasonal-detail__digital">{t('seasonal.detail.digitalNote')}</p>
-            {showUsd && !isOwned && <p className="seasonal-detail__digital">{t('buyTokens.disclaimerUsd')}</p>}
-          </aside>
+              </div>
+              <ul className="seasonal-detail__samples">
+                {loteria.sample_paths.map((path, index) => {
+                  return (
+                    <li key={path}>
+                      <button
+                        type="button"
+                        className="seasonal-detail__sample"
+                        onClick={() => setOpenSampleIndex(index)}
+                        aria-label={t('seasonal.detail.sampleOpen', { number: index + 1 })}
+                      >
+                        <img src={SeasonalRepository.previewUrl(path)} alt="" loading="lazy" />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
         </div>
+
+        <SeasonalIncludes mode={mode} cardCount={loteria.card_count} boardCount={loteria.board_count} />
+        <SeasonalGuarantees placement="flow" />
+        <SeasonalDetailLinks />
+        <SeasonalBuyPanel variant="bar" {...buyPanel} />
       </>
     );
   };
+
+  // Carta de muestra abierta en grande; con más de una muestra se puede pasar de una a otra.
+  const samplePaths = result?.status === 'found' ? result.loteria.sample_paths : [];
+  const openSamplePath = openSampleIndex !== null ? samplePaths[openSampleIndex] : undefined;
+  const openSample: Card | null =
+    openSampleIndex !== null && openSamplePath !== undefined
+      ? {
+          id: openSamplePath,
+          title: t('seasonal.detail.sampleTitle', { number: openSampleIndex + 1 }),
+          image: SeasonalRepository.previewUrl(openSamplePath),
+        }
+      : null;
+  const sampleNavigation =
+    openSampleIndex !== null && samplePaths.length > 1
+      ? {
+          index: openSampleIndex,
+          total: samplePaths.length,
+          onChange: setOpenSampleIndex,
+          labels: {
+            previous: t('seasonal.detail.samplePrevious'),
+            next: t('seasonal.detail.sampleNext'),
+            position: t('seasonal.detail.samplePosition', { current: openSampleIndex + 1, total: samplePaths.length }),
+          },
+        }
+      : undefined;
 
   return (
     <div className="seasonal-detail">
       <main className="seasonal-detail__main">
         {backLink}
-        {renderNotice()}
+        <SeasonalDetailNotice notice={notice} onClose={() => setNotice(null)} />
         {renderBody()}
       </main>
-      <CardPreviewModal card={openSample} isOpen={openSample !== null} onClose={closeSample} finishedCard />
+      <CardPreviewModal
+        card={openSample}
+        isOpen={openSample !== null}
+        onClose={closeSample}
+        navigation={sampleNavigation}
+        finishedCard
+      />
       <EmailAuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} initialMode="login" />
     </div>
   );
