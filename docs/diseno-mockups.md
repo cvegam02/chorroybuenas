@@ -86,8 +86,8 @@ Requiere ser administrador.
 
 | Código | Ventana | Dónde aparece | Para qué |
 |---|---|---|---|
-| M1 | Iniciar sesión / Crear cuenta | Barra de navegación, y donde se pida sesión | Entrar o registrarse con correo o con Google; recuperar contraseña. |
-| M2 | Definir contraseña nueva | Al abrir el enlace de recuperación | Poner la contraseña nueva. |
+| M1 | Iniciar sesión / Crear cuenta | Barra de navegación, y donde se pida sesión | Entrar o registrarse con correo o con Google; recuperar contraseña. Rediseñada el 2026-10-11 (FEAT-38): una sola ventana con las pestañas «Iniciar sesión \| Crear cuenta»; Crear cuenta dice cuántos tokens de regalo da el sitio (la cantidad que configura el administrador); los errores salen como aviso con enlaces para iniciar sesión o recuperar la contraseña; Recuperar contraseña tiene «Volver»; y tras registrarse o pedir el enlace sale «Revisa tu correo», con el correo escrito y «Corrígelo» para regresar al formulario. En celular (640 px o menos) es una hoja que sube desde abajo. |
+| M2 | Definir contraseña nueva | Al abrir el enlace de recuperación | Poner la contraseña nueva. Rediseñada el 2026-10-11 (FEAT-38): dice para qué correo es, avisa cuando las dos contraseñas coinciden y, al guardar, muestra «¡Listo! Contraseña guardada»; la persona queda con sesión iniciada. En celular, hoja inferior. |
 | M3 | Cambiar contraseña | U1 | Cambiar la contraseña con sesión iniciada. |
 | M4 | Subir carta | C1 | Elegir imagen, ajustarla y poner título. Desde el 2026-10-11 (FEAT-34): «Agregar una carta», con «Así se verá»: la carta con su número y su nombre mientras se escribe. |
 | M5 | Editar carta | C1 | Cambiar imagen o título. Desde el 2026-10-11 (FEAT-34): la vista previa es la carta final; «Recortar» y «Otra foto»; con sesión, «Imagen de la carta» para elegir entre la foto original y la versión con IA, y pedir otra versión sin cerrar la ventana; «Cancelar» y «Guardar cambios» fijos abajo. En teléfono, a pantalla completa. Maqueta: `docs/design/EditarCarta.dc.html`. |

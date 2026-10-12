@@ -13,11 +13,13 @@ interface LoginFormProps {
   onSubmit: (event: FormEvent) => void;
   onForgot: () => void;
   isLoading: boolean;
+  /** La contraseña no coincidió con el correo: se marca el campo. */
+  passwordInvalid: boolean;
 }
 
 export const LoginForm = (props: LoginFormProps) => {
   const { t } = useTranslation();
-  const { email, password, onEmailChange, onPasswordChange, onSubmit, onForgot, isLoading } = props;
+  const { email, password, onEmailChange, onPasswordChange, onSubmit, onForgot, isLoading, passwordInvalid } = props;
 
   return (
     <form className="auth-form" onSubmit={onSubmit}>
@@ -40,6 +42,7 @@ export const LoginForm = (props: LoginFormProps) => {
         value={password}
         onChange={onPasswordChange}
         disabled={isLoading}
+        invalid={passwordInvalid}
         labelAction={
           <button type="button" className="auth-link auth-link--label" onClick={onForgot}>
             {t('common.auth.forgotShort')}
@@ -64,11 +67,13 @@ interface SignUpFormProps {
   onConfirmPasswordChange: (value: string) => void;
   onSubmit: (event: FormEvent) => void;
   isLoading: boolean;
+  /** Campo que el aviso de error señala, si hay alguno. */
+  invalidField?: 'email' | 'confirm';
 }
 
 export const SignUpForm = (props: SignUpFormProps) => {
   const { t } = useTranslation();
-  const { fullName, email, password, confirmPassword, onSubmit, isLoading } = props;
+  const { fullName, email, password, confirmPassword, onSubmit, isLoading, invalidField } = props;
 
   return (
     <form className="auth-form" onSubmit={onSubmit}>
@@ -95,6 +100,7 @@ export const SignUpForm = (props: SignUpFormProps) => {
         value={email}
         onChange={props.onEmailChange}
         disabled={isLoading}
+        invalid={invalidField === 'email'}
       />
       <AuthPasswordField
         id="auth-signup-password"
@@ -116,6 +122,7 @@ export const SignUpForm = (props: SignUpFormProps) => {
         value={confirmPassword}
         onChange={props.onConfirmPasswordChange}
         disabled={isLoading}
+        invalid={invalidField === 'confirm'}
       />
       <button type="submit" className="auth-submit" disabled={isLoading}>
         {isLoading ? t('common.loading') : t('common.auth.submitSignUp')}

@@ -1,42 +1,35 @@
-/** Íconos de las ventanas de cuenta, dibujados como en la maqueta (FEAT-38). Todos son decorativos. */
+import {
+  FaCheck,
+  FaChevronLeft,
+  FaEnvelope,
+  FaExclamationCircle,
+  FaEye,
+  FaEyeSlash,
+  FaGift,
+  FaKey,
+  FaLock,
+  FaTimes,
+} from 'react-icons/fa';
 
-const STROKE = {
-  fill: 'none',
-  stroke: 'currentColor',
-  strokeLinecap: 'round',
-  strokeLinejoin: 'round',
-  'aria-hidden': true,
-} as const;
+/**
+ * Íconos de las ventanas de cuenta (FEAT-38), todos decorativos. Salen de `react-icons` (familia `fa`),
+ * como pide el sistema de diseño, con el tamaño que les da la maqueta.
+ */
 
-export const CloseIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" strokeWidth="2.2" {...STROKE}>
-    <path d="M6 6l12 12M18 6L6 18" />
-  </svg>
-);
+export const CloseIcon = () => <FaTimes size={18} aria-hidden="true" />;
+export const EyeIcon = () => <FaEye size={20} aria-hidden="true" />;
+export const EyeOffIcon = () => <FaEyeSlash size={20} aria-hidden="true" />;
+export const GiftIcon = () => <FaGift size={22} aria-hidden="true" />;
+export const BackIcon = () => <FaChevronLeft size={14} aria-hidden="true" />;
+export const AlertIcon = () => <FaExclamationCircle size={20} aria-hidden="true" />;
+export const KeyIcon = () => <FaKey size={26} aria-hidden="true" />;
+export const LockIcon = () => <FaLock size={26} aria-hidden="true" />;
+export const MailIcon = () => <FaEnvelope size={34} aria-hidden="true" />;
 
-export const EyeIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" strokeWidth="2" {...STROKE}>
-    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
-    <circle cx="12" cy="12" r="3" />
-  </svg>
-);
+/** Palomita; `size` en px (14 en la ayuda de un campo, 34 en el aviso de «¡Listo!»). */
+export const CheckIcon = ({ size }: { size: number }) => <FaCheck size={size} aria-hidden="true" />;
 
-export const EyeOffIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" strokeWidth="2" {...STROKE}>
-    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
-    <circle cx="12" cy="12" r="3" />
-    <path d="M4 4l16 16" />
-  </svg>
-);
-
-export const GiftIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" strokeWidth="2" {...STROKE}>
-    <rect x="3" y="8" width="18" height="13" rx="2" />
-    <path d="M12 8v13M3 12h18M7.5 8a2.5 2.5 0 1 1 4.5-1.5A2.5 2.5 0 1 1 16.5 8" />
-  </svg>
-);
-
-/** Logo de Google con los colores de su marca: no salen de la paleta del sitio. */
+/** Logo de Google con los colores de su marca: `fa` solo lo trae en un color, y no salen de la paleta del sitio. */
 export const GoogleIcon = () => (
   <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
     <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />
