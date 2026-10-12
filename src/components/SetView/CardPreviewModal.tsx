@@ -12,6 +12,13 @@ export interface CardPreviewNavigation {
   index: number;
   total: number;
   onChange: (index: number) => void;
+  /** Textos propios, ya traducidos, cuando lo que se recorre no son las cartas de una lotería. */
+  labels?: {
+    previous: string;
+    next: string;
+    /** El contador completo, por ejemplo «Muestra 3 de 6». */
+    position: string;
+  };
 }
 
 interface CardPreviewModalProps {
@@ -83,7 +90,7 @@ export const CardPreviewModal = ({
               navigation.onChange(navigation.index - 1);
             }}
             disabled={!hasPrevious}
-            aria-label={t('setView.previousCard')}
+            aria-label={navigation.labels?.previous ?? t('setView.previousCard')}
           >
             <FaChevronLeft aria-hidden="true" />
           </button>
@@ -118,7 +125,7 @@ export const CardPreviewModal = ({
               navigation.onChange(navigation.index + 1);
             }}
             disabled={!hasNext}
-            aria-label={t('setView.nextCard')}
+            aria-label={navigation.labels?.next ?? t('setView.nextCard')}
           >
             <FaChevronRight aria-hidden="true" />
           </button>
@@ -127,7 +134,8 @@ export const CardPreviewModal = ({
 
       {navigation && (
         <span className="card-preview-modal__position" aria-live="polite">
-          {t('setView.cardPosition', { current: navigation.index + 1, total: navigation.total })}
+          {navigation.labels?.position ??
+            t('setView.cardPosition', { current: navigation.index + 1, total: navigation.total })}
         </span>
       )}
 

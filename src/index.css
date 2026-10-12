@@ -81,6 +81,9 @@
   --color-danger: #dc2626;
   /* Inteligencia artificial: botones y etiquetas de transformar con IA (FEAT-34) */
   --color-ai: #7c3aed;
+  /* Temporada: etiquetas de la temática y del modo en el detalle de una lotería temática (FEAT-37) */
+  --color-season: #6d28d9;
+  --color-season-light: #ede9fe;
 
   /* Shadows - Organic & Warm */
   --shadow-sm: 0 2px 4px rgba(234, 88, 12, 0.08);

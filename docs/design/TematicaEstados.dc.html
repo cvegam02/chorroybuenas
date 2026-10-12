@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Detalle de temática — estados</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;family=Arvo:wght@700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f5efe8}
+a{color:#c2410c}a:hover{color:#9a3412}
+</style>
+</helmet>
+<div style="font-family: 'Quicksand', system-ui, sans-serif; color: #431407; background: #f5efe8; width: 1440px; box-sizing: border-box; padding: 40px; display: flex; flex-direction: column; gap: 28px;">
+  <div><h1 style="margin: 0 0 6px; font-size: 32px;">Detalle de temática — caja de compra y avisos</h1><p style="margin: 0; font-size: 17px; color: #78350f;">Cómo cambia la caja de la derecha (y el aviso de arriba) según la cuenta y el regreso de Mercado Pago.</p></div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; align-items: start;">
+
+    <!-- 1 Con sesión -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em;">1 · Con sesión</div>
+      <div style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; flex-direction: column;"><span style="font-size: 14px; color: #78350f;">Pago único</span><strong style="font-size: 32px; color: #c2410c; line-height: 1.1;">$[PRECIO] MXN</strong></div>
+        <button type="button" style="font: inherit; font-weight: 700; font-size: 18px; padding: 15px 24px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff;">Comprar</button>
+        <p style="margin: 0; font-size: 14px; color: #78350f; text-align: center;">Te llevamos a Mercado Pago para pagar.</p>
+      </div>
+    </div>
+
+    <!-- 2 Abriendo MP -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em;">2 · Abriendo Mercado Pago</div>
+      <div style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; flex-direction: column;"><span style="font-size: 14px; color: #78350f;">Pago único</span><strong style="font-size: 32px; color: #c2410c; line-height: 1.1;">$[PRECIO] MXN</strong></div>
+        <button type="button" disabled="" style="display: flex; align-items: center; justify-content: center; gap: 10px; font: inherit; font-weight: 700; font-size: 17px; padding: 15px 24px; border-radius: 999px; border: none; background: #fdba74; color: #431407; cursor: wait;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 3a9 9 0 1 1-9 9" /></svg>Abriendo Mercado Pago…</button>
+        <p style="margin: 0; font-size: 14px; color: #78350f; text-align: center;">No cierres esta página.</p>
+      </div>
+    </div>
+
+    <!-- 3 Error al iniciar -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em;">3 · No se pudo iniciar la compra</div>
+      <div style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; flex-direction: column;"><span style="font-size: 14px; color: #78350f;">Pago único</span><strong style="font-size: 32px; color: #c2410c; line-height: 1.1;">$[PRECIO] MXN</strong></div>
+        <button type="button" style="font: inherit; font-weight: 700; font-size: 18px; padding: 15px 24px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff;">Intentar de nuevo</button>
+        <div role="alert" style="display: flex; gap: 10px; align-items: flex-start; background: #fee2e2; color: #991b1b; border-radius: 12px; padding: 10px 12px; font-size: 14px; font-weight: 600;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto;"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>No se pudo abrir Mercado Pago. No se hizo ningún cargo.</div>
+      </div>
+    </div>
+
+    <!-- 4 Confirmando -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em;">4 · Regreso: confirmando</div>
+      <div role="status" style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 16px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 3a9 9 0 1 1-9 9"/></svg>Confirmando tu pago…</div>
+      <div style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 14px; opacity: 0.6;">
+        <div style="display: flex; flex-direction: column;"><span style="font-size: 14px; color: #78350f;">Pago único</span><strong style="font-size: 32px; color: #c2410c; line-height: 1.1;">$[PRECIO] MXN</strong></div>
+        <button type="button" disabled="" style="font: inherit; font-weight: 700; font-size: 18px; padding: 15px 24px; border-radius: 999px; border: none; background: #fdba74; color: #431407;">Comprar</button>
+      </div>
+    </div>
+
+    <!-- 5 Listo -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em;">5 · Regreso: ¡ya es tuya!</div>
+      <div role="status" style="background: #ccfbf1; color: #115e59; border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 16px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg><span style="flex: 1 1 auto;">¡Listo! Ya es tuya.</span><button type="button" aria-label="Cerrar aviso" style="width: 36px; height: 36px; border-radius: 999px; border: none; background: rgba(255,255,255,0.6); color: #115e59; display: flex; align-items: center; justify-content: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div style="background: #ffffff; border: 2px solid #5eead4; border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+        <span style="align-self: flex-start; display: flex; align-items: center; gap: 6px; background: #ccfbf1; color: #115e59; font-weight: 700; font-size: 14px; padding: 6px 12px; border-radius: 999px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>Ya es tuya</span>
+        <button type="button" style="display: flex; align-items: center; justify-content: center; gap: 8px; font: inherit; font-weight: 700; font-size: 18px; padding: 15px 24px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Descargar PDF</button>
+        <p style="margin: 0; font-size: 14px; color: #78350f; text-align: center;">También la encuentras en <a href="#" style="font-weight: 700;">Mi cuenta</a>, para descargarla cuando quieras.</p>
+      </div>
+    </div>
+
+    <!-- 6 Pendiente -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em;">6 · Pago en proceso</div>
+      <div role="status" style="background: #fef3c7; color: #78350f; border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 16px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Tu pago está en proceso</div>
+      <div style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 12px;">
+        <span style="align-self: flex-start; background: #fef3c7; color: #92400e; font-weight: 700; font-size: 14px; padding: 6px 12px; border-radius: 999px;">Esperando pago</span>
+        <p style="margin: 0; font-size: 15px; line-height: 1.55; color: #78350f;">Si pagaste en efectivo o por transferencia, la lotería aparece en tu cuenta en cuanto Mercado Pago lo confirme. No tienes que volver a comprarla.</p>
+        <a href="#" style="text-align: center; font-weight: 700; font-size: 16px; color: #c2410c; background: #ffffff; border: 2px solid #fdba74; padding: 12px 18px; border-radius: 999px; text-decoration: none;">Ir a Mi cuenta</a>
+      </div>
+    </div>
+
+    <!-- 7 Cancelado -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em;">7 · Regreso: pago no completado</div>
+      <div role="status" style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 16px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#78350f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg><span style="flex: 1 1 auto;">No se completó el pago.</span><button type="button" aria-label="Cerrar aviso" style="width: 36px; height: 36px; border-radius: 999px; border: none; background: #fff7ed; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div style="background: #ffffff; border: 1px solid #fde4cc; border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; flex-direction: column;"><span style="font-size: 14px; color: #78350f;">Pago único</span><strong style="font-size: 32px; color: #c2410c; line-height: 1.1;">$[PRECIO] MXN</strong></div>
+        <button type="button" style="font: inherit; font-weight: 700; font-size: 18px; padding: 15px 24px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff;">Intentar de nuevo</button>
+        <p style="margin: 0; font-size: 14px; color: #78350f; text-align: center;">Puedes elegir otra forma de pago en Mercado Pago.</p>
+      </div>
+    </div>
+
+    <!-- 8 No disponible -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em;">8 · Ya no está disponible</div>
+      <div style="background: #ffffff; border: 2px dashed #fdba74; border-radius: 24px; padding: 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;">
+        <span style="width: 56px; height: 56px; border-radius: 16px; background: #fff7ed; display: flex; align-items: center; justify-content: center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+        <h3 style="margin: 0; font-size: 20px;">Esta lotería ya no está disponible</h3>
+        <p style="margin: 0; font-size: 15px; color: #78350f; line-height: 1.5;">Terminó su temporada. Si la compraste, sigue en tu cuenta.</p>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+          <a href="#" style="background: #ea580c; color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none; padding: 11px 18px; border-radius: 999px;">Ver el catálogo</a>
+          <a href="#" style="color: #c2410c; font-weight: 700; font-size: 15px; text-decoration: none; padding: 11px 12px;">Mi cuenta</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9 Muestra grande -->
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em;">9 · Carta de muestra grande</div>
+      <div style="background: rgba(30,10,40,0.85); border-radius: 24px; height: 420px; box-sizing: border-box; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; position: relative;">
+        <button type="button" aria-label="Cerrar" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 999px; border: none; background: rgba(255,255,255,0.15); color: #ffffff; display: flex; align-items: center; justify-content: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" aria-label="Muestra anterior" style="width: 44px; height: 44px; border-radius: 999px; border: none; background: #ffffff; color: #6d28d9; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+          <img src="/_blob/66610a28c9f6161cb7657301fefef70c" alt="Carta de muestra 3, La Calavera" style="width: 200px; aspect-ratio: 2 / 3; border-radius: 10px; box-shadow: 0 20px 40px rgba(0,0,0,0.45);">
+          <button type="button" aria-label="Muestra siguiente" style="width: 44px; height: 44px; border-radius: 999px; border: none; background: #ffffff; color: #6d28d9; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+        </div>
+        <span style="color: #ede9fe; font-size: 14px; font-weight: 600;">Muestra 3 de 6</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1640}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

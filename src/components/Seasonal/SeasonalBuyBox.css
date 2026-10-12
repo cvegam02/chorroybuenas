@@ -1,0 +1,318 @@
+/* P6 — Compra de una lotería temática: precio, acción según el estado, barra fija de celular y garantías. */
+
+.seasonal-buy {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.seasonal-buy--box.seasonal-buy--offer {
+  padding-top: 16px;
+  border-top: 1px dashed var(--color-primary-lighter);
+}
+
+.seasonal-buy--box.seasonal-buy--confirming {
+  opacity: 0.6;
+}
+
+.seasonal-buy--bar {
+  display: none;
+}
+
+.seasonal-buy__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.seasonal-buy__price {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.seasonal-buy__price-label,
+.seasonal-buy__usd,
+.seasonal-buy__aside {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.seasonal-buy__usd,
+.seasonal-buy__aside {
+  font-size: 13px;
+}
+
+.seasonal-buy__amount {
+  font-size: 34px;
+  line-height: 1.1;
+  color: var(--color-primary-dark);
+}
+
+.seasonal-buy__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 24px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.seasonal-buy__button:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.seasonal-buy__button:disabled {
+  background: var(--color-primary-lighter);
+  color: var(--color-text-main);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.seasonal-buy--starting .seasonal-buy__button:disabled {
+  cursor: wait;
+}
+
+.seasonal-buy__button:focus-visible,
+.seasonal-buy__outline:focus-visible,
+.seasonal-buy__link:focus-visible {
+  outline: 3px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
+
+.seasonal-buy__spinner {
+  flex: 0 0 auto;
+  animation: seasonal-buy-spin 0.9s linear infinite;
+}
+
+@keyframes seasonal-buy-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.seasonal-buy__hint {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.seasonal-buy__link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-primary-dark);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.seasonal-buy__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-danger) 12%, var(--color-bg-surface));
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.seasonal-buy__error svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--color-danger);
+  font-size: 16px;
+}
+
+.seasonal-buy__tag {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.seasonal-buy__tag--owned {
+  background: color-mix(in srgb, var(--color-secondary-light) 55%, var(--color-bg-surface));
+}
+
+.seasonal-buy__tag--owned svg {
+  color: var(--color-secondary-dark);
+  font-size: 12px;
+}
+
+.seasonal-buy__tag--pending {
+  background: color-mix(in srgb, var(--color-accent-light) 55%, var(--color-bg-surface));
+}
+
+.seasonal-buy__text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--color-text-muted);
+}
+
+.seasonal-buy__outline {
+  display: block;
+  padding: 12px 18px;
+  border: 2px solid var(--color-primary-lighter);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-primary-dark);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.seasonal-buy__outline:hover {
+  background: var(--color-bg-subtle);
+}
+
+/* Garantías */
+
+.seasonal-guarantees {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1.4;
+  list-style: none;
+}
+
+.seasonal-guarantees--flow {
+  display: none;
+}
+
+.seasonal-guarantees__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.seasonal-guarantees__item svg {
+  flex: 0 0 auto;
+  color: var(--color-primary-dark);
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  /* En celular el precio y la acción van en la barra de abajo; en la caja queda solo lo que explica el estado. */
+  .seasonal-buy--box.seasonal-buy--offer,
+  .seasonal-buy--box .seasonal-buy__action {
+    display: none;
+  }
+
+  /* Fija con `position: fixed`: en este sitio `sticky` no se queda pegado (FEAT-37, decisión 9). */
+  .seasonal-buy--bar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 900;
+    display: flex;
+    gap: 6px;
+    padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--color-primary-lightest);
+    background: var(--color-bg-surface);
+    box-shadow: 0 -6px 18px color-mix(in srgb, var(--color-text-main) 8%, transparent);
+  }
+
+  .seasonal-buy--bar .seasonal-buy__row {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .seasonal-buy--bar .seasonal-buy__price {
+    flex: 1 1 auto;
+  }
+
+  .seasonal-buy--bar .seasonal-buy__price-label {
+    font-size: 12px;
+  }
+
+  .seasonal-buy--bar .seasonal-buy__amount {
+    font-size: 22px;
+  }
+
+  .seasonal-buy--bar .seasonal-buy__button {
+    flex: 0 1 auto;
+    width: auto;
+    padding: 14px 30px;
+    font-size: 17px;
+    box-shadow: none;
+  }
+
+  .seasonal-buy--bar .seasonal-buy__button:only-child {
+    flex: 1 1 auto;
+  }
+
+  .seasonal-buy--bar.seasonal-buy--starting .seasonal-buy__button {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+
+  .seasonal-buy--bar .seasonal-buy__hint {
+    font-size: 12px;
+  }
+
+  .seasonal-buy__hint {
+    text-align: left;
+  }
+
+  .seasonal-buy--bar .seasonal-buy__error {
+    font-size: 13px;
+  }
+
+  .seasonal-guarantees--box {
+    display: none;
+  }
+
+  .seasonal-guarantees--flow {
+    display: flex;
+    font-size: 14px;
+  }
+
+  /* El pie de página queda libre arriba de la barra. */
+  body:has(.seasonal-buy--bar) .footer {
+    margin-bottom: 104px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seasonal-buy__spinner {
+    animation: none;
+  }
+
+  .seasonal-buy__button,
+  .seasonal-buy__outline {
+    transition: none;
+  }
+}
