@@ -9,6 +9,9 @@ import './CardUploadModal.css';
 import './CardForm.css';
 import './BatchUploadModal.css';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { usePageScrollLock } from '../../hooks/usePageScrollLock';
+import { useVisualViewportFit } from '../../hooks/useVisualViewportFit';
 import { nextCardNumber, queueItemState, queuePercent } from '../../utils/uploadQueue';
 import { logger } from '../../utils/logger';
 import { isPrintableCardTitle } from '../../utils/cardTitle';
@@ -44,6 +47,9 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
   // Use ref to track completed cards to avoid state update issues
   const completedCardsRef = useRef<Array<{ image: string; title: string }>>([]);
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const queueRef = useRef<HTMLDivElement>(null);
+  const isPhone = useMediaQuery('(max-width: 640px)');
 
   useEffect(() => {
     if (isOpen && files.length > 0) {
@@ -223,9 +229,21 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
     completedCardsRef.current = [];
     onClose();
   };
-  useEscapeKey(requestClose, isOpen && pendingImages.length > 0);
+  const isShown = isOpen && pendingImages.length > 0;
+  useEscapeKey(requestClose, isShown);
+  usePageScrollLock(isShown);
+  useVisualViewportFit(overlayRef, isShown);
 
-  if (!isOpen || pendingImages.length === 0) return null;
+  // La miniatura en turno se trae a la vista solo al cambiar de foto y solo de lado. Con scrollIntoView
+  // se pedía en cada tecla y movía la ventana con el teclado abierto (FEAT-39).
+  useEffect(() => {
+    const queue = queueRef.current;
+    const thumb = queue?.querySelector<HTMLElement>('.batch-upload__thumb--current');
+    if (!queue || !thumb) return;
+    queue.scrollLeft = thumb.offsetLeft - (queue.clientWidth - thumb.offsetWidth) / 2;
+  }, [currentIndex, isShown]);
+
+  if (!isShown) return null;
 
   const currentFile = pendingImages[currentIndex];
   const isLastPhoto = currentIndex === pendingImages.length - 1;
@@ -235,9 +253,42 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
       completedCardsRef.current.some(card => normalizeTitle(card.title) === normalizeTitle(currentTitle)));
   const isInvalidTitle = !isPrintableCardTitle(currentTitle);
 
+  const previewNumber = nextCardNumber(existingTitles.length, completedCardsRef.current.length);
+
+  const adjustButton = (
+    <button
+      type="button"
+      onClick={() => setShowEditor(true)}
+      className="card-form__button card-form__button--secondary card-form__button--small batch-upload__adjust"
+    >
+      <FaCropAlt aria-hidden="true" />
+      {t('cardUpload.actions.adjustImage')}
+    </button>
+  );
+
+  // En teléfono los botones van en el pie de la hoja, fuera de lo que se desliza (FEAT-39).
+  const actionButtons = (
+    <>
+      <button type="button" onClick={handleSkip} className="card-form__button card-form__button--ghost">
+        <FaForward aria-hidden="true" />
+        {t('batchUpload.actions.skip')}
+      </button>
+      <button
+        type="button"
+        onClick={handleNext}
+        disabled={!currentTitle.trim() || isInvalidTitle}
+        className="card-form__button card-form__button--primary batch-upload__next"
+      >
+        {isLastPhoto ? t('batchUpload.actions.finish') : t('batchUpload.actions.next')}
+        {!isLastPhoto && <FaArrowRight aria-hidden="true" />}
+      </button>
+    </>
+  );
+
   const modalContent = (
     <div
-      className="card-modal__overlay"
+      ref={overlayRef}
+      className="card-modal__overlay card-modal__overlay--sheet"
       onClick={(e) => {
         if (e.target === e.currentTarget) requestClose();
       }}
@@ -271,13 +322,12 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
               })}
             </p>
           </div>
-          <div className="batch-upload__queue" aria-hidden="true">
+          <div ref={queueRef} className="batch-upload__queue" aria-hidden="true">
             {pendingImages.map((image, index) => {
               const state = queueItemState(index, currentIndex);
               return (
                 <img
                   key={image.id}
-                  ref={state === 'current' ? (el) => el?.scrollIntoView({ block: 'nearest', inline: 'nearest' }) : undefined}
                   src={image.preview}
                   alt=""
                   className={`batch-upload__thumb batch-upload__thumb--${state}`}
@@ -297,17 +347,16 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
           ) : (
             <div className="batch-upload__layout">
               <div className="batch-upload__media">
-                <div className="card-form__photo">
-                  <img src={currentImage} alt="" />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowEditor(true)}
-                  className="card-form__button card-form__button--secondary card-form__button--small"
-                >
-                  <FaCropAlt aria-hidden="true" />
-                  {t('cardUpload.actions.adjustImage')}
-                </button>
+                {isPhone ? (
+                  <CardLivePreview photo={currentImage || null} title={currentTitle} number={previewNumber} compact />
+                ) : (
+                  <>
+                    <div className="card-form__photo">
+                      <img src={currentImage} alt="" />
+                    </div>
+                    {adjustButton}
+                  </>
+                )}
               </div>
 
               <div className="batch-upload__form">
@@ -335,31 +384,21 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
                   <p className="card-form__help">{t('cardUpload.helpText')}</p>
                 </div>
 
-                <CardLivePreview
-                  photo={currentImage || null}
-                  title={currentTitle}
-                  number={nextCardNumber(existingTitles.length, completedCardsRef.current.length)}
-                />
+                {isPhone && adjustButton}
+                {!isPhone && <CardLivePreview photo={currentImage || null} title={currentTitle} number={previewNumber} />}
 
-                <div className="batch-upload__actions">
-                  <button type="button" onClick={handleSkip} className="card-form__button card-form__button--ghost">
-                    <FaForward aria-hidden="true" />
-                    {t('batchUpload.actions.skip')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    disabled={!currentTitle.trim() || isInvalidTitle}
-                    className="card-form__button card-form__button--primary batch-upload__next"
-                  >
-                    {isLastPhoto ? t('batchUpload.actions.finish') : t('batchUpload.actions.next')}
-                    {!isLastPhoto && <FaArrowRight aria-hidden="true" />}
-                  </button>
-                </div>
+                {!isPhone && <div className="batch-upload__actions">{actionButtons}</div>}
               </div>
             </div>
           )}
         </div>
+
+        {isPhone && !showEditor && (
+          // Tocar un botón no le quita el cursor al nombre: así el teclado no se cierra y se vuelve a abrir entre fotos.
+          <div className="card-modal__footer" onMouseDown={(e) => e.preventDefault()}>
+            {actionButtons}
+          </div>
+        )}
       </div>
     </div>
   );

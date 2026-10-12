@@ -4,6 +4,7 @@ import { FaCamera, FaCropAlt, FaPlus } from 'react-icons/fa';
 import { convertFileToBase64, validateImageFile, compressImage, adjustImageToCardAspectRatio } from '../../utils/imageUtils';
 import { ImageEditor } from './ImageEditor';
 import { CardLivePreview } from './CardLivePreview';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import './CardForm.css';
 import './CardUpload.css';
 import { logger } from '../../utils/logger';
@@ -33,6 +34,7 @@ export const CardUpload = ({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showEditor, setShowEditor] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const isPhone = useMediaQuery('(max-width: 640px)');
   const [wasEdited, setWasEdited] = useState(false); // Track if image was edited/cropped
   const fileInputRef = useRef<HTMLInputElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -171,7 +173,7 @@ export const CardUpload = ({
 
   if (showEditor && imagePreview) {
     return (
-      <div className="card-upload">
+      <div className="card-upload card-upload--editor">
         <ImageEditor
           imageSrc={imagePreview}
           onCrop={handleImageCrop}
@@ -180,6 +182,40 @@ export const CardUpload = ({
       </div>
     );
   }
+
+  // En teléfono la ventana es una hoja compacta: una sola imagen y el botón fijo en el pie (FEAT-39).
+  const mediaActions = (
+    <div className="card-upload__media-actions">
+      <button
+        type="button"
+        onClick={() => setShowEditor(true)}
+        className="card-form__button card-form__button--secondary card-form__button--small"
+        disabled={isUploading}
+      >
+        <FaCropAlt aria-hidden="true" />
+        {t('cardUpload.actions.adjustImage')}
+      </button>
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        className="card-form__button card-form__button--ghost card-form__button--small"
+        disabled={isUploading}
+      >
+        {t('cardUpload.actions.changePhoto')}
+      </button>
+    </div>
+  );
+
+  const submitButton = (
+    <button
+      type="submit"
+      disabled={!title.trim() || isInvalidTitle || !imagePreview || isUploading}
+      className="card-form__button card-form__button--primary card-upload__submit"
+    >
+      {!isUploading && <FaPlus aria-hidden="true" />}
+      {isUploading ? t('cardUpload.status.processing') : t('cardUpload.actions.addCard')}
+    </button>
+  );
 
   return (
     <form className="card-upload" onSubmit={handleSubmit}>
@@ -191,34 +227,18 @@ export const CardUpload = ({
         className="card-upload__input"
         style={{ display: 'none' }}
       />
-      <div className="card-upload__layout">
+      <div className={`card-upload__layout${imagePreview ? '' : ' card-upload__layout--empty'}`}>
         <div className="card-upload__media">
-          {imagePreview ? (
+          {imagePreview && isPhone && <CardLivePreview photo={imagePreview} title={title} number={previewNumber} compact />}
+          {imagePreview && !isPhone && (
             <>
               <div className="card-form__photo">
                 <img src={imagePreview} alt="" />
               </div>
-              <div className="card-upload__media-actions">
-                <button
-                  type="button"
-                  onClick={() => setShowEditor(true)}
-                  className="card-form__button card-form__button--secondary card-form__button--small"
-                  disabled={isUploading}
-                >
-                  <FaCropAlt aria-hidden="true" />
-                  {t('cardUpload.actions.adjustImage')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="card-form__button card-form__button--ghost card-form__button--small"
-                  disabled={isUploading}
-                >
-                  {t('cardUpload.actions.changePhoto')}
-                </button>
-              </div>
+              {mediaActions}
             </>
-          ) : (
+          )}
+          {!imagePreview && (
             <button
               type="button"
               className="card-upload__dropzone"
@@ -259,18 +279,12 @@ export const CardUpload = ({
             <p className="card-form__help">{t('cardUpload.helpText')}</p>
           </div>
 
-          <CardLivePreview photo={imagePreview} title={title} number={previewNumber} />
-
-          <button
-            type="submit"
-            disabled={!title.trim() || isInvalidTitle || !imagePreview || isUploading}
-            className="card-form__button card-form__button--primary card-upload__submit"
-          >
-            {!isUploading && <FaPlus aria-hidden="true" />}
-            {isUploading ? t('cardUpload.status.processing') : t('cardUpload.actions.addCard')}
-          </button>
+          {isPhone && imagePreview && mediaActions}
+          {!isPhone && <CardLivePreview photo={imagePreview} title={title} number={previewNumber} />}
+          {!isPhone && submitButton}
         </div>
       </div>
+      {isPhone && <div className="card-modal__footer">{submitButton}</div>}
     </form>
   );
 };

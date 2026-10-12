@@ -197,6 +197,36 @@
   box-sizing: border-box;
 }
 
+/* La carta en turno: velo de IA con su rueda, como la carta que se convierte en la cuadrícula (FEAT-39, US A4) */
+.ai-batch__cell-working {
+  position: absolute;
+  inset: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-ai) 70%, transparent),
+    color-mix(in srgb, var(--color-primary) 70%, transparent)
+  );
+}
+
+.ai-batch__cell-spinner {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid color-mix(in srgb, var(--color-text-inverted) 35%, transparent);
+  border-top-color: var(--color-text-inverted);
+  border-radius: var(--radius-full);
+  animation: ai-batch-spin 0.9s linear infinite;
+}
+
+@keyframes ai-batch-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .ai-batch__cell-check {
   position: absolute;
   top: 4px;
@@ -307,5 +337,9 @@
 @media (prefers-reduced-motion: reduce) {
   .ai-batch__bar span {
     transition: none;
+  }
+
+  .ai-batch__cell-spinner {
+    animation: none;
   }
 }

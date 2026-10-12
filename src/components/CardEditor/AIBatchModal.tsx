@@ -223,6 +223,11 @@ export const AIBatchModal = ({
                   return (
                     <div key={card.id} className={`ai-batch__cell ai-batch__cell--${state}`}>
                       {card.image && <img src={card.image} alt="" />}
+                      {state === 'current' && (
+                        <span className="ai-batch__cell-working">
+                          <span className="ai-batch__cell-spinner" />
+                        </span>
+                      )}
                       {state === 'done' && (
                         <span className="ai-batch__cell-check">
                           <FaCheck />
