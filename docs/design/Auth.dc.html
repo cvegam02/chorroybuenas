@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Iniciar sesión</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;family=Arvo:wght@700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#fffbf7}
+a{color:#c2410c}a:hover{color:#9a3412}
+</style>
+</helmet>
+<div style="font-family: 'Quicksand', system-ui, sans-serif; color: #431407; background: #fffbf7; width: 1440px; height: 900px; position: relative; overflow: hidden;">
+
+  <!-- PÁGINA DE FONDO (Comprar tokens sin sesión) -->
+  <header style="background: #ffffff; border-bottom: 1px solid #fde4cc;">
+    <nav style="max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; gap: 32px;">
+      <img src="/_blob/d7801622bd0948908ee8484baca4ddcd" alt="chorroybuenas.com.mx" style="height: 50px;">
+      <div style="display: flex; gap: 26px; flex: 1 1 auto; justify-content: center; font-weight: 600; font-size: 15px;"><span>Crear lotería</span><span>Temáticas</span><span>Beneficios</span><span>¿Cómo se juega?</span><span>¿Qué es la lotería?</span></div>
+      <div style="display: flex; align-items: center; gap: 16px; font-weight: 600; font-size: 15px;"><span style="font-weight: 700; font-size: 14px; color: #78350f;">ES</span><span>Iniciar sesión</span><span style="background: #ea580c; color: #fff; font-weight: 700; padding: 11px 20px; border-radius: 999px;">Crear mi lotería gratis</span></div>
+    </nav>
+  </header>
+  <section style="background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); color: #ffffff;">
+    <div style="max-width: 1100px; margin: 0 auto; padding: 44px 24px; display: flex; flex-direction: column; gap: 12px;">
+      <h1 style="margin: 0; font-size: 46px; line-height: 1.1;">Comprar tokens</h1>
+      <p style="margin: 0; font-size: 19px;">Cada token convierte una foto en carta de lotería con IA. Los tokens no caducan.</p>
+    </div>
+  </section>
+  <section style="max-width: 1100px; margin: 0 auto; padding: 48px 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+    <div style="height: 300px; background: #ffffff; border: 1px solid #fde4cc; border-radius: 20px;"></div>
+    <div style="height: 300px; background: #ffffff; border: 2px solid #ea580c; border-radius: 20px;"></div>
+    <div style="height: 300px; background: #ffffff; border: 1px solid #fde4cc; border-radius: 20px;"></div>
+  </section>
+
+  <!-- VELO + VENTANA -->
+  <div style="position: absolute; inset: 0; background: rgba(67,20,7,0.5); display: flex; align-items: center; justify-content: center;">
+    <div role="dialog" aria-modal="true" aria-labelledby="li-t" style="position: relative; width: 420px; box-sizing: border-box; background: #ffffff; border-radius: 24px; padding: 28px 28px 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 24px 48px rgba(67,20,7,0.35);">
+      <button type="button" aria-label="Cerrar" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 999px; border: none; background: transparent; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;">
+        <div style="display: flex; height: 64px; align-items: flex-end;">
+          <img src="/_blob/e7fd813384dcb18d22c9c90a5b9156ad" alt="" style="width: 40px; height: 60px; border-radius: 4px; transform: rotate(-9deg); box-shadow: 0 4px 10px rgba(194,65,12,0.2);">
+          <img src="/_blob/c08bbf2b34d6b08ffa378af14f67fad8" alt="" style="width: 40px; height: 60px; border-radius: 4px; transform: rotate(8deg); margin-left: -10px; box-shadow: 0 4px 10px rgba(194,65,12,0.2);">
+        </div>
+        <h2 id="li-t" style="margin: 0; font-size: 26px; line-height: 1.2;">¡Qué gusto verte!</h2>
+        <p style="margin: 0; font-size: 15px; color: #78350f;">Entra para ver tus loterías y tus tokens.</p>
+      </div>
+
+      <div role="tablist" aria-label="Tipo de acceso" style="display: grid; grid-template-columns: 1fr 1fr; background: #fff7ed; border-radius: 999px; padding: 4px;">
+        <button type="button" role="tab" aria-selected="true" style="font: inherit; font-weight: 700; font-size: 15px; padding: 10px 12px; border-radius: 999px; border: none; background: #ffffff; color: #431407; box-shadow: 0 2px 6px rgba(67,20,7,0.12);">Iniciar sesión</button>
+        <button type="button" role="tab" aria-selected="false" style="font: inherit; font-weight: 700; font-size: 15px; padding: 10px 12px; border-radius: 999px; border: none; background: transparent; color: #9a3412;">Crear cuenta</button>
+      </div>
+
+      <button type="button" style="font: inherit; font-weight: 700; font-size: 16px; padding: 12px 18px; border-radius: 999px; border: 2px solid #fdba74; background: #ffffff; color: #431407; display: flex; align-items: center; justify-content: center; gap: 10px;"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continuar con Google</button>
+
+      <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; color: #78350f;"><span style="flex: 1 1 auto; height: 1px; background: #fde4cc;"></span>o con tu correo<span style="flex: 1 1 auto; height: 1px; background: #fde4cc;"></span></div>
+
+      <form style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="li-email" style="font-weight: 700; font-size: 14px;">Correo</label>
+          <input id="li-email" type="email" autocomplete="email" value="carlos.tests01@gmail.com" style="font: inherit; font-size: 16px; color: #431407; padding: 12px 14px; border: 2px solid #fde4cc; border-radius: 12px; background: #ffffff; width: 100%; box-sizing: border-box;">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between;">
+            <label for="li-pass" style="font-weight: 700; font-size: 14px;">Contraseña</label>
+            <a href="#" style="font-weight: 700; font-size: 14px;">¿La olvidaste?</a>
+          </div>
+          <div style="position: relative;">
+            <input id="li-pass" type="password" autocomplete="current-password" value="secreto123" style="font: inherit; font-size: 16px; color: #431407; padding: 12px 52px 12px 14px; border: 2px solid #ea580c; border-radius: 12px; background: #ffffff; width: 100%; box-sizing: border-box;">
+            <button type="button" aria-label="Mostrar contraseña" style="position: absolute; right: 2px; top: 2px; width: 46px; height: 46px; border: none; background: transparent; color: #9a3412; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          </div>
+        </div>
+        <button type="submit" style="font: inherit; font-weight: 700; font-size: 16px; padding: 14px 18px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff; box-shadow: 0 4px 12px rgba(234,88,12,0.3); margin-top: 4px;">Iniciar sesión</button>
+      </form>
+
+      <p style="margin: 0; font-size: 14px; text-align: center; color: #78350f;">¿Aún no tienes cuenta? <a href="#" style="font-weight: 700;">Crea una gratis</a> y recibe 5 tokens.</p>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
