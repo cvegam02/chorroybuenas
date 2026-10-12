@@ -1,0 +1,115 @@
+/* Sección Tableros de una lotería (U2): cuadrícula de miniaturas, fila deslizable en celular y bloque sin tableros */
+
+.set-boards__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 18px;
+}
+
+.set-boards__item {
+  min-width: 0;
+}
+
+.set-boards__empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 28px;
+  padding: 28px;
+  border: 2px dashed var(--color-primary-lightest);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+}
+
+.set-boards__blanks {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 12px;
+}
+
+.set-boards__blank {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  box-sizing: border-box;
+  width: 110px;
+  height: 128px;
+  padding: 8px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: 6px;
+  background: var(--color-paper-cream);
+  transform: rotate(-4deg);
+}
+
+.set-boards__blank + .set-boards__blank {
+  transform: rotate(4deg);
+}
+
+.set-boards__blank--kids {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.set-boards__blank-cell {
+  border-radius: 2px;
+  background: var(--color-primary-lightest);
+}
+
+.set-boards__empty-text {
+  flex: 1 1 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.set-boards__empty-title {
+  color: var(--color-text-main);
+  font-size: 19px;
+  line-height: 1.3;
+}
+
+.set-boards__locked-button,
+.set-boards__locked-button:disabled {
+  background: var(--color-primary-lightest);
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  /* Fila que se desliza a los lados, de orilla a orilla de la pantalla */
+  .set-boards__grid {
+    display: flex;
+    gap: 12px;
+    margin: 0 -16px;
+    padding: 4px 16px 10px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .set-boards__item {
+    flex: 0 0 168px;
+    scroll-snap-align: start;
+    scroll-margin-left: 16px;
+  }
+
+  .set-boards__empty {
+    gap: 18px;
+    padding: 20px;
+  }
+
+  .set-boards__blanks {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .set-boards__empty-text {
+    flex-basis: 100%;
+  }
+
+  .set-boards__empty .set-button {
+    width: 100%;
+  }
+}

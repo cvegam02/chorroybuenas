@@ -1,0 +1,7 @@
+/* Confirmaciones de la página de una lotería (U2): solo lo que no traen las ventanas de Mi cuenta */
+
+/* El ícono de lo que no borra nada (revolver): naranja en lugar del rojo de eliminar */
+.loteria-dialog__icon.set-confirm__icon--primary {
+  background: var(--color-primary-lightest);
+  color: var(--color-primary-dark);
+}

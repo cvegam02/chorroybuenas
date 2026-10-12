@@ -1,0 +1,46 @@
+/* El «⋮» de la página de una lotería (U2): el botón. El desplegable y la hoja usan los estilos del menú de Mi cuenta. */
+
+.set-menu {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.set-menu__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.set-menu__trigger:hover,
+.set-menu__trigger[aria-expanded='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary-lightest);
+  color: var(--color-primary-dark);
+}
+
+.set-menu__trigger:focus-visible {
+  outline: 3px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
+
+.loteria-menu__dropdown.set-menu__dropdown {
+  width: 250px;
+  font-family: var(--font-body);
+}
+
+@media (max-width: 768px) {
+  .set-menu__trigger {
+    width: 44px;
+    height: 44px;
+  }
+}

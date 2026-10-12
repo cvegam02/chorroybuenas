@@ -1,23 +1,27 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaEdit, FaDownload, FaArrowLeft, FaPencilAlt, FaTrash, FaPlus, FaSync } from 'react-icons/fa';
+import { FaRandom, FaRegWindowClose } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSetContext } from '../../contexts/SetContext';
 import { useCards } from '../../hooks/useCards';
 import { useBoard } from '../../hooks/useBoard';
 import { SetRepository, type LoteriaSet } from '../../repositories/SetRepository';
 import { TokenPricingRepository } from '../../repositories/TokenPricingRepository';
-import { BoardThumbnail } from '../BoardGenerator/BoardThumbnail';
 import { BoardModal } from '../BoardGenerator/BoardModal';
 import { CardPreviewModal } from './CardPreviewModal';
-import { SetCardThumb } from './SetCardThumb';
-import { WarningModal } from '../ConfirmationModal/WarningModal';
+import { SetBoardsSection } from './SetBoardsSection';
+import { SetCardsSection } from './SetCardsSection';
+import { SetConfirmDialog } from './SetConfirmDialog';
+import { PdfProgressDialog } from './PdfProgressDialog';
+import { SetHeader } from './SetHeader';
+import { SetStatusNotice } from './SetStatusNotice';
+import { setViewStateOf } from './setViewState';
+import { DeleteLoteriaDialog } from '../Dashboard/LoteriaDialogs';
 import { generatePDF, downloadPDF, pdfFileName } from '../../services/PDFService';
-import { Card, GridSize } from '../../types';
+import { GridSize } from '../../types';
 import './SetView.css';
 import { logger } from '../../utils/logger';
-import { minCardsForGrid } from '../../utils/gridRules';
 import { pdfErrorMessage } from '../../utils/pdfErrorMessage';
 import { withNumbersFrom } from '../../utils/cardNumbers';
 
@@ -26,27 +30,21 @@ export const SetView = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user, isLoading: authLoading } = useAuth();
-  const { sets, setSets, currentSetId, setCurrentSetId } = useSetContext();
+  const { sets, setSets, refreshSets, currentSetId, setCurrentSetId } = useSetContext();
   const { cards, isLoading: cardsLoading } = useCards();
-  const { boards, clearBoards, isGenerating, isBoardsLoading } = useBoard();
+  const { boards, clearBoards, isBoardsLoading } = useBoard();
   const [selectedBoardIndex, setSelectedBoardIndex] = useState<number | null>(null);
-  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [showClearBoardsModal, setShowClearBoardsModal] = useState(false);
   const [showRegenerateBoardsModal, setShowRegenerateBoardsModal] = useState(false);
-  const [isRenaming, setIsRenaming] = useState(false);
-  const [renameValue, setRenameValue] = useState('');
-  const [isSavingName, setIsSavingName] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [tokensSpentInSet, setTokensSpentInSet] = useState<number | null>(null);
   const [fetchedSet, setFetchedSet] = useState<LoteriaSet | null>(null);
-  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    if (setId) {
-      setCurrentSetId(setId);
-      setLoadedImages(new Set());
-    }
+    if (setId) setCurrentSetId(setId);
   }, [setId, setCurrentSetId]);
 
   // Si el set no está en la lista (ej. carga directa por URL), cargarlo individualmente
@@ -82,14 +80,14 @@ export const SetView = () => {
   }, [authLoading, user, setId, navigate]);
 
   const set = sets.find(s => s.id === setId) ?? fetchedSet ?? null;
-  const setName = set?.name ?? setId ?? t('setView.defaultSetName');
+  const setName = set?.name ?? t('setView.defaultSetName');
   const isSynced = Boolean(setId && currentSetId === setId);
 
   /** grid_size del set: 9 (3x3 Kids) o 16 (4x4 Classic). Desde DB (set) o tableros existentes. */
   const gridSize: GridSize = set?.grid_size ?? (boards.length > 0 ? (boards[0].gridSize ?? 16) : 16);
-  const hasReliableGridSize = set?.grid_size != null || boards.length > 0;
-  const minCardsForBoards = minCardsForGrid(gridSize);
-  const hasEnoughCardsForBoards = cards.length >= minCardsForBoards;
+  const isLoaded = isSynced && !cardsLoading && !isBoardsLoading;
+  const selectedCard = selectedCardIndex !== null ? cards[selectedCardIndex] ?? null : null;
+  const viewState = setViewStateOf({ cardCount: cards.length, boardCount: boards.length, gridSize });
 
   /** Tableros con cartas que usan las imágenes ya hidratadas (IndexedDB) para que se vean al instante. */
   const boardsWithHydratedImages = useMemo(() => {
@@ -106,36 +104,10 @@ export const SetView = () => {
     }));
   }, [boards, cards]);
 
-  const handleEditCards = () => navigate('/cards', { state: { gridSize } });
-
-  const handleRenameStart = () => {
-    setRenameValue(set?.name ?? '');
-    setIsRenaming(true);
-  };
-
-  const handleRenameSave = async () => {
-    const name = renameValue.trim();
-    if (!name || !setId || !user) return;
-    if (name === set?.name) {
-      setIsRenaming(false);
-      return;
-    }
-    setIsSavingName(true);
-    try {
-      const updated = await SetRepository.updateSet(setId, user.id, { name });
-      setSets(prev => prev.map(s => (s.id === setId ? { ...s, name: updated.name } : s)));
-      setIsRenaming(false);
-    } catch (err) {
-      logger.error('Error renaming set:', err);
-      alert(t('common.error'));
-    } finally {
-      setIsSavingName(false);
-    }
-  };
-
-  const handleRenameCancel = () => {
-    setRenameValue(set?.name ?? '');
-    setIsRenaming(false);
+  const renameSet = async (name: string) => {
+    if (!setId || !user) return;
+    const updated = await SetRepository.updateSet(setId, user.id, { name });
+    setSets(prev => prev.map(s => (s.id === setId ? { ...s, name: updated.name } : s)));
   };
 
   const handleDownloadPDF = async () => {
@@ -153,10 +125,6 @@ export const SetView = () => {
     }
   };
 
-  const handleGenerateBoards = () => navigate('/board-count', { state: { gridSize } });
-
-  const handleGenerateNewBoardsClick = () => setShowRegenerateBoardsModal(true);
-
   const handleConfirmRegenerateBoards = async () => {
     try {
       await clearBoards();
@@ -169,8 +137,6 @@ export const SetView = () => {
     }
   };
 
-  const handleClearBoardsClick = () => setShowClearBoardsModal(true);
-
   const handleConfirmClearBoards = async () => {
     try {
       await clearBoards();
@@ -180,6 +146,17 @@ export const SetView = () => {
       logger.error('Error clearing boards:', err);
       alert(t('common.error'));
     }
+  };
+
+  /** Elimina la lotería con sus cartas, tableros e imágenes, igual que desde Mi cuenta, y regresa allá. */
+  const deleteSet = async () => {
+    if (!setId || !user) return;
+    await SetRepository.deleteSetWithImages(setId, user.id);
+    // Se quita de la lista y se sale en el mismo paso, para que esta página no se quede un momento sin su lotería
+    setSets(prev => prev.filter(s => s.id !== setId));
+    navigate('/dashboard#mis-loterias', { replace: true });
+    // La lista se vuelve a pedir para que la lotería actual deje de ser la eliminada
+    void refreshSets();
   };
 
   if (authLoading) {
@@ -200,68 +177,30 @@ export const SetView = () => {
 
   return (
     <div className="set-view">
-      <header className="set-view__header">
-        <button
-          type="button"
-          className="set-view__back"
-          onClick={() => navigate('/')}
-          aria-label={t('common.back')}
-        >
-          <FaArrowLeft />
-          <span>{t('setView.backToHome')}</span>
-        </button>
-        {isRenaming ? (
-          <div className="set-view__rename">
-            <input
-              type="text"
-              className="set-view__rename-input"
-              value={renameValue}
-              onChange={(e) => setRenameValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleRenameSave();
-                if (e.key === 'Escape') handleRenameCancel();
-              }}
-              placeholder={t('setView.renamePlaceholder')}
-              autoFocus
-              disabled={isSavingName}
-              aria-label={t('setView.renameSet')}
-            />
-            <div className="set-view__rename-actions">
-              <button
-                type="button"
-                className="set-view__btn set-view__btn--secondary set-view__btn--small"
-                onClick={handleRenameCancel}
-                disabled={isSavingName}
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                type="button"
-                className="set-view__btn set-view__btn--primary set-view__btn--small"
-                onClick={handleRenameSave}
-                disabled={isSavingName || !renameValue.trim()}
-              >
-                {isSavingName ? t('common.loading') : t('common.save')}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="set-view__title-row">
-            <h1 className="set-view__title">{setName}</h1>
-            <button
-              type="button"
-              className="set-view__rename-btn"
-              onClick={handleRenameStart}
-              aria-label={t('setView.renameSet')}
-              title={t('setView.renameSet')}
-            >
-              <FaPencilAlt />
-            </button>
-          </div>
-        )}
-      </header>
+      <SetHeader
+        name={setName}
+        savedName={set?.name ?? ''}
+        details={
+          isLoaded
+            ? {
+                gridSize,
+                cardCount: cards.length,
+                boardCount: boards.length,
+                tokensSpent: tokensSpentInSet,
+                state: viewState,
+              }
+            : null
+        }
+        thumbnailCard={cards[0]}
+        isDownloading={isGeneratingPDF}
+        onRename={renameSet}
+        onDownload={handleDownloadPDF}
+        onShuffleBoards={() => setShowRegenerateBoardsModal(true)}
+        onClearBoards={() => setShowClearBoardsModal(true)}
+        onDelete={() => setShowDeleteDialog(true)}
+      />
 
-      {(!isSynced || cardsLoading || isBoardsLoading) ? (
+      {!isLoaded ? (
         <div className="set-view__loading">
           <div className="set-view__spinner" />
           <p>{user ? t('setView.loadingCards') : t('common.loading')}</p>
@@ -270,130 +209,31 @@ export const SetView = () => {
           )}
         </div>
       ) : (
-        <>
-          <section className="set-view__section">
-            <div className="set-view__section-header">
-              <h2 className="set-view__section-title">{t('setView.cardsTitle')}</h2>
-              <div className="set-view__section-meta">
-                <span className="set-view__count">{t('setView.cardCount', { count: cards.length })}</span>
-                {tokensSpentInSet != null && tokensSpentInSet > 0 && (
-                  <span className="set-view__tokens-spent">{t('setView.tokensSpentInSet', { count: tokensSpentInSet })}</span>
-                )}
-              </div>
-            </div>
-            {cards.length === 0 ? (
-              <p className="set-view__empty">{t('setView.noCards')}</p>
-            ) : (
-              <div className="set-view__cards-grid">
-                {cards.slice(0, 24).map((card) => (
-                  <SetCardThumb
-                    key={card.id}
-                    card={card}
-                    loaded={loadedImages.has(card.id)}
-                    onLoaded={() => setLoadedImages((prev) => new Set(prev).add(card.id))}
-                    onOpen={() => setSelectedCard(card)}
-                  />
-                ))}
-                {cards.length > 24 && (
-                  <div className="set-view__card-more">+{cards.length - 24}</div>
-                )}
-              </div>
-            )}
-            <button type="button" className="set-view__btn set-view__btn--secondary" onClick={handleEditCards}>
-              <FaEdit />
-              <span>{t('setView.editCards')}</span>
-            </button>
-          </section>
+        <div className="set-view__body">
+          <SetStatusNotice state={viewState} gridSize={gridSize} cardCount={cards.length} boardCount={boards.length} />
+          {pdfError && (
+            <p className="set-view__error" role="alert">
+              {pdfError}
+            </p>
+          )}
 
-          <section className="set-view__section">
-            <div className="set-view__section-header">
-              <h2 className="set-view__section-title">{t('setView.boardsTitle')}</h2>
-              <span className="set-view__count">{t('setView.boardCount', { count: boards.length })}</span>
-            </div>
-            {boards.length === 0 ? (
-              <p className="set-view__empty">{t('setView.noBoards')}</p>
-            ) : (
-              <div className="set-view__boards-wrapper">
-                <div className="set-view__boards-container">
-                  {boardsWithHydratedImages.map((board, index) => (
-                    <BoardThumbnail
-                      key={board.id}
-                      board={board}
-                      index={index}
-                      onClick={() => setSelectedBoardIndex(index)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-            {hasReliableGridSize && !hasEnoughCardsForBoards && cards.length > 0 && (
-              <div className="set-view__insufficient-cards" role="alert">
-                <p className="set-view__insufficient-cards-title">{t('boardGenerator.insufficientCards.title')}</p>
-                <p className="set-view__insufficient-cards-text">
-                  {t('boardGenerator.insufficientCards.text', {
-                    needed: minCardsForBoards,
-                    mode: gridSize === 9 ? t('boardGenerator.modes.kids') : t('boardGenerator.modes.classic'),
-                    count: cards.length
-                  })}
-                </p>
-              </div>
-            )}
-            {pdfError && (
-              <div className="set-view__insufficient-cards" role="alert">
-                <p className="set-view__insufficient-cards-title">{pdfError}</p>
-              </div>
-            )}
-            <div className="set-view__actions">
-              {boards.length === 0 ? (
-                <button
-                  type="button"
-                  className="set-view__btn set-view__btn--primary"
-                  onClick={handleGenerateBoards}
-                  disabled={isGenerating || !hasEnoughCardsForBoards}
-                  title={!hasEnoughCardsForBoards ? t('boardGenerator.insufficientCards.title') : undefined}
-                >
-                  <FaPlus />
-                  <span>{t('setView.generateBoards')}</span>
-                </button>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    className="set-view__btn set-view__btn--primary"
-                    onClick={handleDownloadPDF}
-                    disabled={isGeneratingPDF}
-                  >
-                    <FaDownload />
-                    <span>{t('setView.downloadPDF')}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="set-view__btn set-view__btn--secondary"
-                    onClick={handleGenerateNewBoardsClick}
-                    disabled={isGenerating}
-                  >
-                    <FaSync />
-                    <span>{t('setView.generateNewBoards')}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="set-view__btn set-view__btn--secondary"
-                    onClick={handleClearBoardsClick}
-                    disabled={isGenerating}
-                  >
-                    <FaTrash />
-                    <span>{t('setView.clearBoards')}</span>
-                  </button>
-                </>
-              )}
-            </div>
-          </section>
+          <SetCardsSection cards={cards} state={viewState} gridSize={gridSize} onOpenCard={setSelectedCardIndex} />
 
-          {selectedCard && (
+          <SetBoardsSection
+            boards={boardsWithHydratedImages}
+            state={viewState}
+            gridSize={gridSize}
+            onOpenBoard={setSelectedBoardIndex}
+            onShuffle={() => setShowRegenerateBoardsModal(true)}
+          />
+
+          {selectedCard && selectedCardIndex !== null && (
             <CardPreviewModal
               card={selectedCard}
-              isOpen={!!selectedCard}
-              onClose={() => setSelectedCard(null)}
+              isOpen={true}
+              onClose={() => setSelectedCardIndex(null)}
+              navigation={{ index: selectedCardIndex, total: cards.length, onChange: setSelectedCardIndex }}
+              onEdit={() => navigate('/cards', { state: { gridSize, editCardId: selectedCard.id } })}
             />
           )}
 
@@ -406,41 +246,48 @@ export const SetView = () => {
               onChangeIndex={setSelectedBoardIndex}
             />
           )}
-        </>
-      )}
-
-      {(isGenerating || isGeneratingPDF) && (
-        <div className="set-view__overlay">
-          <div className="set-view__spinner" />
-          <p>
-            {isGeneratingPDF
-              ? t('boardGenerator.status.generatingPDF')
-              : t('boardGenerator.status.generatingBoards')}
-          </p>
         </div>
       )}
 
-      <WarningModal
-        isOpen={showClearBoardsModal}
-        title={t('modals.clearBoards.title')}
-        message={t('modals.clearBoards.message')}
-        confirmText={t('modals.clearBoards.confirm')}
-        cancelText={t('modals.clearBoards.cancel')}
-        onConfirm={handleConfirmClearBoards}
-        onCancel={() => setShowClearBoardsModal(false)}
-        type="danger"
-      />
+      {isGeneratingPDF && <PdfProgressDialog cards={cards} boardCount={boards.length} />}
 
-      <WarningModal
-        isOpen={showRegenerateBoardsModal}
-        title={t('modals.regenerateBoards.title')}
-        message={t('modals.regenerateBoards.message')}
-        confirmText={t('modals.regenerateBoards.confirm')}
-        cancelText={t('modals.regenerateBoards.cancel')}
-        onConfirm={handleConfirmRegenerateBoards}
-        onCancel={() => setShowRegenerateBoardsModal(false)}
-        type="danger"
-      />
+      {showRegenerateBoardsModal && (
+        <SetConfirmDialog
+          icon={<FaRandom />}
+          tone="primary"
+          title={t('setView.shuffleConfirmTitle', { count: boards.length })}
+          text={t('setView.shuffleConfirmText')}
+          confirmLabel={t('setView.shuffleConfirmAction')}
+          cancelLabel={t('common.cancel')}
+          onConfirm={handleConfirmRegenerateBoards}
+          onClose={() => setShowRegenerateBoardsModal(false)}
+        />
+      )}
+
+      {showClearBoardsModal && (
+        <SetConfirmDialog
+          icon={<FaRegWindowClose />}
+          tone="danger"
+          title={t('setView.clearConfirmTitle', { count: boards.length })}
+          text={t('setView.clearConfirmText', { count: cards.length })}
+          confirmLabel={t('setView.clearConfirmAction')}
+          cancelLabel={t('setView.clearConfirmCancel')}
+          onConfirm={handleConfirmClearBoards}
+          onClose={() => setShowClearBoardsModal(false)}
+        />
+      )}
+
+      {showDeleteDialog && (
+        <DeleteLoteriaDialog
+          name={setName}
+          cardCount={isLoaded ? cards.length : null}
+          canDownload={isLoaded && viewState.kind === 'ready'}
+          isDownloading={isGeneratingPDF}
+          onDownload={handleDownloadPDF}
+          onConfirm={deleteSet}
+          onClose={() => setShowDeleteDialog(false)}
+        />
+      )}
     </div>
   );
 };
