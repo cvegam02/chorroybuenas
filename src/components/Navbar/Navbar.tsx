@@ -7,7 +7,7 @@ import { useAvatarUrl } from '../../hooks/useAvatarUrl';
 import { useSetContext } from '../../contexts/SetContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import { SetRepository } from '../../repositories/SetRepository';
-import logoImage from '../../img/logo.png';
+import logoImage from '../../img/logo-barra.png';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import { logger } from '../../utils/logger';
 import { LanguageSwitcher } from './LanguageSwitcher';
