@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FaCoins, FaGoogle, FaTimes } from 'react-icons/fa';
-import logoImage from '../../img/logo.png';
+import logoImage from '../../img/logo-barra.png';
 import { LANGUAGES, currentLanguageCode } from '../../utils/languages';
 import { ALL_SETS_PATH, isNavLinkActive, navLinksFor } from './navLinks';
 import { UserAvatar } from './UserAvatar';
