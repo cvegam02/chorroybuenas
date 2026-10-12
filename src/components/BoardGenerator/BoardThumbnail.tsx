@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { FaSearchPlus } from 'react-icons/fa';
 import { Board, Card } from '../../types';
 import { getImage } from '../../utils/indexedDB';
 import './BoardThumbnail.css';
@@ -22,6 +24,7 @@ interface ThumbnailCardProps {
 
 /** Una carta de la miniatura: como sale impresa cuando ya está compuesta; si no, la foto con su nombre. */
 const ThumbnailCard = ({ card, onImageError }: ThumbnailCardProps) => {
+  const { t } = useTranslation();
   const composedUrl = useComposedCard(card);
   const imageUrl = composedUrl ?? card.freshImageUrl;
 
@@ -41,7 +44,7 @@ const ThumbnailCard = ({ card, onImageError }: ThumbnailCardProps) => {
         />
       ) : (
         <div className="board-thumbnail__card-placeholder">
-          {card.id ? 'Cargando...' : 'Sin imagen'}
+          {card.id ? t('common.loading') : t('boardGenerator.noImage')}
         </div>
       )}
       {!composedUrl && <span className="board-thumbnail__card-title">{card.title}</span>}
@@ -50,6 +53,7 @@ const ThumbnailCard = ({ card, onImageError }: ThumbnailCardProps) => {
 };
 
 export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) => {
+  const { t } = useTranslation();
   // Initialize with null images, will be refreshed from IndexedDB
   const [cardsWithImages, setCardsWithImages] = useState<CardWithImage[]>(
     board.cards.map(card => ({ ...card, freshImageUrl: null }))
@@ -139,28 +143,31 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
 
   return (
     <div className="board-thumbnail">
-      <div className="board-thumbnail__header" onClick={onClick}>
-        <h3 className="board-thumbnail__title">Tablero {index + 1}</h3>
-        <span className="board-thumbnail__click-hint">👆 Click para ver completo</span>
+      {/* Con mouse se abre tocando la hoja; con teclado, con el botón de la lupa. */}
+      <div className="board-thumbnail__sheet" onClick={onClick}>
+        <div className="board-thumbnail__title">
+          <span className="board-thumbnail__rule" />
+          <h3 className="board-thumbnail__name">{t('boardGenerator.sheetTitle', { number: index + 1 })}</h3>
+          <span className="board-thumbnail__rule" />
+        </div>
+        <div className="board-thumbnail__grid" style={{ '--cols': cols } as React.CSSProperties}>
+          {grid.map((row, rowIndex) =>
+            row.map((card, colIndex) => (
+              <div key={`${rowIndex}-${colIndex}`} className="board-thumbnail__cell">
+                {card ? <ThumbnailCard card={card} onImageError={refreshFailedImage} /> : null}
+              </div>
+            ))
+          )}
+        </div>
       </div>
-      <div
-        className="board-thumbnail__grid"
+      <button
+        type="button"
+        className="board-thumbnail__zoom"
+        aria-label={t('boardGenerator.preview.zoom', { number: index + 1 })}
         onClick={onClick}
-        style={{ '--cols': cols } as React.CSSProperties}
       >
-        {grid.map((row, rowIndex) =>
-          row.map((card, colIndex) => (
-            <div
-              key={`${rowIndex}-${colIndex}`}
-              className="board-thumbnail__cell"
-            >
-              {card ? (
-                <ThumbnailCard card={card} onImageError={refreshFailedImage} />
-              ) : null}
-            </div>
-          ))
-        )}
-      </div>
+        <FaSearchPlus aria-hidden="true" />
+      </button>
     </div>
   );
 };

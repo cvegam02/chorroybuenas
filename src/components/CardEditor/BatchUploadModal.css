@@ -1,408 +1,137 @@
-/* Modal batch upload - overlay y contenedor */
-.batch-upload-modal__overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(67, 20, 7, 0.55);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+/* «Nombra tus fotos» (FEAT-34, US A6). El marco de la ventana está en CardUploadModal.css y el formulario en CardForm.css. */
+
+/* Avance y cola de fotos */
+
+.batch-upload__progress {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  padding: 16px;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
-  animation: batch-modal-overlay-in 0.2s ease;
+  gap: 14px;
+  padding: 16px 20px 0;
 }
 
-@keyframes batch-modal-overlay-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.batch-upload-modal__content {
-  background: var(--color-bg-surface);
-  border-radius: 20px;
-  padding: 0;
-  max-width: 720px;
-  width: 100%;
-  max-height: min(95vh, 860px);
-  overflow: hidden;
+.batch-upload__progress-main {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  box-shadow: var(--shadow-lg), 0 24px 48px -12px rgba(67, 20, 7, 0.18);
-  border: 1px solid rgba(234, 88, 12, 0.12);
-  position: relative;
-  margin: auto;
-  font-family: var(--font-body);
-  animation: batch-modal-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes batch-modal-in {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.batch-upload-modal__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px 28px 16px;
-  border-bottom: 1px solid var(--color-border);
-  flex-shrink: 0;
-  background: linear-gradient(to bottom, var(--color-bg-surface) 0%, var(--color-bg-secondary) 100%);
-}
-
-.batch-upload-modal__title {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--color-text-main);
-  margin: 0;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
-}
-
-.batch-upload-modal__close {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  min-height: 40px;
-  border: none;
-  border-radius: var(--radius-full);
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-muted);
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.batch-upload-modal__close:hover {
-  background: var(--color-primary-lightest);
-  color: var(--color-primary);
-  transform: scale(1.06);
-}
-
-.batch-upload-modal__close:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-/* Progress y archivo actual - compactos */
-.batch-upload-modal__progress {
-  padding: 16px 28px 12px;
-  flex-shrink: 0;
-}
-
-.batch-upload-modal__progress-bar {
-  width: 100%;
-  height: 10px;
-  background: var(--color-bg-tertiary);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-
-.batch-upload-modal__progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: var(--radius-full);
-}
-
-.batch-upload-modal__progress-text {
-  font-family: var(--font-body);
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-  margin: 0;
-}
-
-.batch-upload-modal__current-file {
-  padding: 0 28px 16px;
-}
-
-.batch-upload-modal__file-name {
-  font-family: var(--font-body);
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-  margin: 0;
-  font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Editor container */
-.batch-upload-modal__editor-container {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 20px 28px 24px;
-}
-
-/* Form - layout dos columnas */
-.batch-upload-modal__form {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 20px 28px 28px;
-}
-
-.batch-upload-modal__layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-  gap: 28px;
-  align-items: start;
-}
-
-.batch-upload-modal__preview-wrap {
-  aspect-ratio: 5 / 7.5;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  border: 2px solid var(--color-primary-lightest);
-  background: var(--color-bg-secondary);
-  box-shadow: var(--shadow-sm);
-}
-
-.batch-upload-modal__preview-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.batch-upload-modal__form-side {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  gap: 6px;
   min-width: 0;
 }
 
-.batch-upload-modal__title-input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.batch-upload-modal__label {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-main);
-  letter-spacing: -0.01em;
-}
-
-
-.batch-upload-modal__title-input {
-  padding: 14px 18px;
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: 1rem;
-  font-family: var(--font-body);
-  font-weight: 500;
-  color: var(--color-text-main);
-  background: var(--color-bg-surface);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.batch-upload-modal__title-input::placeholder {
-  color: var(--color-text-muted);
-  opacity: 0.7;
-}
-
-.batch-upload-modal__title-input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-lightest);
-}
-
-.batch-upload-modal__help-text {
-  font-family: var(--font-body);
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-  margin: 0;
-  line-height: 1.4;
-}
-
-.batch-upload-modal__error-text {
-  font-family: var(--font-body);
-  font-size: 0.875rem;
-  color: #b91c1c;
-  margin: 0;
-  font-weight: 500;
-}
-
-/* Actions - mismo layout y estilo que CardUpload */
-.batch-upload-modal__actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.batch-upload-modal__skip-button,
-.batch-upload-modal__edit-button,
-.batch-upload-modal__next-button {
-  width: 100%;
-  padding: 14px 24px;
-  min-height: 48px;
-  border: none;
-  border-radius: var(--radius-md);
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-.batch-upload-modal__skip-button {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-muted);
-}
-
-.batch-upload-modal__skip-button:hover {
-  background: var(--color-border-dark);
-  color: var(--color-text-main);
-}
-
-.batch-upload-modal__edit-button {
-  background: var(--color-bg-surface);
-  color: var(--color-primary);
-  border: 2px solid var(--color-primary-lightest);
-}
-
-.batch-upload-modal__edit-button:hover:not(:disabled) {
+.batch-upload__bar {
+  height: 8px;
+  border-radius: var(--radius-full);
   background: var(--color-primary-lightest);
-  border-color: var(--color-primary-lighter);
+  overflow: hidden;
 }
 
-.batch-upload-modal__edit-button svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
+.batch-upload__bar span {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  transition: width 0.3s ease;
 }
 
-.batch-upload-modal__next-button {
-  margin-top: 8px;
-  padding: 16px 28px;
-  min-height: 52px;
-  font-size: 1.0625rem;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-  color: white;
-  box-shadow: var(--shadow-md);
-}
-
-.batch-upload-modal__next-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(234, 88, 12, 0.4);
-}
-
-.batch-upload-modal__next-button:disabled {
-  background: var(--color-bg-tertiary);
+.batch-upload__progress-text {
+  margin: 0;
   color: var(--color-text-muted);
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.batch-upload-modal__skip-button:focus-visible,
-.batch-upload-modal__edit-button:focus-visible,
-.batch-upload-modal__next-button:focus-visible {
+.batch-upload__queue {
+  position: relative;
+  flex: 0 1 auto;
+  display: flex;
+  gap: 6px;
+  max-width: 45%;
+  padding: 3px;
+  overflow-x: auto;
+}
+
+.batch-upload__thumb {
+  flex: 0 0 auto;
+  display: block;
+  width: 34px;
+  aspect-ratio: 2 / 3;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.batch-upload__thumb--current {
   outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
 
-/* Móvil */
+.batch-upload__thumb--done {
+  opacity: 0.45;
+}
+
+/* Foto a la izquierda, nombre y «Así se verá» a la derecha */
+
+.batch-upload__layout {
+  display: flex;
+  gap: 24px;
+}
+
+.batch-upload__media {
+  flex: 0 0 210px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.batch-upload__form {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.batch-upload__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.batch-upload__next {
+  flex: 1 1 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .batch-upload__bar span {
+    transition: none;
+  }
+}
+
+/* Celular: la carta chica a la izquierda y el nombre a la derecha; los botones van en el pie de la hoja (FEAT-39) */
 @media (max-width: 640px) {
-  .batch-upload-modal__overlay {
-    padding: 12px;
-    align-items: center;
+  .batch-upload__progress {
+    padding: 10px 16px 0;
   }
 
-  .batch-upload-modal__content {
-    max-width: 100%;
-    max-height: calc(100vh - 24px);
-    border-radius: 20px;
+  .batch-upload__thumb {
+    width: 28px;
   }
 
-  .batch-upload-modal__header {
-    padding: 20px 20px 12px;
+  .batch-upload__layout {
+    align-items: flex-start;
+    gap: 14px;
   }
 
-  .batch-upload-modal__title {
-    font-size: 1.25rem;
+  .batch-upload__media {
+    flex: 0 0 96px;
   }
 
-  .batch-upload-modal__close {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    min-height: 36px;
-    font-size: 1.25rem;
-  }
-
-  .batch-upload-modal__progress {
-    padding: 12px 20px 10px;
-  }
-
-  .batch-upload-modal__current-file {
-    padding: 0 20px 12px;
-  }
-
-  .batch-upload-modal__file-name {
-    font-size: 0.8125rem;
-  }
-
-  .batch-upload-modal__form {
-    padding: 16px 20px 24px;
-  }
-
-  .batch-upload-modal__editor-container {
-    padding: 16px 20px 20px;
-  }
-
-  .batch-upload-modal__layout {
-    grid-template-columns: 1fr;
-    gap: 22px;
-  }
-
-  .batch-upload-modal__preview-wrap {
-    max-width: 200px;
-    margin: 0 auto;
-  }
-
-  .batch-upload-modal__actions {
-    flex-direction: column;
+  .batch-upload__form {
     gap: 10px;
   }
 
-  .batch-upload-modal__skip-button,
-  .batch-upload-modal__edit-button,
-  .batch-upload-modal__next-button {
-    width: 100%;
-    min-height: 48px;
-    padding: 14px 20px;
-  }
-
-  .batch-upload-modal__next-button {
-    min-width: 0;
-    margin-top: 4px;
+  .batch-upload__adjust {
+    align-self: flex-start;
   }
 }

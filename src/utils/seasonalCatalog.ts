@@ -65,3 +65,8 @@ export function localizedText(es: string | null, en: string | null, language: st
 export function showsSampleNote(sampleCount: number, cardCount: number | null): boolean {
   return cardCount !== null && sampleCount > 0 && sampleCount < cardCount;
 }
+
+/** Una temática con una sola lotería se luce en una tarjeta grande; con varias, en cuadrícula (FEAT-33). */
+export function catalogLayout(loteriaCount: number): 'feature' | 'grid' {
+  return loteriaCount === 1 ? 'feature' : 'grid';
+}

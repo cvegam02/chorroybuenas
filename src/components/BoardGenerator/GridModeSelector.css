@@ -1,118 +1,90 @@
+/* Tipo de lotería: dos tarjetas con su mini cuadrícula (FEAT-34, US A2) */
+
 .grid-mode-selector {
-    margin-bottom: 2rem;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .grid-mode-selector__label {
-    font-size: 1.0625rem;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    margin-bottom: 0.75rem;
-    font-family: var(--font-display);
-    text-align: left;
+    color: var(--color-text-muted);
+    font-size: 14px;
+    font-weight: 700;
 }
 
 .grid-mode-selector__options {
     display: flex;
-    gap: 1rem;
-    justify-content: flex-start;
-    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .grid-mode-option {
+    flex: 1 1 0;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    padding: 1rem;
-    background: white;
-    border: 2px solid var(--color-border);
+    gap: 10px;
+    min-width: 0;
+    padding: 12px;
+    border: 2px solid var(--color-primary-lightest);
     border-radius: var(--radius-md);
+    background: var(--color-bg-surface);
+    color: var(--color-text-main);
+    font: inherit;
+    text-align: left;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    text-align: center;
-    width: 130px;
-    height: 130px;
-    aspect-ratio: 1;
 }
 
 .grid-mode-option:hover {
-    transform: translateY(-2px);
-    border-color: var(--color-primary-light);
-    box-shadow: var(--shadow-sm);
+    border-color: var(--color-primary-lighter);
 }
 
-.grid-mode-option--active {
-    background: var(--color-bg-subtle);
+.grid-mode-option--active,
+.grid-mode-option--active:hover {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 1px var(--color-primary);
+    background: var(--color-bg-subtle);
 }
 
-.grid-mode-option__icon {
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--color-bg-tertiary);
-    border-radius: var(--radius-sm);
-    font-size: 1.125rem;
-    color: var(--color-text-secondary);
-    transition: all 0.2s ease;
+.grid-mode-option:focus-visible {
+    outline: 3px solid var(--color-primary-dark);
+    outline-offset: 2px;
 }
 
-.grid-mode-option--active .grid-mode-option__icon {
+.grid-mode-option__grid {
+    flex: 0 0 auto;
+    display: grid;
+    gap: 2px;
+    width: 34px;
+    height: 34px;
+}
+
+.grid-mode-option__grid--classic {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.grid-mode-option__grid--kids {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-mode-option__grid span {
+    border-radius: 2px;
+    background: var(--color-primary-lighter);
+}
+
+.grid-mode-option--active .grid-mode-option__grid span {
     background: var(--color-primary);
-    color: white;
 }
 
 .grid-mode-option__content {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    min-width: 0;
 }
 
 .grid-mode-option__title {
-    font-family: var(--font-display);
+    font-size: 15px;
     font-weight: 700;
-    font-size: 1rem;
-    color: var(--color-text-main);
 }
 
 .grid-mode-option__desc {
-    font-size: 0.8rem;
-    color: var(--color-text-secondary);
-    font-family: var(--font-body);
-}
-
-@media (max-width: 480px) {
-    .grid-mode-selector__label {
-        font-size: 1.125rem;
-    }
-
-    .grid-mode-selector__options {
-        justify-content: space-between;
-    }
-
-    .grid-mode-option {
-        width: calc(50% - 0.5rem);
-        height: auto;
-        aspect-ratio: 1;
-        padding: 1rem 0.75rem;
-    }
-
-    .grid-mode-option__title {
-        font-size: 1.125rem;
-    }
-
-    .grid-mode-option__desc {
-        font-size: 1rem;
-    }
-
-    .grid-mode-option__icon {
-        width: 2.25rem;
-        height: 2.25rem;
-        font-size: 1.25rem;
-    }
+    color: var(--color-text-muted);
+    font-size: 13px;
 }

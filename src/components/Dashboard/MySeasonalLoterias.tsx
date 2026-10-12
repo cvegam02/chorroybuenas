@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaGift } from 'react-icons/fa';
 import { SeasonalRepository, type PurchasedSeasonalLoteria } from '../../repositories/SeasonalRepository';
 import { localizedText } from '../../utils/seasonalCatalog';
 import { SeasonalDownloadButton } from '../Seasonal/SeasonalDownloadButton';
 import '../Seasonal/SeasonalCatalog.css';
 import './MySeasonalLoterias.css';
 
-/** Sección de Mi cuenta con las loterías de temporada que compró la cuenta. */
+/** «Mis temáticas» de Mi cuenta: las loterías de temporada que compró la cuenta. */
 export const MySeasonalLoterias = () => {
   const { t, i18n } = useTranslation();
   const [purchases, setPurchases] = useState<PurchasedSeasonalLoteria[] | null>(null);
@@ -31,7 +30,7 @@ export const MySeasonalLoterias = () => {
   const renderBody = () => {
     if (isLoading) {
       return (
-        <div className="dashboard__loading-inline" role="status">
+        <div className="dashboard__loading-inline my-seasonal__state" role="status">
           <div className="dashboard__spinner dashboard__spinner--small" />
           <span>{t('common.loading')}</span>
         </div>
@@ -39,8 +38,8 @@ export const MySeasonalLoterias = () => {
     }
     if (purchases === null) {
       return (
-        <div className="dashboard__empty-state" role="alert">
-          <p className="dashboard__empty-text">{t('dashboard.seasonal.error')}</p>
+        <div className="my-seasonal__state" role="alert">
+          <p className="my-seasonal__state-text">{t('dashboard.seasonal.error')}</p>
           <button type="button" className="seasonal-catalog__button" onClick={load}>
             {t('seasonal.retry')}
           </button>
@@ -49,8 +48,8 @@ export const MySeasonalLoterias = () => {
     }
     if (purchases.length === 0) {
       return (
-        <div className="dashboard__empty-state">
-          <p className="dashboard__empty-text">{t('dashboard.seasonal.empty')}</p>
+        <div className="my-seasonal__state">
+          <p className="my-seasonal__state-text">{t('dashboard.seasonal.empty')}</p>
           <Link to="/tematicas" className="seasonal-catalog__button">
             {t('dashboard.seasonal.toCatalog')}
           </Link>
@@ -61,6 +60,7 @@ export const MySeasonalLoterias = () => {
       <ul className="my-seasonal__list">
         {purchases.map((purchase) => {
           const name = localizedText(purchase.name_es, purchase.name_en, language);
+          const isPending = purchase.status === 'pending';
           return (
             <li key={purchase.purchaseId} className="my-seasonal__row">
               {purchase.cover_path ? (
@@ -78,14 +78,12 @@ export const MySeasonalLoterias = () => {
                   {name}
                 </Link>
                 <span className="my-seasonal__meta">
-                  {localizedText(purchase.season_es, purchase.season_en, language)}
-                  {' · '}
-                  {t(purchase.status === 'pending' ? 'dashboard.seasonal.startedOn' : 'dashboard.seasonal.boughtOn', {
+                  {t(isPending ? 'dashboard.seasonal.startedOn' : 'dashboard.seasonal.boughtOn', {
                     date: dateFormat.format(new Date(purchase.purchasedAt)),
                   })}
                 </span>
               </div>
-              {purchase.status === 'pending' ? (
+              {isPending ? (
                 <span className="my-seasonal__pending">{t('dashboard.seasonal.pending')}</span>
               ) : (
                 <SeasonalDownloadButton loteriaId={purchase.loteriaId} loteriaName={name} />
@@ -99,11 +97,16 @@ export const MySeasonalLoterias = () => {
 
   return (
     <section className="my-seasonal" aria-labelledby="my-seasonal-title">
-      <h2 className="dashboard__section-title" id="my-seasonal-title">
-        <FaGift />
-        {t('dashboard.seasonal.title')}
-      </h2>
-      <div className="dashboard__loterias-card">{renderBody()}</div>
+      <div className="dashboard__column-header">
+        <h2 className="dashboard__column-title" id="my-seasonal-title">
+          {t('dashboard.seasonal.title')}
+        </h2>
+        <Link to="/tematicas" className="dashboard__column-link">
+          {t('dashboard.seasonal.catalogLink')} <span aria-hidden="true">→</span>
+        </Link>
+      </div>
+      <div className="my-seasonal__card">{renderBody()}</div>
+      <p className="my-seasonal__note">{t('dashboard.seasonal.keepNote')}</p>
     </section>
   );
 };

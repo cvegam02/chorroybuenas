@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
-import { FaCoins } from 'react-icons/fa';
+import { Link, useSearchParams } from 'react-router-dom';
+import { FaArrowDown, FaCoins, FaGift, FaLock, FaStore, FaUndo } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import { TokenPricingRepository, TokenPack, type PromoSummary } from '../../repositories/TokenPricingRepository';
@@ -10,26 +10,38 @@ import { MAX_CUSTOM_TOKENS, MIN_CUSTOM_TOKENS } from '../../utils/purchaseRules'
 import { createPaymentPreference, creditPaymentOnReturn } from '../../services/PurchaseService';
 import { TokenRepository } from '../../repositories/TokenRepository';
 import { readReturnedPaymentId } from '../../services/creditOnReturn';
+import { AuthChoice } from '../Auth/AuthChoice';
+import { TokenPackCard, TokenPackList } from '../TokenPacks/TokenPackCard';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
+import { useWelcomeTokens } from '../../hooks/useWelcomeTokens';
+import '../LandingPage/LandingPage.css';
 import './BuyTokensPage.css';
 import { logger } from '../../utils/logger';
+import { PACK_NAME_KEYS } from '../../utils/tokenPackNames';
+import { clampCustomTokens, highlightedPackIndex, stepCustomTokens } from '../../utils/tokenPacks';
 import { roundUsdFriendly } from '../../utils/usdReference';
 
+/** Al entrar desde aquí, con Google o con correo, se regresa aquí (FEAT-33, decisión de Carlos). */
+const RETURN_PATH = '/comprar-tokens';
+const CUSTOM_SHORTCUTS = [5, 15, 30, 100];
 
 export const BuyTokensPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { user, isLoading } = useAuth();
-  const { refreshBalance } = useTokenBalance();
+  const { balance, refreshBalance } = useTokenBalance();
+  const welcomeTokens = useWelcomeTokens();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [packs, setPacks] = useState<TokenPack[]>([]);
+  // null: no se pudieron leer. Nunca se muestran paquetes ni precios supuestos (FEAT-33, US A8).
+  const [packs, setPacks] = useState<TokenPack[] | null>(null);
   const [usdRate, setUsdRate] = useState<number | null>(null);
-  const [pricePerTokenCents, setPricePerTokenCents] = useState<number>(200);
+  const [pricePerTokenCents, setPricePerTokenCents] = useState<number | null>(null);
+  const [reloadCount, setReloadCount] = useState(0);
   const [isFirstPurchase, setIsFirstPurchase] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [isNotLoggedInModalOpen, setIsNotLoggedInModalOpen] = useState(false);
-  const [customTokens, setCustomTokens] = useState<number>(10);
+  const [customTokens, setCustomTokens] = useState<number>(15);
   const [promoCode, setPromoCode] = useState('');
   const [promoSummary, setPromoSummary] = useState<PromoSummary>({ firstPurchasePercent: 0, hasCodePromos: false });
   const codePromoPercent = usePromoCode(promoCode, !!user);
@@ -92,9 +104,9 @@ export const BuyTokensPage: React.FC = () => {
 
     async function load() {
       const [packsData, rate, pricePerToken, promos] = await Promise.all([
-        TokenPricingRepository.getPacks(),
+        TokenPricingRepository.getPacksOrNull(),
         showUsd ? TokenPricingRepository.getExchangeRateMxnUsd() : Promise.resolve(null),
-        TokenPricingRepository.getPricing('MXN'),
+        TokenPricingRepository.getPricingOrNull('MXN'),
         TokenPricingRepository.getPromoSummary(),
       ]);
       if (cancelled) return;
@@ -116,7 +128,7 @@ export const BuyTokensPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, showUsd]);
+  }, [user?.id, showUsd, reloadCount]);
 
   const formatPriceMxn = (cents: number): string => {
     return `$${(cents / 100).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} MXN`;
@@ -188,8 +200,8 @@ export const BuyTokensPage: React.FC = () => {
     }
   };
 
-  const customTokensClamped = Math.max(CUSTOM_MIN, Math.min(CUSTOM_MAX, customTokens));
-  const customPriceCents = customTokensClamped * pricePerTokenCents;
+  const customTokensClamped = clampCustomTokens(customTokens);
+  const customPriceCents = customTokensClamped * (pricePerTokenCents ?? 0);
   const customValid = customTokens >= CUSTOM_MIN && customTokens <= CUSTOM_MAX;
 
   const promoCodeTrimmed = promoCode.trim().toUpperCase();
@@ -197,36 +209,42 @@ export const BuyTokensPage: React.FC = () => {
   const firstPurchasePercent = isFirstPurchase ? promoSummary.firstPurchasePercent : 0;
   const appliedPromoPercent = codePromoPercent > 0 ? codePromoPercent : firstPurchasePercent;
 
-  const getTotalTokensWithPromo = (baseTokens: number, bonusTokens: number) => {
-    const promoBonus = appliedPromoPercent > 0 ? Math.floor(baseTokens * (appliedPromoPercent / 100)) : 0;
-    return baseTokens + bonusTokens + promoBonus;
-  };
-
   if (isLoading || loading) {
     return (
-      <div className="buy-tokens-page">
-        <div className="buy-tokens-page__loading">{t('common.loading')}</div>
-      </div>
+      <main className="landing-page buy-tokens">
+        <p className="buy-tokens__loading" role="status">
+          {t('common.loading')}
+        </p>
+      </main>
     );
   }
 
   const isLoggedIn = !!user;
+  const packList = packs ?? [];
+  const loadFailed = packs === null || pricePerTokenCents === null;
+  const highlightedPack = highlightedPackIndex(packList.length);
+  const showPackNames = packList.length === PACK_NAME_KEYS.length;
+  const retryLoad = () => {
+    setLoading(true);
+    setReloadCount((count) => count + 1);
+  };
+  const openSignUp = () => setIsEmailModalOpen(true);
 
   return (
-    <div className="buy-tokens-page">
+    <main className="landing-page buy-tokens">
       {paymentStatus === 'crediting' && (
-        <div className="buy-tokens-page__payment-message buy-tokens-page__payment-message--pending" role="status">
+        <div className="buy-tokens__message buy-tokens__message--pending" role="status">
           <div>
-            <h3>{t('buyTokens.paymentCrediting.title')}</h3>
+            <h2>{t('buyTokens.paymentCrediting.title')}</h2>
             <p>{t('buyTokens.paymentCrediting.message')}</p>
           </div>
         </div>
       )}
       {paymentStatus === 'success' && (
-        <div className="buy-tokens-page__payment-message buy-tokens-page__payment-message--success">
-          <FaCoins />
+        <div className="buy-tokens__message buy-tokens__message--success" role="status">
+          <FaCoins aria-hidden="true" />
           <div>
-            <h3>{t('buyTokens.paymentSuccess.title')}</h3>
+            <h2>{t('buyTokens.paymentSuccess.title')}</h2>
             <p>{t('buyTokens.paymentSuccess.message')}</p>
           </div>
           <button type="button" onClick={() => setPaymentStatus(null)}>
@@ -235,9 +253,9 @@ export const BuyTokensPage: React.FC = () => {
         </div>
       )}
       {paymentStatus === 'cancel' && (
-        <div className="buy-tokens-page__payment-message buy-tokens-page__payment-message--cancel">
+        <div className="buy-tokens__message buy-tokens__message--cancel" role="status">
           <div>
-            <h3>{t('buyTokens.paymentCancel.title')}</h3>
+            <h2>{t('buyTokens.paymentCancel.title')}</h2>
             <p>{t('buyTokens.paymentCancel.message')}</p>
           </div>
           <button type="button" onClick={() => setPaymentStatus(null)}>
@@ -246,9 +264,9 @@ export const BuyTokensPage: React.FC = () => {
         </div>
       )}
       {paymentStatus === 'pending' && (
-        <div className="buy-tokens-page__payment-message buy-tokens-page__payment-message--pending">
+        <div className="buy-tokens__message buy-tokens__message--pending" role="status">
           <div>
-            <h3>{t('buyTokens.paymentPending.title')}</h3>
+            <h2>{t('buyTokens.paymentPending.title')}</h2>
             <p>{t('buyTokens.paymentPending.message')}</p>
           </div>
           <button type="button" onClick={() => setPaymentStatus(null)}>
@@ -256,181 +274,268 @@ export const BuyTokensPage: React.FC = () => {
           </button>
         </div>
       )}
-      <header className="buy-tokens-page__header">
-        <div className="buy-tokens-page__container">
-          <h1 className="buy-tokens-page__title">{t('buyTokens.title')}</h1>
-          <p className="buy-tokens-page__subtitle">{t('buyTokens.subtitle')}</p>
-          {!isLoggedIn && (
-            <div className="buy-tokens-page__login-cta buy-tokens-page__login-cta--banner">
-              <p>{t('buyTokens.loginRequired.description')}</p>
-              <button
-                type="button"
-                className="buy-tokens-page__login-btn"
-                onClick={() => setIsEmailModalOpen(true)}
-              >
-                {t('common.auth.titleLogin')}
-              </button>
+
+      <section className="buy-tokens__hero">
+        <div className="buy-tokens__hero-inner">
+          <div className="buy-tokens__hero-text">
+            <h1 className="buy-tokens__title">{t('buyTokens.title')}</h1>
+            <p className="buy-tokens__subtitle">{t('buyTokens.subtitle')}</p>
+          </div>
+          {isLoggedIn ? (
+            <div className="buy-tokens__balance">
+              <span className="buy-tokens__balance-icon">
+                <FaCoins aria-hidden="true" />
+              </span>
+              <div className="buy-tokens__balance-text">
+                <span className="buy-tokens__balance-label">{t('buyTokens.balanceLabel')}</span>
+                <strong className="buy-tokens__balance-amount">
+                  {balance !== null ? t('navbar.tokensBalance', { count: balance }) : '—'}
+                </strong>
+              </div>
             </div>
-          )}
-          {isLoggedIn && firstPurchasePercent > 0 && (
-            <div className="buy-tokens-page__first-purchase-badge">
-              <FaCoins />
-              {t('buyTokens.firstPurchaseBadge', { percent: firstPurchasePercent })}
+          ) : (
+            <div className="buy-tokens__guest">
+              <p className="buy-tokens__guest-text">
+                <FaGift aria-hidden="true" />
+                <span>
+                  {welcomeTokens !== null && <>{t('buyTokens.guestGift', { count: welcomeTokens })} </>}
+                  {t('buyTokens.guestNeedAccount')}
+                </span>
+              </p>
+              <AuthChoice tone="onLight" showLogin returnPath={RETURN_PATH} compact />
             </div>
           )}
         </div>
-      </header>
+      </section>
 
-      <main className="buy-tokens-page__main">
-        <div className="buy-tokens-page__container">
-          <section className="buy-tokens-page__info" aria-labelledby="buy-tokens-how">
-            <h2 id="buy-tokens-how" className="buy-tokens-page__info-title">
-              {t('buyTokens.howItWorksTitle')}
-            </h2>
-            <p className="buy-tokens-page__info-intro">{t('buyTokens.howItWorksIntro')}</p>
-            <div className="buy-tokens-page__highlight">
-              <FaCoins className="buy-tokens-page__highlight-icon" />
-              <strong>{t('buyTokens.oneTokenPerImage')}</strong>
+      {isLoggedIn && firstPurchasePercent > 0 && (
+        <div className="buy-tokens__block">
+          <p className="buy-tokens__first-purchase">
+            <FaGift aria-hidden="true" />
+            {t('buyTokens.firstPurchaseBadge', { percent: firstPurchasePercent })}
+          </p>
+        </div>
+      )}
+
+      {loadFailed && (
+        <div className="buy-tokens__block">
+          <div className="buy-tokens__load-error" role="alert">
+            <p>{t('buyTokens.loadError')}</p>
+            <button type="button" className="buy-tokens__retry" onClick={retryLoad}>
+              {t('seasonal.retry')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {packList.length > 0 && (
+        <section className="buy-tokens__block buy-tokens__packs" aria-labelledby="buy-tokens-packs-title">
+          <h2 id="buy-tokens-packs-title" className="buy-tokens__section-title">
+            {t('buyTokens.choosePack')}
+          </h2>
+          <TokenPackList>
+            {packList.map((pack, index) => (
+              <TokenPackCard
+                key={pack.id}
+                pack={pack}
+                promoPercent={appliedPromoPercent}
+                name={showPackNames ? t(PACK_NAME_KEYS[index]) : undefined}
+                highlighted={index === highlightedPack}
+                priceNote={showUsd ? formatPriceUsdRef(pack.price_cents) : undefined}
+              >
+                {isLoggedIn ? (
+                  <button
+                    type="button"
+                    className="token-pack__action"
+                    onClick={() => handleBuy(pack)}
+                    disabled={buyLoading}
+                  >
+                    {t('tokenPacks.buy')}
+                  </button>
+                ) : (
+                  <button type="button" className="token-pack__action" onClick={openSignUp}>
+                    {t('buyTokens.guestBuy')}
+                  </button>
+                )}
+              </TokenPackCard>
+            ))}
+          </TokenPackList>
+        </section>
+      )}
+
+      <section className="buy-tokens__block buy-tokens__extras">
+        {pricePerTokenCents !== null && (
+          <div className="buy-tokens__custom">
+            <div>
+              <h2 className="buy-tokens__custom-title">{t('buyTokens.customTitle')}</h2>
+              <p className="buy-tokens__custom-range">
+                {t('buyTokens.customRange', { min: CUSTOM_MIN, max: CUSTOM_MAX, price: formatPriceMxn(pricePerTokenCents) })}
+                {showUsd && <span className="buy-tokens__usd">{formatPriceUsdRef(pricePerTokenCents)}</span>}
+              </p>
             </div>
-            <p className="buy-tokens-page__info-price">
-              {t('buyTokens.pricePerToken')}: <strong>{formatPriceMxn(pricePerTokenCents)}</strong>
-              {showUsd && usdRate != null && (
-                <span className="buy-tokens-page__info-price-usd">{formatPriceUsdRef(pricePerTokenCents)}</span>
-              )}
-            </p>
-            <p className="buy-tokens-page__info-detail">{t('buyTokens.oneTokenPerImageDetail')}</p>
-            <p className="buy-tokens-page__info-where">{t('buyTokens.useInEditor')}</p>
-            <p className="buy-tokens-page__info-example">{t('buyTokens.examplePack')}</p>
-          </section>
-
-          <section className="buy-tokens-page__benefits" aria-labelledby="buy-tokens-why">
-            <h2 id="buy-tokens-why" className="buy-tokens-page__benefits-title">
-              {t('buyTokens.benefitsTitle')}
-            </h2>
-            <ul className="buy-tokens-page__benefits-list">
-              <li>{t('buyTokens.benefit1')}</li>
-              <li>{t('buyTokens.benefit2')}</li>
-              <li>{t('buyTokens.benefit3')}</li>
-            </ul>
-          </section>
-
-          {showUsd && (
-            <p className="buy-tokens-page__disclaimer">{t('buyTokens.disclaimerUsd')}</p>
-          )}
-
-          <h2 className="buy-tokens-page__packs-title">{t('buyTokens.choosePack')}</h2>
-
-          {promoSummary.hasCodePromos && isLoggedIn && (
-            <div className="buy-tokens-page__promo-code-section">
-              <label htmlFor="buy-tokens-promo-code" className="buy-tokens-page__promo-label">
-                {t('buyTokens.promoCodeLabel')}
+            <div className="buy-tokens__stepper">
+              <button
+                type="button"
+                className="buy-tokens__step"
+                aria-label={t('buyTokens.less')}
+                onClick={() => setCustomTokens((current) => stepCustomTokens(current, -1))}
+                disabled={customTokensClamped <= CUSTOM_MIN}
+              >
+                −
+              </button>
+              <label className="buy-tokens__amount">
+                <input
+                  type="number"
+                  min={CUSTOM_MIN}
+                  max={CUSTOM_MAX}
+                  value={customTokens}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value, 10);
+                    if (!Number.isNaN(v)) setCustomTokens(v);
+                    else if (e.target.value === '') setCustomTokens(0);
+                  }}
+                  onBlur={() => setCustomTokens((prev) => clampCustomTokens(prev))}
+                  className="buy-tokens__amount-input"
+                  aria-label={t('buyTokens.customTitle')}
+                />
+                <span className="buy-tokens__amount-unit">{t('buyTokens.tokens')}</span>
               </label>
+              <button
+                type="button"
+                className="buy-tokens__step"
+                aria-label={t('buyTokens.more')}
+                onClick={() => setCustomTokens((current) => stepCustomTokens(current, 1))}
+                disabled={customTokensClamped >= CUSTOM_MAX}
+              >
+                +
+              </button>
+            </div>
+            <div className="buy-tokens__shortcuts">
+              {CUSTOM_SHORTCUTS.map((amount) => (
+                <button
+                  key={amount}
+                  type="button"
+                  className={`buy-tokens__shortcut ${customTokens === amount ? 'buy-tokens__shortcut--current' : ''}`}
+                  aria-pressed={customTokens === amount}
+                  onClick={() => setCustomTokens(clampCustomTokens(amount))}
+                >
+                  {amount}
+                </button>
+              ))}
+            </div>
+            {isLoggedIn && appliedPromoPercent > 0 && (
+              <p className="buy-tokens__custom-bonus">
+                {codePromoPercent > 0
+                  ? t('buyTokens.promoCodeBonus', { percent: codePromoPercent })
+                  : t('buyTokens.customBonus', { percent: appliedPromoPercent })}
+              </p>
+            )}
+            <div className="buy-tokens__custom-footer">
+              <div className="buy-tokens__custom-total">
+                <span className="buy-tokens__custom-total-label">{t('buyTokens.customTotal')}</span>
+                <strong className="buy-tokens__custom-total-amount">
+                  {formatPriceMxn(customPriceCents)}
+                  {showUsd && <span className="buy-tokens__usd">{formatPriceUsdRef(customPriceCents)}</span>}
+                </strong>
+              </div>
+              {isLoggedIn ? (
+                <button
+                  type="button"
+                  className="buy-tokens__custom-buy"
+                  onClick={handleBuyCustom}
+                  disabled={!customValid || buyLoading}
+                >
+                  {t('buyTokens.customBuy', { count: customTokensClamped })}
+                </button>
+              ) : (
+                <button type="button" className="buy-tokens__custom-buy" onClick={openSignUp}>
+                  {t('buyTokens.guestBuy')}
+                </button>
+              )}
+            </div>
+          </div>
+
+        )}
+
+        <div className="buy-tokens__side">
+          {promoSummary.hasCodePromos && isLoggedIn && (
+            <details className="buy-tokens__promo" open>
+              <summary className="buy-tokens__promo-title">{t('buyTokens.promoCodeLabel')}</summary>
               <input
-                id="buy-tokens-promo-code"
                 type="text"
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                 placeholder={t('buyTokens.promoCodePlaceholder')}
-                className="buy-tokens-page__promo-input"
+                className="buy-tokens__promo-input"
                 maxLength={32}
+                aria-label={t('buyTokens.promoCodeLabel')}
               />
               {codePromoPercent > 0 && (
-                <span className="buy-tokens-page__promo-applied">
+                <span className="buy-tokens__promo-applied" role="status">
                   ✓ {t('buyTokens.promoCodeApplied', { percent: codePromoPercent })}
                 </span>
               )}
-            </div>
+            </details>
           )}
+          <ul className="buy-tokens__trust">
+            <li>
+              <FaLock aria-hidden="true" />
+              {t('buyTokens.trustSecure')}
+            </li>
+            <li>
+              <FaStore aria-hidden="true" />
+              {t('buyTokens.trustCash')}
+            </li>
+            <li>
+              <FaUndo aria-hidden="true" />
+              {t('buyTokens.trustRefund')}
+            </li>
+          </ul>
+        </div>
+      </section>
 
-          <div className="buy-tokens-page__grid">
-            {packs.map((pack) => {
-              const totalWithPromo = getTotalTokensWithPromo(pack.base_tokens, pack.bonus_tokens);
-              const promoBonus = totalWithPromo - (pack.base_tokens + pack.bonus_tokens);
-              return (
-                <div key={pack.id} className="buy-tokens-page__card">
-                  <div className="buy-tokens-page__card-tokens">
-                    {totalWithPromo} {t('buyTokens.tokens')}
-                  </div>
-                  <div className="buy-tokens-page__card-you-pay-gift">
-                    {t('buyTokens.youPay', { base: pack.base_tokens })} · {t('buyTokens.weGift', { bonus: pack.bonus_tokens })}
-                    {promoBonus > 0 && (
-                      <span className="buy-tokens-page__card-promo"> · {t('buyTokens.promoBonus', { bonus: promoBonus })}</span>
-                    )}
-                  </div>
-                  <div className="buy-tokens-page__card-price">
-                    {formatPriceMxn(pack.price_cents)}
-                  </div>
-                  {showUsd && (
-                    <div className="buy-tokens-page__card-price-usd">
-                      {formatPriceUsdRef(pack.price_cents)}
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    className="buy-tokens-page__card-buy"
-                    onClick={() => handleBuy(pack)}
-                    disabled={!isLoggedIn || buyLoading}
-                  >
-                    {t('buyTokens.buyButton')}
-                  </button>
-                </div>
-              );
-            })}
-            <div className="buy-tokens-page__card buy-tokens-page__card--custom">
-              <label className="buy-tokens-page__custom-label" htmlFor="buy-tokens-custom-input">
-                {t('buyTokens.customAmountLabel')}
-              </label>
-              <input
-                id="buy-tokens-custom-input"
-                type="number"
-                min={CUSTOM_MIN}
-                max={CUSTOM_MAX}
-                value={customTokens}
-                onChange={(e) => {
-                  const v = parseInt(e.target.value, 10);
-                  if (!Number.isNaN(v)) setCustomTokens(v);
-                  else if (e.target.value === '') setCustomTokens(0);
-                }}
-                onBlur={() => setCustomTokens((prev) => Math.max(CUSTOM_MIN, Math.min(CUSTOM_MAX, prev)))}
-                className="buy-tokens-page__custom-input"
-                placeholder={t('buyTokens.customAmountPlaceholder')}
-                aria-describedby="buy-tokens-custom-hint"
-              />
-              <p id="buy-tokens-custom-hint" className="buy-tokens-page__custom-hint">
-                {t('buyTokens.customAmountMin', { min: CUSTOM_MIN })} · {t('buyTokens.customAmountMax', { max: CUSTOM_MAX })}
-              </p>
-              <p className="buy-tokens-page__custom-price-per-token">
-                {t('buyTokens.pricePerToken')}: {formatPriceMxn(pricePerTokenCents)}
-                {showUsd && <span className="buy-tokens-page__card-price-usd">{formatPriceUsdRef(pricePerTokenCents)}</span>}
-              </p>
-              {appliedPromoPercent > 0 && (
-                <p className="buy-tokens-page__custom-bonus">
-                  {codePromoPercent > 0
-                    ? t('buyTokens.promoCodeBonus', { percent: codePromoPercent })
-                    : t('buyTokens.customBonus', { percent: appliedPromoPercent })}
-                </p>
-              )}
-              <div className="buy-tokens-page__card-price">
-                {t('buyTokens.customTotal')}: {formatPriceMxn(customPriceCents)}
-              </div>
-              {showUsd && (
-                <div className="buy-tokens-page__card-price-usd">
-                  {formatPriceUsdRef(customPriceCents)}
-                </div>
-              )}
-              <button
-                type="button"
-                className="buy-tokens-page__card-buy"
-                onClick={handleBuyCustom}
-                disabled={!customValid || !isLoggedIn || buyLoading}
-              >
-                {t('buyTokens.buyButton')}
-              </button>
-            </div>
+      <section className="landing-section--band">
+        <div className="buy-tokens__block buy-tokens__how">
+          <div className="buy-tokens__how-images">
+            <img
+              className="buy-tokens__how-before"
+              src="/media/beneficios/antes-la-chata.jpg"
+              alt={t('buyTokens.beforeAlt')}
+              width={150}
+              height={200}
+              loading="lazy"
+            />
+            <span className="buy-tokens__how-arrow">
+              {t('buyTokens.oneToken')}
+              <FaArrowDown aria-hidden="true" />
+            </span>
+            <img
+              className="buy-tokens__how-after"
+              src="/media/beneficios/ia-la-chata.jpg"
+              alt={t('landing.benefitsPage.gallery.cardAlt', { name: 'La Chata' })}
+              width={140}
+              height={210}
+              loading="lazy"
+            />
+          </div>
+          <div className="buy-tokens__how-text">
+            <h2 className="buy-tokens__section-title">{t('buyTokens.howTitle')}</h2>
+            <p>{t('buyTokens.howText')}</p>
+            <Link to="/beneficios" className="buy-tokens__how-link">
+              {t('buyTokens.examplesLink')} <span aria-hidden="true">→</span>
+            </Link>
           </div>
         </div>
-      </main>
-      <EmailAuthModal isOpen={isEmailModalOpen} onClose={() => setIsEmailModalOpen(false)} initialMode="login" />
+      </section>
+
+      <p className="buy-tokens__currency-note">{t('buyTokens.currencyNote')}</p>
+
+      <EmailAuthModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        initialMode="signup"
+        googleReturnPath={RETURN_PATH}
+      />
       <WarningModal
         isOpen={isNotLoggedInModalOpen}
         title={t('buyTokens.notLoggedInModal.title')}
@@ -440,6 +545,6 @@ export const BuyTokensPage: React.FC = () => {
         onCancel={() => setIsNotLoggedInModalOpen(false)}
         singleButton
       />
-    </div>
+    </main>
   );
 };

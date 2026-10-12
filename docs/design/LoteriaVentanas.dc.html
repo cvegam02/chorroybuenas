@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Página de lotería — ventanas</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;family=Arvo:wght@700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f5efe8}
+a{color:#c2410c}a:hover{color:#9a3412}
+</style>
+</helmet>
+<div style="font-family: 'Quicksand', system-ui, sans-serif; color: #431407; background: #f5efe8; width: 1440px; height: 1200px; box-sizing: border-box; padding: 40px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: auto auto; gap: 32px;">
+
+  <!-- 1. Menú -->
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em;">1 · Menú «⋮» de la lotería</div>
+    <div style="background: #fffbf7; border-radius: 20px; height: 500px; box-sizing: border-box; padding: 26px; position: relative;">
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <span style="display: flex; align-items: center; gap: 8px; background: #ea580c; color: #ffffff; font-weight: 700; font-size: 15px; padding: 11px 18px; border-radius: 999px;">Descargar PDF</span>
+        <button type="button" aria-label="Más acciones de la lotería" aria-expanded="true" style="width: 46px; height: 46px; border-radius: 999px; border: 2px solid #ea580c; background: #ffedd5; color: #c2410c; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+      </div>
+      <div role="menu" style="position: absolute; right: 26px; top: 84px; width: 250px; background: #ffffff; border: 1px solid #fde4cc; border-radius: 16px; padding: 6px; box-shadow: 0 16px 36px rgba(67,20,7,0.18); display: flex; flex-direction: column;">
+        <button type="button" role="menuitem" style="display: flex; align-items: center; gap: 10px; font: inherit; font-weight: 600; font-size: 15px; color: #431407; background: transparent; border: none; padding: 12px; border-radius: 10px; text-align: left;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Cambiar nombre</button>
+        <button type="button" role="menuitem" style="display: flex; align-items: center; gap: 10px; font: inherit; font-weight: 600; font-size: 15px; color: #431407; background: #fff7ed; border: none; padding: 12px; border-radius: 10px; text-align: left;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Revolver tableros</button>
+        <button type="button" role="menuitem" style="display: flex; align-items: center; gap: 10px; font: inherit; font-weight: 600; font-size: 15px; color: #431407; background: transparent; border: none; padding: 12px; border-radius: 10px; text-align: left;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9l6 6M15 9l-6 6"/></svg>Borrar tableros</button>
+        <div style="height: 1px; background: #fde4cc; margin: 4px 8px;"></div>
+        <button type="button" role="menuitem" style="display: flex; align-items: center; gap: 10px; font: inherit; font-weight: 600; font-size: 15px; color: #b91c1c; background: transparent; border: none; padding: 12px; border-radius: 10px; text-align: left;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"/></svg>Eliminar lotería</button>
+      </div>
+      <p style="position: absolute; left: 26px; right: 26px; bottom: 22px; margin: 0; font-size: 14px; color: #78350f; line-height: 1.5;">Lo que se usa poco o borra cosas sale del frente y vive aquí. En celular es la misma lista como hoja inferior.</p>
+    </div>
+  </div>
+
+  <!-- 2. Cartas listas, sin tableros -->
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em;">2 · Cartas suficientes, sin tableros</div>
+    <div style="background: #fffbf7; border-radius: 20px; height: 500px; box-sizing: border-box; padding: 26px; display: flex; flex-direction: column; gap: 18px;">
+      <div style="background: #ffedd5; border-radius: 18px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="width: 44px; height: 44px; border-radius: 14px; background: #ffffff; display: flex; align-items: center; justify-content: center; flex: 0 0 auto;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg></span>
+          <strong style="font-size: 18px;">¡Ya tienes 24 cartas! Arma tus tableros</strong>
+        </div>
+        <span style="font-size: 15px; color: #78350f; line-height: 1.5;">Elige cuántos tableros quieres, uno por jugador.</span>
+        <a href="#" style="align-self: flex-start; background: #ea580c; color: #ffffff; font-weight: 700; font-size: 16px; text-decoration: none; padding: 12px 22px; border-radius: 999px;">Armar tableros</a>
+      </div>
+      <p style="margin: 0; font-size: 14px; color: #78350f; line-height: 1.5;">Reemplaza al aviso verde cuando la lotería tiene cartas suficientes pero no tableros, por ejemplo después de «Borrar tableros». La sección Tableros muestra este mismo botón.</p>
+    </div>
+  </div>
+
+  <!-- 3. Revolver -->
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em;">3 · Confirmar revolver</div>
+    <div style="background: rgba(67,20,7,0.55); border-radius: 20px; height: 500px; box-sizing: border-box; padding: 24px; display: flex; align-items: center; justify-content: center;">
+      <div role="alertdialog" aria-labelledby="rev-t" style="width: 100%; max-width: 360px; background: #ffffff; border-radius: 24px; padding: 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 80px rgba(67,20,7,0.35);">
+        <span style="width: 52px; height: 52px; border-radius: 16px; background: #ffedd5; display: flex; align-items: center; justify-content: center;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></span>
+        <h3 id="rev-t" style="margin: 0; font-size: 22px;">¿Revolver los 12 tableros?</h3>
+        <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #78350f;">Se arman tableros nuevos con las mismas cartas y los actuales se reemplazan. Si ya imprimiste, descarga el PDF otra vez.</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 4px;">
+          <button type="button" style="font: inherit; font-weight: 700; font-size: 15px; padding: 12px 18px; border-radius: 999px; border: 1px solid #fde4cc; background: #ffffff; color: #78350f;">Cancelar</button>
+          <button type="button" style="font: inherit; font-weight: 700; font-size: 15px; padding: 12px 22px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff;">Sí, revolver</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Borrar tableros -->
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em;">4 · Confirmar borrar tableros</div>
+    <div style="background: rgba(67,20,7,0.55); border-radius: 20px; height: 500px; box-sizing: border-box; padding: 24px; display: flex; align-items: center; justify-content: center;">
+      <div role="alertdialog" aria-labelledby="bor-t" style="width: 100%; max-width: 360px; background: #ffffff; border-radius: 24px; padding: 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 80px rgba(67,20,7,0.35);">
+        <span style="width: 52px; height: 52px; border-radius: 16px; background: #fee2e2; display: flex; align-items: center; justify-content: center;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9l6 6M15 9l-6 6"/></svg></span>
+        <h3 id="bor-t" style="margin: 0; font-size: 22px;">¿Borrar los 12 tableros?</h3>
+        <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #78350f;">Tus 24 cartas se quedan. Puedes armar tableros nuevos cuando quieras.</p>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 4px;">
+          <button type="button" style="font: inherit; font-weight: 700; font-size: 15px; padding: 12px 18px; border-radius: 999px; border: 1px solid #fde4cc; background: #ffffff; color: #78350f;">No, conservar</button>
+          <button type="button" style="font: inherit; font-weight: 700; font-size: 15px; padding: 12px 22px; border-radius: 999px; border: none; background: #b91c1c; color: #ffffff;">Sí, borrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Preparando PDF -->
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em;">5 · Preparando el PDF</div>
+    <div style="background: rgba(67,20,7,0.55); border-radius: 20px; height: 500px; box-sizing: border-box; padding: 24px; display: flex; align-items: center; justify-content: center;">
+      <div role="status" style="width: 100%; max-width: 340px; background: #ffffff; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; box-shadow: 0 30px 80px rgba(67,20,7,0.35);">
+        <div style="display: flex;">
+          <img src="/_blob/e7fd813384dcb18d22c9c90a5b9156ad" alt="" style="width: 52px; height: 78px; border-radius: 4px; transform: rotate(-8deg); box-shadow: 0 4px 10px rgba(194,65,12,0.2);">
+          <img src="/_blob/c08bbf2b34d6b08ffa378af14f67fad8" alt="" style="width: 52px; height: 78px; border-radius: 4px; margin-left: -12px; position: relative; z-index: 1; box-shadow: 0 4px 10px rgba(194,65,12,0.2);">
+          <img src="/_blob/aa7c11be20253fd9cfd1cbaa1263fe34" alt="" style="width: 52px; height: 78px; border-radius: 4px; margin-left: -12px; transform: rotate(8deg); box-shadow: 0 4px 10px rgba(194,65,12,0.2);">
+        </div>
+        <h3 style="margin: 0; font-size: 21px;">Preparando tu PDF…</h3>
+        <span style="font-size: 15px; color: #78350f;">12 tableros y 24 cartas</span>
+        <div style="width: 100%; height: 10px; border-radius: 999px; background: #fff7ed; overflow: hidden;"><div style="width: 62%; height: 100%; background: #ea580c; border-radius: 999px;"></div></div>
+        <span style="font-size: 13px; color: #78350f;">Con muchas cartas puede tardar un momento. No cierres esta página.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Ver carta -->
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-weight: 700; font-size: 15px; color: #9a3412; text-transform: uppercase; letter-spacing: 0.06em;">6 · Ver carta grande</div>
+    <div style="background: rgba(67,20,7,0.75); border-radius: 20px; height: 500px; box-sizing: border-box; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; position: relative;">
+      <button type="button" aria-label="Cerrar" style="position: absolute; top: 14px; right: 14px; width: 44px; height: 44px; border-radius: 999px; border: none; background: rgba(255,255,255,0.15); color: #ffffff; display: flex; align-items: center; justify-content: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" aria-label="Carta anterior" style="width: 44px; height: 44px; border-radius: 999px; border: none; background: #ffffff; color: #c2410c; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+        <img src="/_blob/15b7f56e7903c2f5a97409968f7246b8" alt="Carta 9, La Chata" style="width: 210px; aspect-ratio: 2 / 3; border-radius: 10px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+        <button type="button" aria-label="Carta siguiente" style="width: 44px; height: 44px; border-radius: 999px; border: none; background: #ffffff; color: #c2410c; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+      </div>
+      <span style="color: #ffedd5; font-size: 14px; font-weight: 600;">9 de 24</span>
+      <a href="#" style="background: #ffffff; color: #c2410c; font-weight: 700; font-size: 15px; text-decoration: none; padding: 10px 18px; border-radius: 999px;">Editar esta carta</a>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

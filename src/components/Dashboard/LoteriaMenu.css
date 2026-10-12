@@ -1,0 +1,169 @@
+/* Menú «⋮» de una lotería en Mi cuenta (U1): desplegable en computadora, hoja inferior en celular */
+
+.loteria-menu__dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 220px;
+  padding: 6px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.loteria-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 12px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text-main);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.loteria-menu__item svg {
+  flex: 0 0 auto;
+  color: var(--color-primary-dark);
+  font-size: 16px;
+}
+
+.loteria-menu__item:hover:not(:disabled),
+.loteria-menu__item:focus-visible {
+  background: var(--color-bg-subtle);
+  outline: none;
+}
+
+.loteria-menu__item:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.loteria-menu__item--danger,
+.loteria-menu__item--danger svg {
+  color: var(--color-danger);
+}
+
+.loteria-menu__divider {
+  height: 1px;
+  margin: 4px 8px;
+  background: var(--color-primary-lightest);
+}
+
+/* Hoja inferior */
+.loteria-menu__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: color-mix(in srgb, var(--color-text-main) 45%, transparent);
+}
+
+.loteria-menu__sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 16px max(22px, env(safe-area-inset-bottom));
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  font-family: var(--font-body);
+}
+
+.loteria-menu__handle {
+  align-self: center;
+  width: 40px;
+  height: 5px;
+  margin-bottom: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-lightest);
+}
+
+.loteria-menu__sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+  padding: 4px 4px 12px;
+  border-bottom: 1px solid var(--color-primary-lightest);
+}
+
+.loteria-menu__sheet-thumb {
+  flex: 0 0 auto;
+  width: 40px;
+  aspect-ratio: 2 / 3;
+  border-radius: 4px;
+  background: var(--color-bg-subtle);
+  object-fit: cover;
+}
+
+.loteria-menu__sheet-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.loteria-menu__sheet-name {
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.loteria-menu__sheet-details {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.loteria-menu__sheet-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.loteria-menu__item--sheet {
+  gap: 12px;
+  padding: 14px 8px;
+  font-size: 16px;
+}
+
+.loteria-menu__item--sheet svg {
+  font-size: 18px;
+}
+
+/* En la hoja «Eliminar» va seguido, sin raya */
+.loteria-menu__sheet-items .loteria-menu__divider {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .loteria-menu__overlay {
+    animation: loteria-menu-fade 0.2s ease-out;
+  }
+
+  .loteria-menu__sheet {
+    animation: loteria-menu-rise 0.25s ease-out;
+  }
+}
+
+@keyframes loteria-menu-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes loteria-menu-rise {
+  from {
+    transform: translateY(100%);
+  }
+}

@@ -1,278 +1,345 @@
-.ai-batch-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    backdrop-filter: blur(8px);
+/* IA en lote (FEAT-34, US A6): confirmar, avance, resultado y «te faltan tokens». El marco está en CardUploadModal.css. */
+
+.ai-batch {
+  max-width: 520px;
 }
 
-.ai-batch-modal {
-    background: white;
-    width: 90%;
-    max-width: 500px;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-    animation: modal-enter 0.3s ease-out;
-    font-family: var(--font-body);
+.ai-batch__body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-@keyframes modal-enter {
-    from {
-        transform: scale(0.9);
-        opacity: 0;
-    }
-
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
+.ai-batch__muted {
+  display: block;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
 }
 
-.ai-batch-modal__header {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-    color: white;
-    padding: 24px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
+.ai-batch__muted--small {
+  font-size: 14px;
 }
 
-.ai-batch-modal__header-icon {
-    font-size: 2.5rem;
-    animation: magic-float 3s ease-in-out infinite;
+/* Miniaturas de cartas */
+
+.ai-batch__thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
 }
 
-@keyframes magic-float {
-
-    0%,
-    100% {
-        transform: translateY(0) rotate(0);
-    }
-
-    50% {
-        transform: translateY(-10px) rotate(10deg);
-    }
+.ai-batch__thumb {
+  flex: 0 0 auto;
+  display: block;
+  width: 40px;
+  aspect-ratio: 2 / 3;
+  border-radius: 4px;
+  background: var(--color-primary-lightest);
+  object-fit: cover;
 }
 
-.ai-batch-modal__header h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 800;
-    font-family: var(--font-display);
-    letter-spacing: -0.02em;
+.ai-batch__thumbs-more {
+  padding: 0 4px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 700;
 }
 
-.ai-batch-modal__content {
-    padding: 32px;
+/* Confirmar */
+
+.ai-batch__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.ai-batch-modal__idle,
-.ai-batch-modal__processing,
-.ai-batch-modal__complete,
-.ai-batch-modal__error {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    text-align: center;
+.ai-batch__table {
+  margin: 0;
 }
 
-.ai-batch-modal__estimation {
-    background: var(--color-primary-lightest);
-    width: 100%;
-    padding: 20px;
-    border-radius: 12px;
-    border: 2px dashed var(--color-primary-lighter);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.ai-batch__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px dashed var(--color-primary-lightest);
+  font-size: 15px;
 }
 
-.text-muted {
-    opacity: 0.7;
-    font-weight: 500 !important;
+.ai-batch__row dt {
+  color: var(--color-text-muted);
 }
 
-.ai-batch-modal__est-item {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--color-primary-dark);
+.ai-batch__row dd {
+  margin: 0;
+  font-weight: 700;
 }
 
-.ai-batch-modal__disclaimer {
-    font-size: 0.8rem;
-    color: #666;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    max-width: 80%;
+.ai-batch__row dd.ai-batch__tokens {
+  color: var(--color-primary-dark);
+  font-size: 18px;
 }
 
-.ai-batch-modal__start-btn,
-.ai-batch-modal__close-btn,
-.ai-batch-modal__retry-btn {
-    width: 100%;
-    padding: 16px;
-    border: none;
-    border-radius: 12px;
-    font-weight: 800;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: all 0.2s;
+.ai-batch__refund {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-secondary-light) 45%, var(--color-bg-surface));
+  color: var(--color-text-main);
+  font-size: 14px;
+  line-height: 1.45;
 }
 
-.ai-batch-modal__start-btn {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-    color: white;
+.ai-batch__refund svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--color-secondary-dark);
 }
 
-.ai-batch-modal__start-btn:hover:not(:disabled) {
-    background: var(--color-primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(194, 65, 12, 0.3);
+.ai-batch__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
-.ai-batch-modal__start-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
+.ai-batch__start {
+  flex: 1 1 auto;
+  padding: 13px 22px;
+  background: var(--color-ai);
+  color: var(--color-text-inverted);
+  box-shadow: var(--shadow-md);
 }
 
-.ai-batch-modal__some-skipped {
-    margin: 0 0 12px 0;
-    padding: 10px 12px;
-    background: var(--color-primary-lightest);
-    border-radius: 10px;
-    font-size: 0.9rem;
-    color: var(--color-primary-dark);
-    font-weight: 500;
+.ai-batch__start:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-ai) 85%, var(--color-text-main));
 }
 
-.ai-batch-modal__tokens-warning {
-    color: var(--color-warning, #b45309);
-    font-weight: 600;
-    margin: 0 0 12px 0;
-    padding: 10px 12px;
-    background: rgba(180, 83, 9, 0.1);
-    border-radius: 10px;
-    font-size: 0.9rem;
+.ai-batch__start:disabled {
+  box-shadow: none;
 }
 
-.ai-batch-modal__progress-container {
-    width: 100%;
-    height: 12px;
-    background: #eee;
-    border-radius: 6px;
-    overflow: hidden;
-    margin-top: 10px;
+.ai-batch a.card-form__button {
+  text-decoration: none;
 }
 
-.ai-batch-modal__progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
-    transition: width 0.5s ease;
+/* Avance */
+
+.ai-batch__progress-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 18px;
 }
 
-.ai-batch-modal__status-text {
-    font-weight: 700;
-    color: #333;
+.ai-batch__progress-count {
+  color: var(--color-ai);
+  font-size: 15px;
+  font-weight: 700;
 }
 
-.ai-batch-modal__painter {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #FF5722;
-    font-weight: 600;
+.ai-batch__bar {
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-ai) 15%, var(--color-bg-surface));
+  overflow: hidden;
 }
 
-.ai-batch-modal__painter-anim {
-    font-size: 2rem;
-    animation: paint-brush 1s infinite alternate;
+.ai-batch__bar span {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-ai);
+  transition: width 0.4s ease;
 }
 
-@keyframes paint-brush {
-    from {
-        transform: rotate(-20deg) translate(-5px);
-    }
-
-    to {
-        transform: rotate(20deg) translate(5px);
-    }
+.ai-batch__grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
 }
 
-.ai-batch-modal__processing-info {
-    font-size: 0.85rem;
-    color: #666;
-    margin: 12px 0 0;
-    padding: 10px 14px;
-    background: #f8f9fa;
-    border-radius: 10px;
-    line-height: 1.4;
-    text-align: left;
+.ai-batch__cell {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  border-radius: 4px;
+  background: var(--color-primary-lightest);
+  overflow: hidden;
 }
 
-.ai-batch-modal__close-and-continue {
-    margin-top: 12px;
-    padding: 12px 20px;
-    background: transparent;
-    border: 2px solid var(--color-primary);
-    color: var(--color-primary);
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.2s;
+.ai-batch__cell img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.ai-batch-modal__close-and-continue:hover {
-    background: var(--color-primary-lightest);
+.ai-batch__cell--pending,
+.ai-batch__cell--rejected {
+  opacity: 0.4;
 }
 
-.ai-batch-modal__success-icon {
-    font-size: 4rem;
-    color: #4CAF50;
-    animation: success-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+.ai-batch__cell--current {
+  box-shadow: inset 0 0 0 3px var(--color-ai);
 }
 
-@keyframes success-pop {
-    0% {
-        transform: scale(0);
-    }
-
-    100% {
-        transform: scale(1);
-    }
+.ai-batch__cell--current img {
+  padding: 3px;
+  box-sizing: border-box;
 }
 
-.ai-batch-modal__close-btn {
-    background: #4CAF50;
-    color: white;
+/* La carta en turno: velo de IA con su rueda, como la carta que se convierte en la cuadrícula (FEAT-39, US A4) */
+.ai-batch__cell-working {
+  position: absolute;
+  inset: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-ai) 70%, transparent),
+    color-mix(in srgb, var(--color-primary) 70%, transparent)
+  );
 }
 
-.ai-batch-modal__error-icon {
-    font-size: 4rem;
-    color: #F44336;
+.ai-batch__cell-spinner {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid color-mix(in srgb, var(--color-text-inverted) 35%, transparent);
+  border-top-color: var(--color-text-inverted);
+  border-radius: var(--radius-full);
+  animation: ai-batch-spin 0.9s linear infinite;
 }
 
-.ai-batch-modal__skipped-note {
-    background: #FFF8E1;
-    border-radius: 12px;
-    padding: 12px 20px;
-    border-left: 5px solid #FFC107;
-    margin: 10px 0;
-    line-height: 1.4;
-    text-align: left;
-    width: 100%;
-    font-size: 0.9rem;
-    color: #856404;
+@keyframes ai-batch-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ai-batch__cell-check {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background: var(--color-secondary-dark);
+  color: var(--color-text-inverted);
+  font-size: 9px;
+}
+
+/* Resultado y error */
+
+.ai-batch__result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.ai-batch__result .ai-batch__thumbs {
+  justify-content: center;
+}
+
+.ai-batch__result-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: var(--color-ai);
+  color: var(--color-text-inverted);
+  font-size: 24px;
+}
+
+.ai-batch__result-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 23px;
+  line-height: 1.2;
+  color: var(--color-text-main);
+}
+
+.ai-batch__rejected {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.ai-batch__rejected strong {
+  color: var(--color-text-main);
+}
+
+.ai-batch__error-icon {
+  color: var(--color-danger);
+  font-size: 36px;
+}
+
+.ai-batch__error-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* Te faltan tokens */
+
+.ai-batch__missing {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ai-batch__missing-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent-light);
+  color: var(--color-text-muted);
+  font-size: 22px;
+}
+
+.ai-batch__missing-title {
+  display: block;
+  font-size: 17px;
+}
+
+.ai-batch__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-batch__bar span {
+    transition: none;
+  }
+
+  .ai-batch__cell-spinner {
+    animation: none;
+  }
 }

@@ -1,36 +1,23 @@
+/* Selector de idioma compacto de la barra superior («ES» / «EN») */
+
 .language-switcher {
     display: flex;
     align-items: center;
-    gap: 6px;
-    background: var(--color-bg-subtle);
-    border: 1px solid var(--color-border);
-    color: var(--color-text-main);
-    padding: 6px 10px;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all 0.2s ease;
+    gap: 4px;
+    padding: 6px 0;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
     font-family: var(--font-body);
-    font-weight: 600;
-    font-size: 0.8125rem;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
 }
 
 .language-switcher:hover {
-    background: var(--color-bg-hover);
-    border-color: var(--color-primary-light);
     color: var(--color-primary);
-}
-
-.language-switcher__icon {
-    font-size: 0.875rem;
 }
 
 .language-switcher__label {
     line-height: 1;
-}
-
-@media (max-width: 768px) {
-    .language-switcher {
-        padding: 8px 12px;
-        font-size: 0.875rem;
-    }
 }

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Cuenta celular — estados</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;family=Arvo:wght@700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#fffbf7}
+a{color:#c2410c}a:hover{color:#9a3412}
+</style>
+</helmet>
+<div style="font-family: 'Quicksand', system-ui, sans-serif; color: #431407; background: #fffbf7; width: 1808px; height: 2200px; box-sizing: border-box; padding: 56px 64px; display: grid; grid-template-columns: repeat(4, 390px); align-content: start; align-items: start; gap: 48px 40px;">
+
+  <!-- 1. CREAR CUENTA -->
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    <span style="font-weight: 700; font-size: 15px; color: #9a3412;">1 · Crear cuenta (pantalla completa, se desplaza)</span>
+    <div style="width: 390px; height: 1060px; border-radius: 28px; overflow: hidden; background: rgba(67,20,7,0.5); box-shadow: 0 0 0 1px #fde4cc; box-sizing: border-box; padding-top: 24px; display: flex; flex-direction: column;">
+      <div role="dialog" aria-modal="true" aria-labelledby="m1-t" style="flex: 1 1 auto; position: relative; background: #ffffff; border-radius: 24px 24px 0 0; padding: 10px 20px 28px; display: flex; flex-direction: column; gap: 14px;">
+        <span style="align-self: center; width: 40px; height: 5px; border-radius: 999px; background: #fde4cc;"></span>
+        <button type="button" aria-label="Cerrar" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 999px; border: none; background: transparent; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        <div style="display: flex; flex-direction: column; gap: 2px; padding-right: 36px;">
+          <h2 id="m1-t" style="margin: 0; font-size: 23px; line-height: 1.2;">Crea tu cuenta gratis</h2>
+          <p style="margin: 0; font-size: 14px; color: #78350f;">Guarda tus loterías en la nube.</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; background: #ccfbf1; color: #115e59; border-radius: 14px; padding: 10px 12px; font-weight: 600; font-size: 14px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto;"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M7.5 8a2.5 2.5 0 1 1 4.5-1.5A2.5 2.5 0 1 1 16.5 8"/></svg><span>Te regalamos <strong>5 tokens</strong> al crear tu cuenta.</span></div>
+        <div role="tablist" aria-label="Tipo de acceso" style="display: grid; grid-template-columns: 1fr 1fr; background: #fff7ed; border-radius: 999px; padding: 4px;">
+          <button type="button" role="tab" aria-selected="false" style="font: inherit; font-weight: 700; font-size: 15px; padding: 11px 10px; border-radius: 999px; border: none; background: transparent; color: #9a3412;">Iniciar sesión</button>
+          <button type="button" role="tab" aria-selected="true" style="font: inherit; font-weight: 700; font-size: 15px; padding: 11px 10px; border-radius: 999px; border: none; background: #ffffff; color: #431407; box-shadow: 0 2px 6px rgba(67,20,7,0.12);">Crear cuenta</button>
+        </div>
+        <button type="button" style="font: inherit; font-weight: 700; font-size: 16px; padding: 13px 18px; border-radius: 999px; border: 2px solid #fdba74; background: #ffffff; color: #431407; display: flex; align-items: center; justify-content: center; gap: 10px;"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continuar con Google</button>
+        <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; color: #78350f;"><span style="flex: 1 1 auto; height: 1px; background: #fde4cc;"></span>o con tu correo<span style="flex: 1 1 auto; height: 1px; background: #fde4cc;"></span></div>
+        <form style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="m1-name" style="font-weight: 700; font-size: 14px;">Tu nombre <span style="font-weight: 500; color: #78350f;">(opcional)</span></label>
+            <input id="m1-name" type="text" autocomplete="name" value="Carlos Vega" style="font: inherit; font-size: 16px; color: #431407; padding: 13px 14px; border: 2px solid #fde4cc; border-radius: 12px; background: #ffffff; width: 100%; box-sizing: border-box;">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="m1-email" style="font-weight: 700; font-size: 14px;">Correo</label>
+            <input id="m1-email" type="email" inputmode="email" autocomplete="email" value="carlos.tests01@gmail.com" style="font: inherit; font-size: 16px; color: #431407; padding: 13px 14px; border: 2px solid #fde4cc; border-radius: 12px; background: #ffffff; width: 100%; box-sizing: border-box;">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="m1-pass" style="font-weight: 700; font-size: 14px;">Contraseña</label>
+            <div style="position: relative;">
+              <input id="m1-pass" type="password" autocomplete="new-password" aria-describedby="m1-pass-h" value="secreto123" style="font: inherit; font-size: 16px; color: #431407; padding: 13px 52px 13px 14px; border: 2px solid #ea580c; border-radius: 12px; background: #ffffff; width: 100%; box-sizing: border-box;">
+              <button type="button" aria-label="Mostrar contraseña" style="position: absolute; right: 2px; top: 2px; width: 48px; height: 48px; border: none; background: transparent; color: #9a3412; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+            <span id="m1-pass-h" style="font-size: 13px; color: #78350f;">Mínimo 6 caracteres.</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="m1-pass2" style="font-weight: 700; font-size: 14px;">Repite la contraseña</label>
+            <div style="position: relative;">
+              <input id="m1-pass2" type="password" autocomplete="new-password" value="" style="font: inherit; font-size: 16px; color: #431407; padding: 13px 52px 13px 14px; border: 2px solid #fde4cc; border-radius: 12px; background: #ffffff; width: 100%; box-sizing: border-box;">
+              <button type="button" aria-label="Mostrar contraseña" style="position: absolute; right: 2px; top: 2px; width: 48px; height: 48px; border: none; background: transparent; color: #9a3412; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+          </div>
+          <button type="submit" style="font: inherit; font-weight: 700; font-size: 16px; padding: 15px 18px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff; box-shadow: 0 4px 12px rgba(234,88,12,0.3); margin-top: 2px;">Crear mi cuenta</button>
+        </form>
+        <p style="margin: 0; font-size: 13px; text-align: center; color: #78350f;">Al crear tu cuenta aceptas el <a href="#">Aviso de privacidad</a>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. CORREO YA REGISTRADO -->
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    <span style="font-weight: 700; font-size: 15px; color: #9a3412;">2 · Crear cuenta — ese correo ya tiene cuenta</span>
+    <div style="width: 390px; height: 1100px; border-radius: 28px; overflow: hidden; background: rgba(67,20,7,0.5); box-shadow: 0 0 0 1px #fde4cc; box-sizing: border-box; padding-top: 24px; display: flex; flex-direction: column;">
+      <div role="dialog" aria-modal="true" aria-labelledby="m2-t" style="flex: 1 1 auto; position: relative; background: #ffffff; border-radius: 24px 24px 0 0; padding: 10px 20px 28px; display: flex; flex-direction: column; gap: 14px;">
+        <span style="align-self: center; width: 40px; height: 5px; border-radius: 999px; background: #fde4cc;"></span>
+        <button type="button" aria-label="Cerrar" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 999px; border: none; background: transparent; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        <div style="display: flex; flex-direction: column; gap: 2px; padding-right: 36px;">
+          <h2 id="m2-t" style="margin: 0; font-size: 23px; line-height: 1.2;">Crea tu cuenta gratis</h2>
+          <p style="margin: 0; font-size: 14px; color: #78350f;">Guarda tus loterías en la nube.</p>
+        </div>
+        <div role="tablist" aria-label="Tipo de acceso" style="display: grid; grid-template-columns: 1fr 1fr; background: #fff7ed; border-radius: 999px; padding: 4px;">
+          <button type="button" role="tab" aria-selected="false" style="font: inherit; font-weight: 700; font-size: 15px; padding: 11px 10px; border-radius: 999px; border: none; background: transparent; color: #9a3412;">Iniciar sesión</button>
+          <button type="button" role="tab" aria-selected="true" style="font: inherit; font-weight: 700; font-size: 15px; padding: 11px 10px; border-radius: 999px; border: none; background: #ffffff; color: #431407; box-shadow: 0 2px 6px rgba(67,20,7,0.12);">Crear cuenta</button>
+        </div>
+        <div role="alert" style="display: flex; gap: 10px; align-items: flex-start; background: #fee2e2; color: #991b1b; border-radius: 14px; padding: 12px; font-size: 14px; line-height: 1.45;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto; margin-top: 1px;"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>
+          <div style="display: flex; flex-direction: column; gap: 6px;"><strong style="font-size: 15px;">Ese correo ya tiene una cuenta.</strong><span><a href="#" style="color: #991b1b; font-weight: 700;">Inicia sesión</a> o <a href="#" style="color: #991b1b; font-weight: 700;">recupera tu contraseña</a>. Si la creaste con Google, usa «Continuar con Google».</span></div>
+        </div>
+        <button type="button" style="font: inherit; font-weight: 700; font-size: 16px; padding: 13px 18px; border-radius: 999px; border: 2px solid #fdba74; background: #ffffff; color: #431407; display: flex; align-items: center; justify-content: center; gap: 10px;"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continuar con Google</button>
+        <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; color: #78350f;"><span style="flex: 1 1 auto; height: 1px; background: #fde4cc;"></span>o con tu correo<span style="flex: 1 1 auto; height: 1px; background: #fde4cc;"></span></div>
+        <form style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="m2-name" style="font-weight: 700; font-size: 14px;">Tu nombre <span style="font-weight: 500; color: #78350f;">(opcional)</span></label>
+            <input id="m2-name" type="text" autocomplete="name" value="Carlos Vega" style="font: inherit; font-size: 16px; color: #431407; padding: 13px 14px; border: 2px solid #fde4cc; border-radius: 12px; background: #ffffff; width: 100%; box-sizing: border-box;">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="m2-email" style="font-weight: 700; font-size: 14px;">Correo</label>
+            <input id="m2-email" type="email" inputmode="email" autocomplete="email" aria-invalid="true" value="carlos.tests01@gmail.com" style="font: inherit; font-size: 16px; color: #431407; padding: 13px 14px; border: 2px solid #b91c1c; border-radius: 12px; background: #fffafa; width: 100%; box-sizing: border-box;">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="m2-pass" style="font-weight: 700; font-size: 14px;">Contraseña</label>
+            <div style="position: relative;">
+              <input id="m2-pass" type="password" autocomplete="new-password" value="secreto123" style="font: inherit; font-size: 16px; color: #431407; padding: 13px 52px 13px 14px; border: 2px solid #fde4cc; border-radius: 12px; background: #ffffff; width: 100%; box-sizing: border-box;">
+              <button type="button" aria-label="Mostrar contraseña" style="position: absolute; right: 2px; top: 2px; width: 48px; height: 48px; border: none; background: transparent; color: #9a3412; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="m2-pass2" style="font-weight: 700; font-size: 14px;">Repite la contraseña</label>
+            <div style="position: relative;">
+              <input id="m2-pass2" type="password" autocomplete="new-password" value="secreto123" style="font: inherit; font-size: 16px; color: #431407; padding: 13px 52px 13px 14px; border: 2px solid #fde4cc; border-radius: 12px; background: #ffffff; width: 100%; box-sizing: border-box;">
+              <button type="button" aria-label="Mostrar contraseña" style="position: absolute; right: 2px; top: 2px; width: 48px; height: 48px; border: none; background: transparent; color: #9a3412; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+          </div>
+          <button type="submit" style="font: inherit; font-weight: 700; font-size: 16px; padding: 15px 18px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff; box-shadow: 0 4px 12px rgba(234,88,12,0.3); margin-top: 2px;">Crear mi cuenta</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. ERROR AL ENTRAR -->
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    <span style="font-weight: 700; font-size: 15px; color: #9a3412;">3 · Iniciar sesión — datos incorrectos</span>
+    <div style="width: 390px; height: 844px; border-radius: 28px; overflow: hidden; background: rgba(67,20,7,0.5); box-shadow: 0 0 0 1px #fde4cc; display: flex; flex-direction: column; justify-content: flex-end;">
+      <div role="dialog" aria-modal="true" aria-labelledby="m3-t" style="position: relative; background: #ffffff; border-radius: 24px 24px 0 0; padding: 10px 20px 28px; display: flex; flex-direction: column; gap: 14px;">
+        <span style="align-self: center; width: 40px; height: 5px; border-radius: 999px; background: #fde4cc;"></span>
+        <button type="button" aria-label="Cerrar" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 999px; border: none; background: transparent; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        <div style="display: flex; flex-direction: column; gap: 2px; padding-right: 36px;">
+          <h2 id="m3-t" style="margin: 0; font-size: 23px; line-height: 1.2;">¡Qué gusto verte!</h2>
+          <p style="margin: 0; font-size: 14px; color: #78350f;">Entra para ver tus loterías y tus tokens.</p>
+        </div>
+        <div role="tablist" aria-label="Tipo de acceso" style="display: grid; grid-template-columns: 1fr 1fr; background: #fff7ed; border-radius: 999px; padding: 4px;">
+          <button type="button" role="tab" aria-selected="true" style="font: inherit; font-weight: 700; font-size: 15px; padding: 11px 10px; border-radius: 999px; border: none; background: #ffffff; color: #431407; box-shadow: 0 2px 6px rgba(67,20,7,0.12);">Iniciar sesión</button>
+          <button type="button" role="tab" aria-selected="false" style="font: inherit; font-weight: 700; font-size: 15px; padding: 11px 10px; border-radius: 999px; border: none; background: transparent; color: #9a3412;">Crear cuenta</button>
+        </div>
+        <div role="alert" style="display: flex; gap: 10px; align-items: flex-start; background: #fee2e2; color: #991b1b; border-radius: 14px; padding: 12px; font-size: 14px; line-height: 1.45;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto; margin-top: 1px;"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>
+          <div style="display: flex; flex-direction: column; gap: 6px;"><strong style="font-size: 15px;">El correo o la contraseña no coinciden.</strong><span>Revísalos o <a href="#" style="color: #991b1b; font-weight: 700;">crea una contraseña nueva</a>.</span></div>
+        </div>
+        <form style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="m3-email" style="font-weight: 700; font-size: 14px;">Correo</label>
+            <input id="m3-email" type="email" inputmode="email" autocomplete="email" value="carlos.tests01@gmail.com" style="font: inherit; font-size: 16px; color: #431407; padding: 13px 14px; border: 2px solid #fde4cc; border-radius: 12px; background: #ffffff; width: 100%; box-sizing: border-box;">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <label for="m3-pass" style="font-weight: 700; font-size: 14px;">Contraseña</label>
+              <a href="#" style="font-weight: 700; font-size: 14px; padding: 8px 0;">¿La olvidaste?</a>
+            </div>
+            <div style="position: relative;">
+              <input id="m3-pass" type="password" autocomplete="current-password" aria-invalid="true" value="secreto12" style="font: inherit; font-size: 16px; color: #431407; padding: 13px 52px 13px 14px; border: 2px solid #b91c1c; border-radius: 12px; background: #fffafa; width: 100%; box-sizing: border-box;">
+              <button type="button" aria-label="Mostrar contraseña" style="position: absolute; right: 2px; top: 2px; width: 48px; height: 48px; border: none; background: transparent; color: #9a3412; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+          </div>
+          <button type="submit" style="font: inherit; font-weight: 700; font-size: 16px; padding: 15px 18px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff; box-shadow: 0 4px 12px rgba(234,88,12,0.3); margin-top: 2px;">Iniciar sesión</button>
+        </form>
+        <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; color: #78350f;"><span style="flex: 1 1 auto; height: 1px; background: #fde4cc;"></span>o<span style="flex: 1 1 auto; height: 1px; background: #fde4cc;"></span></div>
+        <button type="button" style="font: inherit; font-weight: 700; font-size: 16px; padding: 13px 18px; border-radius: 999px; border: 2px solid #fdba74; background: #ffffff; color: #431407; display: flex; align-items: center; justify-content: center; gap: 10px;"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continuar con Google</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. RECUPERAR CONTRASEÑA -->
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    <span style="font-weight: 700; font-size: 15px; color: #9a3412;">4 · Recuperar contraseña</span>
+    <div style="width: 390px; height: 844px; border-radius: 28px; overflow: hidden; background: rgba(67,20,7,0.5); box-shadow: 0 0 0 1px #fde4cc; display: flex; flex-direction: column; justify-content: flex-end;">
+      <div role="dialog" aria-modal="true" aria-labelledby="m4-t" style="position: relative; background: #ffffff; border-radius: 24px 24px 0 0; padding: 10px 20px 28px; display: flex; flex-direction: column; gap: 14px;">
+        <span style="align-self: center; width: 40px; height: 5px; border-radius: 999px; background: #fde4cc;"></span>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin: -4px -12px 0;">
+          <button type="button" style="font: inherit; font-weight: 700; font-size: 15px; color: #c2410c; background: transparent; border: none; padding: 12px; display: flex; align-items: center; gap: 6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Volver</button>
+          <button type="button" aria-label="Cerrar" style="width: 44px; height: 44px; border-radius: 999px; border: none; background: transparent; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <span style="flex: 0 0 auto; width: 52px; height: 52px; border-radius: 16px; background: #ffedd5; display: flex; align-items: center; justify-content: center;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/></svg></span>
+          <h2 id="m4-t" style="margin: 0; font-size: 23px; line-height: 1.2;">¿Olvidaste tu contraseña?</h2>
+        </div>
+        <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #78350f;">Escribe el correo de tu cuenta y te mandamos un enlace para crear una nueva.</p>
+        <form style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="m4-email" style="font-weight: 700; font-size: 14px;">Correo</label>
+            <input id="m4-email" type="email" inputmode="email" autocomplete="email" value="carlos.tests01@gmail.com" style="font: inherit; font-size: 16px; color: #431407; padding: 13px 14px; border: 2px solid #ea580c; border-radius: 12px; background: #ffffff; width: 100%; box-sizing: border-box;">
+          </div>
+          <button type="submit" style="font: inherit; font-weight: 700; font-size: 16px; padding: 15px 18px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff; box-shadow: 0 4px 12px rgba(234,88,12,0.3);">Enviar enlace</button>
+        </form>
+        <div style="display: flex; gap: 10px; align-items: flex-start; background: #fff7ed; border-radius: 14px; padding: 12px; font-size: 14px; line-height: 1.45; color: #78350f;">
+          <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true" style="flex: 0 0 auto; margin-top: 1px;"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+          <span>¿Entras con Google? Ahí no usas contraseña: vuelve y toca «Continuar con Google».</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. REVISA TU CORREO — CUENTA NUEVA -->
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    <span style="font-weight: 700; font-size: 15px; color: #9a3412;">5 · Revisa tu correo — confirmar cuenta</span>
+    <div style="width: 390px; height: 844px; border-radius: 28px; overflow: hidden; background: rgba(67,20,7,0.5); box-shadow: 0 0 0 1px #fde4cc; display: flex; flex-direction: column; justify-content: flex-end;">
+      <div role="dialog" aria-modal="true" aria-labelledby="m5-t" style="position: relative; background: #ffffff; border-radius: 24px 24px 0 0; padding: 10px 20px 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center;">
+        <span style="width: 40px; height: 5px; border-radius: 999px; background: #fde4cc;"></span>
+        <button type="button" aria-label="Cerrar" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 999px; border: none; background: transparent; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        <span style="margin-top: 14px; width: 72px; height: 72px; border-radius: 999px; background: #ffedd5; display: flex; align-items: center; justify-content: center;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg></span>
+        <h2 id="m5-t" style="margin: 0; font-size: 24px; line-height: 1.2;">Revisa tu correo</h2>
+        <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #78350f;">Te mandamos un enlace a<br><strong style="color: #431407;">carlos.tests01@gmail.com</strong><br>Ábrelo para confirmar tu cuenta y después entra con tu correo.</p>
+        <div style="align-self: stretch; display: flex; align-items: center; gap: 10px; background: #ccfbf1; color: #115e59; border-radius: 14px; padding: 10px 12px; font-weight: 600; font-size: 14px; text-align: left;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto;"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M7.5 8a2.5 2.5 0 1 1 4.5-1.5A2.5 2.5 0 1 1 16.5 8"/></svg><span>Tus 5 tokens de regalo te esperan en tu cuenta.</span></div>
+        <p style="margin: 0; font-size: 14px; color: #78350f;">¿No te llegó? Busca en spam o promociones.</p>
+        <button type="button" style="align-self: stretch; font: inherit; font-weight: 700; font-size: 16px; padding: 15px 18px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff; box-shadow: 0 4px 12px rgba(234,88,12,0.3);">Entendido</button>
+        <a href="#" style="font-weight: 700; font-size: 14px; padding: 6px 0;">¿Escribiste mal tu correo? Corrígelo</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. REVISA TU CORREO — RECUPERAR -->
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    <span style="font-weight: 700; font-size: 15px; color: #9a3412;">6 · Revisa tu correo — nueva contraseña</span>
+    <div style="width: 390px; height: 844px; border-radius: 28px; overflow: hidden; background: rgba(67,20,7,0.5); box-shadow: 0 0 0 1px #fde4cc; display: flex; flex-direction: column; justify-content: flex-end;">
+      <div role="dialog" aria-modal="true" aria-labelledby="m6-t" style="position: relative; background: #ffffff; border-radius: 24px 24px 0 0; padding: 10px 20px 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center;">
+        <span style="width: 40px; height: 5px; border-radius: 999px; background: #fde4cc;"></span>
+        <button type="button" aria-label="Cerrar" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 999px; border: none; background: transparent; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        <span style="margin-top: 14px; width: 72px; height: 72px; border-radius: 999px; background: #ffedd5; display: flex; align-items: center; justify-content: center;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg></span>
+        <h2 id="m6-t" style="margin: 0; font-size: 24px; line-height: 1.2;">Revisa tu correo</h2>
+        <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #78350f;">Te mandamos un enlace a<br><strong style="color: #431407;">carlos.tests01@gmail.com</strong><br>Ábrelo en este mismo navegador para crear tu contraseña nueva.</p>
+        <p style="margin: 0; font-size: 14px; color: #78350f;">¿No te llegó? Busca en spam o promociones.</p>
+        <button type="button" style="align-self: stretch; font: inherit; font-weight: 700; font-size: 16px; padding: 15px 18px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff; box-shadow: 0 4px 12px rgba(234,88,12,0.3);">Volver a iniciar sesión</button>
+        <a href="#" style="font-weight: 700; font-size: 14px; padding: 6px 0;">¿Escribiste mal tu correo? Corrígelo</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. NUEVA CONTRASEÑA -->
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    <span style="font-weight: 700; font-size: 15px; color: #9a3412;">7 · Nueva contraseña</span>
+    <div style="width: 390px; height: 844px; border-radius: 28px; overflow: hidden; background: rgba(67,20,7,0.5); box-shadow: 0 0 0 1px #fde4cc; display: flex; flex-direction: column; justify-content: flex-end;">
+      <div role="dialog" aria-modal="true" aria-labelledby="m7-t" style="position: relative; background: #ffffff; border-radius: 24px 24px 0 0; padding: 10px 20px 28px; display: flex; flex-direction: column; gap: 14px;">
+        <span style="align-self: center; width: 40px; height: 5px; border-radius: 999px; background: #fde4cc;"></span>
+        <button type="button" aria-label="Cerrar" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 999px; border: none; background: transparent; color: #78350f; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        <div style="display: flex; align-items: center; gap: 14px; padding-right: 36px;">
+          <span style="flex: 0 0 auto; width: 52px; height: 52px; border-radius: 16px; background: #ffedd5; display: flex; align-items: center; justify-content: center;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <h2 id="m7-t" style="margin: 0; font-size: 23px; line-height: 1.2;">Crea tu contraseña nueva</h2>
+            <p style="margin: 0; font-size: 14px; color: #78350f;">Para <strong style="color: #431407;">carlos.tests01@gmail.com</strong></p>
+          </div>
+        </div>
+        <form style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="m7-pass" style="font-weight: 700; font-size: 14px;">Contraseña nueva</label>
+            <div style="position: relative;">
+              <input id="m7-pass" type="password" autocomplete="new-password" aria-describedby="m7-pass-h" value="nuevaclave" style="font: inherit; font-size: 16px; color: #431407; padding: 13px 52px 13px 14px; border: 2px solid #fde4cc; border-radius: 12px; background: #ffffff; width: 100%; box-sizing: border-box;">
+              <button type="button" aria-label="Mostrar contraseña" style="position: absolute; right: 2px; top: 2px; width: 48px; height: 48px; border: none; background: transparent; color: #9a3412; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+            <span id="m7-pass-h" style="font-size: 13px; color: #78350f;">Mínimo 6 caracteres.</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label for="m7-pass2" style="font-weight: 700; font-size: 14px;">Repite la contraseña</label>
+            <div style="position: relative;">
+              <input id="m7-pass2" type="password" autocomplete="new-password" aria-describedby="m7-pass2-h" value="nuevaclave" style="font: inherit; font-size: 16px; color: #431407; padding: 13px 52px 13px 14px; border: 2px solid #ea580c; border-radius: 12px; background: #ffffff; width: 100%; box-sizing: border-box;">
+              <button type="button" aria-label="Mostrar contraseña" style="position: absolute; right: 2px; top: 2px; width: 48px; height: 48px; border: none; background: transparent; color: #9a3412; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+            <span id="m7-pass2-h" style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #0f766e;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Las dos coinciden.</span>
+          </div>
+          <button type="submit" style="font: inherit; font-weight: 700; font-size: 16px; padding: 15px 18px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff; box-shadow: 0 4px 12px rgba(234,88,12,0.3); margin-top: 2px;">Guardar contraseña</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. CONTRASEÑA GUARDADA -->
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    <span style="font-weight: 700; font-size: 15px; color: #9a3412;">8 · Contraseña guardada</span>
+    <div style="width: 390px; height: 844px; border-radius: 28px; overflow: hidden; background: rgba(67,20,7,0.5); box-shadow: 0 0 0 1px #fde4cc; display: flex; flex-direction: column; justify-content: flex-end;">
+      <div role="dialog" aria-modal="true" aria-labelledby="m8-t" style="position: relative; background: #ffffff; border-radius: 24px 24px 0 0; padding: 10px 20px 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center;">
+        <span style="width: 40px; height: 5px; border-radius: 999px; background: #fde4cc;"></span>
+        <span style="margin-top: 14px; width: 72px; height: 72px; border-radius: 999px; background: #ccfbf1; display: flex; align-items: center; justify-content: center;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span>
+        <h2 id="m8-t" style="margin: 0; font-size: 24px; line-height: 1.2;">¡Listo! Contraseña guardada</h2>
+        <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #78350f;">La próxima vez entra con tu correo y tu contraseña nueva.</p>
+        <button type="button" style="align-self: stretch; font: inherit; font-weight: 700; font-size: 16px; padding: 15px 18px; border-radius: 999px; border: none; background: #ea580c; color: #ffffff; box-shadow: 0 4px 12px rgba(234,88,12,0.3); margin-top: 4px;">Continuar</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1808,"height":2200}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

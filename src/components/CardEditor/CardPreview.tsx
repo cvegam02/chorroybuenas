@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
-import { FaMagic, FaUndo, FaEdit, FaTrash, FaSearchPlus } from 'react-icons/fa';
+import { FaMagic, FaUndo, FaEdit, FaTimes, FaTrash, FaSearchPlus } from 'react-icons/fa';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Card } from '../../types';
-import { WarningModal } from '../ConfirmationModal/WarningModal';
+import { CardActionConfirm, type CardAction } from './CardActionConfirm';
 import { CardPreviewModal } from '../SetView/CardPreviewModal';
 import { useComposedCard } from '../../hooks/useComposedCard';
 import './CardPreview.css';
+import './CardPreviewActions.css';
 
-type PendingAction = 'regenerate' | 'delete' | 'revert' | null;
+type PendingAction = CardAction | null;
 
 interface CardPreviewProps {
   card: Card;
@@ -16,8 +17,6 @@ interface CardPreviewProps {
   onRevert?: (id: string) => void;
   onTransform?: (card: Card) => void;
   disableTransformButton?: boolean;
-  /** Cuando el botón está deshabilitado por falta de tokens, mensaje para el tooltip */
-  transformButtonTitle?: string;
   onClick?: (card: Card) => void;
   /** Durante conversión batch con IA: bloquea eliminar, editar y revertir para evitar errores */
   disabledDuringBatch?: boolean;
@@ -25,7 +24,7 @@ interface CardPreviewProps {
   isTransforming?: boolean;
 }
 
-export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTransformButton, transformButtonTitle, onClick, disabledDuringBatch, isTransforming }: CardPreviewProps) => {
+export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTransformButton, onClick, disabledDuringBatch, isTransforming }: CardPreviewProps) => {
   const { t } = useTranslation();
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -52,77 +51,100 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
     }
   };
 
+  // La hoja de acciones del celular también se cierra con Escape.
+  useEffect(() => {
+    if (!showActionsMenu) return;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setShowActionsMenu(false);
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [showActionsMenu]);
+
   const handleMenuAction = (action: () => void) => {
     if (disabledDuringBatch) return;
     action();
     setShowActionsMenu(false);
   };
 
+  // En celular no hay mouse: tocar la carta abre esta hoja desde abajo.
   const actionsMenu = showActionsMenu && isTouchDevice && !disabledDuringBatch && createPortal(
     <div
-      className="card-preview__actions-overlay"
+      className="card-sheet__overlay"
       onClick={() => setShowActionsMenu(false)}
       role="presentation"
     >
       <div
-        className="card-preview__actions-menu"
+        className="card-sheet"
         onClick={(e) => e.stopPropagation()}
-        role="menu"
+        role="dialog"
+        aria-modal="true"
+        aria-label={card.title}
       >
+        <div className="card-sheet__head">
+          {shownImage && <img src={shownImage} alt="" className="card-sheet__thumb" />}
+          <div className="card-sheet__names">
+            <strong className="card-sheet__title">{card.title}</strong>
+            {card.isAiGenerated && <span className="card-sheet__ai">{t('cardEditor.cardActions.madeWithAi')}</span>}
+          </div>
+          <button
+            type="button"
+            className="card-sheet__close"
+            onClick={() => setShowActionsMenu(false)}
+            aria-label={t('common.close')}
+          >
+            <FaTimes aria-hidden="true" />
+          </button>
+        </div>
         {card.image && (
           <button
             type="button"
-            className="card-preview__actions-menu-item"
+            className="card-sheet__item"
             onClick={() => handleMenuAction(() => setShowLargeView(true))}
-            role="menuitem"
           >
-            <FaSearchPlus />
+            <FaSearchPlus aria-hidden="true" />
             <span>{t('cardEditor.cardActions.view')}</span>
           </button>
         )}
         {onClick && !disabledDuringBatch && (
           <button
             type="button"
-            className="card-preview__actions-menu-item"
+            className="card-sheet__item"
             onClick={() => handleMenuAction(() => onClick(card))}
-            role="menuitem"
           >
-            <FaEdit />
-            <span>{t('cardEditor.cardActions.edit')}</span>
-          </button>
-        )}
-        {card.originalImage && onRevert && !disabledDuringBatch && (
-          <button
-            type="button"
-            className="card-preview__actions-menu-item"
-            onClick={() => handleMenuAction(() => setPendingAction('revert'))}
-            role="menuitem"
-          >
-            <FaUndo />
-            <span>{t('cardEditor.cardActions.revert')}</span>
+            <FaEdit aria-hidden="true" />
+            <span>{t('cardEditor.cardActions.editFull')}</span>
           </button>
         )}
         {card.image && onTransform && !card.isProcessing && !isTransforming && !disabledDuringBatch && (
           <button
             type="button"
-            className="card-preview__actions-menu-item"
+            className="card-sheet__item card-sheet__item--ai"
             disabled={disableTransformButton}
             onClick={() => !disableTransformButton && handleMenuAction(() => setPendingAction('regenerate'))}
-            role="menuitem"
           >
-            <FaMagic />
-            <span>{t(card.isAiGenerated ? 'cardEditor.cardActions.transformRegenerate' : 'cardEditor.cardActions.transformConvert')}</span>
+            <FaMagic aria-hidden="true" />
+            <span>{t(card.isAiGenerated ? 'cardEditor.cardActions.sheetAnother' : 'cardEditor.cardActions.sheetTransform')}</span>
+          </button>
+        )}
+        {card.originalImage && onRevert && !disabledDuringBatch && (
+          <button
+            type="button"
+            className="card-sheet__item"
+            onClick={() => handleMenuAction(() => setPendingAction('revert'))}
+          >
+            <FaUndo aria-hidden="true" />
+            <span>{t('cardEditor.cardActions.sheetRevert')}</span>
           </button>
         )}
         {!disabledDuringBatch && (
           <button
             type="button"
-            className="card-preview__actions-menu-item card-preview__actions-menu-item--danger"
+            className="card-sheet__item card-sheet__item--danger"
             onClick={() => handleMenuAction(() => setPendingAction('delete'))}
-            role="menuitem"
           >
-            <FaTrash />
-            <span>{t('cardEditor.cardActions.delete')}</span>
+            <FaTrash aria-hidden="true" />
+            <span>{t('cardEditor.cardActions.sheetDelete')}</span>
           </button>
         )}
       </div>
@@ -139,6 +161,8 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
         tabIndex={onClick ? 0 : undefined}
         onKeyDown={(e) => {
           if (disabledDuringBatch) return;
+          // Solo cuando el foco está en la carta, no en uno de sus botones.
+          if (e.target !== e.currentTarget) return;
           if (onClick && (e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault();
             onClick(card);
@@ -153,9 +177,10 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
           )}
 
           {(card.isProcessing || isTransforming) && (
-            <div className="card-preview__processing">
-              <div className="card-preview__processing-painter">🎨</div>
-              <p className="card-preview__processing-text">{t('cardEditor.cardProcessing')}</p>
+            <div className="card-preview__painting" role="status">
+              <span className="card-preview__spinner" aria-hidden="true" />
+              <strong>{t('cardEditor.cardActions.painting')}</strong>
+              <span>{t('cardEditor.cardActions.paintingTime')}</span>
             </div>
           )}
 
@@ -163,53 +188,44 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
             <div className="card-preview__batch-queued" aria-hidden="true" />
           )}
 
-          {card.isAiGenerated && !card.isProcessing && !isTransforming && !onTransform && (
-            <div className="card-preview__ai-badge" title="Generado con IA">
-              <FaMagic />
-            </div>
-          )}
-
-          {!isTouchDevice && card.originalImage && onRevert && !disabledDuringBatch && !isTransforming && (
-            <button
-              className="card-preview__revert"
-              onClick={(e) => {
-                e.stopPropagation();
-                setPendingAction('revert');
-              }}
-              aria-label="Restaurar imagen original"
-              title="Restaurar imagen original"
-            >
-              <FaUndo />
-            </button>
-          )}
-
-          {!isTouchDevice && card.image && onTransform && !card.isProcessing && !isTransforming && !disabledDuringBatch && (
-            <button
-              className="card-preview__transform"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!disableTransformButton) setPendingAction('regenerate');
-              }}
-              disabled={disableTransformButton}
-              aria-label={card.isAiGenerated ? t('cardEditor.cardActions.transformRegenerate') : t('cardEditor.cardActions.transformConvert')}
-              title={transformButtonTitle ?? (disableTransformButton ? t('cardEditor.syncingMessage') : (card.isAiGenerated ? t('cardEditor.cardActions.transformRegenerate') : t('cardEditor.cardActions.transformConvert')))}
-            >
-              <FaMagic />
-            </button>
+          {card.isAiGenerated && !card.isProcessing && !isTransforming && (
+            <span className="card-preview__ai-tag">{t('cardEditor.cardActions.aiTag')}</span>
           )}
         </div>
         {!composedUrl && <div className="card-preview__title">{card.title}</div>}
+
+        {/* Con mouse: botones redondos de editar y borrar. Lo de la IA está en la ventana de editar. */}
         {!isTouchDevice && !disabledDuringBatch && (
-          <button
-            className="card-preview__remove"
-            onClick={(e) => {
-              e.stopPropagation();
-              setPendingAction('delete');
-            }}
-            aria-label={`Eliminar ${card.title}`}
-          >
-            ×
-          </button>
+          <div className="card-preview__hover">
+            <div className="card-preview__hover-top">
+              {onClick && (
+                <button
+                  type="button"
+                  className="card-preview__round"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClick(card);
+                  }}
+                  aria-label={t('cardEditor.cardActions.editAria', { name: card.title })}
+                  title={t('cardEditor.cardActions.edit')}
+                >
+                  <FaEdit aria-hidden="true" />
+                </button>
+              )}
+              <button
+                type="button"
+                className="card-preview__round card-preview__round--danger"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPendingAction('delete');
+                }}
+                aria-label={t('cardEditor.cardActions.deleteAria', { name: card.title })}
+                title={t('cardEditor.cardActions.delete')}
+              >
+                <FaTrash aria-hidden="true" />
+              </button>
+            </div>
+          </div>
         )}
       </div>
       {actionsMenu}
@@ -218,46 +234,14 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
         isOpen={showLargeView}
         onClose={() => setShowLargeView(false)}
       />
-      {pendingAction === 'regenerate' && onTransform && (
-        <WarningModal
-          isOpen
-          type="warning"
-          title={t(card.isAiGenerated ? 'modals.confirmRegenerateCard.title' : 'modals.confirmConvertCard.title')}
-          message={t(card.isAiGenerated ? 'modals.confirmRegenerateCard.message' : 'modals.confirmConvertCard.message')}
-          confirmText={t(card.isAiGenerated ? 'modals.confirmRegenerateCard.confirm' : 'modals.confirmConvertCard.confirm')}
-          cancelText={t(card.isAiGenerated ? 'modals.confirmRegenerateCard.cancel' : 'modals.confirmConvertCard.cancel')}
+      {pendingAction && (pendingAction !== 'regenerate' || onTransform) && (pendingAction !== 'revert' || onRevert) && (
+        <CardActionConfirm
+          action={pendingAction}
+          isAiGenerated={card.isAiGenerated === true}
           onConfirm={() => {
-            onTransform(card);
-            setPendingAction(null);
-          }}
-          onCancel={() => setPendingAction(null)}
-        />
-      )}
-      {pendingAction === 'delete' && (
-        <WarningModal
-          isOpen
-          type="danger"
-          title={t('modals.confirmDeleteCard.title')}
-          message={t('modals.confirmDeleteCard.message')}
-          confirmText={t('modals.confirmDeleteCard.confirm')}
-          cancelText={t('modals.confirmDeleteCard.cancel')}
-          onConfirm={() => {
-            onRemove(card.id);
-            setPendingAction(null);
-          }}
-          onCancel={() => setPendingAction(null)}
-        />
-      )}
-      {pendingAction === 'revert' && onRevert && (
-        <WarningModal
-          isOpen
-          type="warning"
-          title={t('modals.confirmRevertCard.title')}
-          message={t('modals.confirmRevertCard.message')}
-          confirmText={t('modals.confirmRevertCard.confirm')}
-          cancelText={t('modals.confirmRevertCard.cancel')}
-          onConfirm={() => {
-            onRevert(card.id);
+            if (pendingAction === 'regenerate') onTransform?.(card);
+            if (pendingAction === 'revert') onRevert?.(card.id);
+            if (pendingAction === 'delete') onRemove(card.id);
             setPendingAction(null);
           }}
           onCancel={() => setPendingAction(null)}

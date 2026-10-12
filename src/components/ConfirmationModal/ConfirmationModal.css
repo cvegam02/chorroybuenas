@@ -1,108 +1,287 @@
-.confirmation-modal__overlay {
+/* «PDF descargado» (FEAT-34, US A6). */
+
+/* Va por debajo de la ventana de crear cuenta por correo, que se abre desde aquí. */
+.pdf-done__overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-  scrollbar-gutter: stable;
+  padding: 16px;
+  background: color-mix(in srgb, var(--color-text-main) 55%, transparent);
+  box-sizing: border-box;
 }
 
-.confirmation-modal__content {
-  background: var(--color-bg-primary);
-  border-radius: 24px;
-  padding: 48px 40px;
-  max-width: 500px;
-  width: 100%;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  text-align: center;
-  border: 1px solid var(--color-border);
-  margin: 0 auto;
-}
-
-.confirmation-modal__icon {
-  font-size: 64px;
-  margin-bottom: 20px;
-}
-
-.confirmation-modal__title {
-  font-size: 1.75rem;
-  color: var(--color-primary);
-  margin-bottom: 16px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-  font-family: var(--font-body);
-}
-
-.confirmation-modal__message {
-  font-size: 1rem;
-  color: var(--color-text-secondary);
-  margin-bottom: 32px;
-  line-height: 1.7;
-  font-family: var(--font-body);
-}
-
-.confirmation-modal__actions {
+.pdf-done {
   display: flex;
-  gap: 12px;
-  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  max-width: 520px;
+  max-height: calc(100vh - 32px);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  font-family: var(--font-body);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
 }
 
-.confirmation-modal__modify-button,
-.confirmation-modal__complete-button {
-  flex: 1;
-  padding: 10px 18px;
-  border-radius: 10px;
-  font-size: 0.9375rem;
-  font-weight: 600;
+.pdf-done__header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-primary-lightest);
+  background: var(--color-bg-base);
+}
+
+.pdf-done__heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 21px;
+  line-height: 1.2;
+  color: var(--color-text-main);
+}
+
+.pdf-done__close {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: 16px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: var(--font-body);
+}
+
+.pdf-done__close:hover {
+  background: var(--color-primary-lightest);
+  color: var(--color-text-main);
+}
+
+.pdf-done__body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.pdf-done__muted {
+  display: block;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+/* Palomita y título */
+
+.pdf-done__hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pdf-done__check {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: var(--color-secondary-dark);
+  color: var(--color-text-inverted);
+  font-size: 24px;
+}
+
+.pdf-done__title {
+  margin: 0 0 2px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.2;
+  color: var(--color-text-main);
+}
+
+/* Consejos */
+
+.pdf-done__tips {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pdf-done__tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 15px;
+}
+
+.pdf-done__tip p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+}
+
+.pdf-done__tip a {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
+.pdf-done__tip-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-lightest);
+  color: var(--color-primary-dark);
+  font-size: 16px;
+}
+
+/* Sin sesión: invitación a guardar la lotería */
+
+.pdf-done__save {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.pdf-done__save-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+}
+
+.pdf-done__save-title svg {
+  color: var(--color-primary-dark);
+}
+
+/* Con sesión: la lotería ya está guardada */
+
+.pdf-done__saved {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--color-secondary-light);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-secondary-light) 40%, var(--color-bg-surface));
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.pdf-done__saved svg {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  color: var(--color-secondary-dark);
+}
+
+/* Botones */
+
+.pdf-done__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pdf-done__button {
+  flex: 1 1 160px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 46px;
+  padding: 0 20px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  box-sizing: border-box;
 }
 
-.confirmation-modal__modify-button {
-  background: transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
+.pdf-done__button--primary {
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  box-shadow: var(--shadow-md);
 }
 
-.confirmation-modal__modify-button:hover {
+.pdf-done__button--primary:hover {
+  background: var(--color-primary-dark);
+}
+
+.pdf-done__button--secondary {
+  border-color: var(--color-primary-lighter);
+  background: var(--color-bg-surface);
+  color: var(--color-primary-dark);
+}
+
+.pdf-done__button--secondary:hover {
   background: var(--color-bg-subtle);
-  color: var(--color-text-main);
-  border-color: var(--color-border-dark);
 }
 
-.confirmation-modal__complete-button {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-  color: white;
+.pdf-done__link {
+  align-self: center;
+  padding: 4px 8px;
   border: none;
-  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+  background: transparent;
+  color: var(--color-primary-dark);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
-.confirmation-modal__complete-button:hover {
-  filter: brightness(1.08);
-  box-shadow: 0 6px 16px rgba(234, 88, 12, 0.35);
+.pdf-done__warning {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.pdf-done button:focus-visible,
+.pdf-done a:focus-visible {
+  outline: 3px solid var(--color-primary-dark);
+  outline-offset: 2px;
 }
 
 @media (max-width: 640px) {
-  .confirmation-modal__content {
-    padding: 32px 24px;
+  .pdf-done__overlay {
+    padding: 12px;
   }
 
-  .confirmation-modal__actions {
-    flex-direction: column;
+  .pdf-done {
+    max-height: calc(100vh - 24px);
   }
 
-  .confirmation-modal__modify-button,
-  .confirmation-modal__complete-button {
-    width: 100%;
+  .pdf-done__body {
+    padding: 18px 16px;
+  }
+
+  .pdf-done__title {
+    font-size: 21px;
   }
 }

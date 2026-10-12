@@ -1,0 +1,107 @@
+/* «¿Qué es chorroybuenas?» (FEAT-32, P1) */
+
+.landing-about {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 8px 16px 32px;
+  /* Para que el menú fijo no tape el título al llegar desde el enlace del pie. */
+  scroll-margin-top: 96px;
+}
+
+.landing-about__box {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  border: 2px solid var(--color-primary-lighter);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+}
+
+.landing-about__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.landing-about__title {
+  margin: 0;
+  color: var(--color-text-main);
+  font-size: clamp(28px, 4vw, 34px);
+}
+
+.landing-about__description {
+  max-width: 900px;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.landing-about__list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-about__item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.landing-about__icon {
+  width: 28px;
+  height: 28px;
+  color: var(--color-primary-dark);
+}
+
+.landing-about__item-title {
+  margin: 0;
+  color: var(--color-text-main);
+  font-size: 19px;
+}
+
+.landing-about__item-description {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.landing-about__privacy {
+  margin: 0;
+  color: var(--color-text-main);
+  font-size: 16px;
+}
+
+.landing-about__privacy a {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
+@media (min-width: 769px) {
+  .landing-about {
+    padding: 8px 24px 48px;
+  }
+
+  .landing-about__box {
+    gap: 22px;
+    padding: 32px;
+  }
+
+  .landing-about__description {
+    font-size: 18px;
+  }
+
+  .landing-about__list {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+  }
+}

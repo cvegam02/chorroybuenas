@@ -138,6 +138,39 @@ export class CardRepository {
         return result;
     }
 
+    /**
+     * Firma varias rutas en una sola llamada a Storage, reutilizando cache. Para pantallas que muestran
+     * unas pocas imágenes de muchas loterías a la vez. Las rutas que no se pudieron firmar no vienen en el
+     * resultado: quien la usa muestra esa imagen de otra forma.
+     */
+    static async getImageUrlsInOneCall(paths: string[], expireIn = this.SIGNED_URL_EXPIRY_SEC): Promise<Map<string, string>> {
+        const now = Date.now();
+        const result = new Map<string, string>();
+        const toFetch: string[] = [];
+        for (const path of new Set(paths)) {
+            if (!path) continue;
+            const entry = signedUrlCache.get(path);
+            if (entry && entry.expiresAt > now + CACHE_EXPIRY_MARGIN_MS) {
+                result.set(path, entry.url);
+            } else {
+                toFetch.push(path);
+            }
+        }
+        if (toFetch.length === 0) return result;
+
+        const { data, error } = await supabase.storage
+            .from(this.BUCKET_NAME)
+            .createSignedUrls(toFetch, expireIn);
+        if (error) throw error;
+        const expiresAt = now + expireIn * 1000;
+        for (const item of data) {
+            if (item.error || !item.path || !item.signedUrl) continue;
+            signedUrlCache.set(item.path, { url: item.signedUrl, expiresAt });
+            result.set(item.path, item.signedUrl);
+        }
+        return result;
+    }
+
     private static invalidateCardsCache(userId: string, setId: string): void {
         cardsCache.delete(`${userId}:${setId}`);
     }

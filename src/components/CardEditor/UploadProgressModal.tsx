@@ -6,9 +6,11 @@ import './UploadProgressModal.css';
 interface UploadProgressModalProps {
   isOpen: boolean;
   progress: number; // 0-100, or -1 for indeterminate
+  /** Título de la ventana; sin él, «Subiendo imágenes». */
+  title?: string;
 }
 
-export const UploadProgressModal = ({ isOpen, progress }: UploadProgressModalProps) => {
+export const UploadProgressModal = ({ isOpen, progress, title }: UploadProgressModalProps) => {
   const { t } = useTranslation();
 
   if (!isOpen) return null;
@@ -20,7 +22,7 @@ export const UploadProgressModal = ({ isOpen, progress }: UploadProgressModalPro
       <div className="upload-progress-modal__content">
         <FaCloudUploadAlt className="upload-progress-modal__icon" />
         <h2 id="upload-progress-title" className="upload-progress-modal__title">
-          {t('common.uploadingImages')}
+          {title ?? t('common.uploadingImages')}
         </h2>
         <div className="upload-progress-modal__bar-wrap">
           <div

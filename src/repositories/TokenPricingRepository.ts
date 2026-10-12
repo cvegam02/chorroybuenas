@@ -44,36 +44,32 @@ export interface PromoSummary {
   hasCodePromos: boolean;
 }
 
-const FALLBACK_PACKS: TokenPack[] = [
-  { id: 'fallback-1', base_tokens: 10, bonus_tokens: 2, price_cents: 2400, sort_order: 1, is_active: true, created_at: '' },
-  { id: 'fallback-2', base_tokens: 20, bonus_tokens: 5, price_cents: 4800, sort_order: 2, is_active: true, created_at: '' },
-  { id: 'fallback-3', base_tokens: 50, bonus_tokens: 20, price_cents: 14000, sort_order: 3, is_active: true, created_at: '' },
-];
-
-const FALLBACK_MXN_CENTS = 200;
 const FALLBACK_MXN_USD_RATE = 0.058;
 
 export class TokenPricingRepository {
   /**
-   * Packs activos ordenados por sort_order. Fallback si falla la red o no hay datos.
+   * Paquetes activos, ordenados, tal como están guardados. Una lista vacía significa que no hay
+   * ninguno activo; null, que no se pudieron leer. Nunca devuelve paquetes supuestos: quien llama
+   * decide qué mostrar cuando faltan (FEAT-33, US A8).
    */
-  static async getPacks(): Promise<TokenPack[]> {
+  static async getPacksOrNull(): Promise<TokenPack[] | null> {
     const { data, error } = await supabase
       .from('token_packs')
       .select('id, base_tokens, bonus_tokens, price_cents, sort_order, is_active, created_at')
       .eq('is_active', true)
       .order('sort_order', { ascending: true });
 
-    if (error || !data?.length) {
-      return FALLBACK_PACKS;
+    if (error || !data) {
+      return null;
     }
     return data as TokenPack[];
   }
 
   /**
-   * Precio por token en una moneda. Fallback 200 centavos MXN.
+   * Precio por token tal como está guardado, o null si no se pudo leer. Nunca devuelve un precio
+   * supuesto: sin él, las pantallas no muestran precio (FEAT-32 y FEAT-33, US A8).
    */
-  static async getPricing(currency = 'MXN'): Promise<number> {
+  static async getPricingOrNull(currency = 'MXN'): Promise<number | null> {
     const { data, error } = await supabase
       .from('token_pricing')
       .select('price_per_token_cents')
@@ -81,7 +77,7 @@ export class TokenPricingRepository {
       .maybeSingle();
 
     if (error || !data) {
-      return FALLBACK_MXN_CENTS;
+      return null;
     }
     return data.price_per_token_cents;
   }

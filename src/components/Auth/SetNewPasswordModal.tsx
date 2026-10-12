@@ -1,131 +1,120 @@
-import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useId, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FaLock, FaTimes, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
-import './SetNewPasswordModal.css';
 import { getErrorMessage } from '../../utils/errors';
+import { AuthDialog } from './AuthDialog';
+import { AuthPasswordField } from './AuthFields';
+import { MIN_PASSWORD_LENGTH } from './AuthForms';
+import { CheckIcon, LockIcon } from './AuthIcons';
+import { AuthAlert, AuthLead, AuthNotice } from './AuthParts';
 
-export const SetNewPasswordModal: React.FC = () => {
-    const { t } = useTranslation();
-    const { recoverySession, updatePassword, clearRecovery } = useAuth();
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState(false);
+type PasswordError = { text: string; field: 'password' | 'confirm' | null };
 
-    if (!recoverySession) return null;
+interface SetNewPasswordDialogProps {
+  email: string;
+  onSave: (newPassword: string) => Promise<void>;
+  onClose: () => void;
+}
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError(null);
-        if (password !== confirmPassword) {
-            setError(t('common.auth.errors.passwordMismatch'));
-            return;
-        }
-        if (password.length < 6) {
-            setError(t('common.auth.errors.weakPassword'));
-            return;
-        }
-        setIsLoading(true);
-        try {
-            await updatePassword(password);
-            setSuccess(true);
-            setPassword('');
-            setConfirmPassword('');
-        } catch (err: unknown) {
-            setError(getErrorMessage(err) || t('common.auth.errors.authFailed'));
-        } finally {
-            setIsLoading(false);
-        }
-    };
+const SetNewPasswordDialog = ({ email, onSave, onClose }: SetNewPasswordDialogProps) => {
+  const { t } = useTranslation();
+  const titleId = useId();
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<PasswordError | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
 
-    const modalContent = (
-        <div className="set-password-modal" onClick={(e) => e.target === e.currentTarget && clearRecovery()}>
-            <div className="set-password-modal__content">
-                <button className="set-password-modal__close" onClick={clearRecovery}>
-                    <FaTimes />
-                </button>
-                <div className="set-password-modal__header">
-                    <div className="set-password-modal__icon-circle">
-                        <FaLock />
-                    </div>
-                    <h2>{t('common.auth.setNewPasswordTitle')}</h2>
-                    <p>{t('common.auth.setNewPasswordDescription')}</p>
-                </div>
-                {success ? (
-                    <div className="set-password-modal__form">
-                        <div className="set-password-modal__success">{t('common.auth.passwordUpdated')}</div>
-                        <button type="button" className="set-password-modal__submit" onClick={clearRecovery}>
-                            {t('common.auth.continue')}
-                        </button>
-                    </div>
-                ) : (
-                    <form className="set-password-modal__form" onSubmit={handleSubmit}>
-                        {error && <div className="set-password-modal__error">{error}</div>}
-                        <div className="set-password-modal__input-group">
-                            <label htmlFor="new-password">{t('common.auth.newPassword')}</label>
-                            <div className="set-password-modal__input-wrapper set-password-modal__input-wrapper--password">
-                                <FaLock className="set-password-modal__input-icon" />
-                                <input
-                                    id="new-password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    required
-                                    autoComplete="new-password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="••••••••"
-                                    disabled={isLoading}
-                                    minLength={6}
-                                />
-                                <button
-                                    type="button"
-                                    className="set-password-modal__password-toggle"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    aria-label={showPassword ? t('common.auth.hidePassword') : t('common.auth.showPassword')}
-                                    tabIndex={-1}
-                                >
-                                    {showPassword ? <FaEyeSlash /> : <FaEye />}
-                                </button>
-                            </div>
-                        </div>
-                        <div className="set-password-modal__input-group">
-                            <label htmlFor="confirm-new-password">{t('common.auth.confirmPassword')}</label>
-                            <div className="set-password-modal__input-wrapper set-password-modal__input-wrapper--password">
-                                <FaLock className="set-password-modal__input-icon" />
-                                <input
-                                    id="confirm-new-password"
-                                    type={showConfirmPassword ? 'text' : 'password'}
-                                    required
-                                    autoComplete="new-password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    placeholder="••••••••"
-                                    disabled={isLoading}
-                                    minLength={6}
-                                />
-                                <button
-                                    type="button"
-                                    className="set-password-modal__password-toggle"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    aria-label={showConfirmPassword ? t('common.auth.hidePassword') : t('common.auth.showPassword')}
-                                    tabIndex={-1}
-                                >
-                                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                                </button>
-                            </div>
-                        </div>
-                        <button type="submit" className="set-password-modal__submit" disabled={isLoading}>
-                            {isLoading ? t('common.loading') : t('common.auth.saveNewPassword')}
-                        </button>
-                    </form>
-                )}
-            </div>
-        </div>
+  const passwordsMatch = confirmPassword.length >= MIN_PASSWORD_LENGTH && confirmPassword === password;
+
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      setError({ text: t('common.auth.errors.weakPassword'), field: 'password' });
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError({ text: t('common.auth.errors.passwordMismatch'), field: 'confirm' });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      await onSave(password);
+      setIsSaved(true);
+    } catch (err: unknown) {
+      setError({ text: getErrorMessage(err) || t('common.auth.errors.authFailed'), field: null });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isSaved) {
+    return (
+      <AuthDialog titleId={titleId} onClose={onClose} focusKey="saved" variant="done" hideClose>
+        <AuthNotice titleId={titleId} title={t('common.auth.passwordSavedTitle')} icon={<CheckIcon size={34} />} tone="good">
+          {t('common.auth.passwordSavedText')}
+        </AuthNotice>
+        <button type="button" className="auth-submit" onClick={onClose}>
+          {t('common.auth.continue')}
+        </button>
+      </AuthDialog>
     );
+  }
 
-    return createPortal(modalContent, document.body);
+  return (
+    <AuthDialog titleId={titleId} onClose={onClose} focusKey="form" variant="even">
+      <AuthLead titleId={titleId} title={t('common.auth.newPasswordTitle')} icon={<LockIcon />} inline>
+        {t('common.auth.newPasswordFor')} <strong>{email}</strong>
+      </AuthLead>
+      {error && <AuthAlert title={error.text} />}
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <AuthPasswordField
+          id="auth-new-password"
+          label={t('common.auth.newPasswordLabel')}
+          autoComplete="new-password"
+          required
+          minLength={MIN_PASSWORD_LENGTH}
+          hint={t('common.auth.passwordHint', { min: MIN_PASSWORD_LENGTH })}
+          value={password}
+          onChange={setPassword}
+          disabled={isLoading}
+          invalid={error?.field === 'password'}
+        />
+        <AuthPasswordField
+          id="auth-new-password-repeat"
+          label={t('common.auth.repeatPassword')}
+          autoComplete="new-password"
+          required
+          minLength={MIN_PASSWORD_LENGTH}
+          hint={passwordsMatch ? t('common.auth.passwordsMatch') : undefined}
+          hintIsGood
+          value={confirmPassword}
+          onChange={setConfirmPassword}
+          disabled={isLoading}
+          invalid={error?.field === 'confirm'}
+        />
+        <button type="submit" className="auth-submit" disabled={isLoading}>
+          {isLoading ? t('common.loading') : t('common.auth.saveNewPassword')}
+        </button>
+      </form>
+    </AuthDialog>
+  );
+};
+
+/**
+ * Ventana de contraseña nueva (FEAT-38): aparece al abrir el enlace de recuperación del correo.
+ * Cerrarla quita el aviso de recuperación; la sesión que abrió el enlace sigue iniciada.
+ */
+export const SetNewPasswordModal = () => {
+  const { recoverySession, updatePassword, clearRecovery } = useAuth();
+  if (!recoverySession) return null;
+
+  return (
+    <SetNewPasswordDialog
+      email={recoverySession.user.email ?? ''}
+      onSave={updatePassword}
+      onClose={clearRecovery}
+    />
+  );
 };

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Card } from '../types';
 import { saveCards, loadCards } from '../utils/storage';
-import { saveImage as saveImageToIndexedDB, cacheImageBlob, blobURLToBlob, getImage } from '../utils/indexedDB';
+import { saveImage as saveImageToIndexedDB, cacheImageBlob, getImage } from '../utils/indexedDB';
 import { useAuth } from '../contexts/AuthContext';
 import { useSetContext } from '../contexts/SetContext';
 import { CardRepository } from '../repositories/CardRepository';
@@ -35,33 +35,19 @@ export const useCards = () => {
       setIsLoading(true);
       try {
         if (user && currentSetId) {
+          // Lo hecho sin sesión lo pasa a la cuenta `useVisitorTransfer` (FEAT-41); aquí solo se lee la cuenta.
           const cloudCards = await CardRepository.getCards(user.id, currentSetId);
-          const localCards = await loadCards();
-          if (localCards.length > 0 && cloudCards.length === 0) {
-            await migrateLocalToCloud(localCards, user.id, currentSetId);
-            if (cancelled) return;
-            const updated = await CardRepository.getCards(user.id, currentSetId);
-            if (!cancelled) setCards(updated);
+          if (cloudCards.length === 0) {
+            setCards([]);
+          } else {
+            if (!cancelled) setCards(cloudCards);
             setIsLoading(false);
-            prefetchAndHydrateParallel(updated, () => cancelled).then(async () => {
+            prefetchAndHydrateParallel(cloudCards, () => cancelled).then(async () => {
               if (cancelled) return;
-              const hydrated = await hydrateCards(updated);
+              const hydrated = await hydrateCards(cloudCards);
               if (!cancelled) setCards(hydrated);
             });
             return;
-          } else {
-            if (cloudCards.length === 0) {
-              setCards([]);
-            } else {
-              if (!cancelled) setCards(cloudCards);
-              setIsLoading(false);
-              prefetchAndHydrateParallel(cloudCards, () => cancelled).then(async () => {
-                if (cancelled) return;
-                const hydrated = await hydrateCards(cloudCards);
-                if (!cancelled) setCards(hydrated);
-              });
-              return;
-            }
           }
         } else if (!user) {
           setCards(await loadCards());
@@ -109,45 +95,6 @@ export const useCards = () => {
       cancelled = true;
     };
   }, [user, currentSetId]);
-
-  const migrateLocalToCloud = async (localCards: Card[], userId: string, setId: string) => {
-    for (const card of localCards) {
-      try {
-        let imagePath: string | undefined;
-        let originalImagePath: string | undefined;
-
-        if (card.image) {
-          const blob = await blobURLToBlob(card.image);
-          imagePath = await CardRepository.uploadImage(userId, card.id, blob);
-          try {
-            await saveImageToIndexedDB(card.id, blob);
-          } catch (_) {
-            // Caché local opcional; no fallar la migración
-          }
-        }
-
-        if (card.originalImage) {
-          const blob = await blobURLToBlob(card.originalImage);
-          originalImagePath = await CardRepository.uploadImage(userId, card.id, blob, true);
-        }
-
-        await CardRepository.createCard({
-          id: card.id,
-          title: card.title,
-          user_id: userId,
-          set_id: setId,
-          image_path: imagePath,
-          original_image_path: originalImagePath,
-          is_ai_generated: card.isAiGenerated || false
-        });
-      } catch (err) {
-        logger.error(`Failed to migrate card ${card.id}:`, err);
-      }
-    }
-    const { clearAllImages } = await import('../utils/indexedDB');
-    await clearAllImages();
-    await saveCards([]);
-  };
 
   const addCard = async (card: Card) => {
     try {

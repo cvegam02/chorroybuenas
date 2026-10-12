@@ -1,23 +1,39 @@
-import { useState, useEffect } from 'react';
-import { FaLightbulb, FaExclamationTriangle, FaArrowRight } from 'react-icons/fa';
+import { useState, useEffect, useMemo } from 'react';
+import {
+  FaArrowLeft,
+  FaArrowRight,
+  FaExclamationTriangle,
+  FaMinus,
+  FaPlus,
+  FaRegLightbulb,
+} from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import './BoardCountSelector.css';
+import { BoardPile } from './BoardPile';
 import { loadCards } from '../../utils/storage';
-import { GridSize } from '../../types';
+import { Card, GridSize } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSetContext } from '../../contexts/SetContext';
 import { CardRepository } from '../../repositories/CardRepository';
 import { logger } from '../../utils/logger';
 import { minCardsForGrid } from '../../utils/gridRules';
+import { withCardNumbers } from '../../utils/cardNumbers';
 import { maxUniqueBoards, suggestedBoardCount } from '../../utils/boardGeneration';
+import {
+  MIN_BOARD_COUNT,
+  boardCountShortcuts,
+  pickSample,
+  sheetPileSize,
+  stepBoardCount,
+} from '../../utils/boardCountPicker';
 
 interface BoardCountSelectorProps {
   onGenerate: (count: number, gridSize: GridSize) => void;
-  onCancel: () => void;
+  onBack: () => void;
   gridSize: GridSize;
 }
 
-export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCountSelectorProps) => {
+export const BoardCountSelector = ({ onGenerate, onBack, gridSize }: BoardCountSelectorProps) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const userId = user?.id;
@@ -26,6 +42,8 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
   const [inputValue, setInputValue] = useState<string>('8');
   const [error, setError] = useState<string>('');
   const [cardCount, setCardCount] = useState<number>(0);
+  /** La baraja leída para contar las cartas; con ella se dibuja también la muestra. */
+  const [deckCards, setDeckCards] = useState<Card[]>([]);
   const [isLoadingCards, setIsLoadingCards] = useState(true);
   const [suggestedBoards, setSuggestedBoards] = useState<number>(8);
   const minCards = minCardsForGrid(gridSize);
@@ -35,16 +53,17 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
     const loadCardCount = async () => {
       setIsLoadingCards(true);
       try {
-        let cards;
+        let loadedCards: Card[];
         if (userId && currentSetId) {
-          cards = await CardRepository.getCards(userId, currentSetId);
+          loadedCards = await CardRepository.getCards(userId, currentSetId);
         } else if (userId) {
-          cards = []; // Same as useBoard: logged in but no set selected = no cards
+          loadedCards = []; // Same as useBoard: logged in but no set selected = no cards
         } else {
-          cards = await loadCards();
+          loadedCards = await loadCards();
         }
-        const loadedCardCount = cards.length;
+        const loadedCardCount = loadedCards.length;
         setCardCount(loadedCardCount);
+        setDeckCards(withCardNumbers(loadedCards));
 
         // Calculate suggested boards based on loaded cards and current grid size
         const suggested = suggestedBoardCount(loadedCardCount, gridSize);
@@ -70,6 +89,25 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
     };
     loadCardCount();
   }, [gridSize, userId, currentSetId]); // Re-run when gridSize or card source changes
+
+  // La muestra se elige una vez por baraja: no cambia al mover el número de tableros.
+  const deckSize = deckCards.length;
+  const sampleIndexes = useMemo(
+    () => pickSample(Array.from({ length: deckSize }, (_, i) => i), gridSize),
+    [deckSize, gridSize]
+  );
+  const sample = sampleIndexes.flatMap((index) => (deckCards[index] ? [deckCards[index]] : []));
+
+  const hasEnoughCards = !isLoadingCards && cardCount >= minCards;
+  const maxBoards = maxUniqueBoards(cardCount, gridSize);
+  const shortcuts = hasEnoughCards ? boardCountShortcuts(suggestedBoards, maxBoards) : [];
+  const modeLabel = gridSize === 16 ? t('cardEditor.deck.modeClassic') : t('cardEditor.deck.modeKids');
+
+  const chooseCount = (count: number) => {
+    setBoardCount(count);
+    setInputValue(count.toString());
+    setError('');
+  };
 
   const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.trim();
@@ -126,12 +164,9 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
     }
 
     // Check if requested count exceeds maximum unique boards possible
-    if (cardCount >= gridSize) {
-      const maxBoards = maxUniqueBoards(cardCount, gridSize);
-      if (boardCount > maxBoards) {
-        setError(t('boardGenerator.form.errorMaxUnique', { count: cardCount, max: maxBoards }));
-        return;
-      }
+    if (cardCount >= gridSize && boardCount > maxBoards) {
+      setError(t('boardGenerator.form.errorMaxUnique', { count: cardCount, max: maxBoards }));
+      return;
     }
 
     setError('');
@@ -139,97 +174,125 @@ export const BoardCountSelector = ({ onGenerate, onCancel, gridSize }: BoardCoun
   };
 
   return (
-    <div className="board-count-selector">
-      <div className="board-count-selector__header">
-        <h1 className="board-count-selector__title">{t('boardGenerator.title')}</h1>
-        <p className="board-count-selector__subtitle">
-          {t('boardGenerator.modeSelection', {
-            mode: gridSize === 16 ? t('boardGenerator.modes.classic') : t('boardGenerator.modes.kids')
-          })}
-        </p>
-      </div>
+    <div className="board-count">
+      <div className="board-count__inner">
+        <form onSubmit={handleSubmit} className="board-count__panel">
+          <div>
+            <h1 className="board-count__title">{t('boardGenerator.count.title')}</h1>
+            <p className="board-count__subtitle">
+              {modeLabel}
+              {!isLoadingCards && ` · ${t('boardGenerator.count.deckCards', { count: cardCount })}`}
+            </p>
+          </div>
 
-      {!isLoadingCards && cardCount >= minCards && (
-        <div className="board-count-selector__suggestion">
-          <div className="board-count-selector__suggestion-icon">
-            <FaLightbulb />
-          </div>
-          <div className="board-count-selector__suggestion-content">
-            <div className="board-count-selector__suggestion-title">{t('boardGenerator.suggestion.title')}</div>
-            <div className="board-count-selector__suggestion-text">
-              {t('boardGenerator.suggestion.text', { count: cardCount, suggested: suggestedBoards })}
-              {(() => {
-                const maxUnique = maxUniqueBoards(cardCount, gridSize);
-                if (maxUnique < 100 && maxUnique !== suggestedBoards) {
-                  return t('boardGenerator.suggestion.maxTheoretical', { max: maxUnique });
-                }
-                return '';
-              })()}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {!isLoadingCards && cardCount < minCards && (
-        <div className="board-count-selector__error-message">
-          <div className="board-count-selector__error-icon">
-            <FaExclamationTriangle />
-          </div>
-          <div className="board-count-selector__error-content">
-            <div className="board-count-selector__error-title">{t('boardGenerator.insufficientCards.title')}</div>
-            <div className="board-count-selector__error-text">
-              {t('boardGenerator.insufficientCards.text', {
-                needed: minCards,
-                mode: gridSize === 16 ? t('boardGenerator.modes.classic') : t('boardGenerator.modes.kids'),
-                count: cardCount
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="board-count-selector__form">
-        <div className="board-count-selector__input-group">
-          <label htmlFor="board-count" className="board-count-selector__label">
-            {t('boardGenerator.form.label')}
-          </label>
-          {!isLoadingCards && cardCount >= minCards && (
-            <div className="board-count-selector__hint">
-              {t('boardGenerator.form.hint', { count: suggestedBoards })}
+          {!isLoadingCards && cardCount < minCards && (
+            <div className="board-count__warning" role="alert">
+              <span className="board-count__note-icon">
+                <FaExclamationTriangle aria-hidden="true" />
+              </span>
+              <p className="board-count__note-text">
+                <strong>{t('boardGenerator.insufficientCards.title')}</strong>{' '}
+                {t('boardGenerator.insufficientCards.text', {
+                  needed: minCards,
+                  mode: gridSize === 16 ? t('boardGenerator.modes.classic') : t('boardGenerator.modes.kids'),
+                  count: cardCount,
+                })}
+              </p>
             </div>
           )}
-          <input
-            id="board-count"
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            value={inputValue}
-            onChange={handleCountChange}
-            onBlur={handleInputBlur}
-            className="board-count-selector__input"
-            placeholder={!isLoadingCards && cardCount >= minCards ? suggestedBoards.toString() : t('boardGenerator.form.placeholder')}
-          />
-          {error && <div className="board-count-selector__error">{error}</div>}
-        </div>
 
-        <div className="board-count-selector__actions">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="board-count-selector__cancel-button"
-          >
-            {t('boardGenerator.actions.cancel')}
-          </button>
-          <button
-            type="submit"
-            disabled={boardCount < 1 || cardCount < minCards}
-            className={`board-count-selector__button ${boardCount >= 1 && cardCount >= minCards ? 'board-count-selector__button--enabled' : ''}`}
-          >
-            <span>{t('boardGenerator.actions.generate')}</span>
-            <FaArrowRight />
-          </button>
-        </div>
-      </form>
+          <div className="board-count__stepper">
+            <button
+              type="button"
+              className="board-count__step"
+              aria-label={t('boardGenerator.count.decrease')}
+              disabled={!hasEnoughCards || boardCount <= MIN_BOARD_COUNT}
+              onClick={() => chooseCount(stepBoardCount(boardCount, -1, maxBoards))}
+            >
+              <FaMinus aria-hidden="true" />
+            </button>
+            <label htmlFor="board-count" className="board-count__value">
+              <input
+                id="board-count"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={inputValue}
+                onChange={handleCountChange}
+                onBlur={handleInputBlur}
+                className="board-count__input"
+                style={{ width: `${Math.max(inputValue.length, 1)}ch` }}
+                aria-label={t('boardGenerator.form.label')}
+                aria-invalid={error !== ''}
+                aria-describedby={error ? 'board-count-error' : undefined}
+              />
+              <span className="board-count__unit">{t('boardGenerator.count.unit', { count: boardCount })}</span>
+            </label>
+            <button
+              type="button"
+              className="board-count__step"
+              aria-label={t('boardGenerator.count.increase')}
+              disabled={!hasEnoughCards || boardCount >= maxBoards}
+              onClick={() => chooseCount(stepBoardCount(boardCount, 1, maxBoards))}
+            >
+              <FaPlus aria-hidden="true" />
+            </button>
+          </div>
+
+          {error && (
+            <div id="board-count-error" className="board-count__error" role="alert">
+              {error}
+            </div>
+          )}
+
+          {shortcuts.length > 0 && (
+            <div className="board-count__shortcuts" role="group" aria-label={t('boardGenerator.count.shortcutsLabel')}>
+              {shortcuts.map(({ count, isSuggested }) => (
+                <button
+                  key={count}
+                  type="button"
+                  className={`board-count__shortcut${isSuggested ? ' board-count__shortcut--suggested' : ''}`}
+                  aria-pressed={boardCount === count}
+                  onClick={() => chooseCount(count)}
+                >
+                  {isSuggested ? t('boardGenerator.count.suggested', { count }) : count}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {hasEnoughCards && (
+            <div className="board-count__suggestion">
+              <span className="board-count__note-icon">
+                <FaRegLightbulb aria-hidden="true" />
+              </span>
+              <p className="board-count__note-text">
+                <strong>{t('boardGenerator.count.suggestionLead', { suggested: suggestedBoards })}</strong>{' '}
+                {t('boardGenerator.count.suggestionText', { count: cardCount })}
+              </p>
+            </div>
+          )}
+
+          <div className="board-count__actions">
+            <button type="button" onClick={onBack} className="board-count__back">
+              <FaArrowLeft aria-hidden="true" />
+              {t('boardGenerator.count.back')}
+            </button>
+            <button
+              type="submit"
+              disabled={boardCount < 1 || cardCount < minCards}
+              className="board-count__generate"
+            >
+              {t('boardGenerator.count.generate', { count: boardCount })}
+              <FaArrowRight aria-hidden="true" />
+            </button>
+          </div>
+        </form>
+
+        {sample.length === gridSize && (
+          <BoardPile sample={sample} gridSize={gridSize} sheets={sheetPileSize(boardCount)} />
+        )}
+      </div>
     </div>
   );
 };

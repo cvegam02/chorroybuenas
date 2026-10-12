@@ -1,0 +1,214 @@
+/* P6 — Lo que va debajo de la portada y la caja: «Qué incluye el PDF» y los bloques de jugar y de crear la propia. */
+
+.seasonal-includes {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 32px;
+}
+
+.seasonal-includes__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.seasonal-includes__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.seasonal-includes__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+}
+
+.seasonal-includes__icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--color-primary-lightest);
+  color: var(--color-primary-dark);
+  font-size: 22px;
+}
+
+.seasonal-includes__name {
+  display: block;
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+.seasonal-includes__text {
+  margin: 4px 0 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.seasonal-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.seasonal-links__block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 26px 28px;
+  border-radius: var(--radius-lg);
+}
+
+.seasonal-links__block--play {
+  background: var(--color-bg-subtle);
+}
+
+.seasonal-links__block--photos {
+  flex-flow: row wrap;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 28px;
+  border: 1px solid var(--color-primary-lightest);
+  background: var(--color-bg-surface);
+}
+
+.seasonal-links__cards {
+  flex: 0 0 auto;
+  display: flex;
+}
+
+.seasonal-links__card {
+  width: 62px;
+  height: 93px;
+  border-radius: 5px;
+  box-shadow: var(--shadow-md);
+  transform: rotate(-6deg);
+}
+
+.seasonal-links__card + .seasonal-links__card {
+  margin-left: -12px;
+  transform: rotate(5deg);
+}
+
+.seasonal-links__body {
+  flex: 1 1 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.seasonal-links__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.seasonal-links__text {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.seasonal-links__link {
+  align-self: flex-start;
+  color: var(--color-primary-dark);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.seasonal-links__link:hover {
+  color: var(--color-primary);
+}
+
+.seasonal-links__link:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .seasonal-includes {
+    gap: 10px;
+    margin-top: 0;
+  }
+
+  .seasonal-includes__title {
+    font-size: 18px;
+  }
+
+  .seasonal-includes__list {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .seasonal-includes__item {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  /* En celular las tarjetas van de dos en dos y sin ícono, como en la maqueta. */
+  .seasonal-includes__icon {
+    display: none;
+  }
+
+  .seasonal-includes__name {
+    font-size: 15px;
+  }
+
+  .seasonal-includes__text {
+    margin-top: 2px;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .seasonal-links {
+    gap: 12px;
+    margin-top: 0;
+  }
+
+  .seasonal-links__block,
+  .seasonal-links__block--photos {
+    padding: 16px;
+  }
+
+  .seasonal-links__block--photos {
+    flex-wrap: nowrap;
+    gap: 14px;
+  }
+
+  .seasonal-links__card {
+    width: 46px;
+    height: 69px;
+    border-radius: 4px;
+  }
+
+  .seasonal-links__card + .seasonal-links__card {
+    margin-left: -10px;
+  }
+
+  .seasonal-links__body {
+    flex: 1 1 auto;
+  }
+
+  .seasonal-links__title {
+    font-size: 18px;
+  }
+}

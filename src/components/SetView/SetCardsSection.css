@@ -1,0 +1,151 @@
+/* Sección Cartas de una lotería (U2): todas las cartas, la etiqueta de IA y los espacios de las que faltan */
+
+.set-cards__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 14px;
+}
+
+.set-cards__card {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-text-main) 12%, transparent);
+  color: var(--color-text-main);
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.set-cards__card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--color-text-main) 18%, transparent);
+}
+
+.set-cards__image-wrap {
+  position: relative;
+  display: block;
+  /* La carta entera, como sale impresa (2:3) */
+  aspect-ratio: 2 / 3;
+}
+
+.set-cards__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  transition: opacity 0.2s ease;
+}
+
+.set-cards__skeleton {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-subtle) 25%,
+    var(--color-primary-lightest) 50%,
+    var(--color-bg-subtle) 75%
+  );
+  background-size: 200% 100%;
+  animation: set-cards-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes set-cards-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.set-cards__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 2 / 3;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.set-cards__ai {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  background: var(--color-ai);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--color-card-ink) 25%, transparent);
+  color: var(--color-text-inverted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* El nombre bajo la foto: solo mientras la carta todavía no se ve como sale impresa */
+.set-cards__name {
+  display: block;
+  overflow: hidden;
+  padding: 4px 6px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.set-cards__slot,
+.set-cards__slot:hover {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-sizing: border-box;
+  aspect-ratio: 2 / 3;
+  border: 2px dashed var(--color-primary-lighter);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+  color: var(--color-primary-dark);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.set-cards__slot:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-lightest);
+}
+
+.set-cards__slot svg {
+  font-size: 18px;
+}
+
+@media (max-width: 768px) {
+  .set-cards__grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .set-cards__ai {
+    top: 4px;
+    right: 4px;
+    padding: 1px 5px;
+    font-size: 10px;
+  }
+
+  .set-cards__name {
+    padding: 3px 4px 4px;
+    font-size: 10px;
+  }
+
+  .set-cards__slot svg {
+    font-size: 15px;
+  }
+}

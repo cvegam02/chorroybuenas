@@ -1,0 +1,117 @@
+/* Tarjeta de paquete de tokens, la misma en Beneficios y en Comprar tokens (FEAT-33) */
+
+.token-pack-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  align-items: stretch;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.token-pack {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 26px 22px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  text-align: center;
+}
+
+.token-pack--highlighted {
+  border: 2px solid var(--color-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.token-pack__popular {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  padding: 4px 14px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.token-pack__name {
+  margin: 0;
+  color: inherit;
+  font-size: 17px;
+}
+
+.token-pack__tokens {
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.token-pack__unit {
+  font-size: 18px;
+}
+
+.token-pack__extras,
+.token-pack__per-photo {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+/* «+ 2 de regalo», en turquesa como estaba en Comprar tokens. */
+.token-pack__extras strong {
+  color: var(--color-secondary-dark);
+}
+
+.token-pack__price {
+  display: flex;
+  flex-direction: column;
+  margin-top: 4px;
+  color: var(--color-primary-dark);
+  font-size: 28px;
+}
+
+.token-pack__price-note {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.token-pack__action {
+  align-self: stretch;
+  margin-top: auto;
+  padding: 12px 18px;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  color: var(--color-primary-dark);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.token-pack--highlighted .token-pack__action,
+.token-pack__action:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+}
+
+.token-pack__action:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.token-pack__action:focus-visible {
+  outline: 3px solid var(--color-primary-dark);
+  outline-offset: 3px;
+}

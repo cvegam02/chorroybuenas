@@ -39,6 +39,18 @@ Todos están definidos como variables en `:root`, en `src/index.css`. Se usan co
 | `--color-text-inverted` | `#ffffff` | Texto sobre color |
 | `--color-border` | `#e5e7eb` | Bordes |
 | `--color-border-dark` | `#d1d5db` | Bordes marcados |
+| `--color-card-cream` | `#f4ead4` | Margen crema de una carta dibujada por el sitio (FEAT-32) |
+| `--color-card-ink` | `#14100a` | Marco, ícono y contorno de letra de esa carta (FEAT-32) |
+| `--color-card-pink` | `#e8a3b8` | Fondo de carta de ocasión: rosa (FEAT-32) |
+| `--color-card-blue` | `#93c5fd` | Fondo de carta de ocasión: azul (FEAT-32) |
+| `--color-card-lilac` | `#c4b5fd` | Fondo de carta de ocasión: lila (FEAT-32) |
+| `--color-board-cell-1` a `-8` | `#fde68a`, `#fecaca`, `#bfdbfe`, `#bbf7d0`, `#e9d5ff`, `#fed7aa`, `#a5f3fc`, `#fbcfe8` | Casillas de los tableritos de las jugadas en «¿Cómo se juega?» (FEAT-33). Solo para eso. |
+| `--color-bean-light`, `--color-bean-dark` | `#a16207`, `#5b2a0a` | El frijol que marca una casilla en esos tableritos (FEAT-33) |
+| `--color-paper-cream` | `#fbf3e2` | Papel de la hoja de lotería dibujada en «¿Qué es la lotería?» (FEAT-33) |
+| `--color-danger` | `#dc2626` | Peligro: borrar o vaciar. Es el rojo que el sitio ya usaba escrito a mano; el código nuevo lo toma de aquí (FEAT-34) |
+| `--color-ai` | `#7c3aed` | Inteligencia artificial: botones y etiquetas de transformar con IA (FEAT-34) |
+| `--color-season` | `#6d28d9` | Temporada: texto de las etiquetas de la temática y del modo en el detalle de una lotería temática (FEAT-37) |
+| `--color-season-light` | `#ede9fe` | Temporada: fondo de esas etiquetas (FEAT-37) |
 
 `--color-bg-primary` y `--color-bg-secondary` son alias de `--color-bg-surface` y `--color-bg-base`.
 
@@ -54,6 +66,8 @@ Una sola familia, Quicksand, cargada desde Google Fonts en `index.html` con peso
 ### La carta impresa no es parte del sitio
 
 La carta de lotería que el sitio produce tiene su propio aspecto, que no usa estos tokens: margen crema `#F4EAD4`, marco y contorno de letra `#14100A`, nombre en blanco y letra Arvo Bold (guardada en `src/fonts/`, con su licencia OFL). Esos valores viven en `src/services/cardCompose/constants.ts` y solo se usan para componer la imagen de la carta; no se usan en botones, textos ni pantallas del sitio (FEAT-29, decisión 9).
+
+**Excepción (2026-10-10, FEAT-32, decisión 4):** las seis cartas de «Perfecta para cualquier ocasión», en la página de inicio, sí usan ese aspecto, porque son cartas decorativas dibujadas con HTML y CSS. Para eso existen los tokens `--color-card-*` de la tabla de color y la letra Arvo Bold declarada en `LandingOccasions.css` con el mismo archivo de `src/fonts/`. Fuera de cartas decorativas la regla sigue igual: ese aspecto no se usa en botones, textos ni pantallas.
 
 ### Espaciado, radios y sombras
 
@@ -86,6 +100,7 @@ Los únicos componentes que se reutilizan entre pantallas:
 | Confirmación | `src/components/ConfirmationModal/ConfirmationModal.tsx` | Confirmar acciones que no se deshacen |
 | Advertencia | `src/components/ConfirmationModal/WarningModal.tsx` | Avisos y errores |
 | Iniciar sesión / Crear cuenta | `src/components/Auth/EmailAuthModal.tsx` | Entrada y registro |
+| Cascarón de ventana de cuenta | `src/components/Auth/AuthDialog.tsx` (campos en `AuthFields.tsx`, piezas en `AuthParts.tsx`) | Velo, caja de 420 px y hoja inferior en celular (640 px o menos); lo usan Iniciar sesión / Crear cuenta y Contraseña nueva (FEAT-38) |
 | Selector de modo | `src/components/BoardGenerator/GridModeSelector.tsx` | Clásico o Kids |
 
 Los íconos vienen de `react-icons` (familia `fa`).
