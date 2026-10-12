@@ -25,8 +25,8 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 ### 2. Iniciar sesión
 - **Actor(es)**: Usuario registrado.
 - **Precondiciones**: Tener cuenta confirmada.
-- **Flujo principal**: (1) Entra con correo y contraseña, o con Google. (2) Si en su navegador había cartas o tableros creados como visitante, se pasan a su cuenta dentro de una lotería por defecto (§4). (3) Llega a su panel con sus loterías.
-- **Excepciones**: Credenciales incorrectas: se le avisa. Si alguna carta no se puede pasar a la cuenta, las demás se pasan igual.
+- **Flujo principal**: (1) Entra con correo y contraseña, o con Google. (2) Si en su navegador había cartas o tableros creados como visitante, se pasan a su cuenta (§4): a su primera lotería si está vacía o, si ya tenía cartas, a una lotería nueva; mientras tanto ve «Guardando tu lotería en tu cuenta…». (3) Llega a la página de esa lotería, ya guardada; si no había trabajo de visitante, a su panel con sus loterías. Si entró desde Comprar tokens o desde una lotería temática, se queda en esa página. _(2026-10-12, FEAT-41; antes llegaba siempre a su panel y todo iba a la primera lotería)_
+- **Excepciones**: Credenciales incorrectas: se le avisa. Si alguna carta no se puede pasar a la cuenta, las demás se pasan igual, se le avisa cuántas faltaron y esas se reintentan en su siguiente visita; los tableros se pasan cuando ya están todas sus cartas. Si no se puede pasar ninguna, se le avisa y su lotería sigue en el navegador (2026-10-12, FEAT-41).
 - **Resultado**: Sesión iniciada, con su trabajo previo de visitante ya en la nube.
 - **Estados afectados**: Pueden crearse una lotería, cartas y tableros (§11).
 - **Notificaciones**: Ninguna.

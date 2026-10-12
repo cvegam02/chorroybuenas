@@ -31,6 +31,8 @@ import { CardRepository } from './repositories/CardRepository';
 import { useCards } from './hooks/useCards';
 import { generatePDF, downloadPDF, pdfFileName } from './services/PDFService';
 import { saveBoards, saveBoardCount, loadBoards, clearAllData } from './utils/storage';
+import { useVisitorTransfer } from './hooks/useVisitorTransfer';
+import { UploadProgressModal } from './components/CardEditor/UploadProgressModal';
 import { BoardRepository } from './repositories/BoardRepository';
 import { Board, GridSize } from './types';
 import { logger } from './utils/logger';
@@ -67,6 +69,7 @@ function AppContent() {
   const isCreatingSetRef = useRef(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const { generateBoards, isGenerating } = useBoard();
+  const visitorTransfer = useVisitorTransfer();
 
   // Initialize step based on current route
   useEffect(() => {
@@ -325,6 +328,11 @@ function AppContent() {
       <PageMeta />
       <Navbar />
       <CreateSteps />
+      <UploadProgressModal
+        isOpen={visitorTransfer.isSaving}
+        progress={visitorTransfer.progress}
+        title={t('visitorTransfer.saving')}
+      />
       <Routes>
         <Route
           path="/"

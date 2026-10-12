@@ -1,4 +1,6 @@
+import { z } from 'zod';
 import { Card, Board, BoardStorage, BoardsCollection } from '../types';
+import type { TransferPending } from '../services/visitorTransfer';
 import { saveImage as saveImageToIndexedDB } from './indexedDB';
 import { logger } from './logger';
 
@@ -7,6 +9,7 @@ const BOARDS_KEY = 'loteria_boards';
 const BOARD_COUNT_KEY = 'loteria_board_count';
 const MIGRATION_FLAG_KEY = 'loteria_migrated_to_indexeddb';
 const CURRENT_SET_PREFIX = 'loteria_current_set_';
+const TRANSFER_PENDING_KEY = 'loteria_transfer_pending';
 
 // Card metadata (without images) for localStorage
 interface CardMetadata {
@@ -298,6 +301,45 @@ export const loadBoardsCollection = (): BoardsCollection | null => {
   }
 };
 
+/** Hay cartas guardadas en este navegador. Solo se guardan aquí sin sesión: son trabajo de visitante. */
+export const hasLocalCards = (): boolean => {
+  try {
+    const stored = localStorage.getItem(CARDS_KEY);
+    if (!stored) return false;
+    const parsed: unknown = JSON.parse(stored);
+    return Array.isArray(parsed) && parsed.length > 0;
+  } catch {
+    return false;
+  }
+};
+
+const transferPendingSchema = z.object({
+  userId: z.string().min(1),
+  setId: z.string().min(1),
+  cardIds: z.array(z.string()),
+  attempts: z.number().int().nonnegative(),
+});
+
+/** Traspaso a la cuenta que no terminó (FEAT-41): a qué lotería iba, qué cartas ya pasaron y cuántos intentos lleva. */
+export const loadTransferPending = (): TransferPending | null => {
+  try {
+    const stored = localStorage.getItem(TRANSFER_PENDING_KEY);
+    if (!stored) return null;
+    const parsed = transferPendingSchema.safeParse(JSON.parse(stored));
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
+};
+
+export const saveTransferPending = (pending: TransferPending): void => {
+  try {
+    localStorage.setItem(TRANSFER_PENDING_KEY, JSON.stringify(pending));
+  } catch (error) {
+    logger.warn('Could not persist the pending transfer:', error);
+  }
+};
+
 export const saveBoardCount = (count: number): void => {
   try {
     localStorage.setItem(BOARD_COUNT_KEY, JSON.stringify(count));
@@ -340,6 +382,7 @@ export const clearAllData = async (): Promise<void> => {
     localStorage.removeItem(BOARDS_KEY);
     localStorage.removeItem(BOARD_COUNT_KEY);
     localStorage.removeItem(MIGRATION_FLAG_KEY);
+    localStorage.removeItem(TRANSFER_PENDING_KEY);
     // No borrar CURRENT_SET_* aquí; se limpian al cerrar sesión
 
     // Clear IndexedDB images
