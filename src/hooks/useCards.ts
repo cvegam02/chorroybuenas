@@ -7,6 +7,7 @@ import { useSetContext } from '../contexts/SetContext';
 import { CardRepository } from '../repositories/CardRepository';
 import { logger } from '../utils/logger';
 import { withCardNumbers } from '../utils/cardNumbers';
+import { cardAfterSave } from '../utils/savedCard';
 
 /** Tiempo (ms) que el botón "Generar con IA" permanece deshabilitado tras añadir una carta (evita race con Supabase) */
 const SYNC_COOLDOWN_MS = 2500;
@@ -393,14 +394,9 @@ export const useCards = () => {
         const imageUrl = imagePath ? await CardRepository.getImageUrl(imagePath) : undefined;
         const originalImageUrl = originalImagePath ? await CardRepository.getImageUrl(originalImagePath) : undefined;
 
-        setCards((prevCards: Card[]) => {
-          return prevCards.map(card => card.id === id ? {
-            ...card,
-            ...updates,
-            ...(imageUrl ? { image: imageUrl } : {}),
-            ...(originalImageUrl ? { originalImage: originalImageUrl } : {})
-          } : card);
-        });
+        setCards((prevCards: Card[]) =>
+          prevCards.map(card => card.id === id ? cardAfterSave(card, updates, { imagePath, imageUrl, originalImageUrl }) : card)
+        );
       } else {
         let updatedImage = updates.image;
         if (updatedImage && updatedImage.startsWith('data:')) {
