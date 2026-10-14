@@ -1,6 +1,7 @@
 import { logger } from '../utils/logger';
 import { supabase } from '../utils/supabaseClient';
 import { summarizeRevenue, type RevenueSummary } from '../utils/adminRevenue';
+import { requestGiftNotice } from '../services/giftNotice';
 
 export interface AdminPurchase {
   id: string;
@@ -417,6 +418,7 @@ export class AdminRepository {
 
   /**
    * Regalar tokens a un usuario (admin). El regalo queda registrado con el motivo, si se da.
+   * Después pide el correo de aviso sin esperarlo: si no sale, el regalo ya está hecho.
    * Retorna el nuevo balance o null si falla.
    */
   static async giftTokens(userId: string, amount: number, reason?: string): Promise<number | null> {
@@ -427,6 +429,7 @@ export class AdminRepository {
     });
 
     if (error) return null;
+    void requestGiftNotice(userId, amount);
     return data as number;
   }
 
