@@ -182,9 +182,13 @@ Decidido el 2026-10-06 (remediación del code review). El detalle técnico está
 | Olvidó su contraseña | Al usuario: correo para recuperarla | Funciona |
 | Un pago pendiente (efectivo o transferencia) se confirma y sus tokens ya están disponibles | Al usuario | Por construir |
 | Un administrador le regala tokens | Al usuario | Por construir |
+| Un pago se cobra pero lo comprado no se pudo entregar | Al administrador: alerta por correo | Por construir |
 
 - No se avisa de una compra normal acreditada, de saldo bajo ni de un pago devuelto. Decidido el 2026-10-06.
+- Tampoco se avisa de un pago pendiente que vence sin pagarse. Decidido el 2026-10-13 (fase 3).
 - Los dos avisos nuevos llegan por correo. Decidido el 2026-10-06.
+- Los correos del sitio se envían solo en español, aunque el usuario vea el sitio en inglés. Decidido el 2026-10-13 (fase 3).
+- La alerta al administrador es el único aviso que no va al usuario. Cubre las compras de tokens y las de loterías temáticas (§18). Llega a una sola dirección fija, que se configura en el servidor; no se envía a toda la lista de administradores. Decidido el 2026-10-13 (fase 3).
 - El aviso de pago pendiente confirmado cubre también las compras de loterías temáticas (§18). Mientras no exista, esas compras no generan ningún aviso. Decidido el 2026-10-06 (FEAT-17).
 
 ## 14. Fechas, plazos y cálculos automáticos
@@ -245,6 +249,10 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-08 | Una lotería temática en modo Kids se puede armar con 9 cartas en vez de 15; la lotería normal conserva 15 en Kids y 24 en Clásico, y la temática en Clásico sigue en 24. Con exactamente 9 cartas los tableros llevan las mismas cartas, cada uno con un acomodo distinto (FEAT-24, US A5). _(Descartadas: bajar a 9 todo el modo Kids, también para los usuarios; dejarlo en 15 y solo aclarar el contador «de 54». Para los tableros con 9 cartas, descartadas: generar un solo tablero; permitir copias con el mismo acomodo.)_ |
 | 2026-10-09 | El título de una carta solo admite letras (con acentos, ñ y ü), números, espacios y signos de puntuación comunes; no admite emojis ni letras de otros alfabetos. Se valida en el navegador; las cartas ya guardadas no se tocan y el PDF las dibuja sin esos caracteres. _(Descartadas: quitarlos solo en el PDF y dejar el título intacto en el sitio; quitarlos en el PDF y avisar con una nota en el editor. Origen: FEAT-25.)_ |
 | 2026-10-09 | Cada carta lleva un número, que es su lugar en el orden de subida dentro de su lotería. Se asigna solo, no se edita y, al borrar una carta, las siguientes se renumeran. Lo llevan las cartas con foto y las convertidas con IA; las de loterías temáticas, no (FEAT-30). Descartado: que el usuario pueda editarlo, y dejar huecos al borrar. |
+| 2026-10-13 | Se alerta por correo al administrador cuando un pago se cobra pero lo comprado no se pudo entregar. _(Descartado: no avisar al administrador. Origen: fase 3.)_ |
+| 2026-10-13 | No se avisa al usuario de un pago pendiente que vence sin pagarse. _(Descartado: correo invitándolo a intentarlo de nuevo. Origen: fase 3.)_ |
+| 2026-10-13 | La alerta al administrador cubre las compras de tokens y las de loterías temáticas, y llega a una sola dirección fija configurada en el servidor. _(Descartadas: alertar solo de tokens; enviarla a todos los de la lista de administradores. Origen: fase 3.)_ |
+| 2026-10-13 | Los correos del sitio se envían solo en español. _(Descartadas: español e inglés en el mismo correo; guardar el idioma de cada usuario y escribirle en el suyo. Origen: fase 3.)_ |
 
 ## 16. Pendientes por definir
 
@@ -261,6 +269,7 @@ Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en
 | Descontar tokens ante reembolso o contracargo | §8 | No descuenta nada |
 | Avisar por correo de pago pendiente acreditado | §13 | No avisa |
 | Avisar por correo de tokens regalados | §13 | No avisa |
+| Alertar por correo al administrador de un pago cobrado sin entregar | §13 | No avisa. Anotada el 2026-10-13 (fase 3) |
 | Loterías temáticas: catálogo, compra, descarga y administración | §18 | No existen |
 | Quitar el acceso a una lotería temática ante reembolso o contracargo | §18 | No existe; se construirá junto con el descuento de tokens |
 | Tableros del PDF en tamaño carta | §5 | El PDF sale en hoja A4. Anotada el 2026-10-09; se corrige con `docs/features/FEAT-26-pdf-impresion-y-recorte.md` |
@@ -318,4 +327,4 @@ Definido con Carlos el 2026-10-06 (FEAT-17). Por construir. Hasta el 2026-10-07 
 
 **Historial.** El comprador ve estas compras en su historial, mezcladas por fecha con las de tokens y los regalos. El administrador las ve en la lista de compras, distinguidas por tipo, y ve cuántas ventas lleva cada lotería.
 
-**Avisos.** Ninguno por ahora (§13).
+**Avisos.** Al usuario, ninguno por ahora; al administrador, la alerta de un pago cobrado sin entregar (§13; por construir; agregado el 2026-10-13, fase 3).

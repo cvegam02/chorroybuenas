@@ -90,6 +90,7 @@ npx supabase secrets set MERCADOPAGO_WEBHOOK_SECRET=<clave secreta de Webhooks, 
 npx supabase secrets set ALLOWED_ORIGINS=https://dev.chorroybuenas.com.mx,http://localhost:5173
 npx supabase secrets set SERVICE_ROLE_KEY=<service_role_del_proyecto_dev>
 npx supabase secrets set REPLICATE_API_TOKEN=r8_xxx
+npx supabase secrets set RESEND_API_KEY=<clave de Resend de dev> EMAIL_REPLY_TO=<buzón de respuestas>
 npx supabase secrets unset MP_USE_PRODUCTION_CHECKOUT
 ```
 
@@ -106,6 +107,7 @@ npx supabase secrets set ALLOWED_ORIGINS=https://chorroybuenas.com.mx,https://ww
 npx supabase secrets set APP_URL=https://chorroybuenas.com.mx
 npx supabase secrets set SERVICE_ROLE_KEY=<service_role_del_proyecto_prod>
 npx supabase secrets set REPLICATE_API_TOKEN=r8_xxx
+npx supabase secrets set RESEND_API_KEY=<clave de Resend de producción, de solo envío> EMAIL_REPLY_TO=<buzón de respuestas>
 npx supabase secrets unset MP_USE_PRODUCTION_CHECKOUT
 ```
 
@@ -118,8 +120,27 @@ npx supabase secrets unset MP_USE_PRODUCTION_CHECKOUT
 | `MERCADOPAGO_WEBHOOK_SECRET` | Verifica la firma `x-signature` de las notificaciones | Las notificaciones se aceptan sin verificar la firma (el pago se consulta siempre en la API de Mercado Pago) |
 | `APP_URL` | URL de retorno cuando la que envía el frontend no está en la lista blanca | Se usa `https://chorroybuenas.com.mx` |
 | `MP_USE_PRODUCTION_CHECKOUT` | **Ya no se usa.** Borrarlo | — |
+| `RESEND_API_KEY` | Clave de Resend con la que las funciones mandan los avisos por correo (fase 3). Cada proyecto, la suya | La función de avisos responde 500 y no sale el correo; el regalo o el pago no se afectan |
+| `EMAIL_REPLY_TO` | Dirección a la que llegan las respuestas de los usuarios a los avisos. No se escribe en el repositorio (es público) | Los avisos salen sin dirección de respuesta |
 
 ---
+
+### Correos de cuenta (confirmar registro y recuperar contraseña)
+
+Desde el 2026-10-13 (fase 3, US A1) los dos proyectos envían estos correos con **Resend**, no con el envío de fábrica de Supabase. No es un secret de las funciones: se configura en cada proyecto, en Authentication → Emails → SMTP Settings.
+
+| Campo | Valor |
+|-------|-------|
+| Sender email | `avisos@chorroybuenas.com.mx` |
+| Sender name | `Chorro y Buenas` |
+| Host / Port | `smtp.resend.com` / `465` |
+| Username | `resend` |
+| Password | la clave de Resend de ese entorno |
+
+- El tope de correos por hora (Authentication → Rate Limits) quedó en 30; con el envío de fábrica era 2.
+- El dominio `chorroybuenas.com.mx` está verificado en una sola cuenta de Resend, compartida por dev y producción; cada entorno usa su propia clave. En `.env` local son `RESEND_API_KEY` (dev) y `RESEND_API_PROD` (producción).
+- Las plantillas (en español) y los enlaces no cambiaron.
+- Para volver atrás: apagar «Enable Custom SMTP»; el proyecto vuelve al envío de fábrica.
 
 ## 5. Desplegar Edge Functions por entorno
 

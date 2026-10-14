@@ -171,7 +171,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 - **Excepciones**: El mismo pago se avisa varias veces: se acredita una sola vez (§8). Pago no aprobado, o monto menor al esperado: no se acredita. Falla momentánea del servidor: Mercado Pago reintenta más tarde.
 - **Resultado**: El comprador tiene sus tokens y la compra queda en su historial.
 - **Estados afectados**: Saldo y compra (§11).
-- **Notificaciones**: Si el pago estuvo pendiente (efectivo o transferencia) y se confirma después, correo al usuario avisando que sus tokens ya están disponibles (§13; por construir). En un pago inmediato, ninguna.
+- **Notificaciones**: Si el pago estuvo pendiente (efectivo o transferencia) y se confirma después, correo al usuario avisando que sus tokens ya están disponibles (§13; por construir). En un pago inmediato, ninguna. Si el pago se cobró pero lo comprado no se pudo entregar, alerta por correo al administrador (§13; por construir; agregado el 2026-10-13, fase 3).
 - **Auditoría**: Se registra la compra con tokens, monto, identificador del pago y promoción usada (§11).
 
 ### 16. Usar un código promocional
@@ -281,7 +281,7 @@ Todos los casos de este bloque están por construir (§17, §18).
 - **Excepciones**: Sin sesión: se le pide iniciar sesión y vuelve a la misma lotería. Pago cancelado o rechazado: no recibe nada y puede intentarlo de nuevo. Pago pendiente: la lotería aparece como «pago en proceso» y se entrega al confirmarse. Monto pagado menor al precio: no se entrega. Notificación repetida de Mercado Pago: no se registra dos veces.
 - **Resultado**: La cuenta tiene una compra aprobada de esa lotería.
 - **Estados afectados**: Compra de lotería temática (§11).
-- **Notificaciones**: Ninguna (§13).
+- **Notificaciones**: Al usuario, ninguna (§13). Si el pago se cobró pero la lotería no se pudo entregar, alerta por correo al administrador (§13; por construir; agregado el 2026-10-13, fase 3).
 - **Auditoría**: La compra queda registrada con su pago y su monto.
 
 ### 26. Descargar una lotería temática comprada 🔧
