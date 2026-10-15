@@ -72,12 +72,13 @@ Requiere ser administrador.
 
 | Código | Pantalla | Ruta | Qué muestra y qué permite |
 |---|---|---|---|
-| A1 | Panel de administración | `/admin` | Menú lateral con seis pestañas; serán siete con A1.7. |
+| A1 | Panel de administración | `/admin` | Menú lateral con ocho pestañas. Desde el 2026-10-15 (FEAT-43) la primera es A1.0, la que se abre al entrar (antes, Compras). |
+| A1.0 | — Resumen | | Agregada y construida el 2026-10-15 (FEAT-43). Pantalla de entrada del panel: cómo va el negocio en un periodo (al abrir, «Este mes»; selector de hoy, semana, mes, año o rango), en hora de Hermosillo. De arriba a abajo: Dinero (ingresos separados en tokens y temáticas, gasto en IA, ganancia sin descontar la comisión de Mercado Pago) → Gente (usuarios nuevos, compraron y cuántos por primera vez, usaron la IA) → Ventas (compras de tokens, temáticas vendidas, lo más vendido) → gráfica diaria de ingresos contra gasto en IA → Pendientes (pagos sin confirmar de loterías temáticas, tokens regalados). Cada tarjeta compara contra el periodo anterior y lleva a su pestaña. |
 | A1.1 | — Compras | | Todas las compras, con filtros. Por construir (FEAT-17): columna y filtro «Tipo» (tokens o lotería temática). |
 | A1.2 | — Promociones | | Crear, editar, activar y borrar promociones. |
 | A1.3 | — Packs de tokens | | Paquetes, precio por token y tokens de bienvenida. _(por confirmar dónde está cada control)_ |
 | A1.4 | — Balances | | Saldos de todos los usuarios, regalo de tokens (con motivo opcional) e historial general de regalos. |
-| A1.5 | — Uso de IA | | Uso por día, por usuario y por lotería, con costo estimado. |
+| A1.5 | — Uso de IA | | Uso por día, por usuario y por lotería, con costo estimado. Desde el 2026-10-15 (FEAT-43) los días y el filtro de fechas se cuentan en hora de Hermosillo, no en UTC. |
 | A1.6 | — Transacciones MP | | Transacciones de Mercado Pago, con filtros. |
 | A1.7 | — Temáticas | | **Por construir (FEAT-17).** Lista de temáticas (crear, editar, ordenar, borrar) y tabla de loterías temáticas con estado, fechas, ventas e interruptor de publicar; formulario de lotería con ficha, precio, fechas, PDF, portada y muestras. Desde el 2026-10-07 (FEAT-23) la ventana de la ficha tiene tres pestañas —Datos, Precio y fechas, Archivos— con Cancelar y Guardar siempre visibles; en Archivos, junto a «Elegir PDF», el botón «Crear el PDF con mis cartas» abre A1.7a. Desde el 2026-10-07 (FEAT-24, US A3), cuando la lotería ya tiene un PDF guardado, en Archivos hay además un botón «Descargar» para bajarlo y revisarlo. |
 | A1.7a | Crear lotería temática con cartas | `/admin/tematicas/:id/crear` | Construida el 2026-10-07 (FEAT-23); falta elegir las muestras en el paso 3. Solo administradores; pantalla completa, fuera del panel con pestañas, con botón para volver a la ficha. Tres pasos: Cartas (subida por lote, cartas completas sin nombre, contador «N de 54», aviso de las que no vienen en 2:3) → Tableros (cuántos, generar, volver a generar) → Muestras y guardar (guarda el PDF y los números de cartas y tableros en la ficha y regresa a ella, abierta en Archivos; marcar las muestras está por construir). |

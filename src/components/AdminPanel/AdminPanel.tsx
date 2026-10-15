@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   FaCog, FaArrowLeft, FaTicketAlt, FaShoppingCart,
-  FaBoxOpen, FaWallet, FaChartLine, FaCreditCard, FaTags, FaBars, FaTimes
+  FaBoxOpen, FaWallet, FaChartLine, FaCreditCard, FaTags, FaBars, FaTimes, FaThLarge
 } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
+import { AdminSummary } from './AdminSummary';
 import { AdminPurchases } from './AdminPurchases';
 import { AdminPromotions } from './AdminPromotions';
 import { AdminTokenPacks } from './AdminTokenPacks';
@@ -14,9 +15,10 @@ import { AdminMPTransactions } from './AdminMPTransactions';
 import { AdminSeasonal } from './AdminSeasonal';
 import './AdminPanel.css';
 
-type AdminTab = 'compras' | 'promociones' | 'packs' | 'balances' | 'uso-ia' | 'mp' | 'temporada';
+type AdminTab = 'resumen' | 'compras' | 'promociones' | 'packs' | 'balances' | 'uso-ia' | 'mp' | 'temporada';
 
 const TABS: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
+  { id: 'resumen',     label: 'Resumen',            icon: <FaThLarge /> },
   { id: 'compras',     label: 'Compras',           icon: <FaShoppingCart /> },
   { id: 'promociones', label: 'Promociones',        icon: <FaTicketAlt /> },
   { id: 'packs',       label: 'Packs de tokens',    icon: <FaBoxOpen /> },
@@ -32,7 +34,7 @@ export const AdminPanel = () => {
   const location = useLocation();
   // Quien vuelve de crear una lotería de temporada (A1.7a) regresa a su pestaña.
   const [activeTab, setActiveTab] = useState<AdminTab>(() =>
-    (location.state as { tab?: string } | null)?.tab === 'temporada' ? 'temporada' : 'compras',
+    (location.state as { tab?: string } | null)?.tab === 'temporada' ? 'temporada' : 'resumen',
   );
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -144,6 +146,7 @@ export const AdminPanel = () => {
       {/* Main content */}
       <main className="admin-panel__main">
         <div className="admin-panel__content" key={activeTab}>
+          {activeTab === 'resumen'     && <AdminSummary onOpenTab={setActiveTab} />}
           {activeTab === 'compras'     && <AdminPurchases />}
           {activeTab === 'promociones' && <AdminPromotions />}
           {activeTab === 'packs'       && <AdminTokenPacks />}

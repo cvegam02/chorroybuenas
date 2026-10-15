@@ -1,6 +1,13 @@
 import { logger } from '../utils/logger';
 import { supabase } from '../utils/supabaseClient';
 import { summarizeRevenue, type RevenueSummary } from '../utils/adminRevenue';
+import {
+  hermosilloDayRange,
+  type DailyTotals,
+  type DashboardPending,
+  type DashboardSummary,
+  type SummaryPeriod,
+} from '../utils/adminSummary';
 
 export interface AdminPurchase {
   id: string;
@@ -103,6 +110,30 @@ export interface AdminTokenPricing {
   price_per_token_cents: number;
   currency: string;
   updated_at: string;
+}
+
+/** Fila de admin_get_dashboard_summary (migraciones 035 y 036). */
+interface DashboardSummaryRow {
+  tokens_revenue_cents: number;
+  seasonal_revenue_cents: number;
+  ai_images: number;
+  new_users: number;
+  buyers: number;
+  first_time_buyers: number;
+  ai_users: number;
+  token_purchases: number;
+  tokens_sold: number;
+  seasonal_sales: number;
+  top_pack_tokens: number | null;
+  top_pack_sales: number;
+  top_loteria_name: string | null;
+  top_loteria_sales: number;
+}
+
+/** Filtro por días de Uso de IA, en hora de Hermosillo como el Resumen (FEAT-43). */
+function usageDateParams(filters?: { dateFrom?: string; dateTo?: string }) {
+  const range = hermosilloDayRange(filters?.dateFrom ?? '', filters?.dateTo ?? '');
+  return { p_date_from: range.from, p_date_to: range.to };
 }
 
 export class AdminRepository {
@@ -307,6 +338,76 @@ export class AdminRepository {
     return count ?? 0;
   }
 
+  /** Resumen del panel (FEAT-43) para un periodo en días de Hermosillo; nulo si falla. */
+  static async getDashboardSummary(period: SummaryPeriod): Promise<DashboardSummary | null> {
+    const { data, error } = await supabase.rpc('admin_get_dashboard_summary', {
+      p_from: period.from,
+      p_to: period.to,
+    });
+    if (error) {
+      logger.error('AdminRepository.getDashboardSummary:', error.message);
+      return null;
+    }
+    const row = (Array.isArray(data) ? data[0] : data) as DashboardSummaryRow | undefined;
+    const count = (value: number | null | undefined) => Number(value ?? 0);
+    return {
+      tokensRevenueCents: count(row?.tokens_revenue_cents),
+      seasonalRevenueCents: count(row?.seasonal_revenue_cents),
+      aiImages: count(row?.ai_images),
+      newUsers: count(row?.new_users),
+      buyers: count(row?.buyers),
+      firstTimeBuyers: count(row?.first_time_buyers),
+      aiUsers: count(row?.ai_users),
+      tokenPurchases: count(row?.token_purchases),
+      tokensSold: count(row?.tokens_sold),
+      seasonalSales: count(row?.seasonal_sales),
+      topPack: row?.top_pack_tokens != null
+        ? { baseTokens: count(row.top_pack_tokens), sales: count(row.top_pack_sales) }
+        : null,
+      topLoteria: row?.top_loteria_name != null
+        ? { name: row.top_loteria_name, sales: count(row.top_loteria_sales) }
+        : null,
+    };
+  }
+
+  /** Ingresos e imágenes de IA por día del periodo, para la gráfica del Resumen (FEAT-43); nulo si falla. */
+  static async getDashboardDaily(period: SummaryPeriod): Promise<DailyTotals[] | null> {
+    const { data, error } = await supabase.rpc('admin_get_dashboard_daily', {
+      p_from: period.from,
+      p_to: period.to,
+    });
+    if (error) {
+      logger.error('AdminRepository.getDashboardDaily:', error.message);
+      return null;
+    }
+    return ((data ?? []) as { day: string; revenue_cents: number; ai_images: number }[]).map((row) => ({
+      day: row.day,
+      revenueCents: Number(row.revenue_cents ?? 0),
+      aiImages: Number(row.ai_images ?? 0),
+    }));
+  }
+
+  /** Pagos pendientes y tokens regalados del Resumen (FEAT-43); nulo si falla. */
+  static async getDashboardPending(period: SummaryPeriod): Promise<DashboardPending | null> {
+    const { data, error } = await supabase.rpc('admin_get_dashboard_pending', {
+      p_from: period.from,
+      p_to: period.to,
+    });
+    if (error) {
+      logger.error('AdminRepository.getDashboardPending:', error.message);
+      return null;
+    }
+    const row = (Array.isArray(data) ? data[0] : data) as
+      | { pending_payments: number; oldest_pending_at: string | null; gifted_tokens: number; gift_recipients: number }
+      | undefined;
+    return {
+      pendingPayments: Number(row?.pending_payments ?? 0),
+      oldestPendingAt: row?.oldest_pending_at ?? null,
+      giftedTokens: Number(row?.gifted_tokens ?? 0),
+      giftRecipients: Number(row?.gift_recipients ?? 0),
+    };
+  }
+
   /** Resumen de uso: total tokens, usuarios únicos, sets únicos */
   static async getUsageSummary(filters?: { dateFrom?: string; dateTo?: string }): Promise<{
     totalTokens: number;
@@ -314,8 +415,7 @@ export class AdminRepository {
     uniqueSets: number;
   }> {
     const { data, error } = await supabase.rpc('admin_get_usage_summary', {
-      p_date_from: filters?.dateFrom ? filters.dateFrom + 'T00:00:00Z' : null,
-      p_date_to: filters?.dateTo ? filters.dateTo + 'T23:59:59Z' : null,
+      ...usageDateParams(filters),
     });
     if (error) return { totalTokens: 0, uniqueUsers: 0, uniqueSets: 0 };
     const row = Array.isArray(data) ? data[0] : data;
@@ -333,8 +433,7 @@ export class AdminRepository {
   ): Promise<{ day: string; tokens: number }[]> {
     const { data, error } = await supabase.rpc('admin_get_usage_by_day', {
       p_days: days,
-      p_date_from: filters?.dateFrom ? filters.dateFrom + 'T00:00:00Z' : null,
-      p_date_to: filters?.dateTo ? filters.dateTo + 'T23:59:59Z' : null,
+      ...usageDateParams(filters),
     });
     if (error) return [];
     return (data ?? []).map((r: { day: string; tokens: number }) => ({
@@ -350,8 +449,7 @@ export class AdminRepository {
   ): Promise<{ user_id: string; email: string | null; total_tokens: number }[]> {
     const { data, error } = await supabase.rpc('admin_get_usage_by_user', {
       p_limit: limit,
-      p_date_from: filters?.dateFrom ? filters.dateFrom + 'T00:00:00Z' : null,
-      p_date_to: filters?.dateTo ? filters.dateTo + 'T23:59:59Z' : null,
+      ...usageDateParams(filters),
     });
     if (error) return [];
     return (data ?? []).map((r: { user_id: string; email: string | null; total_tokens: number }) => ({
@@ -368,8 +466,7 @@ export class AdminRepository {
   ): Promise<{ set_id: string; set_name: string | null; total_tokens: number }[]> {
     const { data, error } = await supabase.rpc('admin_get_usage_by_set', {
       p_limit: limit,
-      p_date_from: filters?.dateFrom ? filters.dateFrom + 'T00:00:00Z' : null,
-      p_date_to: filters?.dateTo ? filters.dateTo + 'T23:59:59Z' : null,
+      ...usageDateParams(filters),
     });
     if (error) return [];
     return (data ?? []).map((r: { set_id: string; set_name: string | null; total_tokens: number }) => ({
