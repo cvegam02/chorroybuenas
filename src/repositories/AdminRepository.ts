@@ -8,42 +8,50 @@ import {
   type DashboardSummary,
   type SummaryPeriod,
 } from '../utils/adminSummary';
+import type { SaleKind, SalesTotals, SaleStatusFilter } from '../utils/adminSales';
 
-export interface AdminPurchase {
+/** Renglón de la pestaña Ventas (FEAT-44): una compra de tokens o de una lotería temática. */
+export interface AdminSaleRow {
   id: string;
-  user_id: string;
-  pack_id: string | null;
-  base_tokens: number;
-  bonus_tokens: number;
-  total_tokens: number;
-  amount_cents: number;
-  payment_provider: string;
-  payment_status: string | null;
-  created_at: string;
-  email?: string | null;
-  full_name?: string | null;
-}
-
-/** Tipo de venta: tokens para la IA, o una lotería de temporada. */
-export type AdminSaleKind = 'tokens' | 'seasonal';
-
-/** Renglón de la pestaña Compras: una compra de tokens o de una lotería de temporada. */
-export interface AdminSale extends Omit<AdminPurchase, 'user_id' | 'base_tokens' | 'bonus_tokens' | 'total_tokens'> {
   /** Nulo si la cuenta que compró ya se borró. */
   user_id: string | null;
-  /** Ausente en la consulta de respaldo, que solo trae compras de tokens. */
-  kind?: AdminSaleKind;
-  /** Solo en las compras de temporada. */
-  loteria_name?: string | null;
-  /** Los tokens son nulos en las compras de temporada. */
+  kind: SaleKind;
+  /** Solo en las temáticas. */
+  loteria_name: string | null;
+  /** Nulo en las temáticas y en los tokens sin pack. */
+  pack_id: string | null;
+  /** Los tokens son nulos en las temáticas. */
   base_tokens: number | null;
   bonus_tokens: number | null;
   total_tokens: number | null;
+  amount_cents: number;
+  payment_id: string;
+  payment_status: string | null;
+  created_at: string;
+  email: string | null;
+  full_name: string | null;
 }
 
-export interface AdminMPTransaction extends AdminPurchase {
-  payment_id: string | null;
-  payment_metadata: Record<string, unknown> | null;
+/** El pago de Mercado Pago de una venta, solo con lo que muestra el detalle (US A3). Vacío si no se guardó. */
+export interface AdminSaleDetail {
+  payment_id: string;
+  payer_id: string | null;
+  method_type: string | null;
+  method_id: string | null;
+  mp_status: string | null;
+  mp_status_detail: string | null;
+  mp_created_at: string | null;
+  mp_approved_at: string | null;
+  /** Pesos, como los manda Mercado Pago. */
+  mp_amount: number | null;
+}
+
+/** Filtros de la pestaña Ventas; el periodo es de días de Hermosillo. */
+export interface SalesFilters {
+  period: SummaryPeriod;
+  search: string;
+  kind: '' | SaleKind;
+  status: SaleStatusFilter;
 }
 
 export interface AdminTokenUsage {
@@ -136,45 +144,20 @@ function usageDateParams(filters?: { dateFrom?: string; dateTo?: string }) {
   return { p_date_from: range.from, p_date_to: range.to };
 }
 
+/** Ventas por consulta al exportar: el máximo que acepta admin_get_sales (migración 039). */
+const SALES_EXPORT_PAGE = 1000;
+/** Tope de páginas al exportar (50 000 ventas), para no quedarse pidiendo sin fin. */
+const SALES_EXPORT_MAX_PAGES = 50;
+
+const salesFilterParams = (filters: SalesFilters) => ({
+  p_from: filters.period.from,
+  p_to: filters.period.to,
+  p_search: filters.search.trim() || null,
+  p_kind: filters.kind || null,
+  p_status: filters.status || null,
+});
+
 export class AdminRepository {
-  /** Parámetros de filtro para compras */
-  static async getAllPurchases(
-    limit = 50,
-    offset = 0,
-    filters?: {
-      email?: string;
-      status?: string;
-      provider?: string;
-      dateFrom?: string;
-      dateTo?: string;
-      kind?: string;
-    }
-  ): Promise<AdminSale[]> {
-    const params: Record<string, unknown> = {
-      p_limit: limit,
-      p_offset: offset,
-      p_email: filters?.email?.trim() || null,
-      p_status: filters?.status || null,
-      p_provider: filters?.provider || null,
-      p_date_from: filters?.dateFrom ? filters.dateFrom + 'T00:00:00Z' : null,
-      p_date_to: filters?.dateTo ? filters.dateTo + 'T23:59:59Z' : null,
-      p_kind: filters?.kind || null,
-    };
-    const { data, error } = await supabase.rpc('admin_get_all_purchases', params);
-
-    if (error) {
-      logger.error('AdminRepository.getAllPurchases:', error.message);
-      const fallback = await supabase
-        .from('token_purchases')
-        .select('id, user_id, pack_id, base_tokens, bonus_tokens, total_tokens, amount_cents, payment_provider, payment_status, created_at')
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
-      if (fallback.error) return [];
-      return (fallback.data ?? []) as AdminSale[];
-    }
-    return (data ?? []) as AdminSale[];
-  }
-
   /**
    * Resumen de ingresos: lo vendido en tokens y en loterías de temporada, y el total.
    * Devuelve null si alguna de las dos consultas falla, para no mostrar un total incompleto.
@@ -204,36 +187,6 @@ export class AdminRepository {
 
     const rows = data ?? [];
     return rows.reduce((s, r) => s + (r.amount ?? 0), 0);
-  }
-
-  /**
-   * Total de compras (admin). Para paginación. Acepta mismos filtros que getAllPurchases.
-   */
-  static async getPurchasesCount(filters?: {
-    email?: string;
-    status?: string;
-    provider?: string;
-    dateFrom?: string;
-    dateTo?: string;
-    kind?: string;
-  }): Promise<number> {
-    const { data, error } = await supabase.rpc('admin_get_all_purchases_count', {
-      p_email: filters?.email?.trim() || null,
-      p_status: filters?.status || null,
-      p_provider: filters?.provider || null,
-      p_date_from: filters?.dateFrom ? filters.dateFrom + 'T00:00:00Z' : null,
-      p_date_to: filters?.dateTo ? filters.dateTo + 'T23:59:59Z' : null,
-      p_kind: filters?.kind || null,
-    });
-    if (!error) return (data as number) ?? 0;
-
-    // Respaldo: solo compras de tokens, sin filtros.
-    logger.error('AdminRepository.getPurchasesCount:', error.message);
-    const { count, error: fallbackError } = await supabase
-      .from('token_purchases')
-      .select('*', { count: 'exact', head: true });
-    if (fallbackError) return 0;
-    return count ?? 0;
   }
 
   /**
@@ -295,47 +248,62 @@ export class AdminRepository {
     return count ?? 0;
   }
 
-  /** Transacciones de Mercado Pago con payment_id y metadata */
-  static async getMPTransactions(
-    limit = 50,
-    offset = 0,
-    filters?: { email?: string; status?: string; dateFrom?: string; dateTo?: string }
-  ): Promise<AdminMPTransaction[]> {
-    const { data, error } = await supabase.rpc('admin_get_mp_transactions', {
+  /** Una página de la pestaña Ventas (FEAT-44); nulo si falla. */
+  static async getSales(filters: SalesFilters, limit: number, offset: number): Promise<AdminSaleRow[] | null> {
+    const { data, error } = await supabase.rpc('admin_get_sales', {
+      ...salesFilterParams(filters),
       p_limit: limit,
       p_offset: offset,
-      p_email: filters?.email?.trim() || null,
-      p_status: filters?.status || null,
-      p_date_from: filters?.dateFrom ? filters.dateFrom + 'T00:00:00Z' : null,
-      p_date_to: filters?.dateTo ? filters.dateTo + 'T23:59:59Z' : null,
     });
-    if (error) return [];
-    return (data ?? []) as AdminMPTransaction[];
+    if (error) {
+      logger.error('AdminRepository.getSales:', error.message);
+      return null;
+    }
+    return (data ?? []) as AdminSaleRow[];
   }
 
-  static async getMPTransactionsCount(filters?: {
-    email?: string;
-    status?: string;
-    dateFrom?: string;
-    dateTo?: string;
-  }): Promise<number> {
-    const hasFilters = filters && (filters.email?.trim() || filters.status || filters.dateFrom || filters.dateTo);
-    if (hasFilters) {
-      const { data, error } = await supabase.rpc('admin_get_mp_transactions_count', {
-        p_email: filters?.email?.trim() || null,
-        p_status: filters?.status || null,
-        p_date_from: filters?.dateFrom ? filters.dateFrom + 'T00:00:00Z' : null,
-        p_date_to: filters?.dateTo ? filters.dateTo + 'T23:59:59Z' : null,
-      });
-      if (error) return 0;
-      return (data as number) ?? 0;
+  /**
+   * Todas las ventas con esos filtros, para «Exportar CSV» (US A4), de mil en mil (el tope de la base).
+   * Nulo si falla cualquier página: un archivo incompleto se confundiría con el completo.
+   */
+  static async getAllSales(filters: SalesFilters): Promise<AdminSaleRow[] | null> {
+    const all: AdminSaleRow[] = [];
+    for (let page = 0; page < SALES_EXPORT_MAX_PAGES; page++) {
+      const rows = await AdminRepository.getSales(filters, SALES_EXPORT_PAGE, page * SALES_EXPORT_PAGE);
+      if (!rows) return null;
+      all.push(...rows);
+      if (rows.length < SALES_EXPORT_PAGE) return all;
     }
-    const { count, error } = await supabase
-      .from('token_purchases')
-      .select('*', { count: 'exact', head: true })
-      .eq('payment_provider', 'mercadopago');
-    if (error) return 0;
-    return count ?? 0;
+    logger.error('AdminRepository.getAllSales:', 'demasiadas ventas para un solo archivo');
+    return null;
+  }
+
+  /** El pago de Mercado Pago de una venta; nulo si falla o si la venta ya no existe. */
+  static async getSaleDetail(kind: SaleKind, id: string): Promise<AdminSaleDetail | null> {
+    const { data, error } = await supabase.rpc('admin_get_sale_detail', { p_kind: kind, p_id: id });
+    const row = Array.isArray(data) ? data[0] : null;
+    if (error || !row) {
+      logger.error('AdminRepository.getSaleDetail:', error?.message ?? 'sin datos');
+      return null;
+    }
+    return { ...row, mp_amount: row.mp_amount === null ? null : Number(row.mp_amount) } as AdminSaleDetail;
+  }
+
+  /** Totales de la pestaña Ventas con esos filtros, calculados en la base (US A2); nulo si falla. */
+  static async getSalesTotals(filters: SalesFilters): Promise<SalesTotals | null> {
+    const { data, error } = await supabase.rpc('admin_get_sales_totals', salesFilterParams(filters));
+    const row = Array.isArray(data) ? data[0] : null;
+    if (error || !row) {
+      logger.error('AdminRepository.getSalesTotals:', error?.message ?? 'sin datos');
+      return null;
+    }
+    return {
+      sales: Number(row.sales),
+      collectedCents: Number(row.collected_cents),
+      pendingCount: Number(row.pending_count),
+      pendingCents: Number(row.pending_cents),
+      tokensSold: Number(row.tokens_sold),
+    };
   }
 
   /** Resumen del panel (FEAT-43) para un periodo en días de Hermosillo; nulo si falla. */

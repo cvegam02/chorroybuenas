@@ -25,78 +25,6 @@
   color: var(--color-text-muted);
 }
 
-.admin-summary__periods {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.admin-summary__period {
-  min-height: 40px;
-  padding: 0 16px;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-surface);
-  font-family: inherit;
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-  cursor: pointer;
-}
-
-.admin-summary__period:hover {
-  border-color: var(--color-primary-lighter);
-}
-
-.admin-summary__period--active,
-.admin-summary__period--active:hover {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-text-inverted);
-}
-
-.admin-summary__range {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 12px;
-}
-
-.admin-summary__range-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-}
-
-.admin-summary__range-field input {
-  min-height: 40px;
-  padding: 0 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  font-family: inherit;
-  color: var(--color-text-main);
-}
-
-.admin-summary__range-apply {
-  min-height: 40px;
-  padding: 0 20px;
-  border-radius: var(--radius-full);
-  border: 0;
-  background: var(--color-primary);
-  font-family: inherit;
-  font-weight: 700;
-  color: var(--color-text-inverted);
-  cursor: pointer;
-}
-
-.admin-summary__range-apply:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 .admin-summary__section-title {
   margin: 0 0 12px;
   font-size: 0.8rem;
@@ -246,6 +174,18 @@
   border-radius: var(--radius-md);
   background: var(--color-bg-surface);
   color: var(--color-danger);
+}
+
+.admin-summary__retry {
+  min-height: 40px;
+  padding: 0 20px;
+  border-radius: var(--radius-full);
+  border: 0;
+  background: var(--color-primary);
+  font-family: inherit;
+  font-weight: 700;
+  color: var(--color-text-inverted);
+  cursor: pointer;
 }
 
 .admin-summary__error p {

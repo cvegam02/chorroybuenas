@@ -7,9 +7,20 @@ import {
   type DashboardPending,
   type DashboardSummary,
 } from '../../utils/adminSummary';
+import type { SaleKind, SaleStatusFilter } from '../../utils/adminSales';
+import type { PeriodSelection } from './AdminPeriodPicker';
 
 /** Pestañas del panel a las que lleva una tarjeta del Resumen. */
-export type SummaryTargetTab = 'compras' | 'uso-ia' | 'balances';
+export type SummaryTargetTab = 'ventas' | 'uso-ia' | 'balances';
+
+/** Filtro con el que una tarjeta abre Ventas (US A5); el periodo lo pone el Resumen si no viene. */
+export interface SummarySalesFilter {
+  kind?: '' | SaleKind;
+  status?: SaleStatusFilter;
+  selection?: PeriodSelection;
+}
+
+export type OpenSummaryTab = (tab: SummaryTargetTab, sales?: SummarySalesFilter) => void;
 
 export interface SummaryData {
   totals: DashboardSummary;
@@ -97,7 +108,7 @@ const SummarySection = ({ id, title, loading, children }: { id: string; title: s
 interface SummarySectionsProps {
   data: SummaryData | null;
   loading: boolean;
-  onOpenTab: (tab: SummaryTargetTab) => void;
+  onOpenTab: OpenSummaryTab;
 }
 
 export const SummarySections = ({ data, loading, onOpenTab }: SummarySectionsProps) => {
@@ -109,7 +120,7 @@ export const SummarySections = ({ data, loading, onOpenTab }: SummarySectionsPro
   const value = (text: string) => (t ? text : '…');
   const change = (current: number | null | undefined, previous: number | null | undefined): Change =>
     ready ? (current == null || previous == null ? null : percentChange(current, previous)) : undefined;
-  const open = (tab: SummaryTargetTab) => () => onOpenTab(tab);
+  const open = (tab: SummaryTargetTab, sales?: SummarySalesFilter) => () => onOpenTab(tab, sales);
 
   return (
     <>
@@ -121,7 +132,7 @@ export const SummarySections = ({ data, loading, onOpenTab }: SummarySectionsPro
             ? `Tokens ${formatPesos(t.tokensRevenueCents)} · Temáticas ${formatPesos(t.seasonalRevenueCents)}`
             : 'Tokens y temáticas'}
           change={change(money?.revenueCents, previousMoney?.revenueCents)}
-          onOpen={open('compras')}
+          onOpen={open('ventas', { status: 'approved' })}
         />
         <SummaryCard
           label="Gasto en IA"
@@ -156,7 +167,7 @@ export const SummarySections = ({ data, loading, onOpenTab }: SummarySectionsPro
           value={value(t ? formatCount(t.buyers) : '')}
           detail={t ? `${formatCount(t.firstTimeBuyers)} por primera vez` : 'Personas con una compra aprobada'}
           change={change(t?.buyers, p?.buyers)}
-          onOpen={open('compras')}
+          onOpen={open('ventas', { status: 'approved' })}
         />
         <SummaryCard
           label="Usaron la IA"
@@ -175,7 +186,7 @@ export const SummarySections = ({ data, loading, onOpenTab }: SummarySectionsPro
           value={value(t ? formatCount(t.tokenPurchases) : '')}
           detail={t ? plural(t.tokensSold, 'token vendido', 'tokens vendidos') : 'Tokens vendidos'}
           change={change(t?.tokenPurchases, p?.tokenPurchases)}
-          onOpen={open('compras')}
+          onOpen={open('ventas', { kind: 'tokens', status: 'approved' })}
         />
         <SummaryCard
           label="Loterías temáticas"
@@ -183,7 +194,7 @@ export const SummarySections = ({ data, loading, onOpenTab }: SummarySectionsPro
           value={value(t ? formatCount(t.seasonalSales) : '')}
           detail={t ? `${formatPesos(t.seasonalRevenueCents)} en ventas` : 'Ventas del periodo'}
           change={change(t?.seasonalSales, p?.seasonalSales)}
-          onOpen={open('compras')}
+          onOpen={open('ventas', { kind: 'seasonal', status: 'approved' })}
         />
         <TopSellersCard totals={t} />
       </SummarySection>

@@ -1,11 +1,12 @@
 import { FaCheckCircle, FaClock, FaGift } from 'react-icons/fa';
+import { pendingSalesPeriod } from '../../utils/adminSales';
 import { waitingSince, type DashboardPending } from '../../utils/adminSummary';
-import type { SummaryTargetTab } from './AdminSummarySections';
+import type { OpenSummaryTab } from './AdminSummarySections';
 
 interface SummaryPendingProps {
   /** null mientras carga. */
   pending: DashboardPending | null;
-  onOpenTab: (tab: SummaryTargetTab) => void;
+  onOpenTab: OpenSummaryTab;
 }
 
 const plural = (count: number, one: string, many: string) =>
@@ -26,8 +27,14 @@ export const SummaryPending = ({ pending, onOpenTab }: SummaryPendingProps) => (
               icon={<FaClock />}
               title={`${plural(pending.pendingPayments, 'pago pendiente', 'pagos pendientes')} en Mercado Pago`}
               detail={`${pending.oldestPendingAt ? `El más viejo es ${waitingSince(pending.oldestPendingAt)}. ` : ''}Solo de loterías temáticas: los de tokens no se ven hasta que se confirman.`}
-              action="Ver compras"
-              onAction={() => onOpenTab('compras')}
+              action="Ver ventas"
+              onAction={() =>
+                // El Resumen cuenta todos los pendientes: Ventas se abre desde el día del más viejo.
+                onOpenTab('ventas', {
+                  status: 'pending',
+                  selection: { kind: 'range', period: pendingSalesPeriod(pending.oldestPendingAt) },
+                })
+              }
             />
           )}
           {pending.giftedTokens > 0 && (

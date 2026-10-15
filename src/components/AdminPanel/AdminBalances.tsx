@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FaGift } from 'react-icons/fa';
 import {
   AdminRepository,
@@ -45,19 +45,37 @@ const formatDate = (iso: string) => {
   });
 };
 
-export const AdminBalances = () => {
+/** Cuántos usuarios carga la tabla: los de movimiento más reciente. */
+const BALANCES_LIMIT = 200;
+
+/** Busca por nombre o correo, sin importar mayúsculas (FEAT-44, decisión 13). */
+const matchesPerson = (b: AdminUserBalanceWithInfo, query: string) => {
+  const q = query.trim().toLocaleLowerCase('es-MX');
+  if (!q) return true;
+  return [b.full_name, b.email].some((field) => field?.toLocaleLowerCase('es-MX').includes(q));
+};
+
+interface AdminBalancesProps {
+  /** Correo con el que llega el buscador escrito, desde «Ver ficha del cliente» en Ventas. */
+  initialSearch?: string;
+}
+
+export const AdminBalances = ({ initialSearch = '' }: AdminBalancesProps) => {
   const [balances, setBalances] = useState<AdminUserBalanceWithInfo[]>([]);
+  const [search, setSearch] = useState(initialSearch);
   const [revenue, setRevenue] = useState<RevenueSummary | null>(null);
   const [totalTokensUsed, setTotalTokensUsed] = useState<number | null>(null);
   const [exchangeRateMxnUsd, setExchangeRateMxnUsd] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [gifts, setGifts] = useState<AdminTokenGift[] | null>([]);
 
+  const visibleBalances = useMemo(() => balances.filter((b) => matchesPerson(b, search)), [balances, search]);
+
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
       const [balancesData, purchasesSummary, usageSummary, mxnUsdRate, giftsData] = await Promise.all([
-        AdminRepository.getBalancesWithUserInfo(200),
+        AdminRepository.getBalancesWithUserInfo(BALANCES_LIMIT),
         AdminRepository.getPurchasesSummary(),
         AdminRepository.getTokenUsageSummary(),
         TokenPricingRepository.getExchangeRateMxnUsd(),
@@ -170,8 +188,25 @@ export const AdminBalances = () => {
 
       <div className="admin-balances__table-section">
         <h3 className="admin-balances__table-title">Balances por usuario</h3>
+        <label className="admin-balances__search">
+          <span className="admin-balances__sr-only">Buscar usuario</span>
+          <input
+            type="search"
+            className="admin-balances__search-input"
+            placeholder="Buscar por nombre o correo…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </label>
+        {balances.length >= BALANCES_LIMIT && (
+          <p className="admin-balances__note">
+            Se muestran los {BALANCES_LIMIT} usuarios con movimiento más reciente; la búsqueda solo busca entre ellos.
+          </p>
+        )}
         {balances.length === 0 ? (
           <p className="admin-balances__empty">No hay usuarios con balance.</p>
+        ) : visibleBalances.length === 0 ? (
+          <p className="admin-balances__empty">Nadie coincide con «{search.trim()}».</p>
         ) : (
           <div className="admin-balances__table-wrapper">
             <table className="admin-balances__table">
@@ -185,7 +220,7 @@ export const AdminBalances = () => {
                 </tr>
               </thead>
               <tbody>
-                {balances.map((b) => (
+                {visibleBalances.map((b) => (
                   <tr key={b.user_id} className="admin-balances__row">
                     <td className="admin-balances__cell-name" data-label="Nombre">
                       {b.full_name || '—'}
