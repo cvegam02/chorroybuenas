@@ -142,6 +142,12 @@ export interface AdminPromotion {
   created_at: string;
 }
 
+/** Usos y tokens regalados de una promoción (FEAT-46, US A4). */
+export interface PromotionUsage {
+  uses: number;
+  tokens: number;
+}
+
 export interface AdminTokenPack {
   id: string;
   base_tokens: number;
@@ -578,6 +584,21 @@ export class AdminRepository {
   /**
    * Crear promoción (admin).
    */
+  /** Compras aprobadas que usaron cada promoción y tokens que regaló, por id (FEAT-46, US A4; migración 048). */
+  static async getPromotionUsage(): Promise<Record<string, PromotionUsage> | null> {
+    const { data, error } = await supabase.rpc('admin_get_promotion_usage');
+    if (error || !Array.isArray(data)) {
+      logger.error('AdminRepository.getPromotionUsage:', error?.message ?? 'sin datos');
+      return null;
+    }
+    return Object.fromEntries(
+      (data as { promotion_id: string; uses: number | string; tokens: number | string }[]).map((row) => [
+        row.promotion_id,
+        { uses: Number(row.uses), tokens: Number(row.tokens) },
+      ]),
+    );
+  }
+
   static async createPromotion(params: {
     code?: string | null;
     type: string;
@@ -652,6 +673,18 @@ export class AdminRepository {
   /**
    * Actualizar pack (admin). Precio, orden, activo.
    */
+  /** Ventas aprobadas de cada pack en el periodo, por id (FEAT-46, US A3; migración 047). */
+  static async getPackSales(period: SummaryPeriod): Promise<Record<string, number> | null> {
+    const { data, error } = await supabase.rpc('admin_get_pack_sales', { p_from: period.from, p_to: period.to });
+    if (error || !Array.isArray(data)) {
+      logger.error('AdminRepository.getPackSales:', error?.message ?? 'sin datos');
+      return null;
+    }
+    return Object.fromEntries(
+      (data as { pack_id: string; sales: number | string }[]).map((row) => [row.pack_id, Number(row.sales)]),
+    );
+  }
+
   static async updateTokenPack(
     id: string,
     params: Partial<{
@@ -709,5 +742,15 @@ export class AdminRepository {
 
     if (error) return [];
     return (data ?? []) as AdminTokenPricing[];
+  }
+
+  /** Cambia el precio por token en MXN (FEAT-46, US A2; migración 046). Devuelve el precio guardado o null. */
+  static async setPricePerToken(priceCents: number): Promise<number | null> {
+    const { data, error } = await supabase.rpc('admin_set_price_per_token', { p_price_cents: priceCents });
+    if (error || typeof data !== 'number') {
+      logger.error('AdminRepository.setPricePerToken:', error?.message ?? 'respuesta inesperada');
+      return null;
+    }
+    return data;
   }
 }

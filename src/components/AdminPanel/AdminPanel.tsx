@@ -2,28 +2,26 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   FaCog, FaArrowLeft, FaTicketAlt, FaShoppingCart,
-  FaBoxOpen, FaUsers, FaChartLine, FaTags, FaBars, FaTimes, FaThLarge
+  FaUsers, FaChartLine, FaTags, FaBars, FaTimes, FaThLarge
 } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import { signupSalesPeriod } from '../../utils/adminUsers';
 import { AdminSummary } from './AdminSummary';
 import { AdminSales, type SalesPreset } from './AdminSales';
-import { AdminPromotions } from './AdminPromotions';
-import { AdminTokenPacks } from './AdminTokenPacks';
+import { AdminPricing } from './AdminPricing';
 import { AdminUsers, type UsersPreset } from './AdminUsers';
 import type { PeriodSelection } from './AdminPeriodPicker';
 import { AdminTokenUsage } from './AdminTokenUsage';
 import { AdminSeasonal } from './AdminSeasonal';
 import './AdminPanel.css';
 
-type AdminTab = 'resumen' | 'ventas' | 'promociones' | 'packs' | 'usuarios' | 'uso-ia' | 'temporada';
+type AdminTab = 'resumen' | 'ventas' | 'usuarios' | 'precios' | 'uso-ia' | 'temporada';
 
 const TABS: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
   { id: 'resumen',     label: 'Resumen',            icon: <FaThLarge /> },
   { id: 'ventas',      label: 'Ventas',             icon: <FaShoppingCart /> },
-  { id: 'promociones', label: 'Promociones',        icon: <FaTicketAlt /> },
-  { id: 'packs',       label: 'Packs de tokens',    icon: <FaBoxOpen /> },
   { id: 'usuarios',    label: 'Usuarios',           icon: <FaUsers /> },
+  { id: 'precios',     label: 'Precios y promos',   icon: <FaTicketAlt /> },
   { id: 'uso-ia',      label: 'Uso de IA',          icon: <FaChartLine /> },
   { id: 'temporada',   label: 'Temáticas',          icon: <FaTags /> },
 ];
@@ -183,9 +181,8 @@ export const AdminPanel = () => {
         <div className="admin-panel__content" key={activeTab}>
           {activeTab === 'resumen'     && <AdminSummary onOpenTab={openTab} onOpenGifts={openGifts} />}
           {activeTab === 'ventas'      && <AdminSales preset={salesPreset} onOpenClient={openClient} />}
-          {activeTab === 'promociones' && <AdminPromotions />}
-          {activeTab === 'packs'       && <AdminTokenPacks />}
           {activeTab === 'usuarios'    && <AdminUsers preset={usersPreset} onOpenSales={openUserSales} />}
+          {activeTab === 'precios'     && <AdminPricing />}
           {activeTab === 'uso-ia'      && <AdminTokenUsage />}
           {activeTab === 'temporada'   && <AdminSeasonal />}
         </div>
