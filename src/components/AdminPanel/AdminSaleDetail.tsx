@@ -16,8 +16,8 @@ const formatWhen = (iso: string | null) => {
 interface AdminSaleDetailProps {
   sale: AdminSaleRow;
   onClose: () => void;
-  /** Abre la ficha del cliente; por ahora, Balances con su correo (decisión 13). */
-  onOpenClient: (email: string) => void;
+  /** Abre la ficha del cliente en Usuarios (FEAT-45, US A5). */
+  onOpenClient: (userId: string, email: string) => void;
 }
 
 /** Panel de detalle de una venta (FEAT-44, US A3); en celular es una hoja que sube desde abajo. */
@@ -108,8 +108,12 @@ export const AdminSaleDetail = ({ sale, onClose, onOpenClient }: AdminSaleDetail
           ) : (
             <p className="admin-sales__muted">La cuenta que compró ya se borró.</p>
           )}
-          {sale.email && (
-            <button type="button" className="admin-sale-detail__link" onClick={() => onOpenClient(sale.email ?? '')}>
+          {sale.user_id && (
+            <button
+              type="button"
+              className="admin-sale-detail__link"
+              onClick={() => onOpenClient(sale.user_id ?? '', sale.email ?? '')}
+            >
               Ver ficha del cliente →
             </button>
           )}

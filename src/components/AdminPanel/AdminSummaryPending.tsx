@@ -44,7 +44,7 @@ export const SummaryPending = ({ pending, onOpenTab }: SummaryPendingProps) => (
               title={`${plural(pending.giftedTokens, 'token regalado', 'tokens regalados')}`}
               detail={`A ${plural(pending.giftRecipients, 'persona', 'personas')} en el periodo`}
               action="Ver regalos"
-              onAction={() => onOpenTab('balances')}
+              onAction={() => onOpenTab('regalos')}
             />
           )}
         </>

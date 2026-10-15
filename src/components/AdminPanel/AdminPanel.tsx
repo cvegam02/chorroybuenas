@@ -2,26 +2,28 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   FaCog, FaArrowLeft, FaTicketAlt, FaShoppingCart,
-  FaBoxOpen, FaWallet, FaChartLine, FaTags, FaBars, FaTimes, FaThLarge
+  FaBoxOpen, FaUsers, FaChartLine, FaTags, FaBars, FaTimes, FaThLarge
 } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
+import { signupSalesPeriod } from '../../utils/adminUsers';
 import { AdminSummary } from './AdminSummary';
 import { AdminSales, type SalesPreset } from './AdminSales';
 import { AdminPromotions } from './AdminPromotions';
 import { AdminTokenPacks } from './AdminTokenPacks';
-import { AdminBalances } from './AdminBalances';
+import { AdminUsers, type UsersPreset } from './AdminUsers';
+import type { PeriodSelection } from './AdminPeriodPicker';
 import { AdminTokenUsage } from './AdminTokenUsage';
 import { AdminSeasonal } from './AdminSeasonal';
 import './AdminPanel.css';
 
-type AdminTab = 'resumen' | 'ventas' | 'promociones' | 'packs' | 'balances' | 'uso-ia' | 'temporada';
+type AdminTab = 'resumen' | 'ventas' | 'promociones' | 'packs' | 'usuarios' | 'uso-ia' | 'temporada';
 
 const TABS: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
   { id: 'resumen',     label: 'Resumen',            icon: <FaThLarge /> },
   { id: 'ventas',      label: 'Ventas',             icon: <FaShoppingCart /> },
   { id: 'promociones', label: 'Promociones',        icon: <FaTicketAlt /> },
   { id: 'packs',       label: 'Packs de tokens',    icon: <FaBoxOpen /> },
-  { id: 'balances',    label: 'Balances',           icon: <FaWallet /> },
+  { id: 'usuarios',    label: 'Usuarios',           icon: <FaUsers /> },
   { id: 'uso-ia',      label: 'Uso de IA',          icon: <FaChartLine /> },
   { id: 'temporada',   label: 'Temáticas',          icon: <FaTags /> },
 ];
@@ -35,21 +37,40 @@ export const AdminPanel = () => {
     (location.state as { tab?: string } | null)?.tab === 'temporada' ? 'temporada' : 'resumen',
   );
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  // Correo con el que se abre Balances desde «Ver ficha del cliente» en Ventas (FEAT-44, decisión 13).
-  const [balancesSearch, setBalancesSearch] = useState('');
+  // Con qué se abre Usuarios desde otra pestaña: el correo de «Ver ficha del cliente» en Ventas
+  // (FEAT-44, decisión 13) o el periodo de «Ver regalos» en el Resumen (FEAT-45, US A4).
+  const [usersPreset, setUsersPreset] = useState<UsersPreset | null>(null);
   // Filtros con los que se abre Ventas desde una tarjeta del Resumen (FEAT-44, US A5).
   const [salesPreset, setSalesPreset] = useState<SalesPreset | null>(null);
 
   const openTab = (tab: AdminTab, sales?: SalesPreset) => {
-    setBalancesSearch('');
+    setUsersPreset(null);
     setSalesPreset(sales ?? null);
     setActiveTab(tab);
   };
 
-  const openClient = (email: string) => {
+  const openClient = (userId: string, email: string) => {
     setSalesPreset(null);
-    setBalancesSearch(email);
-    setActiveTab('balances');
+    setUsersPreset({ section: 'usuarios', search: email, openUserId: userId });
+    setActiveTab('usuarios');
+  };
+
+  // Desde la ficha: sus compras desde su alta hasta hoy (FEAT-45, decisión 13).
+  const openUserSales = (email: string, createdAt: string) => {
+    setUsersPreset(null);
+    setSalesPreset({
+      selection: { kind: 'range', period: signupSalesPeriod(createdAt) },
+      kind: '',
+      status: '',
+      search: email,
+    });
+    setActiveTab('ventas');
+  };
+
+  const openGifts = (selection: PeriodSelection) => {
+    setSalesPreset(null);
+    setUsersPreset({ section: 'regalos', giftsSelection: selection });
+    setActiveTab('usuarios');
   };
 
   useEffect(() => {
@@ -160,11 +181,11 @@ export const AdminPanel = () => {
       {/* Main content */}
       <main className="admin-panel__main">
         <div className="admin-panel__content" key={activeTab}>
-          {activeTab === 'resumen'     && <AdminSummary onOpenTab={openTab} />}
+          {activeTab === 'resumen'     && <AdminSummary onOpenTab={openTab} onOpenGifts={openGifts} />}
           {activeTab === 'ventas'      && <AdminSales preset={salesPreset} onOpenClient={openClient} />}
           {activeTab === 'promociones' && <AdminPromotions />}
           {activeTab === 'packs'       && <AdminTokenPacks />}
-          {activeTab === 'balances'    && <AdminBalances initialSearch={balancesSearch} />}
+          {activeTab === 'usuarios'    && <AdminUsers preset={usersPreset} onOpenSales={openUserSales} />}
           {activeTab === 'uso-ia'      && <AdminTokenUsage />}
           {activeTab === 'temporada'   && <AdminSeasonal />}
         </div>

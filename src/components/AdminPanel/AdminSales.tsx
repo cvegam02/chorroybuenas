@@ -39,20 +39,22 @@ export interface SalesPreset {
   selection: PeriodSelection;
   kind: '' | SaleKind;
   status: SaleStatusFilter;
+  /** Correo ya escrito en el buscador, desde la ficha de un usuario (FEAT-45, US A5). */
+  search?: string;
 }
 
 interface AdminSalesProps {
   /** Nulo al entrar desde el menú: «Este mes», sin filtros. */
   preset: SalesPreset | null;
-  /** «Ver ficha del cliente»: por ahora abre Balances con su correo (decisión 13). */
-  onOpenClient: (email: string) => void;
+  /** «Ver ficha del cliente»: abre su ficha en Usuarios (FEAT-45, US A5). */
+  onOpenClient: (userId: string, email: string) => void;
 }
 
 /** Pestaña Ventas (FEAT-44): junta Compras y Transacciones MP, con el periodo del Resumen. */
 export const AdminSales = ({ preset, onOpenClient }: AdminSalesProps) => {
   const [selection, setSelection] = useState<PeriodSelection>(() => preset?.selection ?? defaultPeriodSelection());
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState(preset?.search ?? '');
+  const [search, setSearch] = useState(preset?.search?.trim() ?? '');
   const [kind, setKind] = useState<'' | SaleKind>(preset?.kind ?? '');
   const [status, setStatus] = useState<SaleStatusFilter>(preset?.status ?? '');
   const [page, setPage] = useState(0);

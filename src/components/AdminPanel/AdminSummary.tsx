@@ -28,10 +28,12 @@ const describePeriod = (period: SummaryPeriod) =>
 
 interface AdminSummaryProps {
   /** Ventas se abre con el filtro de la tarjeta y, si no trae otro, el mismo periodo (US A5). */
-  onOpenTab: (tab: SummaryTargetTab, sales?: SalesPreset) => void;
+  onOpenTab: (tab: Exclude<SummaryTargetTab, 'regalos'>, sales?: SalesPreset) => void;
+  /** «Ver regalos» abre Regalos de tokens con el mismo periodo (FEAT-45, US A4). */
+  onOpenGifts: (selection: PeriodSelection) => void;
 }
 
-export const AdminSummary = ({ onOpenTab }: AdminSummaryProps) => {
+export const AdminSummary = ({ onOpenTab, onOpenGifts }: AdminSummaryProps) => {
   const [selection, setSelection] = useState<PeriodSelection>(defaultPeriodSelection);
   const [data, setData] = useState<SummaryData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,12 +43,14 @@ export const AdminSummary = ({ onOpenTab }: AdminSummaryProps) => {
   const previous = previousPeriod(selection.kind, selection.period);
 
   const openTab = (tab: SummaryTargetTab, sales?: SummarySalesFilter) =>
-    onOpenTab(
-      tab,
-      tab === 'ventas'
-        ? { selection: sales?.selection ?? selection, kind: sales?.kind ?? '', status: sales?.status ?? '' }
-        : undefined,
-    );
+    tab === 'regalos'
+      ? onOpenGifts(selection)
+      : onOpenTab(
+          tab,
+          tab === 'ventas'
+            ? { selection: sales?.selection ?? selection, kind: sales?.kind ?? '', status: sales?.status ?? '' }
+            : undefined,
+        );
 
   useEffect(() => {
     let current = true;

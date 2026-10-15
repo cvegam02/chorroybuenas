@@ -11,7 +11,8 @@ import type { SaleKind, SaleStatusFilter } from '../../utils/adminSales';
 import type { PeriodSelection } from './AdminPeriodPicker';
 
 /** Pestañas del panel a las que lleva una tarjeta del Resumen. */
-export type SummaryTargetTab = 'ventas' | 'uso-ia' | 'balances';
+/** 'regalos' es la sub-pestaña «Regalos de tokens» de Usuarios (FEAT-45, US A4). */
+export type SummaryTargetTab = 'ventas' | 'uso-ia' | 'usuarios' | 'regalos';
 
 /** Filtro con el que una tarjeta abre Ventas (US A5); el periodo lo pone el Resumen si no viene. */
 export interface SummarySalesFilter {
@@ -159,7 +160,7 @@ export const SummarySections = ({ data, loading, onOpenTab }: SummarySectionsPro
           value={value(t ? formatCount(t.newUsers) : '')}
           detail="Cuentas creadas en el periodo"
           change={change(t?.newUsers, p?.newUsers)}
-          onOpen={open('balances')}
+          onOpen={open('usuarios')}
         />
         <SummaryCard
           label="Compraron"

@@ -1,6 +1,5 @@
 import { logger } from '../utils/logger';
 import { supabase } from '../utils/supabaseClient';
-import { summarizeRevenue, type RevenueSummary } from '../utils/adminRevenue';
 import {
   hermosilloDayRange,
   type DailyTotals,
@@ -9,6 +8,8 @@ import {
   type SummaryPeriod,
 } from '../utils/adminSummary';
 import type { SaleKind, SalesTotals, SaleStatusFilter } from '../utils/adminSales';
+import type { UserFilter, UserSort } from '../utils/adminUsers';
+import type { UserActivityEvent } from '../utils/userActivity';
 
 /** Renglón de la pestaña Ventas (FEAT-44): una compra de tokens o de una lotería temática. */
 export interface AdminSaleRow {
@@ -68,15 +69,44 @@ export interface AdminTokenUsageWithInfo extends AdminTokenUsage {
   set_name: string | null;
 }
 
-export interface AdminUserBalance {
+/** Renglón de la pestaña Usuarios (FEAT-45): una cuenta con su saldo, lo pagado y su última actividad. */
+export interface AdminUserRow {
   user_id: string;
+  email: string | null;
+  /** Nulo si la cuenta no tiene nombre. */
+  full_name: string | null;
+  created_at: string;
   balance: number;
-  updated_at: string;
+  /** Total pagado en compras aprobadas, tokens y temáticas. */
+  paid_cents: number;
+  last_activity_at: string;
 }
 
-export interface AdminUserBalanceWithInfo extends AdminUserBalance {
+/** Ficha de un usuario (FEAT-45, US A2). */
+export interface AdminUserDetail {
+  user_id: string;
   email: string | null;
+  /** Nulo si la cuenta no tiene nombre. */
   full_name: string | null;
+  created_at: string;
+  /** 'google', 'email' u otro proveedor; nulo si no se sabe. */
+  provider: string | null;
+  balance: number;
+  /** Total pagado en compras aprobadas, tokens y temáticas, y cuántas son. */
+  paid_cents: number;
+  purchases_count: number;
+  /** Tokens gastados en imágenes con IA. */
+  ai_tokens: number;
+  loterias_count: number;
+  seasonal_count: number;
+  /** Tokens regalados por administradores. */
+  gifted_tokens: number;
+}
+
+export interface UsersFilters {
+  search: string;
+  filter: UserFilter;
+  sort: UserSort;
 }
 
 export interface AdminTokenGift {
@@ -90,6 +120,15 @@ export interface AdminTokenGift {
   recipient_id: string;
   recipient_email: string | null;
   recipient_name: string | null;
+}
+
+/** Totales de «Regalos de tokens» en un periodo (FEAT-45, US A4). */
+export interface AdminGiftsTotals {
+  gifts: number;
+  tokens: number;
+  recipients: number;
+  /** Tokens × precio por token vigente; nulo si no hay precio guardado. */
+  valueCents: number | null;
 }
 
 export interface AdminPromotion {
@@ -158,37 +197,6 @@ const salesFilterParams = (filters: SalesFilters) => ({
 });
 
 export class AdminRepository {
-  /**
-   * Resumen de ingresos: lo vendido en tokens y en loterías de temporada, y el total.
-   * Devuelve null si alguna de las dos consultas falla, para no mostrar un total incompleto.
-   */
-  static async getPurchasesSummary(): Promise<RevenueSummary | null> {
-    const [tokens, seasonal] = await Promise.all([
-      supabase.from('token_purchases').select('amount_cents').limit(10000),
-      supabase.from('seasonal_purchases').select('amount_cents, status').limit(10000),
-    ]);
-
-    const error = tokens.error ?? seasonal.error;
-    if (error) {
-      logger.error('AdminRepository.getPurchasesSummary:', error.message);
-      return null;
-    }
-    return summarizeRevenue(tokens.data ?? [], seasonal.data ?? []);
-  }
-
-  /**
-   * Resumen de uso de tokens: total gastado.
-   */
-  static async getTokenUsageSummary(): Promise<number> {
-    const { data } = await supabase
-      .from('token_usage')
-      .select('amount')
-      .limit(10000);
-
-    const rows = data ?? [];
-    return rows.reduce((s, r) => s + (r.amount ?? 0), 0);
-  }
-
   /**
    * Uso de tokens (IA) con email y nombre de lotería (admin). Con filtros.
    */
@@ -444,39 +452,67 @@ export class AdminRepository {
     }));
   }
 
-  /**
-   * Balances de todos los usuarios (admin).
-   */
-  static async getAllUserBalances(limit = 100, offset = 0): Promise<AdminUserBalance[]> {
-    const { data, error } = await supabase
-      .from('user_tokens')
-      .select('user_id, balance, updated_at')
-      .order('updated_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    if (error) return [];
-    return (data ?? []) as AdminUserBalance[];
+  /** Una página de la pestaña Usuarios (FEAT-45), sobre todas las cuentas; nulo si falla. */
+  static async getUsers(filters: UsersFilters, limit: number, offset: number): Promise<AdminUserRow[] | null> {
+    const { data, error } = await supabase.rpc('admin_get_users', {
+      p_search: filters.search || null,
+      p_filter: filters.filter || null,
+      p_sort: filters.sort,
+      p_limit: limit,
+      p_offset: offset,
+    });
+    if (error) {
+      logger.error('AdminRepository.getUsers:', error.message);
+      return null;
+    }
+    return ((data ?? []) as AdminUserRow[]).map((row) => ({ ...row, paid_cents: Number(row.paid_cents) }));
   }
 
-  /**
-   * Balances con email y nombre (admin). Usa RPC que lee auth.users.
-   * Si la RPC falla (p. ej. auth.users restringido en Supabase), hace fallback
-   * a lectura directa de user_tokens (sin email/nombre).
-   */
-  static async getBalancesWithUserInfo(limit = 200): Promise<AdminUserBalanceWithInfo[]> {
-    const { data, error } = await supabase.rpc('admin_get_balances_with_users', {
-      p_limit: limit,
+  /** Cuántas cuentas hay con ese buscador y filtro rápido; nulo si falla. */
+  static async getUsersCount(search: string, filter: UserFilter): Promise<number | null> {
+    const { data, error } = await supabase.rpc('admin_get_users_count', {
+      p_search: search || null,
+      p_filter: filter || null,
     });
+    if (error) {
+      logger.error('AdminRepository.getUsersCount:', error.message);
+      return null;
+    }
+    return Number(data);
+  }
 
-    if (!error) return (data ?? []) as AdminUserBalanceWithInfo[];
+  /** Ficha de un usuario; nulo si falla o si la cuenta ya no existe. */
+  static async getUserDetail(userId: string): Promise<AdminUserDetail | null> {
+    const { data, error } = await supabase.rpc('admin_get_user_detail', { p_user_id: userId });
+    if (error) {
+      logger.error('AdminRepository.getUserDetail:', error.message);
+      return null;
+    }
+    const row = (data as Record<string, unknown>[] | null)?.[0];
+    if (!row) return null;
+    // Postgres manda los bigint como texto o número según su tamaño: se pasan a número.
+    const num = (key: string) => Number(row[key] ?? 0);
+    return {
+      ...(row as unknown as AdminUserDetail),
+      paid_cents: num('paid_cents'),
+      purchases_count: num('purchases_count'),
+      ai_tokens: num('ai_tokens'),
+      loterias_count: num('loterias_count'),
+      seasonal_count: num('seasonal_count'),
+      gifted_tokens: num('gifted_tokens'),
+    };
+  }
 
-    // Fallback: Supabase puede restringir acceso a auth.users en RPCs.
-    // Usamos lectura directa de user_tokens (admins tienen RLS permitido).
-    const fallback = await this.getAllUserBalances(limit, 0);
-    return fallback.map((b) => ({
-      ...b,
-      email: null as string | null,
-      full_name: null as string | null,
+  /** Actividad de un usuario, la más reciente primero, con la IA agrupada por lotería y día; nulo si falla. */
+  static async getUserActivity(userId: string, limit: number): Promise<UserActivityEvent[] | null> {
+    const { data, error } = await supabase.rpc('admin_get_user_activity', { p_user_id: userId, p_limit: limit });
+    if (error) {
+      logger.error('AdminRepository.getUserActivity:', error.message);
+      return null;
+    }
+    return ((data ?? []) as UserActivityEvent[]).map((event) => ({
+      ...event,
+      ai_photos: event.ai_photos == null ? null : Number(event.ai_photos),
     }));
   }
 
@@ -495,15 +531,35 @@ export class AdminRepository {
     return data as number;
   }
 
-  /**
-   * Lista general de regalos de tokens (admin), más recientes primero.
-   * Retorna null si falla, para distinguirlo de una lista vacía.
-   */
-  static async getTokenGifts(limit = 200): Promise<AdminTokenGift[] | null> {
-    const { data, error } = await supabase.rpc('admin_get_token_gifts', { p_limit: limit });
-
-    if (error) return null;
+  /** Regalos de un periodo en hora de Hermosillo, de página en página (FEAT-45, US A4); nulo si falla. */
+  static async getGifts(period: SummaryPeriod, limit: number, offset: number): Promise<AdminTokenGift[] | null> {
+    const { data, error } = await supabase.rpc('admin_get_gifts', {
+      p_from: period.from,
+      p_to: period.to,
+      p_limit: limit,
+      p_offset: offset,
+    });
+    if (error) {
+      logger.error('AdminRepository.getGifts:', error.message);
+      return null;
+    }
     return (data ?? []) as AdminTokenGift[];
+  }
+
+  /** Totales de los regalos de un periodo; nulo si falla. */
+  static async getGiftsTotals(period: SummaryPeriod): Promise<AdminGiftsTotals | null> {
+    const { data, error } = await supabase.rpc('admin_get_gifts_totals', { p_from: period.from, p_to: period.to });
+    const row = (data as Record<string, unknown>[] | null)?.[0];
+    if (error || !row) {
+      logger.error('AdminRepository.getGiftsTotals:', error?.message ?? 'sin datos');
+      return null;
+    }
+    return {
+      gifts: Number(row.gifts ?? 0),
+      tokens: Number(row.tokens ?? 0),
+      recipients: Number(row.recipients ?? 0),
+      valueCents: row.value_cents == null ? null : Number(row.value_cents),
+    };
   }
 
   /**
