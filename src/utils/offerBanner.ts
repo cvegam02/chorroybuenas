@@ -48,6 +48,27 @@ export function timeLeft(endsAt: string, startsAt: string, now: Date): TimeLeft 
   return { days: Math.floor(left / DAY), hours: Math.floor((left % DAY) / HOUR), minutes: Math.floor((left % HOUR) / MINUTE) };
 }
 
+/** Contador del aviso (US A6): «31d 23h» con un día o más; si no, «23h 15m». Nunca «0m». */
+export function formatCountdown({ days, hours, minutes }: TimeLeft): string {
+  if (days >= 1) return `${days}d ${hours}h`;
+  return `${hours}h ${hours === 0 ? Math.max(1, minutes) : minutes}m`;
+}
+
+/** Contador del indicador minimizado (US A7): «31d»; con menos de un día, «23h»; en la última hora, minutos. */
+export function formatMiniCountdown({ days, hours, minutes }: TimeLeft): string {
+  if (days >= 1) return `${days}d`;
+  if (hours >= 1) return `${hours}h`;
+  return `${Math.max(1, minutes)}m`;
+}
+
+/** El aviso aparece a los 3 s de cargar o al bajar más de 300 px, lo que pase primero (US A6). */
+export const TOAST_DELAY_MS = 3000;
+export const TOAST_SCROLL_PX = 300;
+
+export function shouldRevealToast(elapsedMs: number, scrollY: number): boolean {
+  return elapsedMs >= TOAST_DELAY_MS || scrollY > TOAST_SCROLL_PX;
+}
+
 /** El video del banner: MP4, hasta 8 MB y 15 segundos (decisión 10). Null si sirve. */
 export function checkBannerVideo(file: { type: string; size: number; duration: number }): string | null {
   if (file.type !== 'video/mp4') return 'El video tiene que ser MP4.';
@@ -189,37 +210,46 @@ export function bannerPlacesLabel(fields: Pick<OfferBannerFields, 'banner_enable
 
 export type BannerPlacement = 'home' | 'dashboard';
 
-/** Sale si está encendido, en una pantalla elegida y si quien mira no lo cerró (US A5). */
+/** Sale si está encendido y en una pantalla elegida (US A5). Cerrarlo ya no lo quita: lo minimiza (US A7). */
 export function shouldShowBanner(
   offer: Pick<OfferBannerFields, 'banner_enabled' | 'banner_on_home' | 'banner_on_dashboard'> | null,
   placement: BannerPlacement,
-  dismissed: boolean,
 ): boolean {
-  if (!offer?.banner_enabled || dismissed) return false;
+  if (!offer?.banner_enabled) return false;
   return placement === 'home' ? offer.banner_on_home : offer.banner_on_dashboard;
 }
 
 interface SimpleStorage {
   getItem: (key: string) => string | null;
   setItem: (key: string, value: string) => void;
+  removeItem: (key: string) => void;
 }
 
-const dismissKey = (offerId: string) => `offer-banner-closed:${offerId}`;
+const minimizedKey = (offerId: string) => `offer-banner-minimized:${offerId}`;
 
-/** Si quien mira cerró el banner de esta oferta. Sin almacenamiento del navegador, nunca lo cerró. */
-export function isBannerDismissed(storage: SimpleStorage | null, offerId: string): boolean {
+/** Si quien mira minimizó la promo de esta oferta. Sin almacenamiento del navegador, nunca la minimizó. */
+export function isBannerMinimized(storage: SimpleStorage | null, offerId: string): boolean {
   try {
-    return storage?.getItem(dismissKey(offerId)) === '1';
+    return storage?.getItem(minimizedKey(offerId)) === '1';
   } catch {
     return false;
   }
 }
 
-/** Recuerda que se cerró, solo para esta oferta (decisión 13). Si el navegador no deja, se cierra igual por ahora. */
-export function dismissBanner(storage: SimpleStorage | null, offerId: string): void {
+/** Recuerda que se minimizó, solo para esta oferta (decisión 13). Si el navegador no deja, vale solo en esta visita. */
+export function minimizeBanner(storage: SimpleStorage | null, offerId: string): void {
   try {
-    storage?.setItem(dismissKey(offerId), '1');
+    storage?.setItem(minimizedKey(offerId), '1');
   } catch {
-    // Modo privado o almacenamiento bloqueado: el banner se cierra en esta visita y nada más.
+    // Modo privado o almacenamiento bloqueado: se minimiza en esta visita y nada más.
+  }
+}
+
+/** Al reabrirla desde el indicador se borra la marca (US A7). */
+export function restoreBanner(storage: SimpleStorage | null, offerId: string): void {
+  try {
+    storage?.removeItem(minimizedKey(offerId));
+  } catch {
+    // Igual que arriba: sin almacenamiento, solo cambia esta visita.
   }
 }

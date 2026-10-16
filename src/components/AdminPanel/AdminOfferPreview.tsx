@@ -11,7 +11,7 @@ interface AdminOfferPreviewProps {
   endsAt: string | null;
 }
 
-/** Vista previa del banner, en computadora y en celular, antes de guardar (FEAT-49, decisión 14). */
+/** Vista previa del aviso flotante, en computadora y en celular, antes de guardar (FEAT-49, decisión 14 y US A6). */
 export const AdminOfferPreview = ({ draft, videoUrl, imageUrl, startsAt, endsAt }: AdminOfferPreviewProps) => {
   const [layout, setLayout] = useState<'desktop' | 'mobile'>('desktop');
   const countdown = draft.countdown && startsAt && endsAt ? timeLeft(endsAt, startsAt, new Date()) : null;
@@ -37,6 +37,8 @@ export const AdminOfferPreview = ({ draft, videoUrl, imageUrl, startsAt, endsAt 
       </div>
 
       <div className={`admin-offer__device admin-offer__device--${layout}`}>
+        <div className="admin-offer__device-content" aria-hidden="true" />
+        <div className="admin-offer__device-content admin-offer__device-content--short" aria-hidden="true" />
         {ready ? (
           <OfferBanner
             title={draft.titleEs || 'Título del banner'}
@@ -53,7 +55,6 @@ export const AdminOfferPreview = ({ draft, videoUrl, imageUrl, startsAt, endsAt 
         ) : (
           <p className="admin-offer__preview-empty">Sube el video para ver el banner.</p>
         )}
-        <div className="admin-offer__device-content" aria-hidden="true" />
       </div>
 
       <p className="admin-pricing__muted">

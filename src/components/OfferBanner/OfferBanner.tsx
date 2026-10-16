@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { FaPlay, FaTimes, FaVolumeMute, FaVolumeUp } from 'react-icons/fa';
+import { FaPlay, FaTimes } from 'react-icons/fa';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
-import type { TimeLeft } from '../../utils/offerBanner';
+import { formatCountdown, shouldRevealToast, TOAST_DELAY_MS, type TimeLeft } from '../../utils/offerBanner';
+import { OfferVideoModal } from './OfferVideoModal';
 import './OfferBanner.css';
 
 export interface OfferBannerProps {
@@ -18,90 +19,96 @@ export interface OfferBannerProps {
   onClose: () => void;
   /** Fuerza computadora o celular (vista previa del Admin); sin él, según el ancho de la pantalla. */
   layout?: 'desktop' | 'mobile';
-  /** En la vista previa el botón no lleva a ningún lado. */
+  /** En la vista previa el aviso sale de inmediato, dentro del marco, y el botón no lleva a ningún lado. */
   preview?: boolean;
+  /** Reabierto desde el indicador del encabezado (US A7): sale sin esperar. */
+  immediate?: boolean;
 }
 
-const MOBILE_QUERY = '(max-width: 640px)';
+const MOBILE_QUERY = '(max-width: 699px)';
+
+/** Aparece a los 3 s de cargar o al bajar más de 300 px, lo que pase primero. */
+function useToastReveal(immediate: boolean): boolean {
+  const [revealed, setRevealed] = useState(immediate);
+
+  useEffect(() => {
+    if (revealed) return;
+    const startedAt = Date.now();
+    const check = () => {
+      if (shouldRevealToast(Date.now() - startedAt, window.scrollY)) setRevealed(true);
+    };
+    const timer = window.setTimeout(() => setRevealed(true), TOAST_DELAY_MS);
+    window.addEventListener('scroll', check, { passive: true });
+    check();
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('scroll', check);
+    };
+  }, [revealed]);
+
+  return revealed;
+}
 
 /**
- * Banner de la oferta (FEAT-49, decisiones 10 a 13). En computadora el video corre solo, sin sonido y en
- * bucle, con un botón para el sonido. En celular, o con «reducir movimiento», se ve la imagen fija y el
- * video corre al tocarla.
+ * Aviso flotante de la oferta, abajo a la izquierda (FEAT-49, US A6). Miniatura con ▶, cuenta regresiva,
+ * título, botón y «Ver video». El video no está en la página: se abre en una ventana aparte. La ✕ lo minimiza al
+ * encabezado (US A7).
  */
 export const OfferBanner = ({
-  title, text, button, videoUrl, imageUrl, countdown, targetPath, onClose, layout, preview = false,
+  title, text, button, videoUrl, imageUrl, countdown, targetPath, onClose, layout, preview = false, immediate = false,
 }: OfferBannerProps) => {
   const { t } = useTranslation();
   const isNarrow = useMediaQuery(MOBILE_QUERY);
-  const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
   const mobile = layout ? layout === 'mobile' : isNarrow;
-  const [tapped, setTapped] = useState(false);
-  const [muted, setMuted] = useState(true);
-  const playing = tapped || (!mobile && !reducedMotion);
+  const revealed = useToastReveal(preview || immediate);
+  const [videoOpen, setVideoOpen] = useState(false);
 
-  const timeText = countdown && formatTimeLeft(countdown, t);
+  if (!revealed) return null;
+
+  const classes = ['offer-toast', mobile && 'offer-toast--mobile', preview && 'offer-toast--preview'].filter(Boolean).join(' ');
+  const openVideo = () => setVideoOpen(true);
 
   return (
-    <aside className={`offer-banner${mobile ? ' offer-banner--mobile' : ''}`} aria-label={t('offerBanner.label')}>
-      <div className="offer-banner__media">
-        {playing ? (
-          <>
-            <video
-              key={videoUrl}
-              className="offer-banner__video"
-              src={videoUrl}
-              poster={imageUrl}
-              autoPlay
-              muted={muted}
-              loop
-              playsInline
-              aria-hidden="true"
-            />
-            <button
-              type="button"
-              className="offer-banner__sound"
-              aria-pressed={!muted}
-              aria-label={muted ? t('offerBanner.soundOn') : t('offerBanner.soundOff')}
-              onClick={() => setMuted((m) => !m)}
-            >
-              {muted ? <FaVolumeMute aria-hidden="true" /> : <FaVolumeUp aria-hidden="true" />}
-            </button>
-          </>
-        ) : (
-          <button type="button" className="offer-banner__still" onClick={() => setTapped(true)} aria-label={t('offerBanner.playVideo')}>
-            <img className="offer-banner__image" src={imageUrl} alt="" />
-            <span className="offer-banner__play" aria-hidden="true"><FaPlay /></span>
-          </button>
+    <aside className={classes} aria-label={t('offerBanner.label')}>
+      <button type="button" className="offer-toast__thumb" onClick={openVideo} aria-label={t('offerBanner.playVideo')}>
+        <img src={imageUrl} alt="" />
+        <span className="offer-toast__play" aria-hidden="true"><FaPlay /></span>
+      </button>
+
+      <div className="offer-toast__body">
+        {countdown && (
+          <span className="offer-toast__countdown">
+            <span className="offer-toast__dot" aria-hidden="true" />
+            {t('offerBanner.endsIn', { time: formatCountdown(countdown) })}
+          </span>
         )}
+        <strong className="offer-toast__title">{title}</strong>
+        <div className="offer-toast__actions">
+          {preview ? (
+            <span className="offer-toast__cta">{button}</span>
+          ) : (
+            <Link to={targetPath} className="offer-toast__cta">{button}</Link>
+          )}
+          <button type="button" className="offer-toast__watch" onClick={openVideo}>{t('offerBanner.watchVideo')}</button>
+        </div>
       </div>
 
-      <div className="offer-banner__body">
-        {timeText && <span className="offer-banner__countdown">{t('offerBanner.endsIn', { time: timeText })}</span>}
-        <strong className="offer-banner__title">{title}</strong>
-        {text && <span className="offer-banner__text">{text}</span>}
-        {preview ? (
-          <span className="offer-banner__cta">{button}</span>
-        ) : (
-          <Link to={targetPath} className="offer-banner__cta">{button}</Link>
-        )}
-      </div>
-
-      <button type="button" className="offer-banner__close" aria-label={t('offerBanner.close')} onClick={onClose}>
+      <button type="button" className="offer-toast__close" aria-label={t('offerBanner.close')} onClick={onClose}>
         <FaTimes aria-hidden="true" />
       </button>
+
+      {videoOpen && (
+        <OfferVideoModal
+          title={title}
+          text={text}
+          button={button}
+          videoUrl={videoUrl}
+          imageUrl={imageUrl}
+          targetPath={targetPath}
+          preview={preview}
+          onClose={() => setVideoOpen(false)}
+        />
+      )}
     </aside>
   );
 };
-
-type Translate = (key: string, options?: Record<string, unknown>) => string;
-
-/** «2 días 5 h», «5 h» o «45 min», en el idioma del sitio. */
-function formatTimeLeft({ days, hours, minutes }: TimeLeft, t: Translate): string {
-  if (days >= 1) {
-    const dayText = t('offerBanner.days', { count: days });
-    return hours > 0 ? `${dayText} ${t('offerBanner.hours', { count: hours })}` : dayText;
-  }
-  if (hours >= 1) return t('offerBanner.hours', { count: hours });
-  return t('offerBanner.minutes', { count: Math.max(1, minutes) });
-}

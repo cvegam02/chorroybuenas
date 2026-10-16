@@ -28,10 +28,12 @@ interface MobileMenuProps {
   onSignUp: () => void;
   onLogin: () => void;
   onSignOut: () => void;
+  /** La promo minimizada (FEAT-49, US A7): un renglón «🔥 <título>» que la vuelve a abrir. */
+  promo?: { label: string; open: () => void } | null;
 }
 
 /** Menú de la barra en celular y tableta: ocupa toda la pantalla. */
-export const MobileMenu = ({ pathname, user, onClose, onGoogle, onSignUp, onLogin, onSignOut }: MobileMenuProps) => {
+export const MobileMenu = ({ pathname, user, onClose, onGoogle, onSignUp, onLogin, onSignOut, promo }: MobileMenuProps) => {
   const { t, i18n } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const currentLanguage = currentLanguageCode(i18n.language);
@@ -117,6 +119,21 @@ export const MobileMenu = ({ pathname, user, onClose, onGoogle, onSignUp, onLogi
         )}
 
         <ul className="mobile-menu__links">
+          {promo && (
+            <li>
+              <button
+                type="button"
+                className="mobile-menu__link mobile-menu__link--promo"
+                aria-label={t('offerBanner.reopen', { title: promo.label })}
+                onClick={() => {
+                  promo.open();
+                  onClose();
+                }}
+              >
+                <span><span aria-hidden="true">🔥 </span>{promo.label}</span>
+              </button>
+            </li>
+          )}
           {navLinksFor(user !== null).map((link) => {
             const isActive = isNavLinkActive(link, pathname);
             return (

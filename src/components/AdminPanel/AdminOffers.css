@@ -414,10 +414,12 @@
 }
 
 .admin-offer__device {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 10px;
+  min-height: 230px;
+  padding: 10px 10px 120px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-bg-base);
@@ -426,7 +428,10 @@
 .admin-offer__device--mobile {
   width: 260px;
   max-width: 100%;
+  min-height: 380px;
+  padding-bottom: 170px;
   align-self: center;
+  box-sizing: border-box;
   border: 6px solid var(--color-text-main);
   border-radius: 26px;
 }
@@ -435,6 +440,11 @@
   height: 70px;
   border-radius: var(--radius-sm);
   background: var(--color-bg-subtle);
+}
+
+.admin-offer__device-content--short {
+  width: 60%;
+  height: 40px;
 }
 
 .admin-offer__preview-empty {

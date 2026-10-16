@@ -4,13 +4,17 @@ import {
   bannerDraftFromOffer,
   bannerFieldsFromDraft,
   bannerPlacesLabel,
-  dismissBanner,
-  isBannerDismissed,
+  isBannerMinimized,
+  minimizeBanner,
+  restoreBanner,
+  formatMiniCountdown,
   shouldShowBanner,
   bannerFilePath,
   bannerTexts,
   checkBannerImage,
   checkBannerVideo,
+  formatCountdown,
+  shouldRevealToast,
   timeLeft,
   validateBannerForm,
   type BannerForm,
@@ -138,18 +142,51 @@ describe('timeLeft (cuenta regresiva)', () => {
   });
 });
 
+describe('formatCountdown (contador del aviso, US A6)', () => {
+  it('con un día o más: días y horas', () => {
+    expect(formatCountdown({ days: 31, hours: 23, minutes: 40 })).toBe('31d 23h');
+    expect(formatCountdown({ days: 1, hours: 0, minutes: 5 })).toBe('1d 0h');
+  });
+
+  it('con menos de un día: horas y minutos', () => {
+    expect(formatCountdown({ days: 0, hours: 23, minutes: 15 })).toBe('23h 15m');
+    expect(formatCountdown({ days: 0, hours: 0, minutes: 7 })).toBe('0h 7m');
+  });
+
+  it('en el último minuto no dice 0m', () => {
+    expect(formatCountdown({ days: 0, hours: 0, minutes: 0 })).toBe('0h 1m');
+  });
+});
+
+describe('shouldRevealToast (cuándo aparece el aviso, US A6)', () => {
+  it('a los 3 segundos de cargar', () => {
+    expect(shouldRevealToast(2999, 0)).toBe(false);
+    expect(shouldRevealToast(3000, 0)).toBe(true);
+  });
+
+  it('o al bajar más de 300 px, lo que pase primero', () => {
+    expect(shouldRevealToast(500, 300)).toBe(false);
+    expect(shouldRevealToast(500, 301)).toBe(true);
+  });
+});
+
 describe('textos del banner en el sitio', () => {
   it('existen en español y en inglés', () => {
     for (const locale of [es, en]) {
       expect(locale.offerBanner.endsIn).toContain('{{time}}');
-      expect(locale.offerBanner.days_one).toContain('{{count}}');
-      expect(locale.offerBanner.days_other).toContain('{{count}}');
-      expect(locale.offerBanner.hours).toContain('{{count}}');
-      expect(locale.offerBanner.minutes).toContain('{{count}}');
-      for (const key of ['close', 'soundOn', 'soundOff', 'playVideo', 'label'] as const) {
+      for (const key of ['close', 'watchVideo', 'playVideo', 'closeVideo', 'label', 'reopen', 'stillHere', 'see'] as const) {
         expect(locale.offerBanner[key]).toBeTruthy();
       }
     }
+  });
+
+  it('la ✕ se anuncia como «Cerrar promoción»', () => {
+    expect(es.offerBanner.close).toBe('Cerrar promoción');
+  });
+
+  it('el indicador se anuncia como «Ver promoción <título>»', () => {
+    for (const locale of [es, en]) expect(locale.offerBanner.reopen).toContain('{{title}}');
+    expect(es.offerBanner.reopen).toBe('Ver promoción {{title}}');
   });
 });
 
@@ -203,38 +240,68 @@ describe('cuándo sale el banner (US A5)', () => {
   const offer = { id: 'o1', banner_enabled: true, banner_on_home: true, banner_on_dashboard: false };
 
   it('solo encendido, en las pantallas elegidas y si no se cerró', () => {
-    expect(shouldShowBanner(offer, 'home', false)).toBe(true);
-    expect(shouldShowBanner(offer, 'dashboard', false)).toBe(false);
-    expect(shouldShowBanner({ ...offer, banner_enabled: false }, 'home', false)).toBe(false);
-    expect(shouldShowBanner(offer, 'home', true)).toBe(false);
-    expect(shouldShowBanner(null, 'home', false)).toBe(false);
+    expect(shouldShowBanner(offer, 'home')).toBe(true);
+    expect(shouldShowBanner(offer, 'dashboard')).toBe(false);
+    expect(shouldShowBanner({ ...offer, banner_enabled: false }, 'home')).toBe(false);
+    expect(shouldShowBanner(null, 'home')).toBe(false);
   });
 });
 
-describe('cerrar el banner se recuerda en el navegador, por oferta (decisión 13)', () => {
+describe('cerrar minimiza y se recuerda en el navegador, por oferta (decisión 13, US A7)', () => {
   const memoryStorage = () => {
     const data = new Map<string, string>();
     return {
       getItem: (key: string) => data.get(key) ?? null,
       setItem: (key: string, value: string) => void data.set(key, value),
+      removeItem: (key: string) => void data.delete(key),
     };
   };
 
-  it('quien lo cierra no lo vuelve a ver en esa oferta, pero sí en la siguiente', () => {
+  it('minimizada en esa oferta; la siguiente sale completa', () => {
     const storage = memoryStorage();
-    expect(isBannerDismissed(storage, 'o1')).toBe(false);
-    dismissBanner(storage, 'o1');
-    expect(isBannerDismissed(storage, 'o1')).toBe(true);
-    expect(isBannerDismissed(storage, 'o2')).toBe(false);
+    expect(isBannerMinimized(storage, 'o1')).toBe(false);
+    minimizeBanner(storage, 'o1');
+    expect(isBannerMinimized(storage, 'o1')).toBe(true);
+    expect(isBannerMinimized(storage, 'o2')).toBe(false);
   });
 
-  it('sin almacenamiento del navegador (modo privado, bloqueado), se muestra y cerrar no falla', () => {
+  it('reabrirla desde el indicador borra la marca', () => {
+    const storage = memoryStorage();
+    minimizeBanner(storage, 'o1');
+    restoreBanner(storage, 'o1');
+    expect(isBannerMinimized(storage, 'o1')).toBe(false);
+  });
+
+  it('la marca lleva el id de la oferta', () => {
+    const storage = memoryStorage();
+    minimizeBanner(storage, 'o1');
+    expect(storage.getItem('offer-banner-minimized:o1')).toBe('1');
+  });
+
+  it('sin almacenamiento del navegador (modo privado, bloqueado), sale completa y nada falla', () => {
     const broken = {
       getItem: () => { throw new Error('bloqueado'); },
       setItem: () => { throw new Error('bloqueado'); },
+      removeItem: () => { throw new Error('bloqueado'); },
     };
-    expect(isBannerDismissed(broken, 'o1')).toBe(false);
-    expect(() => dismissBanner(broken, 'o1')).not.toThrow();
-    expect(isBannerDismissed(null, 'o1')).toBe(false);
+    expect(isBannerMinimized(broken, 'o1')).toBe(false);
+    expect(() => minimizeBanner(broken, 'o1')).not.toThrow();
+    expect(() => restoreBanner(broken, 'o1')).not.toThrow();
+    expect(isBannerMinimized(null, 'o1')).toBe(false);
+  });
+});
+
+describe('formatMiniCountdown (indicador minimizado, US A7)', () => {
+  it('con un día o más, solo días', () => {
+    expect(formatMiniCountdown({ days: 31, hours: 23, minutes: 5 })).toBe('31d');
+  });
+
+  it('con menos de un día, horas', () => {
+    expect(formatMiniCountdown({ days: 0, hours: 23, minutes: 59 })).toBe('23h');
+  });
+
+  it('en la última hora, minutos (nunca 0)', () => {
+    expect(formatMiniCountdown({ days: 0, hours: 0, minutes: 12 })).toBe('12m');
+    expect(formatMiniCountdown({ days: 0, hours: 0, minutes: 0 })).toBe('1m');
   });
 });
