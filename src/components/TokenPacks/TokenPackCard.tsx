@@ -7,6 +7,8 @@ interface TokenPackCardProps {
   pack: { base_tokens: number; bonus_tokens: number; price_cents: number };
   /** Porcentaje de promoción que aplica a quien mira (primera compra o código); 0 si ninguno. */
   promoPercent: number;
+  /** Descuento de la oferta vigente (FEAT-49); sin oferta, 0. Tacha el precio normal y muestra la etiqueta. */
+  offerPercent?: number;
   /** «Para probar», «Para una lotería»…; sin nombre no se muestra título. */
   name?: string;
   /** Lleva la etiqueta «El más elegido». */
@@ -21,9 +23,9 @@ interface TokenPackCardProps {
  * Tarjeta de un paquete de tokens, la misma en Beneficios y en Comprar tokens (FEAT-33): en grande
  * los tokens que se pagan, debajo el regalo y la promoción, el precio y cuántas fotos alcanza.
  */
-export const TokenPackCard = ({ pack, promoPercent, name, highlighted, priceNote, children }: TokenPackCardProps) => {
+export const TokenPackCard = ({ pack, promoPercent, offerPercent = 0, name, highlighted, priceNote, children }: TokenPackCardProps) => {
   const { t } = useTranslation();
-  const summary = packSummary(pack, promoPercent);
+  const summary = packSummary(pack, promoPercent, offerPercent);
 
   return (
     <li className={`token-pack ${highlighted ? 'token-pack--highlighted' : ''}`}>
@@ -39,7 +41,16 @@ export const TokenPackCard = ({ pack, promoPercent, name, highlighted, priceNote
           {summary.promoBonus > 0 && <strong>{t('tokenPacks.promo', { count: summary.promoBonus })}</strong>}
         </span>
       )}
-      <strong className="token-pack__price">
+      {summary.listPrice && (
+        <span className="token-pack__offer">
+          <s className="token-pack__was">
+            <span className="token-pack__sr-only">{t('tokenPacks.was')} </span>
+            {t('tokenPacks.price', { price: summary.listPrice })}
+          </s>
+          <span className="token-pack__offer-tag">{t('tokenPacks.offerTag', { percent: offerPercent })}</span>
+        </span>
+      )}
+      <strong className={`token-pack__price${summary.listPrice ? ' token-pack__price--offer' : ''}`}>
         {t('tokenPacks.price', { price: summary.price })}
         {priceNote && <span className="token-pack__price-note">{priceNote}</span>}
       </strong>

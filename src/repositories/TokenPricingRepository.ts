@@ -1,5 +1,6 @@
 import { supabase } from '../utils/supabaseClient';
 import { logger } from '../utils/logger';
+import { CurrentOfferRepository } from './CurrentOfferRepository';
 import type { TokenGift } from '../utils/tokenHistory';
 
 export interface TokenPack {
@@ -80,6 +81,20 @@ export class TokenPricingRepository {
       return null;
     }
     return data.price_per_token_cents;
+  }
+
+  /**
+   * Descuento de la oferta vigente (FEAT-49), o null si no hay o no se pudo leer. Solo para mostrarlo:
+   * el cobro lo calcula el servidor con la oferta vigente, así que sin este dato nadie paga de más.
+   */
+  static async getCurrentOfferPercent(): Promise<number | null> {
+    return (await CurrentOfferRepository.getCurrentOffer())?.discount_percent ?? null;
+  }
+
+  /** Igual, pero `undefined` si no se pudo leer (decisión 18: entonces se sigue al pago). */
+  static async checkCurrentOfferPercent(): Promise<number | null | undefined> {
+    const result = await CurrentOfferRepository.checkCurrentOffer();
+    return result.ok ? (result.offer?.discount_percent ?? null) : undefined;
   }
 
   /**

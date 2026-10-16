@@ -7,7 +7,6 @@ import { SeasonalRepository } from '../../repositories/SeasonalRepository';
 import { TokenPricingRepository } from '../../repositories/TokenPricingRepository';
 import type { FaqItem } from '../../utils/faqJsonLd';
 import {
-  catalogLayout,
   groupCatalog,
   localizedText,
   type CatalogLoteria,
@@ -106,11 +105,10 @@ export const SeasonalCatalog = () => {
     ...(linkTo && { linkLabel: t(`seasonal.catalog.faq.${id}.link`), linkTo }),
   }));
 
-  const renderLoteria = (loteria: CatalogLoteria, layout: 'feature' | 'grid') => (
+  const renderLoteria = (loteria: CatalogLoteria) => (
     <li key={loteria.id}>
       <ThemedCard
         loteria={loteria}
-        layout={layout}
         isOwned={ownedIds.includes(loteria.id)}
         usdRate={showUsd ? usdRate : null}
       />
@@ -155,19 +153,14 @@ export const SeasonalCatalog = () => {
     }
     return (
       <>
-        {groups.map(({ season, loterias }) => {
-          const layout = catalogLayout(loterias.length);
-          return (
-            <section key={season.id} className="themed-season" aria-labelledby={`season-${season.id}`}>
-              <h2 id={`season-${season.id}`} className="landing-section__title">
-                {localizedText(season.name_es, season.name_en, language)}
-              </h2>
-              <ul className={`themed-season__list themed-season__list--${layout}`}>
-                {loterias.map((loteria) => renderLoteria(loteria, layout))}
-              </ul>
-            </section>
-          );
-        })}
+        {groups.map(({ season, loterias }) => (
+          <section key={season.id} className="themed-season" aria-labelledby={`season-${season.id}`}>
+            <h2 id={`season-${season.id}`} className="landing-section__title">
+              {localizedText(season.name_es, season.name_en, language)}
+            </h2>
+            <ul className="themed-season__list">{loterias.map(renderLoteria)}</ul>
+          </section>
+        ))}
         {showUsd && <p className="seasonal-catalog__disclaimer">{t('buyTokens.disclaimerUsd')}</p>}
       </>
     );

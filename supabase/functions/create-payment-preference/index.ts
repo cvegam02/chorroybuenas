@@ -1,6 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { pickInitPoint, resolveAppUrl, resolveCheckoutMode } from '../_shared/checkout.ts';
 import { buildCorsHeaders, parseAllowedOrigins } from '../_shared/cors.ts';
+import { selectCurrentOffer, type OfferRow } from '../_shared/offers.ts';
 import { buildPreference, resolvePurchaseItem, type PackRow } from '../_shared/preference.ts';
 import { selectPromotion, type PromotionRow } from '../_shared/promotions.ts';
 import { parsePreferenceRequest } from '../_shared/validation.ts';
@@ -68,7 +69,18 @@ Deno.serve(async (req) => {
       pricePerTokenCents = data?.price_per_token_cents ?? null;
     }
 
-    const item = resolvePurchaseItem({ pack, customTokens, pricePerTokenCents });
+    // La oferta vigente al iniciar el pago fija su precio (contexto-negocio.md §8 y §9).
+    const now = new Date();
+    const { data: offers, error: offersError } = await admin
+      .from('offers')
+      .select('id, discount_percent, starts_at, ends_at, cancelled_at')
+      .is('cancelled_at', null)
+      .lte('starts_at', now.toISOString())
+      .gt('ends_at', now.toISOString());
+    if (offersError) throw new Error(`offers: ${offersError.message}`);
+    const offer = selectCurrentOffer((offers ?? []) as OfferRow[], now);
+
+    const item = resolvePurchaseItem({ pack, customTokens, pricePerTokenCents, offer });
     if (!item.ok) {
       console.error('create-payment-preference: compra inválida', item.message);
       return reply(400, { error: 'INVALID_AMOUNT', message: item.message });
@@ -90,7 +102,7 @@ Deno.serve(async (req) => {
       promoCode,
       isFirstPurchase: (purchases ?? []).length === 0,
       usedPromotionIds: (purchases ?? []).flatMap((p) => (p.promotion_ids ?? []) as string[]),
-      now: new Date(),
+      now,
     });
 
     const mode = resolveCheckoutMode(Deno.env.get('MP_USE_SANDBOX_CHECKOUT'), mpAccessToken);

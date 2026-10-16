@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   FaCog, FaArrowLeft, FaTicketAlt, FaShoppingCart,
   FaUsers, FaTags, FaBars, FaTimes, FaThLarge
@@ -8,6 +8,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { signupSalesPeriod } from '../../utils/adminUsers';
 import { AdminSummary } from './AdminSummary';
 import { AdminSales, type SalesPreset } from './AdminSales';
+import { AdminOfferEditor } from './AdminOfferEditor';
 import { AdminPricing } from './AdminPricing';
 import { AdminUsers, type UsersPreset } from './AdminUsers';
 import type { PeriodSelection } from './AdminPeriodPicker';
@@ -24,14 +25,22 @@ const TABS: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
   { id: 'temporada',   label: 'Temáticas',          icon: <FaTags /> },
 ];
 
+const isAdminTab = (value: unknown): value is AdminTab => TABS.some((tab) => tab.id === value);
+
 export const AdminPanel = () => {
   const navigate = useNavigate();
   const { user, isAdmin, isLoading } = useAuth();
   const location = useLocation();
-  // Quien vuelve de crear una lotería de temporada (A1.7a) regresa a su pestaña.
-  const [activeTab, setActiveTab] = useState<AdminTab>(() =>
-    (location.state as { tab?: string } | null)?.tab === 'temporada' ? 'temporada' : 'resumen',
-  );
+  // Una oferta (A1.2a, FEAT-49) se abre dentro de Precios y promos, con el menú a la vista.
+  const { offerId } = useParams<{ offerId?: string }>();
+  // Quien vuelve de una lotería de temporada (A1.7a) o de una oferta (A1.2a) regresa a su pestaña.
+  const requestedTab = (location.state as { tab?: string } | null)?.tab;
+  const [activeTab, setActiveTab] = useState<AdminTab>(() => (isAdminTab(requestedTab) ? requestedTab : 'resumen'));
+  const shownTab: AdminTab = offerId ? 'precios' : activeTab;
+
+  useEffect(() => {
+    if (isAdminTab(requestedTab)) setActiveTab(requestedTab);
+  }, [location.key, requestedTab]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   // Con qué se abre Usuarios desde otra pestaña: el correo de «Ver ficha del cliente» en Ventas
   // (FEAT-44, decisión 13) o el periodo de «Ver regalos» en el Resumen (FEAT-45, US A4).
@@ -40,6 +49,7 @@ export const AdminPanel = () => {
   const [salesPreset, setSalesPreset] = useState<SalesPreset | null>(null);
 
   const openTab = (tab: AdminTab, sales?: SalesPreset) => {
+    if (offerId) navigate('/admin', { state: { tab } });
     setUsersPreset(null);
     setSalesPreset(sales ?? null);
     setActiveTab(tab);
@@ -76,7 +86,7 @@ export const AdminPanel = () => {
 
   useEffect(() => {
     setSidebarOpen(false);
-  }, [activeTab]);
+  }, [shownTab, offerId]);
 
   if (isLoading) {
     return (
@@ -155,7 +165,7 @@ export const AdminPanel = () => {
               key={tab.id}
               type="button"
               role="menuitem"
-              className={`admin-panel__nav-item${activeTab === tab.id ? ' admin-panel__nav-item--active' : ''}`}
+              className={`admin-panel__nav-item${shownTab === tab.id ? ' admin-panel__nav-item--active' : ''}`}
               onClick={() => openTab(tab.id)}
             >
               <span className="admin-panel__nav-icon">{tab.icon}</span>
@@ -176,12 +186,13 @@ export const AdminPanel = () => {
 
       {/* Main content */}
       <main className="admin-panel__main">
-        <div className="admin-panel__content" key={activeTab}>
-          {activeTab === 'resumen'     && <AdminSummary onOpenTab={openTab} onOpenGifts={openGifts} />}
-          {activeTab === 'ventas'      && <AdminSales preset={salesPreset} onOpenClient={openClient} />}
-          {activeTab === 'usuarios'    && <AdminUsers preset={usersPreset} onOpenSales={openUserSales} />}
-          {activeTab === 'precios'     && <AdminPricing />}
-          {activeTab === 'temporada'   && <AdminSeasonal />}
+        <div className="admin-panel__content" key={offerId ? 'oferta' : activeTab}>
+          {offerId && <AdminOfferEditor offerId={offerId} />}
+          {!offerId && activeTab === 'resumen' && <AdminSummary onOpenTab={openTab} onOpenGifts={openGifts} />}
+          {!offerId && activeTab === 'ventas' && <AdminSales preset={salesPreset} onOpenClient={openClient} />}
+          {!offerId && activeTab === 'usuarios' && <AdminUsers preset={usersPreset} onOpenSales={openUserSales} />}
+          {!offerId && activeTab === 'precios' && <AdminPricing />}
+          {!offerId && activeTab === 'temporada' && <AdminSeasonal />}
         </div>
       </main>
     </div>

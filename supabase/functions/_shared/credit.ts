@@ -1,3 +1,5 @@
+import { isOfferPercent } from './offers.ts';
+
 /** Metadata que create-payment-preference guarda en la preferencia de Mercado Pago. */
 export interface PreferenceMetadata {
   /** Tipo de compra. Ausente en las preferencias de tokens: sin marca, se trata como tokens. */
@@ -12,6 +14,9 @@ export interface PreferenceMetadata {
   promotion_id?: string | null;
   /** Ausente en preferencias creadas antes de este cambio: se trata como 'first_purchase'. */
   promotion_type?: 'code' | 'first_purchase' | null;
+  /** Oferta vigente al iniciar el pago (FEAT-49); ausente en preferencias anteriores. */
+  offer_id?: string | null;
+  offer_percent?: number | null;
 }
 
 /** Parámetros de la RPC add_tokens_after_purchase. */
@@ -28,6 +33,8 @@ export interface CreditParams {
   p_payment_status: string;
   p_payment_metadata: Record<string, unknown>;
   p_promotion_ids: string[] | null;
+  p_offer_id: string | null;
+  p_offer_percent: number | null;
 }
 
 const isCount = (n: unknown): n is number => typeof n === 'number' && Number.isInteger(n) && n >= 0;
@@ -52,6 +59,13 @@ export function buildCreditParams(input: {
 
   if (![baseTokens, packBonus, promotionBonus, amountCents].every(isCount)) return null;
 
+  // La oferta viaja completa (cuál y su porcentaje) o no viaja.
+  const offerId = metadata.offer_id ?? null;
+  const offerPercent = metadata.offer_percent ?? null;
+  const noOffer = offerId === null && offerPercent === null;
+  if (!noOffer && !(typeof offerId === 'string' && offerId !== '' && isOfferPercent(offerPercent))) return null;
+
+  // Se compara contra el monto de ESTE pago (con la oferta del momento en que se inició), no contra el precio de hoy.
   const paid = payment.transaction_amount;
   if (typeof paid === 'number' && Math.round(paid * 100) < amountCents) return null;
 
@@ -78,5 +92,7 @@ export function buildCreditParams(input: {
     p_payment_status: input.status,
     p_payment_metadata: payment,
     p_promotion_ids: promotionIds,
+    p_offer_id: offerId,
+    p_offer_percent: offerPercent,
   };
 }

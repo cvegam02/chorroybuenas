@@ -24,6 +24,7 @@ import { RenameLoteriaDialog, DeleteLoteriaDialog } from './LoteriaDialogs';
 import { SeasonalRepository } from '../../repositories/SeasonalRepository';
 import './Dashboard.css';
 import { logger } from '../../utils/logger';
+import { OfferBannerSlot } from '../OfferBanner/OfferBannerSlot';
 
 export const Dashboard = () => {
   const { t } = useTranslation();
@@ -181,6 +182,7 @@ export const Dashboard = () => {
 
   return (
     <div className="dashboard">
+      <OfferBannerSlot placement="dashboard" />
       <AccountHeader
         fullName={fullName}
         email={email}

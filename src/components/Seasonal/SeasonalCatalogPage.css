@@ -173,8 +173,8 @@
 
 .themed-season__list {
   display: grid;
-  /* minmax(0, …): sin esto la tira de cartas de muestra ensancha la tarjeta más que la pantalla. */
-  grid-template-columns: minmax(0, 1fr);
+  /* Mismo tamaño de tarjeta en todas las temáticas, tengan una lotería o varias (FEAT-49, US A8). */
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
   gap: 24px;
   margin: 0;
   padding: 0;
@@ -183,10 +183,6 @@
 
 .themed-season__list > li {
   min-width: 0;
-}
-
-.themed-season__list--grid {
-  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
 }
 
 /* ¿Prefieres una con tus fotos? */

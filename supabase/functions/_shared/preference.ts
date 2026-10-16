@@ -1,4 +1,5 @@
 import type { PreferenceMetadata } from './credit.ts';
+import { applyOfferDiscount, type AppliedOffer } from './offers.ts';
 import { computePromotionBonus, type SelectedPromotion } from './promotions.ts';
 import { fail, type ParseResult } from './validation.ts';
 
@@ -11,33 +12,42 @@ export interface PackRow {
   price_cents: number;
 }
 
-/** Lo que se compra: tokens base, bono del pack y monto en centavos. */
+/** Lo que se compra: tokens base, bono del pack, monto en centavos (ya con la oferta) y la oferta aplicada. */
 export interface PurchaseItem {
   packId: string | null;
   baseTokens: number;
   bonusTokens: number;
   amountCents: number;
+  offer: AppliedOffer | null;
 }
 
 const isPositiveInt = (n: unknown): n is number => typeof n === 'number' && Number.isInteger(n) && n >= 1;
 
-/** Tokens y monto de la compra a partir del pack o de la cantidad libre. El precio nunca viene del cliente. */
+/**
+ * Tokens y monto de la compra a partir del pack o de la cantidad libre. El precio nunca viene del cliente.
+ * Con una oferta vigente se descuenta del precio del pack, o del precio por token en la cantidad libre
+ * (contexto-negocio.md §9); los tokens no cambian.
+ */
 export function resolvePurchaseItem(input: {
   pack: PackRow | null;
   customTokens: number | null;
   pricePerTokenCents: number | null;
+  offer?: AppliedOffer | null;
 }): ParseResult<PurchaseItem> {
+  const offer = input.offer ?? null;
+  const discounted = (cents: number) => (offer ? applyOfferDiscount(cents, offer.percent) : cents);
   let item: PurchaseItem;
   if (input.pack) {
     item = {
       packId: input.pack.id,
       baseTokens: input.pack.base_tokens,
       bonusTokens: input.pack.bonus_tokens,
-      amountCents: input.pack.price_cents,
+      amountCents: discounted(input.pack.price_cents),
+      offer,
     };
   } else if (input.customTokens !== null) {
-    const price = input.pricePerTokenCents ?? DEFAULT_PRICE_PER_TOKEN_CENTS;
-    item = { packId: null, baseTokens: input.customTokens, bonusTokens: 0, amountCents: input.customTokens * price };
+    const price = discounted(input.pricePerTokenCents ?? DEFAULT_PRICE_PER_TOKEN_CENTS);
+    item = { packId: null, baseTokens: input.customTokens, bonusTokens: 0, amountCents: input.customTokens * price, offer };
   } else {
     return fail('Debes proporcionar pack_id o custom_tokens.');
   }
@@ -71,6 +81,8 @@ export function buildPreference(input: {
     amount_cents: item.amountCents,
     promotion_id: appliedPromotion?.id ?? null,
     promotion_type: appliedPromotion?.type ?? null,
+    offer_id: item.offer?.id ?? null,
+    offer_percent: item.offer?.percent ?? null,
   };
 
   return {
@@ -80,7 +92,8 @@ export function buildPreference(input: {
         description:
           `Pack de ${item.baseTokens} tokens` +
           (item.bonusTokens > 0 ? ` + ${item.bonusTokens} de regalo` : '') +
-          (promotionBonus > 0 ? ` + ${promotionBonus} de promoción` : ''),
+          (promotionBonus > 0 ? ` + ${promotionBonus} de promoción` : '') +
+          (item.offer ? ` · ${item.offer.percent}% de descuento` : ''),
         quantity: 1,
         unit_price: item.amountCents / 100, // MP espera pesos, no centavos
         currency_id: 'MXN',

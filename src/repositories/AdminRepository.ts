@@ -31,6 +31,9 @@ export interface AdminSaleRow {
   created_at: string;
   email: string | null;
   full_name: string | null;
+  /** La oferta que tuvo una compra de tokens (FEAT-49) y su descuento; nulos sin oferta. */
+  offer_name: string | null;
+  offer_percent: number | null;
 }
 
 /** El pago de Mercado Pago de una venta, solo con lo que muestra el detalle (US A3). Vacío si no se guardó. */

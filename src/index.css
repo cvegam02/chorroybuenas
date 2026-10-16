@@ -118,6 +118,9 @@
 
 html {
   overflow-x: hidden;
+  /* clip corta igual lo que se sale a los lados, pero sin volverse contenedor de scroll: así el encabezado
+     (position: sticky) sí se queda arriba (FEAT-49, US A7). Los navegadores sin clip se quedan con hidden. */
+  overflow-x: clip;
   /* Reserva espacio para scrollbar: márgenes izquierdo y derecho iguales */
   scrollbar-gutter: stable;
 }
@@ -130,6 +133,7 @@ body {
   color: var(--color-text-main);
   font-family: var(--font-body);
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 #root {

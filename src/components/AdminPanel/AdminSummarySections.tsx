@@ -31,6 +31,8 @@ export interface SummaryData {
   usdPerMxn: number;
   /** Costo de IA por imagen guardado en Precios y promos (FEAT-47). */
   aiCostPerImageUsd: number;
+  /** Compras de tokens aprobadas con oferta en el periodo (FEAT-49, decisión 16); nulo si no se pudo cargar. */
+  offerSales: { sales: number; collectedCents: number } | null;
 }
 
 const formatPesos = (cents: number) =>
@@ -131,7 +133,10 @@ export const SummarySections = ({ data, loading, onOpenTab }: SummarySectionsPro
           label="Ingresos"
           value={value(money ? formatPesos(money.revenueCents) : '')}
           detail={t
-            ? `Tokens ${formatPesos(t.tokensRevenueCents)} · Temáticas ${formatPesos(t.seasonalRevenueCents)}`
+            ? `Tokens ${formatPesos(t.tokensRevenueCents)} · Temáticas ${formatPesos(t.seasonalRevenueCents)}` +
+              (ready?.offerSales?.sales
+                ? ` · Con oferta ${formatPesos(ready.offerSales.collectedCents)} (${plural(ready.offerSales.sales, 'venta', 'ventas')})`
+                : '')
             : 'Tokens y temáticas'}
           change={change(money?.revenueCents, previousMoney?.revenueCents)}
           onOpen={open('ventas', { status: 'approved' })}

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { AdminRepository, type AdminSaleDetail as SaleDetail, type AdminSaleRow } from '../../repositories/AdminRepository';
-import { saleDateTime, saleItemLabel, saleReceived, saleStatus } from '../../utils/adminSales';
+import { saleDateTime, saleItemLabel, saleOfferLabel, saleReceived, saleStatus } from '../../utils/adminSales';
 import { paymentMethodLabel, paymentResultLabel } from '../../utils/mercadoPagoLabels';
 import { CopyButton } from './CopyButton';
 
@@ -74,6 +74,9 @@ export const AdminSaleDetail = ({ sale, onClose, onOpenClient }: AdminSaleDetail
               {seasonal ? 'Temática' : 'Tokens'}
             </span>
             <h3 className="admin-sale-detail__title">{saleItemLabel(sale)}</h3>
+            {saleOfferLabel(sale) && (
+              <span className="admin-sales__tag admin-sales__tag--offer">Con oferta: {saleOfferLabel(sale)}</span>
+            )}
             <span className="admin-sales__muted">
               {when.date} · {when.time}
             </span>
