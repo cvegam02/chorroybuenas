@@ -2,8 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   SEASONAL_CARD_MAX_WIDTH,
   SEASONAL_CARD_UPLOAD_MAX_BYTES,
-  SEASONAL_EXPECTED_CARDS,
-  cardCountStatus,
   hasEnoughCards,
   isCardRatio,
   placeCardImage,
@@ -72,20 +70,7 @@ describe('acomodo de la imagen dentro de la carta (FEAT-23, decisión 2)', () =>
   });
 });
 
-describe('cuántas cartas hay frente a las 54 esperadas (FEAT-23, decisión 3)', () => {
-  it('avisa cuántas faltan', () => {
-    expect(cardCountStatus(48)).toEqual({ kind: 'missing', difference: 6 });
-    expect(cardCountStatus(0)).toEqual({ kind: 'missing', difference: SEASONAL_EXPECTED_CARDS });
-  });
-
-  it('avisa cuántas sobran', () => {
-    expect(cardCountStatus(56)).toEqual({ kind: 'extra', difference: 2 });
-  });
-
-  it('con 54 no hay aviso', () => {
-    expect(cardCountStatus(54)).toEqual({ kind: 'exact', difference: 0 });
-  });
-
+describe('mínimo de cartas', () => {
   it('no bloquea si llegan al mínimo: 24 en Clásico, 9 en Kids (FEAT-24, US A5)', () => {
     expect(hasEnoughCards(48, 16)).toBe(true);
     expect(hasEnoughCards(24, 16)).toBe(true);

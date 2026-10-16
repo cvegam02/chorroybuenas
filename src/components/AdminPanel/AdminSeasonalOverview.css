@@ -1,0 +1,314 @@
+/* Pestaña Temáticas (FEAT-48, US A1). Solo colores de la paleta. */
+
+.admin-themes__new {
+  margin-left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-themes__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-themes__filters-label {
+  margin-right: 4px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.admin-themes__filters .admin-sales__chip small {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.admin-themes__manage {
+  margin-left: auto;
+}
+
+/* Panel «Administrar temáticas» */
+
+.admin-themes__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-primary-lighter);
+  border-radius: var(--radius-md);
+}
+
+.admin-themes__panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.admin-themes__panel-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.admin-themes__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-themes__list > li {
+  border-top: 1px solid var(--color-border);
+}
+
+.admin-themes__item--dragging {
+  background: var(--color-bg-subtle);
+}
+
+.admin-themes__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.admin-themes__row--editing {
+  align-items: flex-end;
+}
+
+.admin-themes__handle {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: inherit;
+  font-weight: 700;
+  color: var(--color-border-dark);
+  cursor: grab;
+  touch-action: none;
+}
+
+.admin-themes__handle:hover,
+.admin-themes__handle:focus-visible {
+  color: var(--color-text-muted);
+  background: var(--color-bg-subtle);
+}
+
+.admin-themes__item--dragging .admin-themes__handle {
+  cursor: grabbing;
+}
+
+.admin-themes__name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.admin-themes__row-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-themes__rename-field {
+  display: flex;
+  flex: 1 1 200px;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.admin-themes__rename-field input,
+.admin-themes__add-field {
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--color-text-main);
+}
+
+.admin-themes__add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+.admin-themes__add-field {
+  flex: 1 1 220px;
+}
+
+.admin-themes__add-btn {
+  margin-left: 0;
+}
+
+/* Tarjetas de loterías */
+
+.admin-themes__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 18px;
+}
+
+.admin-themes__card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-themes__cover {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: var(--color-bg-tertiary);
+}
+
+.admin-themes__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-themes__no-cover {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.admin-themes__badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--color-text-main);
+}
+
+.admin-themes__badge--published {
+  background: var(--color-secondary-light);
+}
+
+.admin-themes__badge--scheduled {
+  background: var(--color-accent-light);
+}
+
+.admin-themes__badge--expired {
+  background: var(--color-bg-surface);
+  border-color: var(--color-border-dark);
+  color: var(--color-text-muted);
+}
+
+.admin-themes__badge--ready {
+  background: var(--color-bg-tertiary);
+}
+
+.admin-themes__badge--incomplete {
+  background: var(--color-bg-surface);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.admin-themes__card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+}
+
+.admin-themes__tag {
+  align-self: flex-start;
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: var(--color-season-light);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-season);
+}
+
+.admin-themes__card-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  overflow-wrap: anywhere;
+}
+
+.admin-themes__note {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.admin-themes__note--danger {
+  color: var(--color-danger);
+}
+
+.admin-themes__card-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
+}
+
+.admin-themes__price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.admin-themes__card-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 16px;
+}
+
+.admin-themes__edit {
+  flex: 1;
+  margin-left: 0;
+}
+
+.admin-themes__menu {
+  position: relative;
+}
+
+.admin-themes__dropdown {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+
+.admin-themes__dropdown .loteria-menu__item:disabled {
+  cursor: not-allowed;
+}

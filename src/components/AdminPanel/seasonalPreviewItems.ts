@@ -39,3 +39,32 @@ export async function uploadPendingPreviews(
   }
   return uploaded;
 }
+
+export interface SavedPreviews {
+  cover: PreviewItem | null;
+  samples: PreviewItem[];
+}
+
+/**
+ * Sube las imágenes nuevas, guarda la portada y el orden de las muestras y borra las que ya no se usan
+ * (`previousPaths`). Devuelve lo que quedó, con rutas; `ok` es falso si algo no se pudo subir o guardar.
+ */
+export async function savePreviewSelection(
+  loteriaId: string,
+  cover: PreviewItem | null,
+  samples: readonly PreviewItem[],
+  previousPaths: readonly (string | null)[],
+): Promise<SavedPreviews & { ok: boolean }> {
+  const [uploadedCover = null] = cover ? await uploadPendingPreviews(loteriaId, [cover]) : [];
+  const uploadedSamples = await uploadPendingPreviews(loteriaId, samples);
+  const result = { cover: uploadedCover, samples: uploadedSamples };
+  if ([uploadedCover, ...uploadedSamples].some((item) => item !== null && item.path === null)) return { ...result, ok: false };
+
+  const coverPath = uploadedCover?.path ?? null;
+  const samplePaths = uploadedSamples.flatMap((item) => (item.path ? [item.path] : []));
+  if (!(await SeasonalRepository.savePreviews(loteriaId, coverPath, samplePaths))) return { ...result, ok: false };
+
+  const kept = new Set([coverPath, ...samplePaths]);
+  await SeasonalRepository.removePreviews(previousPaths.filter((path): path is string => path !== null && !kept.has(path)));
+  return { ...result, ok: true };
+}

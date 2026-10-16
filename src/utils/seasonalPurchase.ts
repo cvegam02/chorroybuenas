@@ -16,23 +16,3 @@ export function readSeasonalReturn(params: URLSearchParams): SeasonalReturn | nu
   if (success || params.get('pending') === '1') return { kind: 'pending', paymentId };
   return null;
 }
-
-/** Ventas de una lotería: las aprobadas, y todos los pagos registrados (cualquiera impide borrarla). */
-export interface SeasonalSales {
-  approved: number;
-  total: number;
-}
-
-export function summarizeSales(
-  purchases: readonly { loteria_id: string; status: string }[],
-): Map<string, SeasonalSales> {
-  const sales = new Map<string, SeasonalSales>();
-  for (const purchase of purchases) {
-    const current = sales.get(purchase.loteria_id) ?? { approved: 0, total: 0 };
-    sales.set(purchase.loteria_id, {
-      approved: current.approved + (purchase.status === 'approved' ? 1 : 0),
-      total: current.total + 1,
-    });
-  }
-  return sales;
-}
