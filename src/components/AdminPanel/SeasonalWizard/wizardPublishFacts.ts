@@ -55,7 +55,6 @@ export function publishFacts({ form, record, mode, cardsLoaded, boardsGenerated,
     board_count: boardCount,
     price_cents: priceCents === null || Number.isNaN(priceCents) ? null : priceCents,
     cover_path: record?.cover_path ?? null,
-    sample_paths: record?.sample_paths ?? [],
   };
 
   return { checks, preview };

@@ -20,12 +20,10 @@ export type ThemedCardLoteria = Pick<
   | 'board_count'
   | 'price_cents'
   | 'cover_path'
-  | 'sample_paths'
 >;
 
 interface ThemedCardProps {
   loteria: ThemedCardLoteria;
-  layout: 'feature' | 'grid';
   isOwned?: boolean;
   /** Tipo de cambio para la referencia en dólares; null para no mostrarla. */
   usdRate?: number | null;
@@ -33,8 +31,8 @@ interface ThemedCardProps {
   linked?: boolean;
 }
 
-/** Tarjeta de una lotería temática (P5). La vista previa del asistente usa esta misma (FEAT-48, decisión 14). */
-export const ThemedCard = ({ loteria, layout, isOwned = false, usdRate = null, linked = true }: ThemedCardProps) => {
+/** Tarjeta de una lotería temática (P5), del mismo tamaño en todas las temáticas (FEAT-49, US A8). La vista previa del asistente usa esta misma (FEAT-48, decisión 14). */
+export const ThemedCard = ({ loteria, isOwned = false, usdRate = null, linked = true }: ThemedCardProps) => {
   const { t, i18n } = useTranslation();
   const name = localizedText(loteria.name_es, loteria.name_en, i18n.language);
   const description = localizedText(loteria.description_es, loteria.description_en, i18n.language);
@@ -59,7 +57,7 @@ export const ThemedCard = ({ loteria, layout, isOwned = false, usdRate = null, l
   };
 
   return (
-    <article className={`themed-card themed-card--${layout}`}>
+    <article className="themed-card">
       <div className="themed-card__cover-wrap">
         {loteria.cover_path ? (
           <img
@@ -83,23 +81,7 @@ export const ThemedCard = ({ loteria, layout, isOwned = false, usdRate = null, l
             <li className="themed-card__tag">{t('seasonal.boards', { count: loteria.board_count })}</li>
           )}
         </ul>
-        {description && <p className="themed-card__description">{description}</p>}
-        {layout === 'feature' && loteria.sample_paths.length > 0 && (
-          <ul className="themed-card__samples" tabIndex={0} aria-label={t('seasonal.catalog.samplesLabel', { name })}>
-            {loteria.sample_paths.map((path, index) => (
-              <li key={path}>
-                <img
-                  className="themed-card__sample"
-                  src={SeasonalRepository.previewUrl(path)}
-                  alt={t('seasonal.catalog.sampleAlt', { number: index + 1, name })}
-                  width={84}
-                  height={126}
-                  loading="lazy"
-                />
-              </li>
-            ))}
-          </ul>
-        )}
+        <p className="themed-card__description">{description}</p>
         <div className="themed-card__footer">
           {renderPrice()}
           {linked ? (

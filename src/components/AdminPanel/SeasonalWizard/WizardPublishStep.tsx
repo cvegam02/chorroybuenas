@@ -88,7 +88,7 @@ export const WizardPublishStep = ({ form, errors, setField, checks, onGoToStep, 
 
       <div className="seasonal-wizard__preview">
         <span className="seasonal-wizard__muted seasonal-wizard__preview-title">Así se verá en el catálogo</span>
-        <ThemedCard loteria={preview} layout="grid" linked={false} />
+        <ThemedCard loteria={preview} linked={false} />
       </div>
     </div>
   </section>
