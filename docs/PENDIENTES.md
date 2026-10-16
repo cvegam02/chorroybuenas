@@ -66,6 +66,13 @@ Cada uno entra por `dev`, con tests primero.
 ### 5. Limitación conocida de los códigos promocionales
 
 - Si un usuario abre dos checkouts con el mismo código antes de pagar y paga los dos, ambos reciben el bono: el uso se registra al acreditar, no al crear la preferencia. Arreglarlo implica reservar el código al crear la preferencia.
+### 6. Enlace propio en los correos de cuenta (opcional)
+
+- El botón de «confirmar cuenta» y el de «recuperar contraseña» llevan a una dirección `…supabase.co`. Para que apunten a `chorroybuenas.com.mx` hay que cambiar las plantillas de correo en los dos proyectos de Supabase y agregar una página al sitio que reciba el enlace. Toca el inicio de sesión: la ventana de contraseña nueva depende hoy de una señal que con el enlace propio podría no llegar sola. Apartado de la fase 3 por Carlos el 2026-10-13 (`docs/fases/fase-3.md`, decisión 9).
+### 7. «Mi primera lotería» se puede crear dos veces
+
+- Al entrar por primera vez, el sitio revisa en el navegador si la cuenta ya tiene alguna lotería y, si no, crea «Mi primera lotería» (`SetRepository.getOrCreateDefaultSet`). El candado que evita repetirlo vive en la memoria de cada página y la base no lo impide: si dos páginas lo hacen a la vez (lo más probable, la pestaña del registro y la que abre el botón del correo de confirmación), la cuenta queda con dos loterías vacías. Visto en dev el 2026-10-07 y el 2026-10-13, con 0.05 y 0.17 segundos entre una y otra. No pierde datos. El arreglo es que la base cree la primera lotería una sola vez; toca una migración. Carlos decidió no arreglarlo por ahora (2026-10-13).
+- Relacionado, y no es un error: con una sola lotería vacía, Mi cuenta muestra la bienvenida «Aún no tienes loterías» en vez de la lista (`isNewAccount`).
 
 ## Limpieza de configuración
 

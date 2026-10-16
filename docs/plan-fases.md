@@ -47,12 +47,12 @@ De las seis reglas que Carlos definió el 2026-10-06 y que el sitio todavía no 
 
 ## Fase 3 — Avisos por correo
 
-**Estado: 🔲 por definir al cerrar la fase 2**
+**Estado: 🟡 en curso (2026-10-13)** · Seguimiento: [`fases/fase-3.md`](fases/fase-3.md)
 
 - **Por qué va después:** necesita los eventos de la fase 2 (el regalo registrado) y una pieza nueva: el envío de correos propios del sitio, que hoy no existe (solo salen los correos de cuenta, que manda el servicio de inicio de sesión).
-- **Alcance previsto:** correo al usuario cuando un pago pendiente (efectivo o transferencia) se acredita, y cuando un administrador le regala tokens.
-- **Por decidir al abrirla:** con qué servicio se envían los correos, y el texto de cada uno.
-- **Definición de «hecho»:** al regalar tokens a una cuenta de prueba, llega el correo; al confirmarse un pago pendiente de prueba, llega el correo.
+- **Alcance:** correo al usuario cuando un pago pendiente (efectivo o transferencia) se acredita, y cuando un administrador le regala tokens; alerta al administrador cuando un pago se cobra sin entregar lo comprado; y los dos correos de cuenta, que pasan a salir a nombre del sitio.
+- **Decidido el 2026-10-13:** los correos se envían con Resend, que manda también los dos correos de cuenta para que no salgan a nombre de Supabase.
+- **Definición de «hecho»:** al regalar tokens a una cuenta de prueba, llega el correo; al confirmarse un pago pendiente de prueba, llega el correo; ante un pago cobrado sin entregar, llega la alerta; y los correos de cuenta llegan a nombre del sitio.
 
 ## Apartado — Descuento de tokens por reembolso
 

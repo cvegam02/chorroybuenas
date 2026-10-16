@@ -9,6 +9,7 @@ import {
 import type { SaleKind, SalesTotals, SaleStatusFilter } from '../utils/adminSales';
 import type { UserFilter, UserSort } from '../utils/adminUsers';
 import type { UserActivityEvent } from '../utils/userActivity';
+import { requestGiftNotice } from '../services/giftNotice';
 
 /** Renglón de la pestaña Ventas (FEAT-44): una compra de tokens o de una lotería temática. */
 export interface AdminSaleRow {
@@ -376,6 +377,7 @@ export class AdminRepository {
 
   /**
    * Regalar tokens a un usuario (admin). El regalo queda registrado con el motivo, si se da.
+   * Después pide el correo de aviso sin esperarlo: si no sale, el regalo ya está hecho.
    * Retorna el nuevo balance o null si falla.
    */
   static async giftTokens(userId: string, amount: number, reason?: string): Promise<number | null> {
@@ -386,6 +388,7 @@ export class AdminRepository {
     });
 
     if (error) return null;
+    void requestGiftNotice(userId, amount);
     return data as number;
   }
 
