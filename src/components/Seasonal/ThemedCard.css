@@ -31,10 +31,18 @@
   padding: 20px;
 }
 
+/* Siempre dos renglones de alto; el nombre largo se corta con «…» (completo en P6) (FEAT-49, US A8). */
 .themed-card__name {
+  display: -webkit-box;
+  height: 2.5em;
   margin: 0;
+  overflow: hidden;
   color: var(--color-text-main);
   font-size: 22px;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .themed-card__tags {
@@ -60,33 +68,19 @@
   color: var(--color-text-main);
 }
 
+/* Siempre tres renglones de alto, para que todas las tarjetas midan igual: la larga se corta con «…»
+   (completa en P6) y la corta deja el espacio (FEAT-49, US A8). */
 .themed-card__description {
+  display: -webkit-box;
+  height: 4.5em;
   margin: 0;
+  overflow: hidden;
   color: var(--color-text-muted);
   font-size: 16px;
   line-height: 1.5;
-}
-
-.themed-card__samples {
-  display: flex;
-  gap: 8px;
-  margin: 0;
-  padding: 4px 2px 8px;
-  overflow-x: auto;
-  list-style: none;
-}
-
-.themed-card__samples li {
-  flex: 0 0 auto;
-}
-
-.themed-card__sample {
-  display: block;
-  width: 84px;
-  height: 126px;
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-sm);
-  object-fit: cover;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
 }
 
 .themed-card__footer {
@@ -136,32 +130,7 @@
   color: var(--color-text-inverted);
 }
 
-.themed-card__button:focus-visible,
-.themed-card__samples:focus-visible {
+.themed-card__button:focus-visible {
   outline: 3px solid var(--color-primary-dark);
   outline-offset: 3px;
-}
-
-@media (min-width: 769px) {
-  /* Tarjeta grande: portada a la izquierda, datos a la derecha. */
-  .themed-card--feature {
-    flex-flow: row wrap;
-  }
-
-  .themed-card--feature .themed-card__cover-wrap,
-  .themed-card--feature .themed-card__body {
-    flex: 1 1 420px;
-  }
-
-  .themed-card--feature .themed-card__body {
-    padding: 32px;
-  }
-
-  .themed-card--feature .themed-card__name {
-    font-size: 32px;
-  }
-
-  .themed-card--feature .themed-card__price-amount {
-    font-size: 30px;
-  }
 }

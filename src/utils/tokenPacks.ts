@@ -3,6 +3,7 @@
  * (FEAT-33). Solo lo que se lee: el cobro y los bonos los decide el servidor.
  */
 import { formatFromPrice } from './landingPrices';
+import { offerDiscountCents } from './offerPrice';
 import { MAX_CUSTOM_TOKENS, MIN_CUSTOM_TOKENS } from './purchaseRules';
 
 interface PackAmounts {
@@ -16,7 +17,11 @@ export interface PackSummary {
   promoBonus: number;
   /** Fotos que se pueden transformar: tokens + regalo + promoción. */
   totalTokens: number;
+  /** Lo que se paga: con la oferta, si hay. */
   price: string;
+  priceCents: number;
+  /** El precio normal, para tacharlo durante una oferta (FEAT-49); null sin oferta. */
+  listPrice: string | null;
   pricePerPhoto: string;
 }
 
@@ -25,15 +30,21 @@ export function promoBonusTokens(baseTokens: number, promoPercent: number): numb
   return promoPercent > 0 ? Math.floor(baseTokens * (promoPercent / 100)) : 0;
 }
 
-/** Lo que se lee en la tarjeta de un paquete. La promoción suma tokens; nunca cambia el precio. */
-export function packSummary(pack: PackAmounts, promoPercent = 0): PackSummary {
+/**
+ * Lo que se lee en la tarjeta de un paquete. La promoción suma tokens y nunca cambia el precio; la oferta
+ * (FEAT-49) baja el precio y no cambia los tokens. Las dos se suman.
+ */
+export function packSummary(pack: PackAmounts, promoPercent = 0, offerPercent = 0): PackSummary {
   const promoBonus = promoBonusTokens(pack.base_tokens, promoPercent);
   const totalTokens = pack.base_tokens + pack.bonus_tokens + promoBonus;
+  const priceCents = offerPercent > 0 ? offerDiscountCents(pack.price_cents, offerPercent) : pack.price_cents;
   return {
     promoBonus,
     totalTokens,
-    price: formatFromPrice(pack.price_cents) ?? '',
-    pricePerPhoto: formatFromPrice(Math.round(pack.price_cents / totalTokens)) ?? '',
+    price: formatFromPrice(priceCents) ?? '',
+    priceCents,
+    listPrice: offerPercent > 0 ? (formatFromPrice(pack.price_cents) ?? '') : null,
+    pricePerPhoto: formatFromPrice(Math.round(priceCents / totalTokens)) ?? '',
   };
 }
 

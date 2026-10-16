@@ -47,6 +47,12 @@ export function saleItemLabel(sale: {
   return `${sale.base_tokens ?? 0} tokens`;
 }
 
+/** La oferta con la que se compró: «Buen Fin 2026 −25%» (FEAT-49, decisión 16); null sin oferta. */
+export function saleOfferLabel(sale: { offer_name: string | null; offer_percent: number | null }): string | null {
+  if (sale.offer_percent == null) return null;
+  return `${sale.offer_name || 'Oferta'} −${sale.offer_percent}%`;
+}
+
 /** Qué recibió el cliente: «25 tokens (20 + 5 de regalo)», el acceso a la lotería, o nada todavía. */
 export function saleReceived(sale: {
   kind: SaleKind;

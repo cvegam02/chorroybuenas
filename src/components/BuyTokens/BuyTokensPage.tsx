@@ -21,6 +21,7 @@ import { logger } from '../../utils/logger';
 import { PACK_NAME_KEYS } from '../../utils/tokenPackNames';
 import { clampCustomTokens, highlightedPackIndex, stepCustomTokens } from '../../utils/tokenPacks';
 import { roundUsdFriendly } from '../../utils/usdReference';
+import { customOfferPriceCents, formatMxn, offerChangeNotice, offerDiscountCents } from '../../utils/offerPrice';
 
 /** Al entrar desde aquí, con Google o con correo, se regresa aquí (FEAT-33, decisión de Carlos). */
 const RETURN_PATH = '/comprar-tokens';
@@ -36,6 +37,10 @@ export const BuyTokensPage: React.FC = () => {
   const [packs, setPacks] = useState<TokenPack[] | null>(null);
   const [usdRate, setUsdRate] = useState<number | null>(null);
   const [pricePerTokenCents, setPricePerTokenCents] = useState<number | null>(null);
+  // Descuento de la oferta vigente (FEAT-49, US A3); null sin oferta.
+  const [offerPercent, setOfferPercent] = useState<number | null>(null);
+  // Aviso de que la oferta cambió con la pantalla abierta (decisión 18), junto al botón que se tocó.
+  const [offerNotice, setOfferNotice] = useState<{ kind: 'ended' | 'changed'; at: 'packs' | 'custom' } | null>(null);
   const [reloadCount, setReloadCount] = useState(0);
   const [isFirstPurchase, setIsFirstPurchase] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
@@ -103,17 +108,19 @@ export const BuyTokensPage: React.FC = () => {
     let cancelled = false;
 
     async function load() {
-      const [packsData, rate, pricePerToken, promos] = await Promise.all([
+      const [packsData, rate, pricePerToken, promos, offer] = await Promise.all([
         TokenPricingRepository.getPacksOrNull(),
         showUsd ? TokenPricingRepository.getExchangeRateMxnUsd() : Promise.resolve(null),
         TokenPricingRepository.getPricingOrNull('MXN'),
         TokenPricingRepository.getPromoSummary(),
+        TokenPricingRepository.getCurrentOfferPercent(),
       ]);
       if (cancelled) return;
       setPacks(packsData);
       setUsdRate(rate ?? null);
       setPricePerTokenCents(pricePerToken);
       setPromoSummary(promos);
+      setOfferPercent(offer);
 
       if (user?.id) {
         const count = await TokenPricingRepository.getPurchaseCount(user.id);
@@ -130,9 +137,9 @@ export const BuyTokensPage: React.FC = () => {
     };
   }, [user?.id, showUsd, reloadCount]);
 
-  const formatPriceMxn = (cents: number): string => {
-    return `$${(cents / 100).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} MXN`;
-  };
+  // Con centavos solo si los hay: con oferta, el token puede costar $1.50 (FEAT-49).
+  const formatPriceMxn = formatMxn;
+  const withOffer = (cents: number) => (offerPercent ? offerDiscountCents(cents, offerPercent) : cents);
 
   const formatPriceUsdRef = (cents: number): string => {
     if (usdRate == null) return '';
@@ -141,8 +148,25 @@ export const BuyTokensPage: React.FC = () => {
     return ` ($${friendly.toFixed(2)} USD)`;
   };
 
+  /** Antes de ir al pago, revisa que la oferta que se muestra siga vigente; si no, actualiza y avisa. */
+  const offerStillShown = async (at: 'packs' | 'custom'): Promise<boolean> => {
+    const current = await TokenPricingRepository.checkCurrentOfferPercent();
+    const change = offerChangeNotice(offerPercent, current);
+    if (!change) {
+      setOfferNotice(null);
+      return true;
+    }
+    setOfferPercent(current ?? null);
+    setOfferNotice({ kind: change, at });
+    return false;
+  };
+
   const handleBuy = async (pack: TokenPack) => {
     setBuyLoading(true);
+    if (!(await offerStillShown('packs'))) {
+      setBuyLoading(false);
+      return;
+    }
     try {
       const result = await createPaymentPreference({
         packId: pack.id,
@@ -173,6 +197,10 @@ export const BuyTokensPage: React.FC = () => {
   const handleBuyCustom = async () => {
     if (!customValid) return;
     setBuyLoading(true);
+    if (!(await offerStillShown('custom'))) {
+      setBuyLoading(false);
+      return;
+    }
     try {
       const result = await createPaymentPreference({
         customTokens: customTokensClamped,
@@ -201,7 +229,7 @@ export const BuyTokensPage: React.FC = () => {
   };
 
   const customTokensClamped = clampCustomTokens(customTokens);
-  const customPriceCents = customTokensClamped * (pricePerTokenCents ?? 0);
+  const customPriceCents = customOfferPriceCents(customTokensClamped, pricePerTokenCents ?? 0, offerPercent);
   const customValid = customTokens >= CUSTOM_MIN && customTokens <= CUSTOM_MAX;
 
   const promoCodeTrimmed = promoCode.trim().toUpperCase();
@@ -333,15 +361,21 @@ export const BuyTokensPage: React.FC = () => {
           <h2 id="buy-tokens-packs-title" className="buy-tokens__section-title">
             {t('buyTokens.choosePack')}
           </h2>
+          {offerNotice?.at === 'packs' && (
+            <p className="buy-tokens__offer-notice" role="status">
+              {t(offerNotice.kind === 'ended' ? 'buyTokens.offerEnded' : 'buyTokens.offerChanged')}
+            </p>
+          )}
           <TokenPackList>
             {packList.map((pack, index) => (
               <TokenPackCard
                 key={pack.id}
                 pack={pack}
                 promoPercent={appliedPromoPercent}
+                offerPercent={offerPercent ?? 0}
                 name={showPackNames ? t(PACK_NAME_KEYS[index]) : undefined}
                 highlighted={index === highlightedPack}
-                priceNote={showUsd ? formatPriceUsdRef(pack.price_cents) : undefined}
+                priceNote={showUsd ? formatPriceUsdRef(withOffer(pack.price_cents)) : undefined}
               >
                 {isLoggedIn ? (
                   <button
@@ -369,9 +403,18 @@ export const BuyTokensPage: React.FC = () => {
             <div>
               <h2 className="buy-tokens__custom-title">{t('buyTokens.customTitle')}</h2>
               <p className="buy-tokens__custom-range">
-                {t('buyTokens.customRange', { min: CUSTOM_MIN, max: CUSTOM_MAX, price: formatPriceMxn(pricePerTokenCents) })}
-                {showUsd && <span className="buy-tokens__usd">{formatPriceUsdRef(pricePerTokenCents)}</span>}
+                {t('buyTokens.customRange', { min: CUSTOM_MIN, max: CUSTOM_MAX, price: formatPriceMxn(withOffer(pricePerTokenCents)) })}
+                {showUsd && <span className="buy-tokens__usd">{formatPriceUsdRef(withOffer(pricePerTokenCents))}</span>}
               </p>
+              {offerPercent && (
+                <p className="buy-tokens__custom-offer">
+                  <s className="token-pack__was">
+                    <span className="token-pack__sr-only">{t('tokenPacks.was')} </span>
+                    {formatPriceMxn(pricePerTokenCents)}
+                  </s>
+                  <span className="token-pack__offer-tag">{t('tokenPacks.offerTag', { percent: offerPercent })}</span>
+                </p>
+              )}
             </div>
             <div className="buy-tokens__stepper">
               <button
@@ -428,6 +471,11 @@ export const BuyTokensPage: React.FC = () => {
                 {codePromoPercent > 0
                   ? t('buyTokens.promoCodeBonus', { percent: codePromoPercent })
                   : t('buyTokens.customBonus', { percent: appliedPromoPercent })}
+              </p>
+            )}
+            {offerNotice?.at === 'custom' && (
+              <p className="buy-tokens__offer-notice" role="status">
+                {t(offerNotice.kind === 'ended' ? 'buyTokens.offerEnded' : 'buyTokens.offerChanged')}
               </p>
             )}
             <div className="buy-tokens__custom-footer">

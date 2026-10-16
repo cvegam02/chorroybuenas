@@ -107,8 +107,9 @@ Mercado Pago cobra también las loterías temáticas; sus reglas están en §18 
 - **Cantidad libre:** se puede comprar cualquier cantidad entre el mínimo y 500 tokens, a $2.00 MXN por token, sin tokens de regalo. _(confirmado el 2026-10-06)_
 - **Mínimo de compra: 5 tokens ($10.00 MXN). DEFINIDO** (2026-10-06).
 - El precio siempre lo calcula el servidor con los datos de la base. **DEFINIDO** (2026-10-06)
+- Durante una oferta (§9), el precio que calcula el servidor es el de la oferta vigente en el momento de iniciar el pago. Vale el precio del momento en que se inició el pago: si la oferta termina mientras el pago está pendiente (efectivo, transferencia), se respeta el precio con descuento. **DEFINIDO** (2026-10-15, FEAT-49)
 - Un pago aprobado acredita los tokens **una sola vez**, sin importar cuántas veces lo notifique Mercado Pago. **DEFINIDO** (2026-10-06)
-- No se acredita si el monto pagado es menor al esperado. **DEFINIDO** (2026-10-06)
+- No se acredita si el monto pagado es menor al esperado. **DEFINIDO** (2026-10-06). El esperado es el de ese pago, con o sin oferta (2026-10-15, FEAT-49).
 - Los pagos pendientes (efectivo, transferencia) se acreditan cuando Mercado Pago los confirma. _(confirmado el 2026-10-06)_
 - **Reembolsos y contracargos:** cuando un pago se devuelve o el banco lo revierte, se descuentan los tokens de esa compra. Si el usuario ya gastó algunos, su saldo queda en 0, nunca en negativo, y la compra queda marcada como devuelta. **DEFINIDO** (2026-10-06). Hoy el sistema no lo hace: está por construirse.
 - **Comprobante:** el sitio no emite ninguno. El comprador tiene el recibo de Mercado Pago y su historial de compras en su panel. **DEFINIDO** (2026-10-06)
@@ -123,6 +124,18 @@ Mercado Pago cobra también las loterías temáticas; sus reglas están en §18 
 - Los códigos no son visibles públicamente: solo quien conoce un código puede usarlo. **DEFINIDO** (2026-10-06)
 - Hoy no hay ninguna promoción activa en producción.
 
+### Ofertas — DEFINIDO (2026-10-15, FEAT-49)
+
+- Una **oferta** es un descuento con fechas en el precio de los tokens. Tiene nombre interno, porcentaje de descuento y fechas de inicio y fin, obligatorias. Se puede cancelar antes de tiempo.
+- Solo puede haber una oferta vigente a la vez: no se pueden crear dos que se crucen en fechas.
+- Mientras está vigente, el porcentaje se descuenta del precio de la cantidad libre y de todos los packs. Aplica solo a tokens, no a loterías temáticas (§18).
+- El precio con descuento se redondea al centavo. En la cantidad libre el descuento se aplica al precio por token (con 25%, $2.00 → $1.50) y se multiplica por los tokens. _(Descartado: bajar solo el precio por token, porque la cantidad libre quedaba más barata que los packs de 10 y 20.)_
+- Las promociones se suman a la oferta, no compiten: el código y la primera compra siguen dando sus tokens extra encima del descuento. Entre ellas sigue valiendo que gana el código.
+- El precio con oferta lo calcula el servidor al iniciar el pago y vale el de ese momento (§8). Cada compra guarda si tuvo oferta y cuál.
+- Al terminar las fechas, todo vuelve solo a su precio, sin ninguna acción.
+- En Comprar tokens, durante la oferta, se ve el precio normal tachado, el precio con descuento y la etiqueta del descuento («−25%») en cada pack y en la cantidad libre.
+- **Banner:** la oferta puede llevar un banner con video, título, texto corto y un botón que lleva a Comprar tokens, Crear lotería o Temáticas. Sale solo durante las fechas de la oferta, como un aviso flotante abajo a la izquierda en Inicio, en Mi cuenta o en ambas, y opcionalmente con cuenta regresiva. El video no va en la página: el aviso muestra la imagen fija y el video se abre en una ventana aparte solo cuando la persona lo pide _(2026-10-16, FEAT-49, US A6)_. Cerrarlo no lo quita: queda minimizado en el encabezado, de donde se vuelve a abrir, y así se recuerda en el navegador durante esa oferta; solo se va al terminar la oferta _(cambiado el 2026-10-16, FEAT-49, US A7; antes, quien lo cerraba no lo volvía a ver)_. Los textos van en español y, opcionalmente, en inglés; si falta el inglés, se muestra el español.
+
 ## 10. Panel de administración
 
 El administrador puede: _(confirmado el 2026-10-06)_
@@ -130,6 +143,7 @@ El administrador puede: _(confirmado el 2026-10-06)_
 - ver todas las compras y las transacciones de Mercado Pago;
 - crear, editar, activar y borrar promociones;
 - crear y editar paquetes de tokens, y cambiar el precio por token;
+- crear, editar y cancelar ofertas con su banner (§9) _(2026-10-15, FEAT-49)_;
 - ver los saldos de todos los usuarios y regalar tokens;
 - ver el gasto en IA del periodo (Resumen) y el uso de cada usuario (su ficha), y ajustar el costo por imagen que se usa para estimarlo _(cambiado el 2026-10-15, FEAT-47; antes: ver el uso de la IA por día, por usuario y por lotería y su costo estimado)_;
 - cambiar la cantidad de tokens de bienvenida;
@@ -144,10 +158,11 @@ El administrador puede: _(confirmado el 2026-10-06)_
 | Tablero (`boards`, `board_cards`) | Las cartas de un tablero y su posición | Pertenece a una lotería |
 | Saldo (`user_tokens`) | Tokens disponibles | Uno por usuario |
 | Uso (`token_usage`) | Cada token gastado en IA, con su lotería | Pertenece a un usuario |
-| Compra (`token_purchases`) | Tokens, monto, pago de Mercado Pago, promoción usada | Pertenece a un usuario |
+| Compra (`token_purchases`) | Tokens, monto, pago de Mercado Pago, promoción usada y oferta que tuvo | Pertenece a un usuario |
 | Paquete (`token_packs`) | Tokens base, de regalo y precio | — |
 | Precio (`token_pricing`) | Precio por token para la cantidad libre | — |
 | Promoción (`promotions`) | Tipo, código, porcentaje, vigencia | — |
+| Oferta (`offers`) — por construir | Nombre interno, porcentaje de descuento, fechas, si se canceló y su banner | — |
 | Configuración (`app_config`) | Tokens de bienvenida | — |
 | Perfil (`profiles`) | Correo y nombre | Uno por usuario |
 | Administradores (`admin_users`) | Quién es administrador | Apunta a un usuario |
@@ -254,6 +269,7 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-13 | La alerta al administrador cubre las compras de tokens y las de loterías temáticas, y llega a una sola dirección fija configurada en el servidor. _(Descartadas: alertar solo de tokens; enviarla a todos los de la lista de administradores. Origen: fase 3.)_ |
 | 2026-10-13 | Los correos del sitio se envían solo en español. _(Descartadas: español e inglés en el mismo correo; guardar el idioma de cada usuario y escribirle en el suyo. Origen: fase 3.)_ |
 | 2026-10-15 | Las cartas que el administrador carga para armar el PDF de una lotería temática se guardan en privado (solo él las ve), con su orden y el acomodo de los tableros, hasta que se borra la lotería; así puede seguir armándola otro día y elegir de entre ellas la portada y las muestras. Una lotería que se empieza a crear queda guardada como borrador no publicado. _(Descartado: no guardar las cartas. Origen: FEAT-48.)_ |
+| 2026-10-15 | Existen las ofertas: un descuento con fechas, una vigente a la vez, sobre el precio de la cantidad libre y de todos los packs (no de las loterías temáticas), redondeado al centavo; las promociones dan sus tokens extra encima; vale el precio del momento en que se inició el pago; cada compra guarda su oferta; con banner opcional en Inicio y Mi cuenta (§9). _(Descartado: bajar solo el precio por token, porque la cantidad libre quedaba más barata que los packs de 10 y 20 y nadie los compraría. Origen: FEAT-49.)_ |
 
 ## 16. Pendientes por definir
 
@@ -273,6 +289,7 @@ Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en
 | Alertar por correo al administrador de un pago cobrado sin entregar | §13 | No avisa. Anotada el 2026-10-13 (fase 3) |
 | Loterías temáticas: catálogo, compra, descarga y administración | §18 | No existen |
 | Quitar el acceso a una lotería temática ante reembolso o contracargo | §18 | No existe; se construirá junto con el descuento de tokens |
+| Ofertas con descuento y banner | §8, §9 | No existen. Anotada el 2026-10-15; se construye con `docs/features/FEAT-49-ofertas-con-banner.md` |
 | Tableros del PDF en tamaño carta | §5 | El PDF sale en hoja A4. Anotada el 2026-10-09; se corrige con `docs/features/FEAT-26-pdf-impresion-y-recorte.md` |
 
 ## 18. Loterías temáticas — DEFINIDO

@@ -4,6 +4,7 @@ import {
   pendingSalesPeriod,
   saleDateTime,
   saleItemLabel,
+  saleOfferLabel,
   saleReceived,
   saleStatus,
 } from '../../src/utils/adminSales';
@@ -101,5 +102,19 @@ describe('pendingSalesPeriod', () => {
 
   it('sin fecha del más viejo, el mes en curso', () => {
     expect(pendingSalesPeriod(null, now)).toEqual({ from: '2026-10-01', to: '2026-10-15' });
+  });
+});
+
+describe('saleOfferLabel', () => {
+  it('nombra la oferta con su descuento (FEAT-49, decisión 16)', () => {
+    expect(saleOfferLabel({ offer_name: 'Buen Fin 2026', offer_percent: 25 })).toBe('Buen Fin 2026 −25%');
+  });
+
+  it('sin oferta, nada', () => {
+    expect(saleOfferLabel({ offer_name: null, offer_percent: null })).toBe(null);
+  });
+
+  it('si la oferta ya no tiene nombre, solo el descuento', () => {
+    expect(saleOfferLabel({ offer_name: null, offer_percent: 25 })).toBe('Oferta −25%');
   });
 });

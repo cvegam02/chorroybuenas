@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AdminRepository } from '../../repositories/AdminRepository';
+import { OfferRepository } from '../../repositories/OfferRepository';
 import { TokenPricingRepository } from '../../repositories/TokenPricingRepository';
 import { MAX_CHART_DAYS, periodDays, previousPeriod, type SummaryPeriod } from '../../utils/adminSummary';
 import { AdminPeriodPicker, defaultPeriodSelection, type PeriodSelection } from './AdminPeriodPicker';
@@ -64,11 +65,12 @@ export const AdminSummary = ({ onOpenTab, onOpenGifts }: AdminSummaryProps) => {
       AdminRepository.getDashboardPending(selection.period),
       TokenPricingRepository.getExchangeRateMxnUsd(),
       AdminRepository.getAiCostPerImage(),
+      OfferRepository.getOfferSalesTotal(selection.period),
     ])
-      .then(([totals, previousTotals, daily, pending, usdPerMxn, aiCostPerImageUsd]) => {
+      .then(([totals, previousTotals, daily, pending, usdPerMxn, aiCostPerImageUsd, offerSales]) => {
         if (!current) return;
         if (totals && previousTotals && pending && aiCostPerImageUsd != null && (daily || !chartFits)) {
-          setData({ totals, previous: previousTotals, daily, pending, usdPerMxn, aiCostPerImageUsd });
+          setData({ totals, previous: previousTotals, daily, pending, usdPerMxn, aiCostPerImageUsd, offerSales });
         } else {
           setFailed(true);
         }

@@ -353,6 +353,10 @@ function AppContent() {
           element={<AdminPanel />}
         />
         <Route
+          path="/admin/ofertas/:offerId"
+          element={<AdminPanel />}
+        />
+        <Route
           path="/admin/tematicas/:id"
           element={<SeasonalWizard />}
         />

@@ -12,6 +12,7 @@ import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import { logger } from '../../utils/logger';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { MOBILE_MENU_ID, MobileMenu } from './MobileMenu';
+import { OfferPromoPill, OfferPromoTab, useMenuPromo } from '../OfferBanner/OfferPromoIndicator';
 import { displayFirstName, isNavLinkActive, navLinksFor } from './navLinks';
 import { UserAvatar } from './UserAvatar';
 import { UserMenuPanel } from './UserMenuPanel';
@@ -41,6 +42,7 @@ export const Navbar = () => {
   const email = user?.email ?? '';
 
   const closeMobileMenu = useCallback(() => setIsMobileMenuOpen(false), []);
+  const menuPromo = useMenuPromo();
 
   // Al cambiar de página se cierran los dos menús.
   useEffect(() => {
@@ -145,6 +147,7 @@ export const Navbar = () => {
         </ul>
 
         <div className="navbar__actions">
+          <OfferPromoPill />
           <span className="navbar__wide-only">
             <LanguageSwitcher />
           </span>
@@ -232,6 +235,7 @@ export const Navbar = () => {
           </button>
         </div>
       </nav>
+      <OfferPromoTab />
 
       {isMobileMenuOpen && (
         <MobileMenu
@@ -242,6 +246,7 @@ export const Navbar = () => {
           onSignUp={() => openAuth('signup')}
           onLogin={() => openAuth('login')}
           onSignOut={handleSignOut}
+          promo={menuPromo}
         />
       )}
 

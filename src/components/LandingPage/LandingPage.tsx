@@ -11,6 +11,7 @@ import { LandingPaths } from './LandingPaths';
 import { LandingShowcase } from './LandingShowcase';
 import { LandingSteps } from './LandingSteps';
 import { useLandingPrices } from './useLandingPrices';
+import { OfferBannerSlot } from '../OfferBanner/OfferBannerSlot';
 
 interface LandingPageProps {
   onStart: () => void;
@@ -32,6 +33,7 @@ export const LandingPage = ({ onStart }: LandingPageProps) => {
 
   return (
     <main className="landing-page">
+      <OfferBannerSlot placement="home" />
       <LandingHero onStart={onStart} />
       <LandingPaths aiPrice={prices.aiPrice} themedPrice={prices.themedPrice} />
       <LandingShowcase />

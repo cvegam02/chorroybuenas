@@ -1,0 +1,186 @@
+/* La promo minimizada en el encabezado (FEAT-49, US A7). Solo colores de la paleta. */
+
+.offer-promo__flame {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.offer-promo__count {
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-text-main);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.offer-promo__hint {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-text-main);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text-inverted);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: offer-promo-hint 3.5s ease forwards;
+}
+
+@keyframes offer-promo-hint {
+  0%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Pestaña que cuelga del encabezado (700 px o más). Se alinea con la orilla derecha del contenido de la barra. */
+.offer-promo-tab {
+  position: absolute;
+  top: 100%;
+  right: max(14px, calc((100% - 1200px) / 2 + 14px));
+  display: none;
+}
+
+@media (min-width: 700px) {
+  .offer-promo-tab {
+    display: block;
+  }
+}
+
+@media (min-width: 1201px) {
+  .offer-promo-tab {
+    right: max(24px, calc((100% - 1200px) / 2 + 24px));
+  }
+}
+
+.offer-promo-tab__button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 320px;
+  padding: 6px 14px 7px 8px;
+  border: 0;
+  border-radius: 0 0 14px 14px;
+  background: var(--color-text-main);
+  box-shadow: 0 6px 14px -6px color-mix(in srgb, var(--color-text-main) 60%, transparent);
+  color: var(--color-text-inverted);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: padding-bottom 0.15s ease;
+}
+
+.offer-promo-tab__button:hover,
+.offer-promo-tab__button:focus-visible {
+  padding-bottom: 10px;
+}
+
+.offer-promo-tab__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.offer-promo-tab__see {
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+/* Al minimizar «cae» desde el borde del encabezado: lo de arriba del borde queda recortado. */
+.offer-promo-tab--drop .offer-promo-tab__button {
+  animation: offer-promo-drop 0.4s ease-out;
+}
+
+@keyframes offer-promo-drop {
+  from {
+    transform: translateY(-100%);
+    clip-path: inset(100% -20px -20px -20px);
+  }
+  to {
+    transform: translateY(0);
+    clip-path: inset(0 -20px -20px -20px);
+  }
+}
+
+/* Pastilla dentro del encabezado (menos de 700 px). */
+.offer-promo-pill {
+  position: relative;
+  display: inline-flex;
+}
+
+@media (min-width: 700px) {
+  .offer-promo-pill {
+    display: none;
+  }
+}
+
+.offer-promo-pill__button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 4px 8px 4px 5px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-text-main);
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.offer-promo-pill__dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--color-text-inverted);
+  border-radius: var(--radius-full);
+  background: var(--color-danger);
+}
+
+.offer-promo-pill--pop .offer-promo-pill__button {
+  animation: offer-promo-pop 0.35s ease-out;
+}
+
+@keyframes offer-promo-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.8);
+  }
+}
+
+.offer-promo__hint--pill {
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .offer-promo__hint,
+  .offer-promo-tab--drop .offer-promo-tab__button,
+  .offer-promo-pill--pop .offer-promo-pill__button {
+    animation: none;
+  }
+
+  .offer-promo-tab__button {
+    transition: none;
+  }
+}

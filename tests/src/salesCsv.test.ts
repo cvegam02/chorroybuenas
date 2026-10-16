@@ -17,6 +17,8 @@ const tokens: AdminSaleRow = {
   created_at: '2026-10-16T06:00:00Z',
   email: 'ana@test.dev',
   full_name: 'Ana López',
+  offer_name: null,
+  offer_percent: null,
 };
 
 const seasonal: AdminSaleRow = {
@@ -33,6 +35,8 @@ const seasonal: AdminSaleRow = {
   user_id: null,
   email: null,
   full_name: null,
+  offer_name: null,
+  offer_percent: null,
 };
 
 const lines = (csv: string) => csv.replace(/^\uFEFF/, '').split('\r\n');
