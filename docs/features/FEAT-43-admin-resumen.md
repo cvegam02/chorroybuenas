@@ -1,6 +1,6 @@
 # FEAT-43 — Resumen del panel de administración
 
-**Estado: definida con Carlos el 2026-10-14 y 2026-10-15. Decisiones completas y cambio en `docs/diseno-mockups.md` confirmado y aplicado el 2026-10-15 (A1.0 en el índice). Se trabaja en `feature/admin-resumen`, creada desde `dev` el 2026-10-15. Las cinco historias (A1 a A5) construidas el 2026-10-15, con las migraciones 035 a 038 aplicadas en el Supabase de dev; falta la demo de Carlos y aplicarlas en producción antes de pasar a `main`.**
+**Estado: definida con Carlos el 2026-10-14 y 2026-10-15. Decisiones completas y cambio en `docs/diseno-mockups.md` confirmado y aplicado el 2026-10-15 (A1.0 en el índice). Se trabaja en `feature/admin-resumen`, creada desde `dev` el 2026-10-15. Las cinco historias (A1 a A5) construidas el 2026-10-15, con las migraciones 035 a 038 aplicadas en el Supabase de dev; falta la demo de Carlos y aplicarlas en producción antes de pasar a `main`. Llegan a `dev` todas juntas (FEAT-43 a FEAT-48) con el PR de `feature/admin-tematicas-asistente`, abierto el 2026-10-15.**
 
 **Contexto.** Carlos pidió el 2026-10-14 mejorar el panel de administración y quitar información que no ayuda. Al revisarlo, Claude encontró que para saber «cómo vamos» hay que juntar números de tres pestañas: los ingresos están en Balances, el gasto de IA en Uso de IA y las ventas en Compras, y nunca se comparan entre sí. Esta feature es la primera de varias para el Admin; las demás (reacomodo de pestañas, limpieza de columnas, ficha de usuario, rediseño visual) se definen después, una por una.
 

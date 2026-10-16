@@ -17,7 +17,7 @@ import { SeasonalCatalog } from './components/Seasonal/SeasonalCatalog';
 import { SeasonalDetail } from './components/Seasonal/SeasonalDetail';
 import { Dashboard } from './components/Dashboard/Dashboard';
 import { AdminPanel } from './components/AdminPanel/AdminPanel';
-import { SeasonalBuilder } from './components/AdminPanel/SeasonalBuilder/SeasonalBuilder';
+import { SeasonalWizard } from './components/AdminPanel/SeasonalWizard/SeasonalWizard';
 import { Navbar } from './components/Navbar/Navbar';
 import { PageMeta } from './components/PageMeta/PageMeta';
 import { CreateSteps } from './components/CreateSteps/CreateSteps';
@@ -353,8 +353,8 @@ function AppContent() {
           element={<AdminPanel />}
         />
         <Route
-          path="/admin/tematicas/:id/crear"
-          element={<SeasonalBuilder />}
+          path="/admin/tematicas/:id"
+          element={<SeasonalWizard />}
         />
         <Route
           path="/beneficios"

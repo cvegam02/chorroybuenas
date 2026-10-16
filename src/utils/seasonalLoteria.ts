@@ -3,7 +3,7 @@
  * La base repite estos límites (supabase/migrations/027 y 028): ella es quien manda.
  */
 import { fileNameSlug } from './fileNameSlug';
-import { localInputToIso } from './seasonalPublishing';
+import { isoToLocalInput, localInputToIso } from './seasonalPublishing';
 
 export const SEASONAL_NAME_MAX_LENGTH = 80;
 export const SEASONAL_DESCRIPTION_MAX_LENGTH = 600;
@@ -71,7 +71,8 @@ function emptyToNull(text: string): string | null {
   return trimmed === '' ? null : trimmed;
 }
 
-function priceError(cents: number | null): string | undefined {
+/** Lo que está mal en un precio ya convertido a centavos; undefined si está bien o aún no se escribe. */
+export function seasonalPriceError(cents: number | null): string | undefined {
   if (cents === null) return undefined;
   if (Number.isNaN(cents)) return 'Escribe el precio en pesos, por ejemplo 49 o 49.50.';
   if (cents < SEASONAL_MIN_PRICE_CENTS) return 'El precio mínimo es $10.00.';
@@ -117,7 +118,7 @@ export function validateSeasonalLoteriaForm(form: SeasonalLoteriaForm): Seasonal
     descriptionEn: tooLong(form.descriptionEn, SEASONAL_DESCRIPTION_MAX_LENGTH),
     cardCount: Number.isNaN(cardCount) ? countMessage : undefined,
     boardCount: Number.isNaN(boardCount) ? countMessage : undefined,
-    price: priceError(priceCents),
+    price: seasonalPriceError(priceCents),
     validFrom: validFrom === undefined ? dateMessage : undefined,
     validUntil: validUntil === undefined ? dateMessage : untilError(validFrom, validUntil),
   };
@@ -145,6 +146,47 @@ export function validateSeasonalLoteriaForm(form: SeasonalLoteriaForm): Seasonal
   };
 }
 
+/** 4900 → «49»; 4950 → «49.50». */
+export function centsToPriceText(cents: number | null): string {
+  if (cents === null) return '';
+  return cents % 100 === 0 ? String(cents / 100) : (cents / 100).toFixed(2);
+}
+
+/** La ficha guardada como la muestra el formulario; null = una nueva (con la temática puesta si solo hay una). */
+export function seasonalFormFromLoteria(
+  loteria: SeasonalLoteriaInput | null,
+  seasons: readonly { id: string }[],
+): SeasonalLoteriaForm {
+  if (!loteria) {
+    return {
+      seasonId: seasons.length === 1 ? seasons[0].id : '',
+      nameEs: '',
+      nameEn: '',
+      descriptionEs: '',
+      descriptionEn: '',
+      gridSize: 16,
+      cardCount: '',
+      boardCount: '',
+      price: '',
+      validFrom: '',
+      validUntil: '',
+    };
+  }
+  return {
+    seasonId: loteria.season_id,
+    nameEs: loteria.name_es,
+    nameEn: loteria.name_en ?? '',
+    descriptionEs: loteria.description_es ?? '',
+    descriptionEn: loteria.description_en ?? '',
+    gridSize: loteria.grid_size,
+    cardCount: loteria.card_count?.toString() ?? '',
+    boardCount: loteria.board_count?.toString() ?? '',
+    price: centsToPriceText(loteria.price_cents),
+    validFrom: isoToLocalInput(loteria.valid_from),
+    validUntil: isoToLocalInput(loteria.valid_until),
+  };
+}
+
 /** Devuelve el motivo del rechazo, o null si el archivo sirve como PDF de una lotería. */
 export function validatePdfFile(file: { type: string; size: number }): string | null {
   if (file.type !== SEASONAL_PDF_MIME_TYPE) return 'El archivo tiene que ser un PDF.';
@@ -159,59 +201,7 @@ export function formatFileSize(bytes: number): string {
   return `${Math.max(1, Math.ceil(bytes / 1024))} KB`;
 }
 
-/** La ficha tal como queda al armar el PDF en el sitio: solo cambian el número de cartas y el de tableros (FEAT-23). */
-export function withBuiltCounts(
-  loteria: SeasonalLoteriaInput,
-  cardCount: number,
-  boardCount: number,
-): SeasonalLoteriaInput {
-  return {
-    season_id: loteria.season_id,
-    name_es: loteria.name_es,
-    name_en: loteria.name_en,
-    description_es: loteria.description_es,
-    description_en: loteria.description_en,
-    grid_size: loteria.grid_size,
-    card_count: cardCount,
-    board_count: boardCount,
-    price_cents: loteria.price_cents,
-    valid_from: loteria.valid_from,
-    valid_until: loteria.valid_until,
-  };
-}
-
 /** «Día de Muertos» → «dia-de-muertos.pdf». */
 export function seasonalPdfFileName(name: string): string {
   return `${fileNameSlug(name) || 'loteria-tematica'}.pdf`;
-}
-
-/** Pestañas de la ventana de la ficha, en el orden en que se muestran. */
-export const SEASONAL_FORM_TABS = [
-  { id: 'datos', label: 'Datos' },
-  { id: 'precio', label: 'Precio y fechas' },
-  { id: 'archivos', label: 'Archivos' },
-] as const;
-
-export type SeasonalFormTab = (typeof SEASONAL_FORM_TABS)[number]['id'];
-
-const TAB_OF_FIELD: Record<keyof SeasonalLoteriaForm, SeasonalFormTab> = {
-  seasonId: 'datos',
-  nameEs: 'datos',
-  nameEn: 'datos',
-  descriptionEs: 'datos',
-  descriptionEn: 'datos',
-  gridSize: 'datos',
-  cardCount: 'datos',
-  boardCount: 'datos',
-  price: 'precio',
-  validFrom: 'precio',
-  validUntil: 'precio',
-};
-
-/** Las pestañas que tienen algún campo con error, en el orden en que se muestran. */
-export function tabsWithErrors(errors: SeasonalFormErrors): SeasonalFormTab[] {
-  const withErrors = new Set(
-    (Object.keys(errors) as (keyof SeasonalLoteriaForm)[]).filter((field) => errors[field]).map((field) => TAB_OF_FIELD[field]),
-  );
-  return SEASONAL_FORM_TABS.map((tab) => tab.id).filter((id) => withErrors.has(id));
 }

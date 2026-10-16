@@ -1,6 +1,6 @@
 # FEAT-45 — Usuarios en el panel de administración
 
-**Estado: definida con Carlos el 2026-10-15. Decisiones completas y cambio en `docs/diseno-mockups.md` confirmado y aplicado el 2026-10-15. Se trabaja en `feature/admin-usuarios`, creada el 2026-10-15 desde `feature/admin-ventas` (decisión 11). Las cinco historias (A1 a A5) construidas el 2026-10-15, con las migraciones 042 a 045 aplicadas en el Supabase de dev; falta la demo de Carlos y aplicarlas en producción antes de pasar a `main`.**
+**Estado: definida con Carlos el 2026-10-15. Decisiones completas y cambio en `docs/diseno-mockups.md` confirmado y aplicado el 2026-10-15. Se trabaja en `feature/admin-usuarios`, creada el 2026-10-15 desde `feature/admin-ventas` (decisión 11). Las cinco historias (A1 a A5) construidas el 2026-10-15, con las migraciones 042 a 045 aplicadas en el Supabase de dev; falta la demo de Carlos y aplicarlas en producción antes de pasar a `main`. Llegan a `dev` todas juntas (FEAT-43 a FEAT-48) con el PR de `feature/admin-tematicas-asistente`, abierto el 2026-10-15.**
 
 **Contexto.** Tercera feature del Admin, después del Resumen (FEAT-43) y Ventas (FEAT-44). Reemplaza la pestaña Balances (A1.4): hoy carga solo las 200 cuentas con movimiento más reciente, repite tres tarjetas que ya están en el Resumen y no deja ver qué ha hecho una persona. Esta feature la convierte en «Usuarios»: buscador sobre todas las cuentas, ficha de cada usuario con su actividad, y el historial de regalos en su propia sub-pestaña.
 

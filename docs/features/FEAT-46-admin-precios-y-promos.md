@@ -1,6 +1,6 @@
 # FEAT-46 — Precios y promos en el panel de administración
 
-**Estado: definida con Carlos el 2026-10-15. Decisiones completas y cambio en `docs/diseno-mockups.md` confirmado y aplicado el 2026-10-15. Se trabaja en `feature/admin-precios-y-promos`, creada el 2026-10-15 desde `feature/admin-usuarios` (decisión 13). Las cuatro historias (A1 a A4) construidas el 2026-10-15, con las migraciones 046 a 048 aplicadas en el Supabase de dev; falta la demo de Carlos y aplicarlas en producción antes de pasar a `main`.**
+**Estado: definida con Carlos el 2026-10-15. Decisiones completas y cambio en `docs/diseno-mockups.md` confirmado y aplicado el 2026-10-15. Se trabaja en `feature/admin-precios-y-promos`, creada el 2026-10-15 desde `feature/admin-usuarios` (decisión 13). Las cuatro historias (A1 a A4) construidas el 2026-10-15, con las migraciones 046 a 048 aplicadas en el Supabase de dev; falta la demo de Carlos y aplicarlas en producción antes de pasar a `main`. Llegan a `dev` todas juntas (FEAT-43 a FEAT-48) con el PR de `feature/admin-tematicas-asistente`, abierto el 2026-10-15.**
 
 **Contexto.** Cuarta feature del Admin, después del Resumen (FEAT-43), Ventas (FEAT-44) y Usuarios (FEAT-45). Junta las pestañas Promociones (A1.2) y Packs de tokens (A1.3) en una sola, «Precios y promos»: todo lo que define cuánto paga un cliente y cuántos tokens recibe. Con esto el menú del panel queda en seis pestañas: Resumen, Ventas, Usuarios, Precios y promos, Uso de IA y Temáticas.
 

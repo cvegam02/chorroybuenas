@@ -1,6 +1,6 @@
 # FEAT-44 — Ventas en el panel de administración
 
-**Estado: definida con Carlos el 2026-10-15. Decisiones completas y cambio en `docs/diseno-mockups.md` confirmado y aplicado el 2026-10-15. Se trabaja en `feature/admin-ventas`, creada el 2026-10-15 desde `feature/admin-resumen` (decisión 11). Las cinco historias (A1 a A5) construidas el 2026-10-15, con las migraciones 039 a 041 aplicadas en el Supabase de dev; falta la demo de Carlos y aplicarlas en producción antes de pasar a `main`.**
+**Estado: definida con Carlos el 2026-10-15. Decisiones completas y cambio en `docs/diseno-mockups.md` confirmado y aplicado el 2026-10-15. Se trabaja en `feature/admin-ventas`, creada el 2026-10-15 desde `feature/admin-resumen` (decisión 11). Las cinco historias (A1 a A5) construidas el 2026-10-15, con las migraciones 039 a 041 aplicadas en el Supabase de dev; falta la demo de Carlos y aplicarlas en producción antes de pasar a `main`. Llegan a `dev` todas juntas (FEAT-43 a FEAT-48) con el PR de `feature/admin-tematicas-asistente`, abierto el 2026-10-15.**
 
 **Contexto.** Segunda feature del Admin, después del Resumen (FEAT-43). Hoy las ventas están repartidas en dos pestañas que se enciman: Compras (A1.1) y Transacciones MP (A1.6). Esta feature las junta en una sola pestaña, «Ventas», que reutiliza el selector de periodo del Resumen y trae el detalle de Mercado Pago traducido al español.
 

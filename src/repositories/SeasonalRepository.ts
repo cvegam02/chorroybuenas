@@ -3,8 +3,9 @@ import { logger } from '../utils/logger';
 import { SEASONAL_PDF_MIME_TYPE, type SeasonalLoteriaInput } from '../utils/seasonalLoteria';
 import type { CatalogLoteria, CatalogSeason } from '../utils/seasonalCatalog';
 import { PREVIEW_OUTPUT_EXTENSION, PREVIEW_OUTPUT_MIME_TYPE } from '../utils/seasonalPreview';
-import { summarizeSales, type SeasonalSales } from '../utils/seasonalPurchase';
 import type { SeasonalHistoryPurchase } from '../utils/tokenHistory';
+import { EMPTY_BUILD, readBuild, type SeasonalBuild } from '../utils/seasonalBuild';
+import { SEASONAL_CARD_OUTPUT_MIME_TYPE } from '../utils/seasonalCards';
 
 /** Temporada del catálogo de loterías de temporada. */
 export interface Season {
@@ -45,6 +46,25 @@ export interface AdminSeasonalLoteria extends SeasonalLoteriaInput {
   pdf: SeasonalPdf | null;
 }
 
+/** Ventas de una lotería temática para su tarjeta del panel. */
+export interface AdminSeasonalSales {
+  /** Compras aprobadas de siempre. */
+  approvedSales: number;
+  revenueCents: number;
+  /** Lo aprobado dentro del periodo pedido. */
+  periodRevenueCents: number;
+  /** Cualquier compra registrada, también pendiente o repetida: impide borrarla. */
+  hasPurchases: boolean;
+}
+
+interface AdminSeasonalSalesRow {
+  loteria_id: string;
+  approved_sales: number | string;
+  revenue_cents: number | string;
+  period_revenue_cents: number | string;
+  has_purchases: boolean;
+}
+
 /** Una lotería de temporada que compró la cuenta, para la lista de Mi cuenta. */
 export interface PurchasedSeasonalLoteria {
   purchaseId: string;
@@ -79,6 +99,8 @@ interface PurchasedLoteriaRow {
 
 /** Lo que dura el enlace temporal de descarga del PDF. */
 const PDF_LINK_SECONDS = 60;
+/** Las cartas se ven mientras se arma la lotería: una sesión de trabajo larga. */
+const CARD_LINK_SECONDS = 4 * 60 * 60;
 
 const firstOf = <T,>(value: T | T[] | null): T | null => (Array.isArray(value) ? value[0] ?? null : value);
 
@@ -132,6 +154,7 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 export class SeasonalRepository {
   static readonly PDF_BUCKET = 'seasonal-pdfs';
   static readonly PREVIEW_BUCKET = 'seasonal-previews';
+  static readonly CARDS_BUCKET = 'seasonal-cards';
 
   /**
    * Lo que necesita el catálogo público: las temporadas y las loterías publicadas. Las fechas las
@@ -310,14 +333,42 @@ export class SeasonalRepository {
     return data.signedUrl;
   }
 
-  /** Ventas por lotería, para el panel de administración. Devuelve null si la consulta falla. */
-  static async getAdminSales(): Promise<Map<string, SeasonalSales> | null> {
-    const { data, error } = await supabase.from('seasonal_purchases').select('loteria_id, status');
+  /**
+   * Ventas e ingresos de cada lotería temática y lo vendido entre `from` y `to` (días de Hermosillo,
+   * AAAA-MM-DD), para la pestaña Temáticas (FEAT-48). Devuelve null si la consulta falla.
+   */
+  static async getAdminSalesOverview(from: string, to: string): Promise<Map<string, AdminSeasonalSales> | null> {
+    const { data, error } = await supabase.rpc('admin_get_seasonal_sales', { p_from: from, p_to: to });
     if (error) {
-      logger.error('SeasonalRepository.getAdminSales:', error.message);
+      logger.error('SeasonalRepository.getAdminSalesOverview:', error.message);
       return null;
     }
-    return summarizeSales((data ?? []) as { loteria_id: string; status: string }[]);
+    const rows = (data ?? []) as AdminSeasonalSalesRow[];
+    return new Map(
+      rows.map((row) => [
+        row.loteria_id,
+        {
+          approvedSales: Number(row.approved_sales),
+          revenueCents: Number(row.revenue_cents),
+          periodRevenueCents: Number(row.period_revenue_cents),
+          hasPurchases: row.has_purchases,
+        },
+      ]),
+    );
+  }
+
+  /** Si alguien ya la compró: reemplazar su PDF cambia lo que descargan (§18). Devuelve null si la consulta falla. */
+  static async hasApprovedSales(loteriaId: string): Promise<boolean | null> {
+    const { count, error } = await supabase
+      .from('seasonal_purchases')
+      .select('id', { count: 'exact', head: true })
+      .eq('loteria_id', loteriaId)
+      .eq('status', 'approved');
+    if (error) {
+      logger.error('SeasonalRepository.hasApprovedSales:', error.message);
+      return null;
+    }
+    return (count ?? 0) > 0;
   }
 
   /** Todas las loterías de temporada, publicadas o no, con su PDF. Devuelve null si la consulta falla. */
@@ -368,6 +419,8 @@ export class SeasonalRepository {
 
   /** Borra la ficha y, si la base lo permitió, sus archivos. */
   static async deleteLoteria(loteria: AdminSeasonalLoteria): Promise<boolean> {
+    // Las cartas guardadas se leen antes: su registro se borra junto con la lotería.
+    const build = await this.getBuild(loteria.id);
     const { error } = await supabase.from('seasonal_loterias').delete().eq('id', loteria.id);
     if (error) {
       logger.error('SeasonalRepository.deleteLoteria:', error.message);
@@ -375,21 +428,87 @@ export class SeasonalRepository {
     }
     if (loteria.pdf) await this.removePdfObject(loteria.pdf.path);
     await this.removePreviews([loteria.cover_path, ...loteria.sample_paths].filter((path): path is string => !!path));
+    await this.removeCards((build ?? EMPTY_BUILD).cards.map((card) => card.path));
     return true;
   }
 
+  /** Las cartas guardadas de una lotería y sus tableros (FEAT-48). Sin registro, vacío; null si la consulta falla. */
+  static async getBuild(loteriaId: string): Promise<SeasonalBuild | null> {
+    const { data, error } = await supabase
+      .from('seasonal_loteria_builds')
+      .select('cards, boards, pdf_is_current')
+      .eq('loteria_id', loteriaId)
+      .maybeSingle();
+    if (error) {
+      logger.error('SeasonalRepository.getBuild:', error.message);
+      return null;
+    }
+    return readBuild(data);
+  }
+
+  static async saveBuild(loteriaId: string, build: SeasonalBuild): Promise<boolean> {
+    const { error } = await supabase.from('seasonal_loteria_builds').upsert({
+      loteria_id: loteriaId,
+      cards: build.cards,
+      boards: build.boards,
+      pdf_is_current: build.pdfIsCurrent,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) {
+      logger.error('SeasonalRepository.saveBuild:', error.message);
+      return false;
+    }
+    return true;
+  }
+
+  /** Sube una carta ya preparada al espacio privado. Devuelve su ruta, o null si falla. */
+  static async uploadCard(loteriaId: string, image: Blob): Promise<string | null> {
+    const path = `${loteriaId}/${crypto.randomUUID()}.jpg`;
+    const { error } = await supabase.storage
+      .from(this.CARDS_BUCKET)
+      .upload(path, image, { contentType: SEASONAL_CARD_OUTPUT_MIME_TYPE });
+    if (error) {
+      logger.error('SeasonalRepository.uploadCard:', error.message);
+      return null;
+    }
+    return path;
+  }
+
+  /** Direcciones temporales para ver las cartas guardadas, por ruta. Devuelve null si falla. */
+  static async getCardUrls(paths: readonly string[]): Promise<Map<string, string> | null> {
+    if (paths.length === 0) return new Map();
+    const { data, error } = await supabase.storage.from(this.CARDS_BUCKET).createSignedUrls([...paths], CARD_LINK_SECONDS);
+    if (error || !data) {
+      logger.error('SeasonalRepository.getCardUrls:', error?.message);
+      return null;
+    }
+    const urls = new Map<string, string>();
+    for (const item of data) {
+      if (item.path && item.signedUrl) urls.set(item.path, item.signedUrl);
+    }
+    return urls.size === paths.length ? urls : null;
+  }
+
+  /** Un archivo huérfano no rompe nada: se avisa en el registro y se sigue. */
+  static async removeCards(paths: readonly string[]): Promise<void> {
+    if (paths.length === 0) return;
+    const { error } = await supabase.storage.from(this.CARDS_BUCKET).remove([...paths]);
+    if (error) logger.warn('SeasonalRepository: no se pudieron borrar cartas', paths, error.message);
+  }
+
   /**
-   * Sube el PDF de una lotería y lo registra. Cada subida usa una ruta nueva, para que un reemplazo
-   * nunca entregue una copia guardada del archivo anterior; el anterior se borra al final.
+   * Sube el PDF de una lotería y lo registra; devuelve el registro, o null si falla. Cada subida usa una
+   * ruta nueva, para que un reemplazo nunca entregue una copia guardada del archivo anterior; el anterior
+   * se borra al final.
    */
-  static async uploadPdf(loteriaId: string, file: File, previousPath: string | null): Promise<boolean> {
+  static async uploadPdf(loteriaId: string, file: File, previousPath: string | null): Promise<SeasonalPdf | null> {
     const bucket = supabase.storage.from(this.PDF_BUCKET);
     const path = `${loteriaId}/${Date.now()}.pdf`;
 
     const { error: uploadError } = await bucket.upload(path, file, { contentType: SEASONAL_PDF_MIME_TYPE });
     if (uploadError) {
       logger.error('SeasonalRepository.uploadPdf (archivo):', uploadError.message);
-      return false;
+      return null;
     }
 
     const { error: rowError } = await supabase.from('seasonal_loteria_files').upsert({
@@ -402,11 +521,11 @@ export class SeasonalRepository {
     if (rowError) {
       logger.error('SeasonalRepository.uploadPdf (registro):', rowError.message);
       await this.removePdfObject(path);
-      return false;
+      return null;
     }
 
     if (previousPath && previousPath !== path) await this.removePdfObject(previousPath);
-    return true;
+    return { path, name: file.name, sizeBytes: file.size };
   }
 
   /** Dirección pública de una portada o muestra ya protegida. */
@@ -499,6 +618,16 @@ export class SeasonalRepository {
       return null;
     }
     return data as Season;
+  }
+
+  /** Pone el orden del catálogo: recibe todas las temáticas, en el orden nuevo. */
+  static async setSeasonOrder(ids: readonly string[]): Promise<boolean> {
+    const { error } = await supabase.rpc('admin_set_season_order', { p_ids: ids });
+    if (error) {
+      logger.error('SeasonalRepository.setSeasonOrder:', error.message);
+      return false;
+    }
+    return true;
   }
 
   /** Borra una temporada. La base lo rechaza si todavía tiene loterías. */
