@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { AIService } from '../../services/AIService';
 import {
   percentChange,
   summaryMoney,
@@ -12,7 +11,7 @@ import type { PeriodSelection } from './AdminPeriodPicker';
 
 /** Pestañas del panel a las que lleva una tarjeta del Resumen. */
 /** 'regalos' es la sub-pestaña «Regalos de tokens» de Usuarios (FEAT-45, US A4). */
-export type SummaryTargetTab = 'ventas' | 'uso-ia' | 'usuarios' | 'regalos';
+export type SummaryTargetTab = 'ventas' | 'usuarios' | 'regalos';
 
 /** Filtro con el que una tarjeta abre Ventas (US A5); el periodo lo pone el Resumen si no viene. */
 export interface SummarySalesFilter {
@@ -30,6 +29,8 @@ export interface SummaryData {
   daily: DailyTotals[] | null;
   pending: DashboardPending;
   usdPerMxn: number;
+  /** Costo de IA por imagen guardado en Precios y promos (FEAT-47). */
+  aiCostPerImageUsd: number;
 }
 
 const formatPesos = (cents: number) =>
@@ -116,8 +117,8 @@ export const SummarySections = ({ data, loading, onOpenTab }: SummarySectionsPro
   const ready = loading ? null : data;
   const t = ready?.totals ?? null;
   const p = ready?.previous ?? null;
-  const money = ready ? summaryMoney(ready.totals, AIService.COST_PER_IMAGE, ready.usdPerMxn) : null;
-  const previousMoney = ready ? summaryMoney(ready.previous, AIService.COST_PER_IMAGE, ready.usdPerMxn) : null;
+  const money = ready ? summaryMoney(ready.totals, ready.aiCostPerImageUsd, ready.usdPerMxn) : null;
+  const previousMoney = ready ? summaryMoney(ready.previous, ready.aiCostPerImageUsd, ready.usdPerMxn) : null;
   const value = (text: string) => (t ? text : '…');
   const change = (current: number | null | undefined, previous: number | null | undefined): Change =>
     ready ? (current == null || previous == null ? null : percentChange(current, previous)) : undefined;
@@ -139,10 +140,9 @@ export const SummarySections = ({ data, loading, onOpenTab }: SummarySectionsPro
           label="Gasto en IA"
           value={value(money?.aiCostCents != null ? formatPesos(money.aiCostCents) : '—')}
           detail={t
-            ? `${plural(t.aiImages, 'imagen', 'imágenes')} · ≈ ${formatUsd(t.aiImages * AIService.COST_PER_IMAGE)}`
+            ? `${plural(t.aiImages, 'imagen', 'imágenes')} · ≈ ${formatUsd(t.aiImages * (ready?.aiCostPerImageUsd ?? 0))}`
             : 'Imágenes transformadas'}
           change={change(t?.aiImages, p?.aiImages)}
-          onOpen={open('uso-ia')}
         />
         <SummaryCard
           label="Ganancia"
@@ -176,7 +176,6 @@ export const SummarySections = ({ data, loading, onOpenTab }: SummarySectionsPro
           value={value(t ? formatCount(t.aiUsers) : '')}
           detail="Transformaron al menos una foto"
           change={change(t?.aiUsers, p?.aiUsers)}
-          onOpen={open('uso-ia')}
         />
       </SummarySection>
 

@@ -64,13 +64,6 @@ select test.throws($$
   select * from public.admin_get_dashboard_summary(null, '2026-10-01')
 $$, 'Invalid period', 'un periodo sin inicio se rechaza');
 
--- Uso de IA agrupa los días en hora de Hermosillo, igual que el Resumen.
-select test.is(
-  (select array_agg(row(day, tokens)::text order by day)
-     from public.admin_get_usage_by_day(30, '2026-10-15T07:00:00Z', '2026-10-16T06:59:59Z')),
-  array['(2026-10-15,2)'],
-  'Uso de IA cuenta lo de las 23:00 de Hermosillo en ese mismo día');
-
 -- Solo un administrador puede pedir el resumen.
 select test.as_user('00000000-0000-0000-0000-0000000043a2');
 select test.throws($$

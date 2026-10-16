@@ -100,3 +100,26 @@ export function packCard(pack: PackFigures, pricePerTokenCents: number | null): 
 export function packSalesLabel(sales: number): string {
   return `${countFormat.format(sales)} ${sales === 1 ? 'venta' : 'ventas'} este mes`;
 }
+
+/**
+ * Lee el costo de IA por imagen que escribe el administrador, en dólares ("0.012", "0,047", "$0.128"),
+ * hasta seis decimales como guarda la base (FEAT-47, US A1). null si está vacío, no es un número o no es
+ * mayor que cero.
+ */
+export function parseAiCostInput(text: string): number | null {
+  const clean = text.trim().replace(/^\$/, '').replace(',', '.');
+  if (!/^(\d+(\.\d{1,6})?|\.\d{1,6})$/.test(clean)) return null;
+  const value = Number(clean);
+  return value > 0 ? value : null;
+}
+
+/** Lo que muestra el campo: el costo guardado tal cual («0.012»). */
+export function aiCostDraft(costUsd: number): string {
+  return String(Number(costUsd.toFixed(6)));
+}
+
+/** Junto al campo: «≈ $0.22 MXN» con el tipo de cambio actual (USD por peso). */
+export function aiCostPesosLabel(costUsd: number, usdPerMxn: number): string {
+  if (!(usdPerMxn > 0)) return 'sin tipo de cambio';
+  return `≈ ${pricePerTokenLabel(Math.round((costUsd / usdPerMxn) * 100))} MXN`;
+}

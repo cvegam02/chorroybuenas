@@ -35,8 +35,6 @@ export type AIStyle = {
 };
 
 export class AIService {
-    public static COST_PER_IMAGE = 0.013; // USD (OpenAI GPT-Image-1.5 Low)
-
     /** Solo estilo lotería tradicional (Don Clemente Gallo). */
     public static STYLES: AIStyle[] = [
         {
@@ -66,11 +64,10 @@ export class AIService {
     }
 
     /**
-     * Calculates the estimated cost and time for a batch of images
+     * Estimated time for a batch of images. The AI cost lives in the database (FEAT-47).
      */
     static getEstimation(count: number) {
         return {
-            totalCost: count * this.COST_PER_IMAGE,
             estimatedSeconds: count * 45, // GPT-Image on Replicate ~45s per image
         };
     }

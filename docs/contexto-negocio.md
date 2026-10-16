@@ -131,7 +131,7 @@ El administrador puede: _(confirmado el 2026-10-06)_
 - crear, editar, activar y borrar promociones;
 - crear y editar paquetes de tokens, y cambiar el precio por token;
 - ver los saldos de todos los usuarios y regalar tokens;
-- ver el uso de la IA (por día, por usuario y por lotería) y su costo estimado;
+- ver el gasto en IA del periodo (Resumen) y el uso de cada usuario (su ficha), y ajustar el costo por imagen que se usa para estimarlo _(cambiado el 2026-10-15, FEAT-47; antes: ver el uso de la IA por día, por usuario y por lotería y su costo estimado)_;
 - cambiar la cantidad de tokens de bienvenida;
 - administrar las loterías temáticas (§18): crear temáticas, dar de alta loterías con su precio y sus archivos, publicarlas y retirarlas. Sus ventas se ven junto a las compras de tokens, distinguidas por tipo. **DEFINIDO** (2026-10-06, FEAT-17)
 

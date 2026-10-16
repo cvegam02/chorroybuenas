@@ -1,5 +1,4 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { AIService } from '../../services/AIService';
 import { MAX_CHART_DAYS, dailyMoney, type DailyMoney, type DailyTotals } from '../../utils/adminSummary';
 
 // Colores de la paleta (src/index.css); SVG los acepta como variables de CSS.
@@ -25,10 +24,12 @@ interface SummaryChartProps {
   /** undefined mientras carga; null si el periodo es demasiado largo para dibujarlo. */
   daily: DailyTotals[] | null | undefined;
   usdPerMxn: number;
+  /** Costo de IA por imagen guardado en Precios y promos (FEAT-47). */
+  aiCostPerImageUsd: number;
 }
 
-export const SummaryChart = ({ daily, usdPerMxn }: SummaryChartProps) => {
-  const series = daily ? dailyMoney(daily, AIService.COST_PER_IMAGE, usdPerMxn) : [];
+export const SummaryChart = ({ daily, usdPerMxn, aiCostPerImageUsd }: SummaryChartProps) => {
+  const series = daily ? dailyMoney(daily, aiCostPerImageUsd, usdPerMxn) : [];
 
   return (
     <section className="admin-summary__card admin-summary__chart" aria-labelledby="admin-summary-chart">

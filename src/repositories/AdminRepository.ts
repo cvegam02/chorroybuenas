@@ -1,7 +1,6 @@
 import { logger } from '../utils/logger';
 import { supabase } from '../utils/supabaseClient';
 import {
-  hermosilloDayRange,
   type DailyTotals,
   type DashboardPending,
   type DashboardSummary,
@@ -53,20 +52,6 @@ export interface SalesFilters {
   search: string;
   kind: '' | SaleKind;
   status: SaleStatusFilter;
-}
-
-export interface AdminTokenUsage {
-  id: string;
-  user_id: string;
-  amount: number;
-  reason: string | null;
-  set_id: string | null;
-  created_at: string;
-}
-
-export interface AdminTokenUsageWithInfo extends AdminTokenUsage {
-  email: string | null;
-  set_name: string | null;
 }
 
 /** Renglón de la pestaña Usuarios (FEAT-45): una cuenta con su saldo, lo pagado y su última actividad. */
@@ -183,12 +168,6 @@ interface DashboardSummaryRow {
   top_loteria_sales: number;
 }
 
-/** Filtro por días de Uso de IA, en hora de Hermosillo como el Resumen (FEAT-43). */
-function usageDateParams(filters?: { dateFrom?: string; dateTo?: string }) {
-  const range = hermosilloDayRange(filters?.dateFrom ?? '', filters?.dateTo ?? '');
-  return { p_date_from: range.from, p_date_to: range.to };
-}
-
 /** Ventas por consulta al exportar: el máximo que acepta admin_get_sales (migración 039). */
 const SALES_EXPORT_PAGE = 1000;
 /** Tope de páginas al exportar (50 000 ventas), para no quedarse pidiendo sin fin. */
@@ -203,65 +182,6 @@ const salesFilterParams = (filters: SalesFilters) => ({
 });
 
 export class AdminRepository {
-  /**
-   * Uso de tokens (IA) con email y nombre de lotería (admin). Con filtros.
-   */
-  static async getTokenUsageWithInfo(
-    limit = 50,
-    offset = 0,
-    filters?: { email?: string; dateFrom?: string; dateTo?: string; setName?: string }
-  ): Promise<AdminTokenUsageWithInfo[]> {
-    const params: Record<string, unknown> = {
-      p_limit: limit,
-      p_offset: offset,
-      p_email: filters?.email?.trim() || null,
-      p_date_from: filters?.dateFrom ? filters.dateFrom + 'T00:00:00Z' : null,
-      p_date_to: filters?.dateTo ? filters.dateTo + 'T23:59:59Z' : null,
-      p_set_name: filters?.setName?.trim() || null,
-    };
-    const { data, error } = await supabase.rpc('admin_get_token_usage_with_users', params);
-
-    if (error) {
-      const fallback = await supabase
-        .from('token_usage')
-        .select('id, user_id, amount, reason, set_id, created_at')
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
-      if (fallback.error) return [];
-      return (fallback.data ?? []).map((r) => ({
-        ...r,
-        email: null as string | null,
-        set_name: null as string | null,
-      })) as AdminTokenUsageWithInfo[];
-    }
-    return (data ?? []) as AdminTokenUsageWithInfo[];
-  }
-
-  /**
-   * Total de registros de uso de tokens (admin). Con filtros para paginación.
-   */
-  static async getTokenUsageCount(filters?: {
-    email?: string;
-    dateFrom?: string;
-    dateTo?: string;
-    setName?: string;
-  }): Promise<number> {
-    const hasFilters = filters && (filters.email?.trim() || filters.dateFrom || filters.dateTo || filters.setName?.trim());
-    if (hasFilters) {
-      const { data, error } = await supabase.rpc('admin_get_token_usage_count', {
-        p_email: filters?.email?.trim() || null,
-        p_date_from: filters?.dateFrom ? filters.dateFrom + 'T00:00:00Z' : null,
-        p_date_to: filters?.dateTo ? filters.dateTo + 'T23:59:59Z' : null,
-        p_set_name: filters?.setName?.trim() || null,
-      });
-      if (error) return 0;
-      return (data as number) ?? 0;
-    }
-    const { count, error } = await supabase.from('token_usage').select('*', { count: 'exact', head: true });
-    if (error) return 0;
-    return count ?? 0;
-  }
-
   /** Una página de la pestaña Ventas (FEAT-44); nulo si falla. */
   static async getSales(filters: SalesFilters, limit: number, offset: number): Promise<AdminSaleRow[] | null> {
     const { data, error } = await supabase.rpc('admin_get_sales', {
@@ -388,74 +308,6 @@ export class AdminRepository {
       giftedTokens: Number(row?.gifted_tokens ?? 0),
       giftRecipients: Number(row?.gift_recipients ?? 0),
     };
-  }
-
-  /** Resumen de uso: total tokens, usuarios únicos, sets únicos */
-  static async getUsageSummary(filters?: { dateFrom?: string; dateTo?: string }): Promise<{
-    totalTokens: number;
-    uniqueUsers: number;
-    uniqueSets: number;
-  }> {
-    const { data, error } = await supabase.rpc('admin_get_usage_summary', {
-      ...usageDateParams(filters),
-    });
-    if (error) return { totalTokens: 0, uniqueUsers: 0, uniqueSets: 0 };
-    const row = Array.isArray(data) ? data[0] : data;
-    return {
-      totalTokens: Number(row?.total_tokens ?? 0),
-      uniqueUsers: Number(row?.unique_users ?? 0),
-      uniqueSets: Number(row?.unique_sets ?? 0),
-    };
-  }
-
-  /** Tokens por día (para gráfica) */
-  static async getUsageByDay(
-    days = 30,
-    filters?: { dateFrom?: string; dateTo?: string }
-  ): Promise<{ day: string; tokens: number }[]> {
-    const { data, error } = await supabase.rpc('admin_get_usage_by_day', {
-      p_days: days,
-      ...usageDateParams(filters),
-    });
-    if (error) return [];
-    return (data ?? []).map((r: { day: string; tokens: number }) => ({
-      day: r.day,
-      tokens: Number(r.tokens ?? 0),
-    }));
-  }
-
-  /** Top usuarios por tokens */
-  static async getUsageByUser(
-    limit = 10,
-    filters?: { dateFrom?: string; dateTo?: string }
-  ): Promise<{ user_id: string; email: string | null; total_tokens: number }[]> {
-    const { data, error } = await supabase.rpc('admin_get_usage_by_user', {
-      p_limit: limit,
-      ...usageDateParams(filters),
-    });
-    if (error) return [];
-    return (data ?? []).map((r: { user_id: string; email: string | null; total_tokens: number }) => ({
-      user_id: r.user_id,
-      email: r.email,
-      total_tokens: Number(r.total_tokens ?? 0),
-    }));
-  }
-
-  /** Top loterías por tokens */
-  static async getUsageBySet(
-    limit = 10,
-    filters?: { dateFrom?: string; dateTo?: string }
-  ): Promise<{ set_id: string; set_name: string | null; total_tokens: number }[]> {
-    const { data, error } = await supabase.rpc('admin_get_usage_by_set', {
-      p_limit: limit,
-      ...usageDateParams(filters),
-    });
-    if (error) return [];
-    return (data ?? []).map((r: { set_id: string; set_name: string | null; total_tokens: number }) => ({
-      set_id: r.set_id,
-      set_name: r.set_name,
-      total_tokens: Number(r.total_tokens ?? 0),
-    }));
   }
 
   /** Una página de la pestaña Usuarios (FEAT-45), sobre todas las cuentas; nulo si falla. */
@@ -752,5 +604,26 @@ export class AdminRepository {
       return null;
     }
     return data;
+  }
+
+  /** Costo de IA por imagen en USD con que el Resumen estima el gasto (FEAT-47). null si falla. */
+  static async getAiCostPerImage(): Promise<number | null> {
+    const { data, error } = await supabase.rpc('admin_get_ai_cost_per_image');
+    const cost = Number(data);
+    if (error || data == null || !(cost > 0)) {
+      logger.error('AdminRepository.getAiCostPerImage:', error?.message ?? 'respuesta inesperada');
+      return null;
+    }
+    return cost;
+  }
+
+  static async setAiCostPerImage(costUsd: number): Promise<number | null> {
+    const { data, error } = await supabase.rpc('admin_set_ai_cost_per_image', { p_cost_usd: costUsd });
+    const cost = Number(data);
+    if (error || data == null || !(cost > 0)) {
+      logger.error('AdminRepository.setAiCostPerImage:', error?.message ?? 'respuesta inesperada');
+      return null;
+    }
+    return cost;
   }
 }

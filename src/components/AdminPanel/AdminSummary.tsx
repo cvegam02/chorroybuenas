@@ -63,11 +63,12 @@ export const AdminSummary = ({ onOpenTab, onOpenGifts }: AdminSummaryProps) => {
       chartFits ? AdminRepository.getDashboardDaily(selection.period) : Promise.resolve(null),
       AdminRepository.getDashboardPending(selection.period),
       TokenPricingRepository.getExchangeRateMxnUsd(),
+      AdminRepository.getAiCostPerImage(),
     ])
-      .then(([totals, previousTotals, daily, pending, usdPerMxn]) => {
+      .then(([totals, previousTotals, daily, pending, usdPerMxn, aiCostPerImageUsd]) => {
         if (!current) return;
-        if (totals && previousTotals && pending && (daily || !chartFits)) {
-          setData({ totals, previous: previousTotals, daily, pending, usdPerMxn });
+        if (totals && previousTotals && pending && aiCostPerImageUsd != null && (daily || !chartFits)) {
+          setData({ totals, previous: previousTotals, daily, pending, usdPerMxn, aiCostPerImageUsd });
         } else {
           setFailed(true);
         }
@@ -108,6 +109,7 @@ export const AdminSummary = ({ onOpenTab, onOpenGifts }: AdminSummaryProps) => {
           <SummaryChart
             daily={loading || !data ? undefined : data.daily}
             usdPerMxn={data?.usdPerMxn ?? 0}
+            aiCostPerImageUsd={data?.aiCostPerImageUsd ?? 0}
           />
           <SummaryPending pending={loading ? null : data?.pending ?? null} onOpenTab={openTab} />
         </>

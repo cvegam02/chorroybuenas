@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { AdminRepository } from '../../repositories/AdminRepository';
 import { AppConfigRepository } from '../../repositories/AppConfigRepository';
 import { welcomeEstimateLabel } from '../../utils/adminPricing';
+import { AdminAiCostCard } from './AdminAiCostCard';
 import { AdminPriceCard } from './AdminPriceCard';
 
 interface AdminPricingBasicsProps {
@@ -11,7 +12,10 @@ interface AdminPricingBasicsProps {
   onPriceSaved: (priceCents: number) => void;
 }
 
-/** «Lo básico» de Precios y promos (FEAT-46): precio por token (editable desde US A2) y tokens de bienvenida. */
+/**
+ * «Lo básico» de Precios y promos (FEAT-46): precio por token (editable desde US A2), tokens de bienvenida y,
+ * desde FEAT-47, el costo de IA por imagen.
+ */
 export const AdminPricingBasics = ({ priceCents, priceError, onPriceSaved }: AdminPricingBasicsProps) => {
   const [newAccounts, setNewAccounts] = useState<number | null>(null);
   // Lo guardado (para el estimado) y lo que se está escribiendo.
@@ -109,6 +113,8 @@ export const AdminPricingBasics = ({ priceCents, priceError, onPriceSaved }: Adm
           <p className="admin-pricing__muted">{welcomeEstimateLabel(newAccounts, welcomeSaved, priceCents)}</p>
         )}
       </form>
+
+      <AdminAiCostCard />
     </div>
   );
 };

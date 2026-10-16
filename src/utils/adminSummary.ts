@@ -4,7 +4,6 @@
  */
 
 const TIME_ZONE = 'America/Hermosillo';
-const UTC_OFFSET = '-07:00';
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export type SummaryPeriodKind = 'today' | 'week' | 'month' | 'year';
@@ -81,16 +80,8 @@ export function customPeriod(from: string, to: string): SummaryPeriod | null {
   return { from, to };
 }
 
-/** Límites de un filtro por días (Uso de IA) en hora de Hermosillo; vacío no filtra. */
-export function hermosilloDayRange(dateFrom: string, dateTo: string): { from: string | null; to: string | null } {
-  return {
-    from: dateFrom ? `${dateFrom}T00:00:00${UTC_OFFSET}` : null,
-    to: dateTo ? `${dateTo}T23:59:59.999${UTC_OFFSET}` : null,
-  };
-}
-
 /**
- * Ingresos, gasto en IA y ganancia. El gasto usa el mismo cálculo que la pestaña Uso de IA:
+ * Ingresos, gasto en IA y ganancia. El gasto en IA se estima así:
  * imágenes × costo por imagen en USD, pasado a pesos con el tipo de cambio (USD por peso).
  * La ganancia no descuenta la comisión de Mercado Pago, que no se guarda.
  */
@@ -168,7 +159,7 @@ export interface DailyMoney {
   aiCost: number;
 }
 
-/** Serie de la gráfica en pesos; el gasto en IA usa el mismo cálculo que las tarjetas y Uso de IA. */
+/** Serie de la gráfica en pesos; el gasto en IA usa el mismo cálculo que las tarjetas. */
 export function dailyMoney(rows: readonly DailyTotals[], costPerImageUsd: number, usdPerMxn: number): DailyMoney[] {
   return rows.map((row) => ({
     day: row.day,

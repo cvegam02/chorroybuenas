@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  aiCostDraft,
+  aiCostPesosLabel,
   minimumPurchaseLabel,
   packCard,
   packSalesLabel,
+  parseAiCostInput,
   parsePriceInput,
   priceChangeMessage,
   pricePerTokenLabel,
@@ -124,5 +127,36 @@ describe('packSalesLabel', () => {
     expect(packSalesLabel(0)).toBe('0 ventas este mes');
     expect(packSalesLabel(1)).toBe('1 venta este mes');
     expect(packSalesLabel(1234)).toBe('1,234 ventas este mes');
+  });
+});
+
+describe('costo de IA por imagen (FEAT-47, US A1)', () => {
+  it('lee dólares con hasta seis decimales, con punto, coma o signo de pesos', () => {
+    expect(parseAiCostInput('0.012')).toBe(0.012);
+    expect(parseAiCostInput(' 0,047 ')).toBe(0.047);
+    expect(parseAiCostInput('$0.128')).toBe(0.128);
+    expect(parseAiCostInput('1')).toBe(1);
+    expect(parseAiCostInput('.5')).toBe(0.5);
+    expect(parseAiCostInput('0.012345')).toBe(0.012345);
+  });
+
+  it('rechaza vacío, cero, negativos, texto y más de seis decimales', () => {
+    expect(parseAiCostInput('')).toBeNull();
+    expect(parseAiCostInput('0')).toBeNull();
+    expect(parseAiCostInput('0.000')).toBeNull();
+    expect(parseAiCostInput('-0.01')).toBeNull();
+    expect(parseAiCostInput('doce')).toBeNull();
+    expect(parseAiCostInput('0.0123456')).toBeNull();
+  });
+
+  it('equivalente en pesos con el tipo de cambio actual (USD por peso)', () => {
+    expect(aiCostPesosLabel(0.012, 1 / 18.4)).toBe('≈ $0.22 MXN');
+    expect(aiCostPesosLabel(0.128, 1 / 18.4)).toBe('≈ $2.36 MXN');
+    expect(aiCostPesosLabel(0.012, 0)).toBe('sin tipo de cambio');
+  });
+
+  it('el campo muestra el costo guardado sin ceros de sobra', () => {
+    expect(aiCostDraft(0.012)).toBe('0.012');
+    expect(aiCostDraft(0.0245)).toBe('0.0245');
   });
 });

@@ -5,7 +5,6 @@ import {
   periodDays,
   percentChange,
   previousPeriod,
-  hermosilloDayRange,
   hermosilloToday,
   summaryMoney,
   summaryPeriod,
@@ -74,23 +73,10 @@ describe('rango de fechas elegido a mano', () => {
   });
 });
 
-describe('filtro de fechas de Uso de IA en hora de Hermosillo', () => {
-  it('el día empieza y termina a la medianoche de Hermosillo', () => {
-    expect(hermosilloDayRange('2026-10-01', '2026-10-15')).toEqual({
-      from: '2026-10-01T00:00:00-07:00',
-      to: '2026-10-15T23:59:59.999-07:00',
-    });
-  });
-
-  it('sin fechas no filtra', () => {
-    expect(hermosilloDayRange('', '')).toEqual({ from: null, to: null });
-  });
-});
-
 describe('dinero del Resumen', () => {
   const totals = { tokensRevenueCents: 20000, seasonalRevenueCents: 9800, aiImages: 100 };
 
-  it('ingresos suma tokens y temáticas; el gasto en IA usa el mismo cálculo que Uso de IA', () => {
+  it('ingresos suma tokens y temáticas; el gasto en IA es imágenes × costo por imagen en pesos', () => {
     // 100 imágenes × 0.013 USD = 1.3 USD; con 0.05 USD por peso son $26.00.
     expect(summaryMoney(totals, 0.013, 0.05)).toEqual({
       revenueCents: 29800,
@@ -99,7 +85,7 @@ describe('dinero del Resumen', () => {
     });
   });
 
-  it('el gasto en IA se redondea al centavo, igual que en Uso de IA', () => {
+  it('el gasto en IA se redondea al centavo', () => {
     // 7 × 0.013 = 0.091 USD; / 0.0545 = 1.66972… pesos → 167 centavos.
     expect(summaryMoney({ ...totals, aiImages: 7 }, 0.013, 0.0545).aiCostCents).toBe(167);
   });

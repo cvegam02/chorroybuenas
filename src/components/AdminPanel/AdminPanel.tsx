@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   FaCog, FaArrowLeft, FaTicketAlt, FaShoppingCart,
-  FaUsers, FaChartLine, FaTags, FaBars, FaTimes, FaThLarge
+  FaUsers, FaTags, FaBars, FaTimes, FaThLarge
 } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import { signupSalesPeriod } from '../../utils/adminUsers';
@@ -11,18 +11,16 @@ import { AdminSales, type SalesPreset } from './AdminSales';
 import { AdminPricing } from './AdminPricing';
 import { AdminUsers, type UsersPreset } from './AdminUsers';
 import type { PeriodSelection } from './AdminPeriodPicker';
-import { AdminTokenUsage } from './AdminTokenUsage';
 import { AdminSeasonal } from './AdminSeasonal';
 import './AdminPanel.css';
 
-type AdminTab = 'resumen' | 'ventas' | 'usuarios' | 'precios' | 'uso-ia' | 'temporada';
+type AdminTab = 'resumen' | 'ventas' | 'usuarios' | 'precios' | 'temporada';
 
 const TABS: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
   { id: 'resumen',     label: 'Resumen',            icon: <FaThLarge /> },
   { id: 'ventas',      label: 'Ventas',             icon: <FaShoppingCart /> },
   { id: 'usuarios',    label: 'Usuarios',           icon: <FaUsers /> },
   { id: 'precios',     label: 'Precios y promos',   icon: <FaTicketAlt /> },
-  { id: 'uso-ia',      label: 'Uso de IA',          icon: <FaChartLine /> },
   { id: 'temporada',   label: 'Temáticas',          icon: <FaTags /> },
 ];
 
@@ -183,7 +181,6 @@ export const AdminPanel = () => {
           {activeTab === 'ventas'      && <AdminSales preset={salesPreset} onOpenClient={openClient} />}
           {activeTab === 'usuarios'    && <AdminUsers preset={usersPreset} onOpenSales={openUserSales} />}
           {activeTab === 'precios'     && <AdminPricing />}
-          {activeTab === 'uso-ia'      && <AdminTokenUsage />}
           {activeTab === 'temporada'   && <AdminSeasonal />}
         </div>
       </main>
