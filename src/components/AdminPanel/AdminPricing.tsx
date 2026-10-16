@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AdminRepository } from '../../repositories/AdminRepository';
+import { AdminOffers } from './AdminOffers';
 import { AdminPricingBasics } from './AdminPricingBasics';
 import { AdminPromotions } from './AdminPromotions';
 import { AdminTokenPacks } from './AdminTokenPacks';
@@ -8,7 +9,7 @@ import './AdminPricing.css';
 
 const CURRENCY = 'MXN';
 
-/** Pestaña Precios y promos (FEAT-46): junta Promociones y Packs de tokens en tres secciones. */
+/** Pestaña Precios y promos (FEAT-46): junta Promociones y Packs de tokens; desde FEAT-49, también las ofertas. */
 export const AdminPricing = () => {
   // El precio por token lo usan «Lo básico» y el ahorro de cada pack (US A3).
   const [priceCents, setPriceCents] = useState<number | null>(null);
@@ -43,6 +44,10 @@ export const AdminPricing = () => {
 
       <section className="admin-pricing__section" aria-labelledby="admin-pricing-packs">
         <AdminTokenPacks priceCents={priceCents} titleId="admin-pricing-packs" />
+      </section>
+
+      <section className="admin-pricing__section" aria-labelledby="admin-pricing-offers">
+        <AdminOffers priceCents={priceCents} titleId="admin-pricing-offers" />
       </section>
 
       <section className="admin-pricing__section" aria-labelledby="admin-pricing-promos">

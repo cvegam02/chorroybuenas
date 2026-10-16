@@ -242,6 +242,14 @@
   color: var(--color-season);
 }
 
+/* Venta hecha con oferta (FEAT-49): el nombre va como se escribió, sin mayúsculas. */
+.admin-sales__tag--offer {
+  background: var(--color-accent-light);
+  color: var(--color-text-main);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 .admin-sales__status {
   display: inline-flex;
   align-items: center;

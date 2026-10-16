@@ -589,3 +589,22 @@
     width: 140px;
   }
 }
+
+/* Oferta vigente en la cantidad libre (FEAT-49): el precio por token normal tachado y la etiqueta. */
+.buy-tokens__custom-offer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 0;
+}
+
+/* La oferta cambió con la pantalla abierta (FEAT-49, decisión 18). */
+.buy-tokens__offer-notice {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-light);
+  color: var(--color-text-main);
+  font-weight: 600;
+}

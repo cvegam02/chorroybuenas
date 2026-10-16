@@ -1,0 +1,453 @@
+/* Ofertas con banner (FEAT-49): sección de Precios y promos y pantalla de la oferta. Solo colores de la paleta. */
+.admin-offers__new {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0;
+  text-decoration: none;
+}
+
+.admin-offers__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-offers__card {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+}
+
+.admin-offers__card:hover {
+  border-color: var(--color-primary-lighter);
+}
+
+.admin-offers__thumb {
+  width: 96px;
+  height: 60px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: repeating-linear-gradient(135deg, var(--color-primary-dark) 0 16px, var(--color-primary) 16px 32px);
+}
+
+.admin-offers__text {
+  display: flex;
+  flex: 1 1 220px;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.admin-offers__name {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.admin-offers__status {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--color-text-main);
+}
+
+.admin-offers__status--scheduled {
+  background: var(--color-accent-light);
+}
+
+.admin-offers__status--current {
+  background: var(--color-secondary-light);
+}
+
+.admin-offers__status--ended {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-dark);
+  color: var(--color-text-muted);
+}
+
+.admin-offers__status--cancelled {
+  background: var(--color-bg-tertiary);
+}
+
+/* Pantalla de la oferta (A1.2a). */
+.admin-offer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1200px;
+}
+
+/* El formulario a la izquierda y la vista previa a la derecha; en pantallas angostas, una debajo de otra. */
+.admin-offer__layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 22px;
+}
+
+.admin-offer__main {
+  display: flex;
+  flex: 1 1 420px;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.admin-offer__header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-offer__back {
+  align-self: flex-start;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-primary-dark);
+  text-decoration: none;
+}
+
+.admin-offer__back:hover {
+  color: var(--color-primary);
+}
+
+.admin-offer__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-offer__title {
+  margin: 0;
+  font-size: 1.8rem;
+  color: var(--color-text-main);
+}
+
+.admin-offer__part {
+  gap: 16px;
+}
+
+.admin-offer__part-title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.admin-offer__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+}
+
+.admin-offer__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.admin-offer__input {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--color-text-main);
+}
+
+.admin-offer__input:disabled {
+  background: var(--color-bg-tertiary);
+}
+
+.admin-offer__input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.admin-offer__table-box {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.admin-offer__table {
+  width: 100%;
+  min-width: 420px;
+  border-collapse: collapse;
+}
+
+.admin-offer__table th {
+  padding: 10px 14px;
+  background: var(--color-bg-subtle);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+}
+
+.admin-offer__table td {
+  padding: 10px 14px;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.9rem;
+}
+
+.admin-offer__normal {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+
+.admin-offer__discounted {
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.admin-offer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.admin-offer__actions .admin-pricing__btn {
+  margin-left: 0;
+}
+
+.admin-offer__cancel {
+  color: var(--color-danger);
+}
+
+.admin-offer__cancel:hover:not(:disabled) {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+/* Parte «2 · El banner» (US A4). */
+.admin-offer__part-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-offer__fields--wide {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.admin-offer__file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--radius-sm);
+  font-weight: 400;
+}
+
+.admin-offer__thumb {
+  width: 64px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 6px;
+}
+
+.admin-offer__thumb--image {
+  width: 40px;
+  object-fit: cover;
+}
+
+.admin-offer__thumb--square {
+  width: 40px;
+  background: var(--color-primary);
+}
+
+.admin-offer__file-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.admin-offer__file-name {
+  overflow: hidden;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-offer__file-btn {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0;
+  min-height: 40px;
+}
+
+.admin-offer__file-btn--off {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-offer__file-btn:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.admin-offer__check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.admin-offer__check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-secondary-dark);
+}
+
+.admin-offer__check--strong {
+  font-weight: 700;
+}
+
+.admin-offer__group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.admin-offer__legend {
+  padding: 0;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.admin-offer__checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.admin-offer__english {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.admin-offer__english summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-offer__english[open] > *:not(summary) {
+  margin-top: 12px;
+}
+
+/* Vista previa (decisión 14). */
+.admin-offer__preview {
+  display: flex;
+  flex: 1 1 360px;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.admin-offer__preview-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-offer__seg {
+  display: flex;
+}
+
+.admin-offer__seg-btn {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.admin-offer__seg-btn:first-child {
+  border-radius: var(--radius-full) 0 0 var(--radius-full);
+}
+
+.admin-offer__seg-btn:last-child {
+  border-left: 0;
+  border-radius: 0 var(--radius-full) var(--radius-full) 0;
+}
+
+.admin-offer__seg-btn--on {
+  border-color: var(--color-primary-lighter);
+  background: var(--color-primary-lightest);
+  color: var(--color-primary-dark);
+}
+
+.admin-offer__device {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-base);
+}
+
+.admin-offer__device--mobile {
+  width: 260px;
+  max-width: 100%;
+  align-self: center;
+  border: 6px solid var(--color-text-main);
+  border-radius: 26px;
+}
+
+.admin-offer__device-content {
+  height: 70px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+}
+
+.admin-offer__preview-empty {
+  margin: 0;
+  padding: 24px 12px;
+  border: 1px dashed var(--color-border-dark);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.admin-offers__thumb--image {
+  object-fit: cover;
+  background: var(--color-bg-tertiary);
+}

@@ -69,3 +69,47 @@ describe('buildCreditParams', () => {
     expect(buildCreditParams(input({ metadata: meta(over) }))).toBe(null);
   });
 });
+
+describe('buildCreditParams con oferta', () => {
+  const offerMeta = (over: Partial<PreferenceMetadata> = {}) =>
+    meta({ base_tokens: 20, bonus_tokens: 5, promotion_bonus: 0, promotion_id: null, promotion_type: null,
+      amount_cents: 3000, offer_id: 'offer-1', offer_percent: 25, ...over });
+
+  it('guarda la oferta que tuvo la compra', () => {
+    expect(buildCreditParams(input({ metadata: offerMeta(), payment: { transaction_amount: 30 } }))).toMatchObject({
+      p_tokens_to_add: 25, p_amount_cents: 3000, p_offer_id: 'offer-1', p_offer_percent: 25,
+    });
+  });
+
+  it('sin oferta manda la oferta vacía', () => {
+    expect(buildCreditParams(input())).toMatchObject({ p_offer_id: null, p_offer_percent: null });
+  });
+
+  it('un pago pendiente iniciado con oferta se acredita con el precio con descuento, aunque la oferta ya terminó', () => {
+    // La acreditación compara contra el monto guardado al iniciar ese pago, no contra la oferta de hoy.
+    expect(buildCreditParams(input({ metadata: offerMeta(), payment: { transaction_amount: 30 }, status: 'approved' }))).not.toBe(null);
+  });
+
+  it('rechaza un monto menor al esperado para ese pago', () => {
+    expect(buildCreditParams(input({ metadata: offerMeta(), payment: { transaction_amount: 29.99 } }))).toBe(null);
+  });
+
+  it('oferta + código: acredita los tokens extra del código', () => {
+    const r = buildCreditParams(input({
+      metadata: offerMeta({ promotion_bonus: 4, promotion_id: 'promo-1', promotion_type: 'code' }),
+      payment: { transaction_amount: 30 },
+    }));
+    expect(r).toMatchObject({ p_tokens_to_add: 29, p_offer_percent: 25, p_promotion_ids: ['promo-1'] });
+  });
+
+  it.each([
+    ['descuento sin oferta', { offer_id: null, offer_percent: 25 }],
+    ['oferta sin descuento', { offer_id: 'offer-1', offer_percent: null }],
+    ['descuento de 0%', { offer_percent: 0 }],
+    ['descuento de 100%', { offer_percent: 100 }],
+    ['descuento fraccionario', { offer_percent: 12.5 }],
+    ['oferta que no es texto', { offer_id: 7 as unknown as string }],
+  ])('rechaza metadata de oferta inválida: %s', (_name, over) => {
+    expect(buildCreditParams(input({ metadata: offerMeta(over), payment: { transaction_amount: 30 } }))).toBe(null);
+  });
+});

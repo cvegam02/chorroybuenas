@@ -6,13 +6,13 @@ const pack = { id: 'pack-1', base_tokens: 10, bonus_tokens: 2, price_cents: 2000
 describe('resolvePurchaseItem', () => {
   it('toma tokens y precio del pack', () => {
     expect(resolvePurchaseItem({ pack, customTokens: null, pricePerTokenCents: 200 })).toEqual({
-      ok: true, value: { packId: 'pack-1', baseTokens: 10, bonusTokens: 2, amountCents: 2000 },
+      ok: true, value: { packId: 'pack-1', baseTokens: 10, bonusTokens: 2, amountCents: 2000, offer: null },
     });
   });
 
   it('calcula el monto de una cantidad libre con el precio por token', () => {
     expect(resolvePurchaseItem({ pack: null, customTokens: 25, pricePerTokenCents: 150 })).toEqual({
-      ok: true, value: { packId: null, baseTokens: 25, bonusTokens: 0, amountCents: 3750 },
+      ok: true, value: { packId: null, baseTokens: 25, bonusTokens: 0, amountCents: 3750, offer: null },
     });
   });
 
@@ -32,9 +32,46 @@ describe('resolvePurchaseItem', () => {
   });
 });
 
+describe('resolvePurchaseItem con oferta vigente', () => {
+  const offer = { id: 'offer-1', percent: 25 };
+
+  it('descuenta el porcentaje del precio del pack', () => {
+    expect(resolvePurchaseItem({ pack: { ...pack, base_tokens: 20, bonus_tokens: 5, price_cents: 4000 }, customTokens: null, pricePerTokenCents: 200, offer })).toEqual({
+      ok: true, value: { packId: 'pack-1', baseTokens: 20, bonusTokens: 5, amountCents: 3000, offer },
+    });
+  });
+
+  it('en la cantidad libre descuenta el precio por token: $2.00 → $1.50', () => {
+    expect(resolvePurchaseItem({ pack: null, customTokens: 10, pricePerTokenCents: 200, offer })).toEqual({
+      ok: true, value: { packId: null, baseTokens: 10, bonusTokens: 0, amountCents: 1500, offer },
+    });
+  });
+
+  it('redondea el precio por token al centavo antes de multiplicar', () => {
+    // $1.99 con 25% = $1.4925 → $1.49 por token; 10 tokens = $14.90 (no $14.93).
+    const r = resolvePurchaseItem({ pack: null, customTokens: 10, pricePerTokenCents: 199, offer });
+    expect(r.ok && r.value.amountCents).toBe(1490);
+  });
+
+  it('redondea al centavo el precio del pack', () => {
+    const r = resolvePurchaseItem({ pack: { ...pack, price_cents: 1999 }, customTokens: null, pricePerTokenCents: 200, offer });
+    expect(r.ok && r.value.amountCents).toBe(1499);
+  });
+
+  it('el descuento no cambia los tokens', () => {
+    const r = resolvePurchaseItem({ pack, customTokens: null, pricePerTokenCents: 200, offer });
+    expect(r.ok && [r.value.baseTokens, r.value.bonusTokens]).toEqual([10, 2]);
+  });
+
+  it('sin oferta cobra el precio normal', () => {
+    const r = resolvePurchaseItem({ pack, customTokens: null, pricePerTokenCents: 200, offer: null });
+    expect(r.ok && r.value.amountCents).toBe(2000);
+  });
+});
+
 describe('buildPreference', () => {
   const base = {
-    item: { packId: 'pack-1', baseTokens: 10, bonusTokens: 2, amountCents: 2000 },
+    item: { packId: 'pack-1', baseTokens: 10, bonusTokens: 2, amountCents: 2000, offer: null },
     promotion: null,
     userId: 'user-1',
     appUrl: 'https://chorroybuenas.com.mx',
@@ -46,6 +83,7 @@ describe('buildPreference', () => {
     expect(p.metadata).toEqual({
       user_id: 'user-1', pack_id: 'pack-1', base_tokens: 10, bonus_tokens: 2, promotion_bonus: 0,
       total_tokens: 12, amount_cents: 2000, promotion_id: null, promotion_type: null,
+      offer_id: null, offer_percent: null,
     });
     expect(p.items[0]).toMatchObject({ title: 'Tokens de IA - 12 tokens', quantity: 1, unit_price: 20, currency_id: 'MXN' });
     expect(p.items[0].description).toBe('Pack de 10 tokens + 2 de regalo');
@@ -82,5 +120,36 @@ describe('buildPreference', () => {
   it('convierte centavos a pesos sin perder decimales', () => {
     const p = buildPreference({ ...base, item: { ...base.item, amountCents: 1999 } });
     expect(p.items[0].unit_price).toBe(19.99);
+  });
+
+  it('con oferta cobra el precio con descuento y guarda la oferta', () => {
+    const offer = { id: 'offer-1', percent: 25 };
+    const p = buildPreference({ ...base, item: { packId: 'pack-20', baseTokens: 20, bonusTokens: 5, amountCents: 3000, offer } });
+    expect(p.metadata).toMatchObject({ amount_cents: 3000, offer_id: 'offer-1', offer_percent: 25, total_tokens: 25 });
+    expect(p.items[0].unit_price).toBe(30);
+    expect(p.items[0].description).toBe('Pack de 20 tokens + 5 de regalo · 25% de descuento');
+  });
+
+  it('oferta + código: el descuento en el precio y los tokens extra del código se suman', () => {
+    const offer = { id: 'offer-1', percent: 25 };
+    const p = buildPreference({
+      ...base,
+      item: { packId: 'pack-20', baseTokens: 20, bonusTokens: 5, amountCents: 3000, offer },
+      promotion: { id: 'promo-1', type: 'code', percent: 20 },
+    });
+    expect(p.metadata).toMatchObject({
+      amount_cents: 3000, offer_id: 'offer-1', offer_percent: 25,
+      promotion_bonus: 4, promotion_id: 'promo-1', total_tokens: 29,
+    });
+  });
+
+  it('oferta + primera compra: también se suman', () => {
+    const offer = { id: 'offer-1', percent: 25 };
+    const p = buildPreference({
+      ...base,
+      item: { packId: null, baseTokens: 10, bonusTokens: 0, amountCents: 1500, offer },
+      promotion: { id: 'promo-2', type: 'first_purchase', percent: 10 },
+    });
+    expect(p.metadata).toMatchObject({ amount_cents: 1500, offer_percent: 25, promotion_bonus: 1, total_tokens: 11 });
   });
 });

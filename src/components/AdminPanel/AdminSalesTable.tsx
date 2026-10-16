@@ -1,6 +1,6 @@
 import { FaChevronRight } from 'react-icons/fa';
 import type { AdminSaleRow } from '../../repositories/AdminRepository';
-import { saleDateTime, saleItemLabel, saleStatus } from '../../utils/adminSales';
+import { saleDateTime, saleItemLabel, saleOfferLabel, saleStatus } from '../../utils/adminSales';
 
 const moneyFormat = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 2 });
 
@@ -57,6 +57,7 @@ export const AdminSalesTable = ({ rows, selectedKey, onSelect }: AdminSalesTable
                     {seasonal ? 'Temática' : 'Tokens'}
                   </span>
                   <span className="admin-sales__main">{saleItemLabel(sale)}</span>
+                  {saleOfferLabel(sale) && <span className="admin-sales__tag admin-sales__tag--offer">{saleOfferLabel(sale)}</span>}
                 </span>
               </td>
               <td data-label="Monto" className="admin-sales__amount">

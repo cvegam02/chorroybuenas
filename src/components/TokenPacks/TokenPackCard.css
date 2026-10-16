@@ -78,6 +78,43 @@
   font-size: 28px;
 }
 
+/* Oferta vigente (FEAT-49): el precio normal tachado y la etiqueta del descuento, arriba del precio. */
+.token-pack__offer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.token-pack__was {
+  color: var(--color-text-muted);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.token-pack__offer-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: var(--color-text-main);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.token-pack__price--offer {
+  margin-top: 0;
+}
+
+.token-pack__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 .token-pack__price-note {
   color: var(--color-text-muted);
   font-size: 13px;
