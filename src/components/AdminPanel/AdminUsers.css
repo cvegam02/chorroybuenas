@@ -1,0 +1,244 @@
+/* Pestaña Usuarios (FEAT-45). Reutiliza la lista, los filtros y la tabla de Ventas; solo colores de la paleta. */
+.admin-users__tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-users__tab {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.admin-users__tab:hover {
+  color: var(--color-primary-dark);
+}
+
+.admin-users__tab--active {
+  border-bottom-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}
+
+.admin-users__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-users__person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-users__avatar {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-lighter);
+  color: var(--color-text-main);
+  font-weight: 700;
+}
+
+.admin-users__avatar--large {
+  width: 48px;
+  height: 48px;
+  font-size: 1.25rem;
+}
+
+/* Ficha del usuario (US A2): usa el panel del detalle de Ventas. */
+.admin-users__balance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.admin-users__balance-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.admin-users__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-users__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.admin-users__stat b {
+  font-size: 1.25rem;
+  color: var(--color-text-main);
+}
+
+/* Regalos de tokens (US A4): selector de periodo y tres totales. */
+.admin-users__gifts-head {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.admin-users__totals {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Actividad de la ficha (US A3). Íconos según la decisión 10. */
+.admin-users__activity {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-users__event {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.admin-users__event:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.admin-users__event-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.admin-users__event-icon--buy {
+  background: var(--color-primary-lightest);
+  color: var(--color-primary-dark);
+}
+
+.admin-users__event-icon--gift {
+  background: var(--color-secondary-light);
+  color: var(--color-text-main);
+}
+
+.admin-users__event-icon--ai,
+.admin-users__event-icon--seasonal {
+  background: var(--color-season-light);
+  color: var(--color-season);
+}
+
+.admin-users__event-icon--signup {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-main);
+}
+
+.admin-users__event-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.875rem;
+}
+
+.admin-users__event-value {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.admin-gift-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-gift-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.admin-gift-form__error {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-danger);
+}
+
+.admin-gift-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.admin-gift-form__btn {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.admin-gift-form__btn--primary {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+}
+
+.admin-gift-form__btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.admin-gift-form__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .admin-users__totals {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-users__gifts-head {
+    justify-content: flex-start;
+  }
+
+  .admin-sales__table .admin-users__person {
+    justify-content: flex-end;
+    text-align: right;
+  }
+}

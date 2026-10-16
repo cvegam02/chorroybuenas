@@ -13,8 +13,8 @@ import {
   type CatalogLoteria,
   type CatalogSeason,
 } from '../../utils/seasonalCatalog';
-import { formatUsdReference } from '../../utils/usdReference';
 import { FaqSection } from '../Faq/FaqSection';
+import { ThemedCard } from './ThemedCard';
 import '../LandingPage/LandingPage.css';
 import './SeasonalCatalog.css';
 import './SeasonalCatalogPage.css';
@@ -24,7 +24,6 @@ interface CatalogData {
   loterias: CatalogLoteria[];
 }
 
-const PRICE_FORMAT = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
 const SKELETON_CARDS = [0, 1, 2];
 const CATALOG_ID = 'catalogo';
 
@@ -107,86 +106,16 @@ export const SeasonalCatalog = () => {
     ...(linkTo && { linkLabel: t(`seasonal.catalog.faq.${id}.link`), linkTo }),
   }));
 
-  const renderTags = (loteria: CatalogLoteria) => (
-    <ul className="themed-card__tags">
-      <li className="themed-card__tag themed-card__tag--mode">
-        {t(loteria.grid_size === 9 ? 'seasonal.modeKids' : 'seasonal.modeClassic')}
-      </li>
-      {loteria.card_count !== null && (
-        <li className="themed-card__tag">{t('seasonal.cards', { count: loteria.card_count })}</li>
-      )}
-      {loteria.board_count !== null && (
-        <li className="themed-card__tag">{t('seasonal.boards', { count: loteria.board_count })}</li>
-      )}
-    </ul>
-  );
-
-  const renderPrice = (loteria: CatalogLoteria) => {
-    if (ownedIds.includes(loteria.id)) {
-      return <p className="themed-card__owned">{t('seasonal.detail.owned')}</p>;
-    }
-    if (loteria.price_cents === null) return null;
-    return (
-      <p className="themed-card__price">
-        <span className="themed-card__price-label">{t('seasonal.catalog.oneTime')}</span>
-        <strong className="themed-card__price-amount">{PRICE_FORMAT.format(loteria.price_cents / 100)} MXN</strong>
-        {showUsd && usdRate !== null && (
-          <span className="themed-card__price-label">({formatUsdReference(loteria.price_cents, usdRate)})</span>
-        )}
-      </p>
-    );
-  };
-
-  const renderCover = (loteria: CatalogLoteria, name: string) =>
-    loteria.cover_path ? (
-      <img
-        className="themed-card__cover"
-        src={SeasonalRepository.previewUrl(loteria.cover_path)}
-        alt={t('seasonal.coverAlt', { name })}
-        loading="lazy"
+  const renderLoteria = (loteria: CatalogLoteria, layout: 'feature' | 'grid') => (
+    <li key={loteria.id}>
+      <ThemedCard
+        loteria={loteria}
+        layout={layout}
+        isOwned={ownedIds.includes(loteria.id)}
+        usdRate={showUsd ? usdRate : null}
       />
-    ) : (
-      <div className="themed-card__cover" aria-hidden="true" />
-    );
-
-  const renderLoteria = (loteria: CatalogLoteria, layout: 'feature' | 'grid') => {
-    const name = localizedText(loteria.name_es, loteria.name_en, language);
-    const description = localizedText(loteria.description_es, loteria.description_en, language);
-    return (
-      <li key={loteria.id}>
-        <article className={`themed-card themed-card--${layout}`}>
-          <div className="themed-card__cover-wrap">{renderCover(loteria, name)}</div>
-          <div className="themed-card__body">
-            <h3 className="themed-card__name">{name}</h3>
-            {renderTags(loteria)}
-            {description && <p className="themed-card__description">{description}</p>}
-            {layout === 'feature' && loteria.sample_paths.length > 0 && (
-              <ul className="themed-card__samples" tabIndex={0} aria-label={t('seasonal.catalog.samplesLabel', { name })}>
-                {loteria.sample_paths.map((path, index) => (
-                  <li key={path}>
-                    <img
-                      className="themed-card__sample"
-                      src={SeasonalRepository.previewUrl(path)}
-                      alt={t('seasonal.catalog.sampleAlt', { number: index + 1, name })}
-                      width={84}
-                      height={126}
-                      loading="lazy"
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
-            <div className="themed-card__footer">
-              {renderPrice(loteria)}
-              <Link to={`/tematicas/${loteria.id}`} className="themed-card__button">
-                {t('seasonal.catalog.viewLoteria')} <span aria-hidden="true">→</span>
-              </Link>
-            </div>
-          </div>
-        </article>
-      </li>
-    );
-  };
+    </li>
+  );
 
   const renderCatalog = () => {
     if (isLoading) {

@@ -22,11 +22,6 @@ export interface CardPlacement {
   image: { x: number; y: number; width: number; height: number };
 }
 
-export interface CardCountStatus {
-  kind: 'missing' | 'extra' | 'exact';
-  difference: number;
-}
-
 export interface PreparedCard {
   blob: Blob;
   /** La imagen original no venía en 2:3: se acomodó entera, con franjas blancas. */
@@ -57,12 +52,6 @@ export function placeCardImage(width: number, height: number): CardPlacement {
       height: imageHeight,
     },
   };
-}
-
-export function cardCountStatus(count: number, expected: number = SEASONAL_EXPECTED_CARDS): CardCountStatus {
-  if (count < expected) return { kind: 'missing', difference: expected - count };
-  if (count > expected) return { kind: 'extra', difference: count - expected };
-  return { kind: 'exact', difference: 0 };
 }
 
 /**

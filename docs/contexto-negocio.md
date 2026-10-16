@@ -131,7 +131,7 @@ El administrador puede: _(confirmado el 2026-10-06)_
 - crear, editar, activar y borrar promociones;
 - crear y editar paquetes de tokens, y cambiar el precio por token;
 - ver los saldos de todos los usuarios y regalar tokens;
-- ver el uso de la IA (por día, por usuario y por lotería) y su costo estimado;
+- ver el gasto en IA del periodo (Resumen) y el uso de cada usuario (su ficha), y ajustar el costo por imagen que se usa para estimarlo _(cambiado el 2026-10-15, FEAT-47; antes: ver el uso de la IA por día, por usuario y por lotería y su costo estimado)_;
 - cambiar la cantidad de tokens de bienvenida;
 - administrar las loterías temáticas (§18): crear temáticas, dar de alta loterías con su precio y sus archivos, publicarlas y retirarlas. Sus ventas se ven junto a las compras de tokens, distinguidas por tipo. **DEFINIDO** (2026-10-06, FEAT-17)
 
@@ -244,7 +244,7 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-06 | El cobro de una lotería de temporada tiene las mismas garantías que el de tokens: precio puesto por el servidor, entrega una sola vez por pago, y sin entrega si el monto es menor. Los pagos pendientes entregan al confirmarse. |
 | 2026-10-06 | Una lotería de temporada con ventas no se borra, solo se despublica. No se puede publicar incompleta. Se puede reemplazar su PDF: los compradores descargan la versión nueva. |
 | 2026-10-06 | Para publicar una lotería de temporada hacen falta también el número de cartas y el de tableros, además de nombre, descripción, precio, PDF y portada (FEAT-17). |
-| 2026-10-07 | El PDF de una lotería de temporada también se puede armar en el sitio: el administrador sube por lote sus cartas ya terminadas (con el nombre dibujado, 54 esperadas, sin recortarlas), genera los tableros y el PDF queda guardado en la ficha; solo se guarda el PDF, no las cartas. Las muestras se pueden elegir de esas cartas. _(Descartadas: una página pública para cualquier usuario; exigir exactamente 54; recortar a 2:3; guardar cartas y tableros. Origen: FEAT-23.)_ |
+| 2026-10-07 | El PDF de una lotería de temporada también se puede armar en el sitio: el administrador sube por lote sus cartas ya terminadas (con el nombre dibujado, 54 esperadas, sin recortarlas), genera los tableros y el PDF queda guardado en la ficha; solo se guarda el PDF, no las cartas. Las muestras se pueden elegir de esas cartas. _(Descartadas: una página pública para cualquier usuario; exigir exactamente 54; recortar a 2:3; guardar cartas y tableros. Origen: FEAT-23.)_ Desde el 2026-10-15 (FEAT-48) las cartas sí se guardan, en privado: ver esa fecha. |
 | 2026-10-07 | Las loterías «de temporada» pasan a llamarse «loterías temáticas» y sus grupos «temáticas», para dar cabida a ocasiones sin fecha del año; el catálogo pasa de `/temporada` a `/tematicas` y la dirección anterior redirige a la nueva. Ninguna regla cambia. En las decisiones de arriba, «temporada» es el nombre anterior de lo mismo. _(Descartadas: quitar además las fechas de inicio y fin; cambiar solo el título público; conservar la dirección `/temporada`. Origen: FEAT-24.)_ |
 | 2026-10-08 | Una lotería temática en modo Kids se puede armar con 9 cartas en vez de 15; la lotería normal conserva 15 en Kids y 24 en Clásico, y la temática en Clásico sigue en 24. Con exactamente 9 cartas los tableros llevan las mismas cartas, cada uno con un acomodo distinto (FEAT-24, US A5). _(Descartadas: bajar a 9 todo el modo Kids, también para los usuarios; dejarlo en 15 y solo aclarar el contador «de 54». Para los tableros con 9 cartas, descartadas: generar un solo tablero; permitir copias con el mismo acomodo.)_ |
 | 2026-10-09 | El título de una carta solo admite letras (con acentos, ñ y ü), números, espacios y signos de puntuación comunes; no admite emojis ni letras de otros alfabetos. Se valida en el navegador; las cartas ya guardadas no se tocan y el PDF las dibuja sin esos caracteres. _(Descartadas: quitarlos solo en el PDF y dejar el título intacto en el sitio; quitarlos en el PDF y avisar con una nota en el editor. Origen: FEAT-25.)_ |
@@ -253,6 +253,7 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-13 | No se avisa al usuario de un pago pendiente que vence sin pagarse. _(Descartado: correo invitándolo a intentarlo de nuevo. Origen: fase 3.)_ |
 | 2026-10-13 | La alerta al administrador cubre las compras de tokens y las de loterías temáticas, y llega a una sola dirección fija configurada en el servidor. _(Descartadas: alertar solo de tokens; enviarla a todos los de la lista de administradores. Origen: fase 3.)_ |
 | 2026-10-13 | Los correos del sitio se envían solo en español. _(Descartadas: español e inglés en el mismo correo; guardar el idioma de cada usuario y escribirle en el suyo. Origen: fase 3.)_ |
+| 2026-10-15 | Las cartas que el administrador carga para armar el PDF de una lotería temática se guardan en privado (solo él las ve), con su orden y el acomodo de los tableros, hasta que se borra la lotería; así puede seguir armándola otro día y elegir de entre ellas la portada y las muestras. Una lotería que se empieza a crear queda guardada como borrador no publicado. _(Descartado: no guardar las cartas. Origen: FEAT-48.)_ |
 
 ## 16. Pendientes por definir
 
@@ -293,13 +294,15 @@ Definido con Carlos el 2026-10-06 (FEAT-17). Por construir. Hasta el 2026-10-07 
 
 **Vista previa.**
 
-- El administrador sube una portada y las cartas de muestra que quiera, pocas o todas. Si arma el PDF en el sitio, puede elegir las muestras entre las cartas que cargó (2026-10-07, FEAT-23).
-- El sitio las reduce y les pone marca de agua antes de guardarlas; la imagen limpia no se guarda.
+- El administrador elige una portada y las cartas de muestra que quiera, pocas o todas. Si arma el PDF en el sitio, la portada puede ser una de las cartas que cargó o una imagen que suba aparte, y las muestras se eligen entre esas cartas (2026-10-07, FEAT-23; la portada desde las cartas, 2026-10-15, FEAT-48). Si sube el PDF ya hecho, sube la portada y las muestras como imágenes.
+- El sitio reduce la portada y las muestras —también las cartas que se usen como portada o muestra— y les pone marca de agua antes de guardarlas; la imagen limpia no se guarda como vista previa.
+- Las cartas que el administrador carga para armar el PDF se guardan en privado, solo para él, hasta que se borra la lotería; nunca se muestran al público (2026-10-15, FEAT-48).
 - El PDF nunca se entrega a quien no lo compró.
 
 **Visibilidad.**
 
 - Cada lotería tiene «publicada sí/no» y fechas opcionales de inicio y de fin. Es visible cuando está publicada y dentro de sus fechas.
+- Una lotería que se empieza a crear queda guardada como borrador no publicado hasta que el administrador la publique o la borre (2026-10-15, FEAT-48).
 - El catálogo muestra solo las visibles, y solo las temáticas que tienen al menos una.
 - No se puede publicar una lotería a la que le falte nombre, descripción, número de cartas, número de tableros, precio, PDF o portada. _(El número de cartas y de tableros se agregaron el 2026-10-06, FEAT-17: el catálogo los muestra en cada tarjeta.)_
 - Una lotería con ventas no se borra: solo se despublica.

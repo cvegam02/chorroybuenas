@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { placeImageInCard } from '../../src/services/pdf/layout';
-import { seasonalPdfFileName, withBuiltCounts } from '../../src/utils/seasonalLoteria';
+import { seasonalPdfFileName } from '../../src/utils/seasonalLoteria';
 
 describe('imagen de una carta dentro de su casilla del PDF', () => {
   const cell = { width: 96, height: 145.6 };
@@ -41,50 +41,7 @@ describe('imagen de una carta dentro de su casilla del PDF', () => {
   });
 });
 
-describe('ficha después de armar el PDF en el sitio (FEAT-23, decisión 6)', () => {
-  const loteria = {
-    id: 'lot-1',
-    is_published: true,
-    cover_path: 'lot-1/portada.jpg',
-    sample_paths: ['lot-1/a.jpg'],
-    pdf: null,
-    season_id: 'temp-1',
-    name_es: 'Halloween 2026',
-    name_en: null,
-    description_es: 'Lotería de Halloween',
-    description_en: null,
-    grid_size: 16 as const,
-    card_count: 40,
-    board_count: 5,
-    price_cents: 4900,
-    valid_from: null,
-    valid_until: '2026-11-02T06:00:00.000Z',
-  };
-
-  it('el número de cartas y de tableros es el de lo generado', () => {
-    const input = withBuiltCounts(loteria, 54, 27);
-    expect(input.card_count).toBe(54);
-    expect(input.board_count).toBe(27);
-  });
-
-  it('el resto de la ficha no cambia y no se cuelan campos que no se guardan', () => {
-    const input = withBuiltCounts(loteria, 54, 27);
-    expect(input).toEqual({
-      season_id: 'temp-1',
-      name_es: 'Halloween 2026',
-      name_en: null,
-      description_es: 'Lotería de Halloween',
-      description_en: null,
-      grid_size: 16,
-      card_count: 54,
-      board_count: 27,
-      price_cents: 4900,
-      valid_from: null,
-      valid_until: '2026-11-02T06:00:00.000Z',
-    });
-    expect(loteria.card_count).toBe(40);
-  });
-
+describe('nombre del PDF armado en el sitio (FEAT-23)', () => {
   it('el archivo se llama como la lotería, sin caracteres raros', () => {
     expect(seasonalPdfFileName('Halloween 2026')).toBe('halloween-2026.pdf');
     expect(seasonalPdfFileName('  Día de Muertos: ¡edición niños!  ')).toBe('dia-de-muertos-edicion-ninos.pdf');

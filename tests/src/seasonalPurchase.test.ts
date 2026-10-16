@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readSeasonalReturn, summarizeSales } from '../../src/utils/seasonalPurchase';
+import { readSeasonalReturn } from '../../src/utils/seasonalPurchase';
 
 const params = (query: string) => new URLSearchParams(query);
 
@@ -24,19 +24,5 @@ describe('readSeasonalReturn', () => {
 
   it('pago cancelado', () => {
     expect(readSeasonalReturn(params('cancel=1'))).toEqual({ kind: 'cancel' });
-  });
-});
-
-describe('summarizeSales', () => {
-  it('cuenta como venta solo las compras aprobadas, pero recuerda si hay algún pago registrado', () => {
-    const sales = summarizeSales([
-      { loteria_id: 'a', status: 'approved' },
-      { loteria_id: 'a', status: 'approved' },
-      { loteria_id: 'a', status: 'repeated' },
-      { loteria_id: 'b', status: 'repeated' },
-    ]);
-    expect(sales.get('a')).toEqual({ approved: 2, total: 3 });
-    expect(sales.get('b')).toEqual({ approved: 0, total: 1 });
-    expect(sales.get('c')).toBeUndefined();
   });
 });

@@ -1,256 +1,220 @@
 import { useCallback, useEffect, useState } from 'react';
-import { FaPlus, FaPencilAlt, FaTrash, FaCheck, FaTimes } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { FaPlus } from 'react-icons/fa';
 import {
   SeasonalRepository,
-  SEASON_NAME_MAX_LENGTH,
   type AdminSeason,
-  type SeasonInput,
+  type AdminSeasonalLoteria,
+  type AdminSeasonalSales,
 } from '../../repositories/SeasonalRepository';
+import { seasonalOverviewLine, themeChips } from '../../utils/adminSeasonal';
+import { summaryPeriod } from '../../utils/adminSummary';
+import { openDownloadLink } from '../../utils/openDownloadLink';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
-import { AdminSeasonalLoterias } from './AdminSeasonalLoterias';
+import { AdminSeasonalCard } from './AdminSeasonalCard';
+import { AdminSeasonalThemes } from './AdminSeasonalThemes';
 import './AdminTokenPacks.css';
+import './AdminSales.css';
+import './AdminPricing.css';
 import './AdminSeasonal.css';
+import './AdminSeasonalOverview.css';
 
-/** 'new' mientras se crea una temporada; el id mientras se edita una; null con el formulario cerrado. */
-type FormTarget = 'new' | string | null;
-
-interface SeasonFormState {
-  nameEs: string;
-  nameEn: string;
-  sortOrder: string;
+interface SeasonalData {
+  seasons: AdminSeason[];
+  loterias: AdminSeasonalLoteria[];
+  sales: Map<string, AdminSeasonalSales>;
 }
 
-const EMPTY_FORM: SeasonFormState = { nameEs: '', nameEn: '', sortOrder: '0' };
+type LoadState = { status: 'loading' } | { status: 'failed' } | ({ status: 'ready' } & SeasonalData);
 
-function toSeasonInput(form: SeasonFormState): SeasonInput | null {
-  const sortOrder = Number(form.sortOrder);
-  if (form.nameEs.trim() === '' || !Number.isInteger(sortOrder)) return null;
-  return { name_es: form.nameEs, name_en: form.nameEn, sort_order: sortOrder };
-}
-
+/** A1.7 — Temáticas (FEAT-48, US A1): loterías en tarjetas, filtro por temática y «Administrar temáticas». */
 export const AdminSeasonal = () => {
-  const [seasons, setSeasons] = useState<AdminSeason[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadFailed, setLoadFailed] = useState(false);
-  const [formTarget, setFormTarget] = useState<FormTarget>(null);
-  const [form, setForm] = useState<SeasonFormState>(EMPTY_FORM);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<AdminSeason | null>(null);
+  const [load, setLoad] = useState<LoadState>({ status: 'loading' });
+  const [filter, setFilter] = useState('');
+  const [themesOpen, setThemesOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<AdminSeasonalLoteria | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setIsLoading(true);
-    const data = await SeasonalRepository.getAdminSeasons();
-    setLoadFailed(data === null);
-    setSeasons(data ?? []);
-    setIsLoading(false);
+  const reload = useCallback(async () => {
+    const month = summaryPeriod('month');
+    const [seasons, loterias, sales] = await Promise.all([
+      SeasonalRepository.getAdminSeasons(),
+      SeasonalRepository.getAdminLoterias(),
+      SeasonalRepository.getAdminSalesOverview(month.from, month.to),
+    ]);
+    // Sin las ventas no se sabe cuáles se pueden borrar: se trata como fallo de carga.
+    if (!seasons || !loterias || !sales) {
+      setLoad({ status: 'failed' });
+      return;
+    }
+    setLoad({ status: 'ready', seasons, loterias, sales });
   }, []);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    reload();
+  }, [reload]);
 
-  const openNewForm = () => {
-    const nextOrder = seasons.reduce((max, s) => Math.max(max, s.sort_order), 0) + (seasons.length > 0 ? 1 : 0);
-    setForm({ ...EMPTY_FORM, sortOrder: String(nextOrder) });
-    setFormTarget('new');
-    setError(null);
+  const navigate = useNavigate();
+
+  const retry = () => {
+    setLoad({ status: 'loading' });
+    reload();
   };
 
-  const openEditForm = (season: AdminSeason) => {
-    setForm({ nameEs: season.name_es, nameEn: season.name_en ?? '', sortOrder: String(season.sort_order) });
-    setFormTarget(season.id);
-    setError(null);
+  // Cualquier lotería, publicada o no, se abre en el asistente (FEAT-48, US A5).
+  const edit = (loteria: AdminSeasonalLoteria) => navigate(`/admin/tematicas/${loteria.id}`);
+
+  const withBusy = async (loteria: AdminSeasonalLoteria, action: () => Promise<string | null>) => {
+    setBusyId(loteria.id);
+    setActionError(null);
+    const failure = await action();
+    if (failure) setActionError(failure);
+    await reload();
+    setBusyId(null);
   };
 
-  const closeForm = () => {
-    setFormTarget(null);
-    setError(null);
-  };
+  const togglePublished = (loteria: AdminSeasonalLoteria) =>
+    withBusy(loteria, async () =>
+      (await SeasonalRepository.setPublished(loteria.id, !loteria.is_published))
+        ? null
+        : `No se pudo ${loteria.is_published ? 'despublicar' : 'publicar'} «${loteria.name_es}». Intenta de nuevo.`,
+    );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formTarget) return;
-    const input = toSeasonInput(form);
-    if (!input) {
-      setError('Escribe el nombre en español y un orden en número entero.');
+  const download = async (loteria: AdminSeasonalLoteria) => {
+    setActionError(null);
+    setBusyId(loteria.id);
+    const url = await SeasonalRepository.getPdfDownloadUrl(loteria.id);
+    setBusyId(null);
+    if (!url) {
+      setActionError(`No se pudo preparar el PDF de «${loteria.name_es}». Intenta de nuevo.`);
       return;
     }
-    setIsSaving(true);
-    setError(null);
-    const saved =
-      formTarget === 'new'
-        ? await SeasonalRepository.createSeason(input)
-        : await SeasonalRepository.updateSeason(formTarget, input);
-    setIsSaving(false);
-    if (!saved) {
-      setError('No se pudo guardar la temática. Intenta de nuevo.');
-      return;
-    }
-    setFormTarget(null);
-    await load();
+    openDownloadLink(url);
   };
 
-  const handleDelete = async () => {
+  const confirmDelete = async () => {
     if (!deleteTarget) return;
     const target = deleteTarget;
     setDeleteTarget(null);
-    const deleted = await SeasonalRepository.deleteSeason(target.id);
-    if (!deleted) {
-      setError(`No se pudo borrar «${target.name_es}». Intenta de nuevo.`);
-      return;
-    }
-    setError(null);
-    await load();
+    await withBusy(target, async () =>
+      (await SeasonalRepository.deleteLoteria(target)) ? null : `No se pudo borrar «${target.name_es}». Intenta de nuevo.`,
+    );
   };
 
-  const renderForm = () => (
-    <form className="admin-packs__new-form" onSubmit={handleSubmit}>
-      <div className="admin-packs__new-row">
-        <div className="admin-packs__field admin-seasonal__field--wide">
-          <label htmlFor="season-name-es">Nombre en español</label>
-          <input
-            id="season-name-es"
-            type="text"
-            maxLength={SEASON_NAME_MAX_LENGTH}
-            value={form.nameEs}
-            onChange={(e) => setForm((prev) => ({ ...prev, nameEs: e.target.value }))}
-            placeholder="Día de Muertos"
-            autoFocus
-          />
-        </div>
-        <div className="admin-packs__field admin-seasonal__field--wide">
-          <label htmlFor="season-name-en">Nombre en inglés (opcional)</label>
-          <input
-            id="season-name-en"
-            type="text"
-            maxLength={SEASON_NAME_MAX_LENGTH}
-            value={form.nameEn}
-            onChange={(e) => setForm((prev) => ({ ...prev, nameEn: e.target.value }))}
-            placeholder="Day of the Dead"
-          />
-        </div>
-        <div className="admin-packs__field">
-          <label htmlFor="season-order">Orden</label>
-          <input
-            id="season-order"
-            type="number"
-            step={1}
-            value={form.sortOrder}
-            onChange={(e) => setForm((prev) => ({ ...prev, sortOrder: e.target.value }))}
-          />
-        </div>
-      </div>
-      <div className="admin-packs__new-actions">
-        <button type="button" className="admin-packs__btn admin-packs__btn--secondary" onClick={closeForm}>
-          <FaTimes /> Cancelar
-        </button>
-        <button type="submit" className="admin-packs__btn admin-packs__btn--primary" disabled={isSaving}>
-          <FaCheck /> Guardar
-        </button>
-      </div>
-    </form>
-  );
+  const ready = load.status === 'ready' ? load : null;
+  const now = new Date();
+  const monthRevenue = ready ? [...ready.sales.values()].reduce((sum, sale) => sum + sale.periodRevenueCents, 0) : 0;
+  const hasSeasons = (ready?.seasons.length ?? 0) > 0;
 
-  const renderSeasons = () => {
-    if (isLoading) {
+  const renderLoterias = () => {
+    if (load.status === 'loading') {
       return (
         <div className="admin-packs__loading">
           <div className="admin-packs__spinner" />
-          <span>Cargando temáticas...</span>
+          <span>Cargando loterías…</span>
         </div>
       );
     }
-    if (loadFailed) {
+    if (load.status === 'failed') {
       return (
         <div className="admin-seasonal__load-error">
-          <p className="admin-packs__error">No se pudieron cargar las temáticas.</p>
-          <button type="button" className="admin-packs__btn admin-packs__btn--secondary" onClick={load}>
+          <p className="admin-packs__error">No se pudieron cargar las loterías temáticas.</p>
+          <button type="button" className="admin-pricing__btn" onClick={retry}>
             Reintentar
           </button>
         </div>
       );
     }
-    if (seasons.length === 0) {
-      return <p className="admin-packs__empty">Primero crea una temática.</p>;
+    if (!hasSeasons) {
+      return <p className="admin-pricing__muted">Primero crea una temática en «Administrar temáticas».</p>;
     }
+    if (load.loterias.length === 0) {
+      return <p className="admin-pricing__muted">Aún no hay loterías temáticas. Crea la primera con «Nueva lotería temática».</p>;
+    }
+    const shown = filter === '' ? load.loterias : load.loterias.filter((loteria) => loteria.season_id === filter);
+    if (shown.length === 0) return <p className="admin-pricing__muted">Esta temática no tiene loterías.</p>;
+    const seasonName = (id: string) => load.seasons.find((season) => season.id === id)?.name_es ?? '—';
     return (
-      <div className="admin-packs__list">
-        {seasons.map((season) =>
-          formTarget === season.id ? (
-            <div key={season.id}>{renderForm()}</div>
-          ) : (
-            <div key={season.id} className="admin-packs__card">
-              <div className="admin-packs__card-body">
-                <div className="admin-packs__card-main">
-                  <span className="admin-packs__card-tokens">{season.name_es}</span>
-                  <span className="admin-seasonal__meta">
-                    {season.name_en ? `Inglés: ${season.name_en}` : 'Sin nombre en inglés'} · Orden {season.sort_order} ·{' '}
-                    {season.loteria_count === 1 ? '1 lotería' : `${season.loteria_count} loterías`}
-                  </span>
-                </div>
-              </div>
-              <div className="admin-seasonal__actions">
-                <button
-                  type="button"
-                  className="admin-packs__action-btn"
-                  onClick={() => openEditForm(season)}
-                  title="Editar"
-                  aria-label={`Editar ${season.name_es}`}
-                >
-                  <FaPencilAlt />
-                </button>
-                <button
-                  type="button"
-                  className="admin-packs__action-btn"
-                  onClick={() => setDeleteTarget(season)}
-                  disabled={season.loteria_count > 0}
-                  title={season.loteria_count > 0 ? 'Tiene loterías: primero muévelas o bórralas' : 'Borrar'}
-                  aria-label={`Borrar ${season.name_es}`}
-                >
-                  <FaTrash />
-                </button>
-              </div>
-            </div>
-          ),
-        )}
+      <div className="admin-themes__grid">
+        {shown.map((loteria) => (
+          <AdminSeasonalCard
+            key={loteria.id}
+            loteria={loteria}
+            seasonName={seasonName(loteria.season_id)}
+            sales={load.sales.get(loteria.id)}
+            now={now}
+            isBusy={busyId === loteria.id}
+            onEdit={() => edit(loteria)}
+            onTogglePublished={() => togglePublished(loteria)}
+            onDownload={() => download(loteria)}
+            onDelete={() => setDeleteTarget(loteria)}
+          />
+        ))}
       </div>
     );
   };
 
   return (
-    <div className="admin-packs">
-      <div className="admin-packs__header">
-        <h2 className="admin-packs__title">Loterías temáticas</h2>
-        <p className="admin-packs__subtitle">
-          Temáticas y loterías del catálogo. El orden decide qué temática aparece primero: el número más bajo va
-          arriba.
-        </p>
-      </div>
-
-      <h3 className="admin-seasonal__section-title">Temáticas</h3>
-
-      {formTarget === 'new' ? (
-        renderForm()
-      ) : (
-        <button type="button" className="admin-packs__add-btn" onClick={openNewForm}>
-          <FaPlus /> Nueva temática
+    <div className="admin-sales">
+      <header className="admin-sales__header">
+        <div>
+          <h2 className="admin-sales__title">Loterías temáticas</h2>
+          {ready && <p className="admin-sales__subtitle">{seasonalOverviewLine(ready.loterias, monthRevenue, now)}</p>}
+        </div>
+        <button
+          type="button"
+          className="admin-pricing__btn admin-pricing__btn--primary admin-themes__new"
+          onClick={() => navigate('/admin/tematicas/nueva')}
+          disabled={!hasSeasons}
+          title={hasSeasons ? undefined : 'Primero crea una temática'}
+        >
+          <FaPlus aria-hidden="true" /> Nueva lotería temática
         </button>
+      </header>
+
+      {ready && (
+        <div className="admin-themes__filters">
+          <span className="admin-themes__filters-label">Temática:</span>
+          {themeChips(ready.seasons, ready.loterias).map((chip) => (
+            <button
+              key={chip.id || 'todas'}
+              type="button"
+              className={`admin-sales__chip${filter === chip.id ? ' admin-sales__chip--active' : ''}`}
+              aria-pressed={filter === chip.id}
+              onClick={() => setFilter(chip.id)}
+            >
+              {chip.label} <small>{chip.count}</small>
+            </button>
+          ))}
+          <button
+            type="button"
+            className="admin-pricing__btn admin-themes__manage"
+            aria-expanded={themesOpen}
+            onClick={() => setThemesOpen((open) => !open)}
+          >
+            Administrar temáticas
+          </button>
+        </div>
       )}
 
-      {error && <p className="admin-packs__error">{error}</p>}
+      {ready && themesOpen && <AdminSeasonalThemes seasons={ready.seasons} onChanged={reload} />}
 
-      {renderSeasons()}
+      {actionError && (
+        <p className="admin-pricing__error" role="alert">
+          {actionError}
+        </p>
+      )}
 
-      <AdminSeasonalLoterias seasons={seasons} onChanged={load} />
+      {renderLoterias()}
 
       <WarningModal
         isOpen={!!deleteTarget}
-        title="Borrar temática"
-        message={deleteTarget ? `¿Borrar «${deleteTarget.name_es}»?` : ''}
+        title="Borrar lotería"
+        message={deleteTarget ? `¿Borrar «${deleteTarget.name_es}»? Se borran también su PDF y sus imágenes.` : ''}
         confirmText="Borrar"
         cancelText="Cancelar"
-        onConfirm={handleDelete}
+        onConfirm={confirmDelete}
         onCancel={() => setDeleteTarget(null)}
         type="danger"
       />

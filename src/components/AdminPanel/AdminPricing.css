@@ -1,0 +1,451 @@
+/* Pestaña Precios y promos (FEAT-46). Solo colores de la paleta. */
+.admin-pricing__section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.admin-pricing__section-title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.admin-pricing__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.admin-pricing__card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 20px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text-main);
+}
+
+.admin-pricing__label {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.admin-pricing__currency {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.admin-pricing__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-pricing__input {
+  width: 90px;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.admin-pricing__input--price {
+  width: 110px;
+}
+
+.admin-pricing__btn {
+  min-height: 44px;
+  margin-left: auto;
+  padding: 0 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.admin-pricing__btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}
+
+.admin-pricing__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-pricing__muted {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.admin-pricing__ok,
+.admin-pricing__error {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.admin-pricing__ok {
+  color: var(--color-text-main);
+}
+
+.admin-pricing__error {
+  color: var(--color-danger);
+}
+
+.admin-pricing__ok:empty,
+.admin-pricing__error:empty {
+  display: none;
+}
+
+.admin-pricing__section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-pricing__section-head .admin-pricing__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 0;
+}
+
+/* Tarjetas de packs (US A3). */
+.admin-pricing__packs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.admin-pricing__pack--hidden {
+  opacity: 0.6;
+}
+
+.admin-pricing__pack-head,
+.admin-pricing__pack-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.admin-pricing__pack-total {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.admin-pricing__pack-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.admin-pricing__pack-amount {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.admin-pricing__savings {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-secondary-light);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.admin-pricing__pack-foot {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
+}
+
+.admin-pricing__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.admin-pricing__icon-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}
+
+/* Interruptor Activo/Oculto (AdminSwitch), decisión 10. */
+.admin-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-border-dark);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.admin-switch--on {
+  background: var(--color-secondary-dark);
+}
+
+.admin-switch:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.admin-switch:focus-visible {
+  outline: 2px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
+
+.admin-switch__knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-sm);
+  transition: left 0.15s;
+}
+
+.admin-switch--on .admin-switch__knob {
+  left: 21px;
+}
+
+/* Botón principal («+ Nueva promoción», «Crear promoción»). */
+.admin-pricing__btn--primary {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+}
+
+.admin-pricing__btn--primary:hover:not(:disabled) {
+  border-color: var(--color-primary-dark);
+  background: var(--color-primary-dark);
+  color: var(--color-text-inverted);
+}
+
+.admin-pricing__strong {
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.admin-pricing__nowrap {
+  white-space: nowrap;
+}
+
+.admin-pricing__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Formulario de promoción (US A4). */
+.admin-pricing__promo-form {
+  gap: 16px;
+  border-color: var(--color-primary-lighter);
+}
+
+.admin-pricing__form-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.admin-pricing__choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-pricing__choice {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.admin-pricing__choice--on {
+  border-color: var(--color-primary-lighter);
+  background: var(--color-primary-lightest);
+  color: var(--color-primary-dark);
+}
+
+.admin-pricing__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.admin-pricing__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.admin-pricing__text {
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--color-text-main);
+}
+
+.admin-pricing__preview {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.admin-pricing__form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.admin-pricing__form-actions .admin-pricing__btn {
+  margin-left: 0;
+}
+
+/* Tabla de promociones (US A4). */
+.admin-pricing__table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.admin-pricing__table-scroll {
+  overflow-x: auto;
+}
+
+.admin-pricing__table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+
+.admin-pricing__table th {
+  padding: 12px 16px;
+  background: var(--color-bg-subtle);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: left;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+}
+
+.admin-pricing__table td {
+  padding: 12px 16px;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.875rem;
+  vertical-align: middle;
+}
+
+.admin-pricing__table .admin-pricing__num {
+  text-align: right;
+}
+
+.admin-pricing__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-pricing__icon-btn--danger {
+  color: var(--color-danger);
+}
+
+.admin-pricing__icon-btn--danger:hover {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+/* Estados calculados, decisión 10. */
+.admin-pricing__status {
+  display: inline-flex;
+  padding: 3px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--color-text-main);
+}
+
+.admin-pricing__status--active {
+  background: var(--color-secondary-light);
+}
+
+.admin-pricing__status--scheduled {
+  background: var(--color-accent-light);
+}
+
+.admin-pricing__status--off {
+  background: var(--color-bg-tertiary);
+}
+
+.admin-pricing__status--expired {
+  border-color: var(--color-border-dark);
+  background: var(--color-bg-surface);
+  color: var(--color-text-muted);
+}
