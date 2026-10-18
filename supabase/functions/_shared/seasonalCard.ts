@@ -50,6 +50,23 @@ export function buildSeasonalCardPrediction(
 export const attemptPath = (loteriaId: string, cardId: string, attemptId: string) =>
   `${loteriaId}/${cardId}/${attemptId}.webp`;
 
+/** Intentos que guarda cada carta (FEAT-50, decisión 7). */
+export const MAX_ATTEMPTS_PER_CARD = 5;
+
+/**
+ * Los intentos que sobran al pasar del máximo, del más viejo al más nuevo (US A3). Recibe los ids en
+ * orden de creación; los protegidos (el elegido antes de rehacer y el nuevo) nunca se borran.
+ */
+export function attemptsToPrune(
+  idsOldestFirst: readonly string[],
+  protectedIds: readonly string[],
+  max = MAX_ATTEMPTS_PER_CARD,
+): string[] {
+  const excess = idsOldestFirst.length - max;
+  if (excess <= 0) return [];
+  return idsOldestFirst.filter((id) => !protectedIds.includes(id)).slice(0, excess);
+}
+
 const PUBLIC_ERRORS: Record<string, { status: number; message: string }> = {
   NOT_ADMIN: { status: 403, message: 'Solo un administrador puede generar cartas.' },
   CARD_NOT_FOUND: { status: 404, message: 'La carta ya no existe. Vuelve a cargar la página.' },

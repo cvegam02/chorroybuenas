@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { parseSceneList, type AiCardListError } from '../../../utils/aiCardList';
+import { parseSceneList, type AiCardListError, type SceneUpdate } from '../../../utils/aiCardList';
 
 interface WizardAiSceneLoaderProps {
   cards: readonly { number: number; name: string }[];
   isSaving: boolean;
-  onLoad: (scenes: ReadonlyMap<number, string>) => Promise<boolean>;
+  onLoad: (scenes: ReadonlyMap<number, SceneUpdate>) => Promise<boolean>;
   onClose: () => void;
 }
 
-const EXAMPLE = '1 | un gallo con bufanda roja cantando sobre un trineo\n6 | LA SIRENA | una sirena con gorro de Santa…';
+const EXAMPLE = '1 | un gallo con bufanda roja cantando sobre un trineo\n26 | EL DUENDE | un duende de Santa con traje verde…';
 
-/** «Cargar escenas» (FEAT-50, decisión 11): las escenas de todas las cartas de una vez, por número. */
+/** «Cargar escenas» (FEAT-50, decisiones 11 y 12): las escenas de todas las cartas de una vez, por número; un nombre distinto renombra la carta. */
 export const WizardAiSceneLoader = ({ cards, isSaving, onLoad, onClose }: WizardAiSceneLoaderProps) => {
   const [text, setText] = useState('');
   const [errors, setErrors] = useState<AiCardListError[]>([]);
@@ -60,7 +60,9 @@ export const WizardAiSceneLoader = ({ cards, isSaving, onLoad, onClose }: Wizard
         <button type="button" className="seasonal-wizard__btn" onClick={onClose}>
           Cerrar
         </button>
-        <span className="seasonal-wizard__muted">Cada escena va a la carta de su número. Lo ya generado no se borra.</span>
+        <span className="seasonal-wizard__muted">
+          Cada escena va a la carta de su número; si pones otro nombre, la carta se renombra. Lo ya generado no se borra.
+        </span>
       </div>
     </div>
   );

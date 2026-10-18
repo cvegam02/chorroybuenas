@@ -1,4 +1,4 @@
-/* Modo «Generar con IA» del paso 2 del asistente (FEAT-50, US A2). */
+/* Modo «Generar con IA» del paso 2 del asistente (FEAT-50, US A2 a A4). */
 
 .wizard-ai {
   display: flex;
@@ -61,8 +61,14 @@
   background: var(--color-bg-surface);
 }
 
-.wizard-ai__result {
+.wizard-ai__media {
+  display: flex;
   flex: 0 0 140px;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wizard-ai__result {
   aspect-ratio: 2 / 3;
   overflow: hidden;
   border-radius: var(--radius-sm);
@@ -94,8 +100,78 @@
   min-width: 0;
 }
 
+.wizard-ai__card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .wizard-ai__card-title {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 180px;
   color: var(--color-text-main);
+}
+
+.wizard-ai__name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+}
+
+.wizard-ai__reference {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wizard-ai__reference-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-primary-lightest);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+/* Intentos en chico: el elegido lleva borde de color. */
+.wizard-ai__attempts {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+.wizard-ai__attempt {
+  aspect-ratio: 2 / 3;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-tertiary);
+  font-family: inherit;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.wizard-ai__attempt img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wizard-ai__attempt--chosen {
+  border-color: var(--color-primary);
+}
+
+.wizard-ai__attempt:disabled {
+  cursor: default;
+  opacity: 0.6;
 }
 
 .wizard-ai__card-actions {
@@ -106,12 +182,20 @@
   gap: 10px;
 }
 
+.wizard-ai__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
 @media (max-width: 640px) {
   .wizard-ai__card {
     flex-direction: column;
   }
 
-  .wizard-ai__result {
+  .wizard-ai__media {
     flex-basis: auto;
     width: 60%;
     align-self: center;

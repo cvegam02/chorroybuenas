@@ -42,29 +42,40 @@ describe('lista de cartas para generar con IA (FEAT-50, US A2)', () => {
   });
 });
 
-describe('escenas pegadas sobre la lista ya cargada (FEAT-50, decisión 11)', () => {
+describe('escenas pegadas sobre la lista ya cargada (FEAT-50, decisiones 11 y 12)', () => {
   const cards = [
     { number: 1, name: 'EL GALLO' },
     { number: 6, name: 'LA SIRENA' },
+    { number: 26, name: 'EL NEGRITO' },
   ];
 
-  it('acepta «número | escena» y «número | NOMBRE | escena»', () => {
+  it('acepta «número | escena» y «número | NOMBRE | escena»; con el mismo nombre, no renombra', () => {
     const { scenes, errors } = parseSceneList('1 | un gallo con bufanda\n6 | la sirena | una sirena con gorro de Santa', cards);
     expect(errors).toEqual([]);
     expect([...scenes]).toEqual([
-      [1, 'un gallo con bufanda'],
-      [6, 'una sirena con gorro de Santa'],
+      [1, { scene: 'un gallo con bufanda' }],
+      [6, { scene: 'una sirena con gorro de Santa' }],
     ]);
   });
 
-  it('si el segundo trozo no es el nombre de la carta, todo es la escena', () => {
-    const { scenes } = parseSceneList('6 | una sirena | con cola verde', cards);
-    expect(scenes.get(6)).toBe('una sirena | con cola verde');
+  it('con otro nombre, renombra la carta y la escena es solo lo que sigue', () => {
+    const { scenes, errors } = parseSceneList('26 | EL DUENDE | un duende de Santa con traje verde', cards);
+    expect(errors).toEqual([]);
+    expect(scenes.get(26)).toEqual({ name: 'EL DUENDE', scene: 'un duende de Santa con traje verde' });
+  });
+
+  it('señala un nombre vacío o demasiado largo', () => {
+    const { scenes, errors } = parseSceneList(`1 |  | escena\n6 | ${'X'.repeat(81)} | escena`, cards);
+    expect(scenes.size).toBe(0);
+    expect(errors.map((e) => [e.line, e.reason])).toEqual([
+      [1, 'le falta el nombre'],
+      [2, 'el nombre pasa de 80 letras'],
+    ]);
   });
 
   it('señala números que no están en la lista, renglones sin número o sin escena, y repetidos', () => {
     const { scenes, errors } = parseSceneList('1 | ok\n9 | no existe\nsin número\n6 |   \n1 | otra', cards);
-    expect([...scenes]).toEqual([[1, 'ok']]);
+    expect([...scenes]).toEqual([[1, { scene: 'ok' }]]);
     expect(errors.map((e) => [e.line, e.reason])).toEqual([
       [2, 'no hay carta 9 en la lista'],
       [3, 'empieza sin número'],

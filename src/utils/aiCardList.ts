@@ -73,7 +73,13 @@ export const defaultInputSource = (cards: readonly { number: number }[]): AiInpu
 
 const sameName = (a: string, b: string) => a.trim().localeCompare(b.trim(), 'es', { sensitivity: 'base' }) === 0;
 
-type SceneLineResult = { number: number; scene: string } | { reason: string };
+/** Lo que un renglón cambia en una carta: la escena y, si trae otro nombre, el nombre (decisión 12). */
+export interface SceneUpdate {
+  scene: string;
+  name?: string;
+}
+
+type SceneLineResult = { number: number; update: SceneUpdate } | { reason: string };
 
 const parseSceneLine = (text: string, names: ReadonlyMap<number, string>, seen: Set<number>): SceneLineResult => {
   const [rawNumber, ...rest] = text.split('|');
@@ -83,24 +89,27 @@ const parseSceneLine = (text: string, names: ReadonlyMap<number, string>, seen: 
   const name = names.get(number);
   if (name === undefined) return { reason: `no hay carta ${number} en la lista` };
   if (seen.has(number)) return { reason: `el número ${number} ya está en la lista` };
-  // «6 | LA SIRENA | escena»: el nombre se ignora si es el de la carta; si no, todo es la escena.
-  const parts = rest.length > 1 && sameName(rest[0], name) ? rest.slice(1) : rest;
-  const scene = parts.join('|').trim();
+  // «6 | NOMBRE | escena»: el nombre se ignora si es el de la carta; si es otro, la carta se renombra.
+  const newName = rest.length > 1 ? rest[0].trim() : null;
+  if (newName === '') return { reason: 'le falta el nombre' };
+  if (newName && newName.length > AI_CARD_NAME_MAX_LENGTH) return { reason: `el nombre pasa de ${AI_CARD_NAME_MAX_LENGTH} letras` };
+  const scene = (newName === null ? rest : rest.slice(1)).join('|').trim();
   if (scene === '') return { reason: 'le falta la escena' };
   if (scene.length > AI_CARD_SCENE_MAX_LENGTH) return { reason: `la escena pasa de ${AI_CARD_SCENE_MAX_LENGTH} letras` };
-  return { number, scene };
+  return { number, update: newName && !sameName(newName, name) ? { name: newName, scene } : { scene } };
 };
 
 /**
- * Escenas pegadas sobre la lista ya cargada (FEAT-50, decisión 11): «6 | escena» o «6 | LA SIRENA | escena».
- * Cada escena va a la carta de ese número; los renglones que no sirven se señalan sin perder los demás.
+ * Escenas pegadas sobre la lista ya cargada (FEAT-50, decisiones 11 y 12): «6 | escena» o «6 | NOMBRE | escena».
+ * Cada escena va a la carta de ese número y, si el nombre es otro, la renombra; los renglones que no
+ * sirven se señalan sin perder los demás.
  */
 export const parseSceneList = (
   text: string,
   cards: readonly { number: number; name: string }[],
-): { scenes: Map<number, string>; errors: AiCardListError[] } => {
+): { scenes: Map<number, SceneUpdate>; errors: AiCardListError[] } => {
   const names = new Map(cards.map((card) => [card.number, card.name]));
-  const scenes = new Map<number, string>();
+  const scenes = new Map<number, SceneUpdate>();
   const errors: AiCardListError[] = [];
   const seen = new Set<number>();
   text.split(/\r?\n/).forEach((raw, index) => {
@@ -111,7 +120,7 @@ export const parseSceneList = (
       return;
     }
     seen.add(result.number);
-    scenes.set(result.number, result.scene);
+    scenes.set(result.number, result.update);
   });
   return { scenes, errors };
 };

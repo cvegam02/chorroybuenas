@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   attemptPath,
+  attemptsToPrune,
+  MAX_ATTEMPTS_PER_CARD,
   buildSeasonalCardPrompt,
   buildSeasonalCardPrediction,
   parseGenerateCardRequest,
@@ -73,6 +75,27 @@ describe('generate-seasonal-card (FEAT-50, US A2)', () => {
       status: 502,
       body: { error: 'AI_ERROR' },
       internal: true,
+    });
+  });
+
+  describe('máximo de intentos por carta (US A3)', () => {
+    const ids = (n: number) => Array.from({ length: n }, (_, i) => `a${i + 1}`);
+
+    it('guarda hasta 5 intentos', () => {
+      expect(MAX_ATTEMPTS_PER_CARD).toBe(5);
+      expect(attemptsToPrune(ids(5), ['a5'])).toEqual([]);
+    });
+
+    it('al sexto se borra el más viejo', () => {
+      expect(attemptsToPrune(ids(6), ['a6'])).toEqual(['a1']);
+    });
+
+    it('nunca borra uno protegido (el elegido antes de rehacer): borra el siguiente más viejo', () => {
+      expect(attemptsToPrune(ids(6), ['a1', 'a6'])).toEqual(['a2']);
+    });
+
+    it('si sobran varios, borra los más viejos hasta dejar 5', () => {
+      expect(attemptsToPrune(ids(8), ['a8'])).toEqual(['a1', 'a2', 'a3']);
     });
   });
 });

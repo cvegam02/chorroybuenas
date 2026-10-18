@@ -7,6 +7,7 @@ import { WarningModal } from '../../ConfirmationModal/WarningModal';
 import { WizardBasicsStep } from './WizardBasicsStep';
 import { WizardBoardsStep } from './WizardBoardsStep';
 import { WizardCardUploader } from './WizardCardUploader';
+import { WizardAiFooter } from './WizardAiFooter';
 import { WizardAiGenerator } from './WizardAiGenerator';
 import { buildsOnSite, WizardCardsStep, type CardsMode } from './WizardCardsStep';
 import { WizardFooter, WizardHeader, WizardStepsNav } from './WizardChrome';
@@ -205,7 +206,9 @@ export const WizardScreen = ({ initialSeasons, initialLoteria, onCreated }: Wiza
             {mode === 'cards' ? (
               <WizardCardUploader cards={cards} gridSize={form.gridSize} />
             ) : mode === 'ai' ? (
-              <WizardAiGenerator ai={ai} />
+              <WizardAiGenerator ai={ai}>
+                <WizardAiFooter ai={ai} gridSize={form.gridSize} siteCardCount={cards.cards.length} onUse={cards.replaceAll} />
+              </WizardAiGenerator>
             ) : (
               <>
                 <WizardOwnPdf

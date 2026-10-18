@@ -148,6 +148,42 @@ export function useWizardCards(
     [commitCards],
   );
 
+  /**
+   * Sustituye todas las cartas por estas imágenes, en este orden («Usar estas cartas», FEAT-50 US A4). Si
+   * alguna no se puede preparar o subir, no cambia nada y borra lo que alcanzó a subir.
+   */
+  const replaceAll = useCallback(
+    async (images: readonly { blob: Blob; fileName: string }[]) => {
+      if (!loteriaId || images.length === 0) return false;
+      setIsAdding(true);
+      const added: WizardCard[] = [];
+      for (const { blob, fileName } of images) {
+        try {
+          const prepared = await prepareSeasonalCard(blob);
+          const path = await SeasonalRepository.uploadCard(loteriaId, prepared.blob);
+          if (!path) break;
+          const url = URL.createObjectURL(prepared.blob);
+          localUrls.current.add(url);
+          added.push({ id: path, path, fileName, offRatio: prepared.offRatio, url });
+        } catch (error) {
+          logger.error(`Carta temática: no se pudo preparar ${fileName}:`, error);
+          break;
+        }
+      }
+      if (added.length < images.length) {
+        await SeasonalRepository.removeCards(added.map((card) => card.path));
+        setIsAdding(false);
+        return false;
+      }
+      const previous = latest.current.cards;
+      const saved = await commitCards(added);
+      if (saved) await SeasonalRepository.removeCards(previous.map((card) => card.path));
+      setIsAdding(false);
+      return saved;
+    },
+    [loteriaId, commitCards],
+  );
+
   const reorderCards = useCallback((cards: WizardCard[]) => commitCards(cards), [commitCards]);
 
   const setBoards = useCallback(
@@ -178,6 +214,7 @@ export function useWizardCards(
     addFiles,
     removeCard,
     reorderCards,
+    replaceAll,
     setBoards,
     setShowcase,
     setPdfIsCurrent,

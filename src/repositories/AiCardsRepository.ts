@@ -31,7 +31,10 @@ export interface AiBuild {
 
 export const EMPTY_AI_BUILD: AiBuild = { generalPrompt: '', quality: 'low', referenceCardId: null, cards: [] };
 
-export type GenerateResult = { ok: true; attempt: AiAttempt } | { ok: false; message: string };
+/** `prunedIds`: los intentos viejos que el servidor borró para dejar 5 (US A3). */
+export type GenerateResult =
+  | { ok: true; attempt: AiAttempt; prunedIds: string[] }
+  | { ok: false; message: string; code?: string };
 
 interface CardRow {
   id: string;
@@ -119,6 +122,26 @@ export class AiCardsRepository {
     return urls;
   }
 
+  /** Baja los archivos de estos intentos, en este orden («Usar estas cartas», US A4). null si alguno falla. */
+  static async downloadAttempts(paths: readonly string[]): Promise<Blob[] | null> {
+    const urls = await this.getAttemptUrls(paths);
+    if (!urls) return null;
+    try {
+      return await Promise.all(
+        paths.map(async (path) => {
+          const url = urls.get(path);
+          if (!url) throw new Error(`${path}: sin dirección`);
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`${path}: ${res.status}`);
+          return res.blob();
+        }),
+      );
+    } catch (error) {
+      logger.error('AiCardsRepository.downloadAttempts:', error);
+      return null;
+    }
+  }
+
   static async saveSettings(
     loteriaId: string,
     settings: { generalPrompt: string; quality: AiQuality; referenceCardId?: string | null },
@@ -170,12 +193,17 @@ export class AiCardsRepository {
     return (data as CardRow[]).map((row) => toCard(row, []));
   }
 
-  static async updateCard(cardId: string, patch: { scene?: string; inputSource?: AiInputSource }): Promise<boolean> {
+  static async updateCard(
+    cardId: string,
+    patch: { name?: string; scene?: string; inputSource?: AiInputSource; chosenAttemptId?: string },
+  ): Promise<boolean> {
     const { error } = await supabase
       .from('seasonal_ai_cards')
       .update({
+        ...(patch.name !== undefined ? { name: patch.name } : {}),
         ...(patch.scene !== undefined ? { scene: patch.scene } : {}),
         ...(patch.inputSource !== undefined ? { input_source: patch.inputSource } : {}),
+        ...(patch.chosenAttemptId !== undefined ? { chosen_attempt_id: patch.chosenAttemptId } : {}),
         updated_at: new Date().toISOString(),
       })
       .eq('id', cardId);
@@ -183,9 +211,11 @@ export class AiCardsRepository {
     return !error;
   }
 
-  /** Cambia la escena de varias cartas de una vez (FEAT-50, decisión 11). Devuelve false si alguna falla. */
-  static async updateScenes(updates: readonly { cardId: string; scene: string }[]): Promise<boolean> {
-    const results = await Promise.all(updates.map((update) => this.updateCard(update.cardId, { scene: update.scene })));
+  /** Cambia la escena (y, si viene, el nombre) de varias cartas de una vez (FEAT-50, decisiones 11 y 12). Devuelve false si alguna falla. */
+  static async updateScenes(updates: readonly { cardId: string; scene: string; name?: string }[]): Promise<boolean> {
+    const results = await Promise.all(
+      updates.map((update) => this.updateCard(update.cardId, { scene: update.scene, name: update.name })),
+    );
     return results.every(Boolean);
   }
 
@@ -221,11 +251,13 @@ export class AiCardsRepository {
         body: JSON.stringify({ card_id: cardId }),
       });
       const body = (await res.json().catch(() => null)) as
-        | { attempt?: { id: string; path: string; quality: AiQuality }; message?: string; error?: string }
+        | { attempt?: { id: string; path: string; quality: AiQuality }; prunedIds?: string[]; message?: string; error?: string }
         | null;
-      if (res.ok && body?.attempt) return { ok: true, attempt: { ...body.attempt, createdAt: new Date().toISOString() } };
+      if (res.ok && body?.attempt) {
+        return { ok: true, attempt: { ...body.attempt, createdAt: new Date().toISOString() }, prunedIds: body.prunedIds ?? [] };
+      }
       logger.error('AiCardsRepository.generate:', res.status, body?.error);
-      return { ok: false, message: body?.message ?? 'No se pudo generar la carta. Intenta de nuevo.' };
+      return { ok: false, code: body?.error, message: body?.message ?? 'No se pudo generar la carta. Intenta de nuevo.' };
     } catch (error) {
       logger.error('AiCardsRepository.generate: error de red', error);
       return { ok: false, message: 'No hubo conexión con el servidor. Intenta de nuevo.' };

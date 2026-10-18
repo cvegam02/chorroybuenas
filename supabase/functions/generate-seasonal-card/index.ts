@@ -1,14 +1,15 @@
-// Genera una carta de lotería temática con IA (FEAT-50, US A2). Solo administradores. Arma el prompt
+// Genera una carta de lotería temática con IA (FEAT-50, US A2 y A3). Solo administradores. Arma el prompt
 // (general + número, nombre y escena), elige la imagen de entrada (baraja base, carta de referencia o
 // ninguna), llama a openai/gpt-image-2 en Replicate, guarda la imagen en el espacio privado
-// `seasonal-ai` y la registra como intento elegido de la carta. No descuenta tokens (decisión del
-// 2026-10-17): el costo lo paga la cuenta de Replicate.
+// `seasonal-ai`, la registra como intento elegido de la carta y le deja solo sus últimos 5 intentos. No
+// descuenta tokens (decisión del 2026-10-17): el costo lo paga la cuenta de Replicate.
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { buildCorsHeaders, parseAllowedOrigins } from '../_shared/cors.ts';
 import { createPrediction, firstOutput, waitForPrediction, type ReplicateDeps } from '../_shared/replicate.ts';
 import { assertPredictionSucceeded } from '../_shared/transform.ts';
 import {
   attemptPath,
+  attemptsToPrune,
   buildSeasonalCardPrediction,
   buildSeasonalCardPrompt,
   parseGenerateCardRequest,
@@ -37,6 +38,7 @@ interface CardRow {
   name: string;
   scene: string;
   input_source: 'base' | 'reference' | 'none';
+  chosen_attempt_id: string | null;
 }
 
 interface BuildRow {
@@ -54,7 +56,7 @@ async function requireAdmin(admin: SupabaseClient, userId: string): Promise<void
 async function loadCard(admin: SupabaseClient, cardId: string): Promise<{ card: CardRow; build: BuildRow }> {
   const { data: card, error } = await admin
     .from('seasonal_ai_cards')
-    .select('id, loteria_id, number, name, scene, input_source')
+    .select('id, loteria_id, number, name, scene, input_source, chosen_attempt_id')
     .eq('id', cardId)
     .maybeSingle();
   if (error) throw new Error(`seasonal_ai_cards: ${error.message}`);
@@ -106,7 +108,37 @@ async function storeAttempt(admin: SupabaseClient, card: CardRow, outputUrl: str
   if (insertError) throw new Error(`seasonal_ai_attempts: ${insertError.message}`);
   const { error: chooseError } = await admin.from('seasonal_ai_cards').update({ chosen_attempt_id: attemptId }).eq('id', card.id);
   if (chooseError) throw new Error(`elegir intento: ${chooseError.message}`);
-  return { id: attemptId, path, quality };
+  const prunedIds = await pruneAttempts(admin, card, attemptId);
+  return { attempt: { id: attemptId, path, quality }, prunedIds };
+}
+
+/**
+ * Deja cada carta con sus últimos 5 intentos (US A3): borra los más viejos, nunca el que estaba elegido
+ * antes de rehacer ni el nuevo. Si falla, el intento nuevo ya quedó: se avisa en el registro y se sigue.
+ */
+async function pruneAttempts(admin: SupabaseClient, card: CardRow, newAttemptId: string): Promise<string[]> {
+  const { data, error } = await admin
+    .from('seasonal_ai_attempts')
+    .select('id, path')
+    .eq('card_id', card.id)
+    .order('created_at');
+  if (error) {
+    console.error('generate-seasonal-card: no se pudieron revisar los intentos', error.message);
+    return [];
+  }
+  const rows = data as { id: string; path: string }[];
+  const protectedIds = [newAttemptId, ...(card.chosen_attempt_id ? [card.chosen_attempt_id] : [])];
+  const prunedIds = attemptsToPrune(rows.map((row) => row.id), protectedIds);
+  if (prunedIds.length === 0) return [];
+  const { error: deleteError } = await admin.from('seasonal_ai_attempts').delete().in('id', prunedIds);
+  if (deleteError) {
+    console.error('generate-seasonal-card: no se pudieron borrar intentos viejos', deleteError.message);
+    return [];
+  }
+  const paths = rows.filter((row) => prunedIds.includes(row.id)).map((row) => row.path);
+  const { error: removeError } = await admin.storage.from(ATTEMPTS_BUCKET).remove(paths);
+  if (removeError) console.error('generate-seasonal-card: archivos de intentos huérfanos', paths, removeError.message);
+  return prunedIds;
 }
 
 Deno.serve(async (req) => {
@@ -144,8 +176,8 @@ Deno.serve(async (req) => {
     const created = await createPrediction(replicateDeps, replicateToken, body, 3, SEASONAL_CARD_MODEL_PATH);
     const finished = await waitForPrediction(replicateDeps, replicateToken, created, WAIT);
     assertPredictionSucceeded(finished);
-    const attempt = await storeAttempt(admin, card, firstOutput(finished), build.quality, prompt);
-    return reply(200, { attempt });
+    const stored = await storeAttempt(admin, card, firstOutput(finished), build.quality, prompt);
+    return reply(200, stored);
   } catch (err) {
     const response = seasonalCardErrorResponse(err);
     if (response.internal) console.error('generate-seasonal-card:', err);
