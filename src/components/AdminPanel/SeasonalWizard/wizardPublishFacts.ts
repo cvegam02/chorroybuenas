@@ -2,7 +2,7 @@ import type { AdminSeasonalLoteria } from '../../../repositories/SeasonalReposit
 import { parsePriceToCents, type SeasonalLoteriaForm } from '../../../utils/seasonalLoteria';
 import { publishChecklist, type PublishCheck } from '../../../utils/seasonalWizard';
 import type { ThemedCardLoteria } from '../../Seasonal/ThemedCard';
-import type { CardsMode } from './WizardCardsStep';
+import { buildsOnSite, type CardsMode } from './WizardCardsStep';
 
 interface PublishFactsSource {
   form: SeasonalLoteriaForm;
@@ -26,7 +26,7 @@ export function publishFacts({ form, record, mode, cardsLoaded, boardsGenerated,
   checks: PublishCheck[];
   preview: ThemedCardLoteria;
 } {
-  const buildsPdf = mode === 'cards';
+  const buildsPdf = buildsOnSite(mode);
   const cardCount = buildsPdf ? cardsLoaded || null : countFromText(form.cardCount);
   const boardCount = buildsPdf ? boardsGenerated || null : countFromText(form.boardCount);
   const priceCents = parsePriceToCents(form.price);

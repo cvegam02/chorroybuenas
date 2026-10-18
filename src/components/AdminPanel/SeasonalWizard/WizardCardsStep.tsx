@@ -1,12 +1,20 @@
 import type { ReactNode } from 'react';
 
-export type CardsMode = 'cards' | 'pdf';
+export type CardsMode = 'cards' | 'ai' | 'pdf';
+
+/** «Subir mis cartas» y «Generar con IA» terminan igual: el sitio arma el PDF con las cartas (FEAT-50). */
+export const buildsOnSite = (mode: CardsMode): boolean => mode !== 'pdf';
 
 const MODES: { mode: CardsMode; title: string; detail: string }[] = [
   {
     mode: 'cards',
     title: 'Subir mis cartas',
     detail: 'Sube las imágenes y el sitio arma el PDF, los tableros y las muestras. Recomendado.',
+  },
+  {
+    mode: 'ai',
+    title: 'Generar con IA',
+    detail: 'Escribe el prompt y la escena de cada carta; el sitio las genera y eliges las que se quedan.',
   },
   { mode: 'pdf', title: 'Ya tengo el PDF', detail: 'Sube el PDF terminado e indica cuántas cartas y tableros trae.' },
 ];
@@ -19,7 +27,7 @@ interface WizardCardsStepProps {
   children: ReactNode;
 }
 
-/** Paso 2 del asistente (FEAT-48, decisión 11): cómo se arma la lotería, y sus cartas o su PDF. */
+/** Paso 2 del asistente (FEAT-48, decisión 11; «Generar con IA», FEAT-50): cómo se arma la lotería, y sus cartas o su PDF. */
 export const WizardCardsStep = ({ mode, onModeChange, canUpload, children }: WizardCardsStepProps) => (
   <section className="seasonal-wizard__panel" aria-labelledby="wizard-step-title">
     <div>

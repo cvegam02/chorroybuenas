@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { PREVIEW_ACCEPTED_MIME_TYPES } from '../../../utils/seasonalPreview';
 import { AdminSeasonalPreviews } from '../AdminSeasonalPreviews';
 import type { WizardCardsState } from './useWizardCards';
-import type { CardsMode } from './WizardCardsStep';
+import { buildsOnSite, type CardsMode } from './WizardCardsStep';
 import type { WizardShowcaseState } from './useWizardShowcase';
 
 interface WizardShowcaseStepProps {
@@ -111,10 +111,10 @@ export const WizardShowcaseStep = ({ mode, cards, showcase }: WizardShowcaseStep
         Vitrina
       </h1>
       <p className="seasonal-wizard__muted">
-        Lo que ve la gente en el catálogo antes de comprar.{mode === 'cards' ? ' Toca una carta para marcarla.' : ''}
+        Lo que ve la gente en el catálogo antes de comprar.{buildsOnSite(mode) ? ' Toca una carta para marcarla.' : ''}
       </p>
     </div>
-    {mode === 'cards' ? (
+    {buildsOnSite(mode) ? (
       <CardsShowcase cards={cards} showcase={showcase} />
     ) : (
       <AdminSeasonalPreviews

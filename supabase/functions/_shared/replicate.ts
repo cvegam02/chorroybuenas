@@ -19,15 +19,19 @@ export interface ReplicateDeps {
 
 const TERMINAL = new Set(['succeeded', 'failed', 'canceled']);
 
-/** Crea una predicción. Ante 429 reintenta hasta maxRetries veces y luego lanza AI_BUSY. */
+/**
+ * Crea una predicción. Ante 429 reintenta hasta maxRetries veces y luego lanza AI_BUSY.
+ * `path` permite llamar a un modelo oficial por su nombre (`/models/<dueño>/<modelo>/predictions`).
+ */
 export async function createPrediction(
   deps: ReplicateDeps,
   apiKey: string,
   body: Record<string, unknown>,
   maxRetries = 3,
+  path = '/predictions',
 ): Promise<Prediction> {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const res = await deps.fetchFn(`${REPLICATE_API_BASE}/predictions`, {
+    const res = await deps.fetchFn(`${REPLICATE_API_BASE}${path}`, {
       method: 'POST',
       headers: { Authorization: `Token ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body),

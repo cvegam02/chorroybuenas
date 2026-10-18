@@ -1,0 +1,119 @@
+/* Modo «Generar con IA» del paso 2 del asistente (FEAT-50, US A2). */
+
+.wizard-ai {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wizard-ai__quality,
+.wizard-ai__source {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 260px;
+}
+
+.wizard-ai__loader {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px dashed var(--color-primary-lighter);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.wizard-ai__list-field {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+}
+
+.wizard-ai__list-errors {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.85rem;
+  color: var(--color-danger);
+}
+
+.wizard-ai__loader-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.wizard-ai__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wizard-ai__card {
+  display: flex;
+  gap: 16px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+}
+
+.wizard-ai__result {
+  flex: 0 0 140px;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-tertiary);
+}
+
+.wizard-ai__result img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wizard-ai__result--empty,
+.wizard-ai__result[aria-busy='true'] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--color-border-dark);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.wizard-ai__card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.wizard-ai__card-title {
+  color: var(--color-text-main);
+}
+
+.wizard-ai__card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .wizard-ai__card {
+    flex-direction: column;
+  }
+
+  .wizard-ai__result {
+    flex-basis: auto;
+    width: 60%;
+    align-self: center;
+  }
+}

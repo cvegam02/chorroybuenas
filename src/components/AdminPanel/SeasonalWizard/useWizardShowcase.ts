@@ -10,7 +10,7 @@ import {
   type SavedPreviews,
 } from '../seasonalPreviewItems';
 import type { WizardCard, WizardCardsState } from './useWizardCards';
-import type { CardsMode } from './WizardCardsStep';
+import { buildsOnSite, type CardsMode } from './WizardCardsStep';
 import type { useWizardDraft } from './useWizardDraft';
 
 type Draft = ReturnType<typeof useWizardDraft>;
@@ -55,7 +55,7 @@ export function useWizardShowcase(draft: Draft, cards: WizardCardsState, mode: C
   const wantedSamples = samples.map((index) => cards.cards[index].previewPath ?? null);
   const hasLeftovers = cards.cards.some((card, index) => card.previewPath && index !== cover && !samples.includes(index));
   const needsSync =
-    mode === 'cards'
+    buildsOnSite(mode)
       ? cards.status === 'ready' &&
         (hasLeftovers ||
           (cover !== null && !ownCover && !cards.cards[cover].previewPath) ||
@@ -133,7 +133,7 @@ export function useWizardShowcase(draft: Draft, cards: WizardCardsState, mode: C
     setError(null);
     let ok = false;
     try {
-      ok = mode === 'cards' ? await syncCards(record.id) : await syncPdf(record.id);
+      ok = buildsOnSite(mode) ? await syncCards(record.id) : await syncPdf(record.id);
     } catch (syncError: unknown) {
       logger.error('Vitrina: no se pudieron guardar portada y muestras', syncError);
     }
