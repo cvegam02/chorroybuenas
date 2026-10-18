@@ -8,6 +8,7 @@ import {
   BASE_DECK_SLOTS,
   type BaseDeckSlot,
 } from '../../utils/baseDeck';
+import { LoadingLine, ProgressBar } from './SeasonalWizard/WizardBusy';
 import './AdminBaseDeck.css';
 
 /** Subidas en paralelo: pocas, para no saturar la conexión con 54 imágenes. */
@@ -156,9 +157,9 @@ export const AdminBaseDeck = () => {
       </p>
 
       {progress && (
-        <p className="admin-base-deck__progress" role="status">
-          Subiendo {progress.done} de {progress.total}…
-        </p>
+        <div className="admin-base-deck__progress">
+          <ProgressBar label="Subiendo la baraja base" done={progress.done} total={progress.total} />
+        </div>
       )}
       {messages.map((message) => (
         <p key={message} className="admin-pricing__error" role="alert">
@@ -166,7 +167,7 @@ export const AdminBaseDeck = () => {
         </p>
       ))}
 
-      {load.status === 'loading' && <p className="admin-pricing__muted">Cargando la baraja base…</p>}
+      {load.status === 'loading' && <LoadingLine text="Cargando la baraja base…" />}
       {load.status === 'failed' && (
         <div className="admin-seasonal__load-error">
           <p className="admin-packs__error">No se pudo cargar la baraja base.</p>

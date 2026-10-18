@@ -7,6 +7,7 @@ import {
   type SeasonalFormErrors,
   type SeasonalLoteriaForm,
 } from '../../../utils/seasonalLoteria';
+import { BusyLabel } from './WizardBusy';
 
 interface WizardOwnPdfProps {
   pdf: SeasonalPdf | null;
@@ -32,7 +33,7 @@ export const WizardOwnPdf = ({ pdf, form, errors, setField, isUploading, onUploa
           <b>Todavía no hay PDF</b>
         )}
         <button type="button" className="seasonal-wizard__btn" onClick={() => inputRef.current?.click()} disabled={isUploading}>
-          {isUploading ? 'Subiendo el PDF…' : pdf ? 'Cambiar PDF' : 'Elegir PDF'}
+          <BusyLabel busy={isUploading} text={isUploading ? 'Subiendo el PDF…' : pdf ? 'Cambiar PDF' : 'Elegir PDF'} />
         </button>
         <span className="seasonal-wizard__muted">El PDF que se vende, ya terminado. Hasta 50 MB.</span>
         <input

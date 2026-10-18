@@ -47,6 +47,8 @@ export function useWizardCards(
   const [state, setState] = useState<CardsState>({ cards: [], boards: [], pdfIsCurrent: false });
   const [rejected, setRejected] = useState<RejectedCardFile[]>([]);
   const [isAdding, setIsAdding] = useState(false);
+  /** Cuántas van de las que se están subiendo (US A5), o null si no se sube nada. */
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
   const latest = useRef(state);
   latest.current = state;
@@ -107,8 +109,10 @@ export function useWizardCards(
       setIsAdding(true);
       const failures: RejectedCardFile[] = [];
       const added: WizardCard[] = [];
+      const sorted = [...files].sort((a, b) => byFileName.compare(a.name, b.name));
       // De una en una: preparar 54 imágenes grandes a la vez puede agotar la memoria del navegador.
-      for (const file of [...files].sort((a, b) => byFileName.compare(a.name, b.name))) {
+      for (const [index, file] of sorted.entries()) {
+        setProgress({ done: index, total: sorted.length });
         const rejection = validateCardFile(file);
         if (rejection) {
           failures.push({ fileName: file.name, reason: rejection });
@@ -131,7 +135,9 @@ export function useWizardCards(
         }
       }
       setRejected(failures);
+      setProgress({ done: sorted.length, total: sorted.length });
       if (added.length > 0) await commitCards([...latest.current.cards.filter((card) => !added.includes(card)), ...added]);
+      setProgress(null);
       setIsAdding(false);
     },
     [loteriaId, commitCards],
@@ -157,7 +163,8 @@ export function useWizardCards(
       if (!loteriaId || images.length === 0) return false;
       setIsAdding(true);
       const added: WizardCard[] = [];
-      for (const { blob, fileName } of images) {
+      for (const [index, { blob, fileName }] of images.entries()) {
+        setProgress({ done: index, total: images.length });
         try {
           const prepared = await prepareSeasonalCard(blob);
           const path = await SeasonalRepository.uploadCard(loteriaId, prepared.blob);
@@ -170,6 +177,7 @@ export function useWizardCards(
           break;
         }
       }
+      setProgress(null);
       if (added.length < images.length) {
         await SeasonalRepository.removeCards(added.map((card) => card.path));
         setIsAdding(false);
@@ -207,6 +215,7 @@ export function useWizardCards(
     ...state,
     rejected,
     isAdding,
+    progress,
     saveFailed,
     retry: () => {
       if (loteriaId) void load(loteriaId);

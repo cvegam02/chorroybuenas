@@ -207,7 +207,13 @@ export const WizardScreen = ({ initialSeasons, initialLoteria, onCreated }: Wiza
               <WizardCardUploader cards={cards} gridSize={form.gridSize} />
             ) : mode === 'ai' ? (
               <WizardAiGenerator ai={ai}>
-                <WizardAiFooter ai={ai} gridSize={form.gridSize} siteCardCount={cards.cards.length} onUse={cards.replaceAll} />
+                <WizardAiFooter
+                  ai={ai}
+                  gridSize={form.gridSize}
+                  siteCardCount={cards.cards.length}
+                  usingProgress={cards.progress ?? {}}
+                  onUse={cards.replaceAll}
+                />
               </WizardAiGenerator>
             ) : (
               <>

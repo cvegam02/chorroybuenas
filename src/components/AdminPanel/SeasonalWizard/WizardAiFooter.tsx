@@ -6,12 +6,20 @@ import { cardCountMessage } from '../../../utils/seasonalBuild';
 import { hasEnoughCards } from '../../../utils/seasonalCards';
 import { WarningModal } from '../../ConfirmationModal/WarningModal';
 import type { WizardAiState } from './useWizardAi';
+import { BusyLabel, ProgressBar } from './WizardBusy';
+
+interface UseProgress {
+  done?: number;
+  total?: number;
+}
 
 interface WizardAiFooterProps {
   ai: WizardAiState;
   gridSize: GridSize;
   /** Cartas que la lotería ya tiene: «Usar estas cartas» las reemplaza. */
   siteCardCount: number;
+  /** Cuántas van al pasarlas a la lotería; mientras se bajan, sin cuenta. */
+  usingProgress: UseProgress;
   onUse: (images: { blob: Blob; fileName: string }[]) => Promise<boolean>;
 }
 
@@ -21,7 +29,7 @@ type Pending = 'generate' | 'use' | null;
  * Abajo del modo «Generar con IA» (FEAT-50, US A4): «Generar las que faltan», con confirmación y avance, y
  * «Usar estas cartas», que pasa los intentos elegidos a las cartas de la lotería en el orden de la lista.
  */
-export const WizardAiFooter = ({ ai, gridSize, siteCardCount, onUse }: WizardAiFooterProps) => {
+export const WizardAiFooter = ({ ai, gridSize, siteCardCount, usingProgress, onUse }: WizardAiFooterProps) => {
   const [pending, setPending] = useState<Pending>(null);
   const [isUsing, setIsUsing] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
@@ -69,13 +77,15 @@ export const WizardAiFooter = ({ ai, gridSize, siteCardCount, onUse }: WizardAiF
           disabled={!enough || busy}
           onClick={() => (siteCardCount > 0 ? setPending('use') : void use())}
         >
-          {isUsing ? 'Pasando las cartas…' : 'Usar estas cartas'}
+          <BusyLabel busy={isUsing} text={isUsing ? 'Pasando las cartas…' : 'Usar estas cartas'} />
         </button>
         <span className="seasonal-wizard__muted">
           {cardCountMessage(items.length, gridSize)}
           {notReady > 0 && enough && `. Las ${notReady} sin generar se quedan fuera`}.
         </span>
       </div>
+      {ai.isBatchRunning && <ProgressBar label="Generando las que faltan" done={cards.length - notReady} total={cards.length} />}
+      {isUsing && <ProgressBar label="Pasando las cartas a la lotería" {...usingProgress} />}
       {result && (
         <p className={result.ok ? 'seasonal-wizard__muted' : 'seasonal-wizard__field-error'} role={result.ok ? 'status' : 'alert'}>
           {result.message}

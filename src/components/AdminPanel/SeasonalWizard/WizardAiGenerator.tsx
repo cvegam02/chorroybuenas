@@ -6,6 +6,7 @@ import type { WizardAiState } from './useWizardAi';
 import { WizardAiListLoader } from './WizardAiListLoader';
 import { WizardAiSceneLoader } from './WizardAiSceneLoader';
 import './WizardAiGenerator.css';
+import { BusyLabel, LoadingLine } from './WizardBusy';
 
 const QUALITIES: { value: AiQuality; label: string }[] = [
   { value: 'low', label: 'Low (para probar)' },
@@ -56,9 +57,12 @@ const AiCardRow = ({ card, ai }: CardRowProps) => {
   return (
     <li className="wizard-ai__card">
       <div className="wizard-ai__media">
-        <div className={`wizard-ai__result${url ? '' : ' wizard-ai__result--empty'}`} aria-busy={isGenerating}>
+        <div
+          className={`wizard-ai__result${url ? '' : ' wizard-ai__result--empty'}${isGenerating ? ' wizard-busy__shimmer' : ''}`}
+          aria-busy={isGenerating}
+        >
           {isGenerating ? (
-            <span>Generando…</span>
+            <BusyLabel busy text="Generando…" />
           ) : url ? (
             <img src={url} alt={`Carta ${card.number}, ${card.name}, generada`} />
           ) : (
@@ -130,7 +134,7 @@ const AiCardRow = ({ card, ai }: CardRowProps) => {
             disabled={isGenerating}
             onClick={() => void ai.generate(card.id)}
           >
-            {isGenerating ? 'Generando…' : chosen ? 'Rehacer' : 'Generar'}
+            <BusyLabel busy={isGenerating} text={isGenerating ? 'Generando…' : chosen ? 'Rehacer' : 'Generar'} />
           </button>
         </div>
         {error && (
@@ -150,7 +154,7 @@ const AiCardRow = ({ card, ai }: CardRowProps) => {
 export const WizardAiGenerator = ({ ai, children }: { ai: WizardAiState; children?: ReactNode }) => {
   const [panel, setPanel] = useState<'list' | 'scenes' | null>(null);
 
-  if (ai.status === 'loading' || ai.status === 'idle') return <p className="seasonal-wizard__muted">Cargando las cartas generadas…</p>;
+  if (ai.status === 'loading' || ai.status === 'idle') return <LoadingLine text="Cargando las cartas generadas…" />;
   if (ai.status === 'failed') {
     return (
       <div>
