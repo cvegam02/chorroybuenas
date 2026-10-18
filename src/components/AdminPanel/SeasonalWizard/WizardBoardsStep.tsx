@@ -10,6 +10,7 @@ import {
 import { hasEnoughCards, seasonalMinCards } from '../../../utils/seasonalCards';
 import type { WizardCardsState } from './useWizardCards';
 import { PDF_STAGE_LABELS, type PdfStage } from './useWizardPdf';
+import { ProgressBar } from './WizardBusy';
 
 /** Cuántos tableros se muestran de ejemplo. */
 const PREVIEW_BOARDS = 4;
@@ -133,7 +134,12 @@ export const WizardBoardsStep = ({ cards, gridSize, boards, pdfStage, pdfError }
               : 'Al seguir, se arma y se guarda el PDF.'}
         </p>
       )}
-      {busy && <p className="seasonal-wizard__muted">Puede tardar un poco. No cierres esta pestaña.</p>}
+      {busy && (
+        <>
+          <ProgressBar label={PDF_STAGE_LABELS[pdfStage as Exclude<PdfStage, 'idle'>]} />
+          <p className="seasonal-wizard__muted">Puede tardar un poco. No cierres esta pestaña.</p>
+        </>
+      )}
       {pdfError && (
         <p className="seasonal-wizard__field-error" role="alert">
           {pdfError}

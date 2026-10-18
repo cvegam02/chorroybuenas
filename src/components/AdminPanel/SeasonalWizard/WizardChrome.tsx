@@ -1,6 +1,7 @@
 import { FaArrowLeft } from 'react-icons/fa';
 import { savedAgoLabel, type WizardStep } from '../../../utils/seasonalWizard';
 import type { DraftSaveState } from './useWizardDraft';
+import { BusyLabel, Spinner } from './WizardBusy';
 
 function saveLabel(state: DraftSaveState, isPublished: boolean, now: Date): string {
   if (isPublished) return 'Publicada: los cambios se guardan con «Guardar cambios»';
@@ -41,10 +42,14 @@ export const WizardHeader = ({ name, isPublished, saveState, now, onBack }: Wiza
       </div>
     </div>
     <span className="seasonal-wizard__saved" role="status">
-      <span
-        className={`seasonal-wizard__dot${saveState.kind === 'failed' || saveState.kind === 'invalid' ? ' seasonal-wizard__dot--off' : ''}`}
-        aria-hidden="true"
-      />
+      {saveState.kind === 'saving' ? (
+        <Spinner inline />
+      ) : (
+        <span
+          className={`seasonal-wizard__dot${saveState.kind === 'failed' || saveState.kind === 'invalid' ? ' seasonal-wizard__dot--off' : ''}`}
+          aria-hidden="true"
+        />
+      )}
       {saveLabel(saveState, isPublished, now)}
     </span>
   </header>
@@ -123,7 +128,7 @@ export const WizardFooter = ({
           disabled={busy || !isReady}
           title={isReady ? undefined : 'Una lotería publicada no puede quedarse sin lo que marca la lista'}
         >
-          Guardar cambios
+          <BusyLabel busy={busy} text="Guardar cambios" />
         </button>
       )}
       {isLast && !isPublished && (
@@ -138,13 +143,13 @@ export const WizardFooter = ({
             disabled={busy || !isReady}
             title={isReady ? undefined : 'Completa lo que marca «Lista para publicar»'}
           >
-            Publicar
+            <BusyLabel busy={busy} text="Publicar" />
           </button>
         </>
       )}
       {!isLast && (
         <button type="button" className="seasonal-wizard__btn seasonal-wizard__btn--primary" onClick={onNext} disabled={busy}>
-          Siguiente →
+          <BusyLabel busy={busy} text="Siguiente →" />
         </button>
       )}
     </div>

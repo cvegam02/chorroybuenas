@@ -7,11 +7,14 @@ import { WarningModal } from '../../ConfirmationModal/WarningModal';
 import { WizardBasicsStep } from './WizardBasicsStep';
 import { WizardBoardsStep } from './WizardBoardsStep';
 import { WizardCardUploader } from './WizardCardUploader';
-import { WizardCardsStep, type CardsMode } from './WizardCardsStep';
+import { WizardAiFooter } from './WizardAiFooter';
+import { WizardAiGenerator } from './WizardAiGenerator';
+import { buildsOnSite, WizardCardsStep, type CardsMode } from './WizardCardsStep';
 import { WizardFooter, WizardHeader, WizardStepsNav } from './WizardChrome';
 import { WizardOwnPdf } from './WizardOwnPdf';
 import { WizardPublishStep } from './WizardPublishStep';
 import { WizardShowcaseStep } from './WizardShowcaseStep';
+import { useWizardAi } from './useWizardAi';
 import { useWizardCards } from './useWizardCards';
 import { useWizardDraft } from './useWizardDraft';
 import { useWizardPdf } from './useWizardPdf';
@@ -69,8 +72,12 @@ export const WizardScreen = ({ initialSeasons, initialLoteria, onCreated }: Wiza
   const [publishError, setPublishError] = useState<string | null>(null);
   const isPublished = record?.is_published ?? false;
 
-  // Sin elección: con cartas guardadas, «Subir mis cartas»; sin cartas pero con un PDF, «Ya tengo el PDF».
-  const mode: CardsMode = chosenMode ?? (cards.status === 'ready' && cards.cards.length === 0 && record?.pdf ? 'pdf' : 'cards');
+  const ai = useWizardAi(record?.id ?? null);
+  // Sin elección: con cartas guardadas, «Subir mis cartas»; sin cartas pero con un PDF, «Ya tengo el PDF»;
+  // sin cartas pero con cartas para generar, «Generar con IA» (FEAT-50).
+  const noCards = cards.status === 'ready' && cards.cards.length === 0;
+  const mode: CardsMode =
+    chosenMode ?? (noCards && record?.pdf ? 'pdf' : noCards && ai.build.cards.length > 0 ? 'ai' : 'cards');
   const showcase = useWizardShowcase(draft, cards, mode);
   const busy = pdf.stage !== 'idle' || cards.isAdding || showcase.isSaving || showcase.isPreparing || isPublishing;
   // Unos tableros de otro modo (se cambió de Clásico a Kids) ya no sirven.
@@ -106,14 +113,14 @@ export const WizardScreen = ({ initialSeasons, initialLoteria, onCreated }: Wiza
   const finishStep = async (): Promise<boolean> => {
     const step = steps[stepIndex];
     if (isPublished) return true;
-    if (step.id === 'boards' && mode === 'cards' && boards.length > 0 && !cards.pdfIsCurrent) {
+    if (step.id === 'boards' && buildsOnSite(mode) && boards.length > 0 && !cards.pdfIsCurrent) {
       return pdf.generate();
     }
     if (!draft.isClean() && !(await save())) {
       setStepIndex(stepWithErrors(draft.form));
       return false;
     }
-    const syncsShowcase = step.id === 'showcase' || (step.id === 'cards' && mode === 'cards');
+    const syncsShowcase = step.id === 'showcase' || (step.id === 'cards' && buildsOnSite(mode));
     return syncsShowcase ? showcase.sync() : true;
   };
 
@@ -135,7 +142,7 @@ export const WizardScreen = ({ initialSeasons, initialLoteria, onCreated }: Wiza
    * cambiaron; la ficha; y la portada y las muestras. Si algo falla, lleva al paso que lo tiene.
    */
   const commitAll = async (): Promise<string | null> => {
-    if (mode === 'cards' && boards.length > 0 && !cards.pdfIsCurrent && !(await pdf.generate())) {
+    if (buildsOnSite(mode) && boards.length > 0 && !cards.pdfIsCurrent && !(await pdf.generate())) {
       setStepIndex(BOARDS_STEP);
       return null;
     }
@@ -178,7 +185,7 @@ export const WizardScreen = ({ initialSeasons, initialLoteria, onCreated }: Wiza
     cardsLoaded: cards.cards.length,
     boardsGenerated: boards.length,
     pdfIsCurrent: cards.pdfIsCurrent,
-    hasCover: mode === 'cards' ? showcase.cover !== null || showcase.ownCover !== null : showcase.pdfCover !== null,
+    hasCover: buildsOnSite(mode) ? showcase.cover !== null || showcase.ownCover !== null : showcase.pdfCover !== null,
   });
 
   const renderStep = () => {
@@ -198,6 +205,16 @@ export const WizardScreen = ({ initialSeasons, initialLoteria, onCreated }: Wiza
           <WizardCardsStep mode={mode} onModeChange={setChosenMode} canUpload={!!record}>
             {mode === 'cards' ? (
               <WizardCardUploader cards={cards} gridSize={form.gridSize} />
+            ) : mode === 'ai' ? (
+              <WizardAiGenerator ai={ai}>
+                <WizardAiFooter
+                  ai={ai}
+                  gridSize={form.gridSize}
+                  siteCardCount={cards.cards.length}
+                  usingProgress={cards.progress ?? {}}
+                  onUse={cards.replaceAll}
+                />
+              </WizardAiGenerator>
             ) : (
               <>
                 <WizardOwnPdf
@@ -220,7 +237,7 @@ export const WizardScreen = ({ initialSeasons, initialLoteria, onCreated }: Wiza
       case 'boards':
         return (
           <Panel title="Tableros" subtitle="Cuántos tableros trae el PDF que se vende.">
-            {mode === 'cards' ? (
+            {buildsOnSite(mode) ? (
               <WizardBoardsStep cards={cards} gridSize={form.gridSize} boards={boards} pdfStage={pdf.stage} pdfError={pdf.error} />
             ) : (
               <p className="seasonal-wizard__muted">

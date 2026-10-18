@@ -5,6 +5,7 @@ import { useDragReorder } from '../../../hooks/useDragReorder';
 import { cardCountMessage, cardProgress, offRatioNotice } from '../../../utils/seasonalBuild';
 import { SEASONAL_CARD_ACCEPTED_MIME_TYPES, SEASONAL_EXPECTED_CARDS } from '../../../utils/seasonalCards';
 import type { WizardCardsState } from './useWizardCards';
+import { BusyLabel, LoadingLine, ProgressBar } from './WizardBusy';
 
 interface WizardCardUploaderProps {
   cards: WizardCardsState;
@@ -20,7 +21,7 @@ export const WizardCardUploader = ({ cards, gridSize }: WizardCardUploaderProps)
   const notice = offRatioNotice(cards.cards);
 
   if (cards.status === 'loading' || cards.status === 'idle') {
-    return <p className="seasonal-wizard__muted">Cargando las cartas…</p>;
+    return <LoadingLine text="Cargando las cartas…" />;
   }
   if (cards.status === 'failed') {
     return (
@@ -62,8 +63,9 @@ export const WizardCardUploader = ({ cards, gridSize }: WizardCardUploaderProps)
       >
         <b>Arrastra aquí tus cartas o</b>
         <button type="button" className="seasonal-wizard__btn" onClick={() => inputRef.current?.click()} disabled={busy}>
-          {cards.isAdding ? 'Preparando y subiendo cartas…' : 'Elegir imágenes'}
+          <BusyLabel busy={cards.isAdding} text={cards.isAdding ? 'Preparando y subiendo cartas…' : 'Elegir imágenes'} />
         </button>
+        {cards.progress && <ProgressBar label="Subiendo cartas" done={cards.progress.done} total={cards.progress.total} />}
         <span className="seasonal-wizard__muted">Cartas completas, en proporción 2:3. Puedes subir varias a la vez.</span>
         <input
           ref={inputRef}

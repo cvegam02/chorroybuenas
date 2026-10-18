@@ -11,6 +11,7 @@ import { seasonalOverviewLine, themeChips } from '../../utils/adminSeasonal';
 import { summaryPeriod } from '../../utils/adminSummary';
 import { openDownloadLink } from '../../utils/openDownloadLink';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
+import { AdminBaseDeck } from './AdminBaseDeck';
 import { AdminSeasonalCard } from './AdminSeasonalCard';
 import { AdminSeasonalThemes } from './AdminSeasonalThemes';
 import './AdminTokenPacks.css';
@@ -27,11 +28,12 @@ interface SeasonalData {
 
 type LoadState = { status: 'loading' } | { status: 'failed' } | ({ status: 'ready' } & SeasonalData);
 
-/** A1.7 — Temáticas (FEAT-48, US A1): loterías en tarjetas, filtro por temática y «Administrar temáticas». */
+/** A1.7 — Temáticas (FEAT-48, US A1): loterías en tarjetas, filtro por temática, «Administrar temáticas» y «Baraja base» (FEAT-50, US A1). */
 export const AdminSeasonal = () => {
   const [load, setLoad] = useState<LoadState>({ status: 'loading' });
   const [filter, setFilter] = useState('');
   const [themesOpen, setThemesOpen] = useState(false);
+  const [baseDeckOpen, setBaseDeckOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<AdminSeasonalLoteria | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -195,10 +197,20 @@ export const AdminSeasonal = () => {
           >
             Administrar temáticas
           </button>
+          <button
+            type="button"
+            className="admin-pricing__btn"
+            aria-expanded={baseDeckOpen}
+            onClick={() => setBaseDeckOpen((open) => !open)}
+          >
+            Baraja base
+          </button>
         </div>
       )}
 
       {ready && themesOpen && <AdminSeasonalThemes seasons={ready.seasons} onChanged={reload} />}
+
+      {ready && baseDeckOpen && <AdminBaseDeck />}
 
       {actionError && (
         <p className="admin-pricing__error" role="alert">

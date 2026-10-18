@@ -1,0 +1,149 @@
+# FEAT-50 — Generar cartas temáticas con IA en el asistente
+
+**Estado: 🚧 en curso. Definida con Carlos el 2026-10-17; base de conocimiento actualizada. Se trabaja en `feature/cartas-con-ia`, creada desde `dev` el 2026-10-17 (decisión 10). Las cinco historias (A1 a A5) construidas el 2026-10-17 y la A6 (cuadrícula y panel) agregada ese día y construida el 2026-10-18, con las migraciones 056 y 057 aplicadas y la función `generate-seasonal-card` desplegada en el Supabase de dev; falta la demo de Carlos. Hay que aplicarlas y desplegarla en producción antes de pasar a `main`.**
+
+**Contexto.** Hoy Carlos genera cada carta de una lotería temática a mano en Replicate (`openai/gpt-image-2`): escribe un prompt general de la temática, le agrega número, nombre y escena de la carta, manda como imagen de entrada la carta tradicional que corresponde (o una carta ya generada que le gustó, como referencia de estilo), elige 2:3, calidad «low» y salida WebP, descarga el resultado y, al final, sube todas las cartas al asistente (FEAT-48, paso 2). Esta feature lleva ese trabajo al asistente: generar, revisar, rehacer y quedarse con la buena, sin descargar ni volver a subir nada.
+
+**Clasificación:** toca el asistente de loterías temáticas (paso 2, Cartas), una función nueva en el servidor que llama a Replicate, almacenamiento privado para la baraja base y los intentos, y tablas nuevas. No toca tokens, cobros ni el catálogo público. Estimado: 4 a 5 sesiones.
+
+## Decisiones tomadas con el usuario (2026-10-17)
+
+1. **Vive dentro del asistente,** como un tercer modo del paso 2, «Generar con IA», junto a «Subir mis cartas» y «Ya tengo el PDF». Las cartas elegidas quedan como las cartas de la lotería y siguen a Tableros, Vitrina y PDF como hoy. Todo se guarda en el borrador privado (FEAT-48, decisión 18), así que se puede dejar a medias y seguir otro día. _(Descartado: una pantalla aparte «Generador de cartas» que después manda las cartas a una lotería.)_
+2. **Flujo:** generar de una en una para ajustar el prompt; cuando va bien, «Generar las que faltan» de una sola vez; rehacer solo las que no gusten, ajustando su escena o el prompt general.
+3. **Baraja base privada, se sube una vez:** las 54 cartas tradicionales, cada una con su número y nombre, en un espacio que solo ve el administrador. Todas las temáticas la reusan; una carta se puede reemplazar. Nunca se muestra al público. _(Descartado: subir las 54 en cada lotería.)_
+4. **No toda temática sale de la baraja tradicional** (por ejemplo, estados o números). La lista de cartas es libre: cada carta tiene número, nombre, escena y, opcionalmente, una imagen de entrada. La baraja tradicional es una plantilla que llena número y nombre de las 54.
+5. **Imagen de entrada de cada carta:** su carta de la baraja base, la carta generada que se marque como «referencia de estilo», o ninguna (solo el prompt). Así se cubre el flujo de las temáticas no tradicionales: se genera la primera solo con el prompt y, cuando gusta, se usa de referencia para las demás.
+6. **Captura pegando una lista,** un renglón por carta: `número | NOMBRE | escena`. Después cada carta se edita sola. Con la plantilla tradicional, número y nombre ya vienen llenos y solo se agregan escenas. _(Descartado: capturar una por una con formulario.)_
+7. **Los intentos se guardan y se elige:** cada carta guarda sus últimos intentos (hasta 5) y el administrador marca cuál se queda. _(Descartado: que el nuevo reemplace al anterior.)_
+8. **Ajustes de generación:** modelo `openai/gpt-image-2`, proporción 2:3 y salida WebP fijas; calidad «low» por defecto, con selector low / medium / high. _(Descartado: calidad siempre «low». WebP en vez de JPG porque pesa menos con la misma calidad.)_
+
+9. **La baraja base se administra en la pestaña Temáticas:** un botón «Baraja base» junto a «Administrar temáticas» despliega el panel en la misma pantalla. _(Descartado: subirla dentro del asistente la primera vez.)_
+
+10. **La rama `feature/cartas-con-ia` sale de `dev`,** creada el 2026-10-17. Sus migraciones empiezan en la 056. Al crearla resultó que FEAT-49 ya estaba en `dev` (PR #63), así que no había choque de numeración. _(Descartados: esperar a que FEAT-49 llegue a `dev`; salir de `feature/ofertas-con-banner`.)_
+11. **Las escenas se cargan de una vez sobre la lista ya cargada** (por ejemplo, la baraja tradicional), pegando un renglón por carta: sirven «6 | escena» y «6 | LA SIRENA | escena» (si el nombre coincide con el de la carta, se ignora). Cada escena va a la carta de ese número; los números que no están en la lista se señalan. No borra lo ya generado: solo cambia escenas. Pedido por Carlos el 2026-10-17 al revisar A2; cumple la decisión 6, así que entra en US A2. _(Descartados: solo «número | escena»; solo escenas en orden, sin número.)_
+12. **Un nombre distinto al pegar escenas renombra la carta,** y el nombre también se edita en la fila de cada carta. En «26 | EL DUENDE | escena», el segundo trozo siempre es el nombre: si es otro que el de la carta (EL NEGRITO), la carta pasa a llamarse EL DUENDE y la escena es lo que sigue; «26 | escena» solo cambia la escena. La imagen de entrada sigue siendo la carta 26 de la baraja base. Pedido por Carlos el 2026-10-17 al probar A2, cuando un nombre distinto acabó dentro de la escena; ajusta la decisión 11 y entra en US A2. _(Descartado: que un nombre distinto se volviera parte de la escena, como se construyó primero.)_
+13. **«Generar las que faltan» genera 8 cartas a la vez,** y una carta que recibe «Replicate está ocupado» espera 20 segundos y se vuelve a pedir, hasta 2 veces, además de los reintentos que ya hace el servidor. Pedido por Carlos el 2026-10-17 al revisar A4 (se había construido con 3). _(Descartados: lanzar todas de golpe; un botón «Generar todas» que rehaga también las ya generadas.)_
+14. **Todo el asistente de temáticas muestra que está trabajando,** con las animaciones que el sitio ya tiene: el círculo que gira, el brillo sobre el hueco de una carta y la barra de avance del PDF. Entra como US A5 de esta feature, en la misma rama. Pedido por Carlos el 2026-10-17 al revisar A4. _(Descartado: una feature aparte, FEAT-51.)_
+15. **Las cartas se ven en cuadrícula y se editan en un panel,** en lugar de una fila alta por carta: miniaturas 2:3 con número, nombre y estado (sin generar, generando, lista, con error; «Sin escena» y «Ref.» como marcas); filtros Todas · Sin escena · Sin generar · Listas · Con error; al tocar una carta se abre su detalle (lo que hoy tiene cada fila) en un panel a la derecha que deja ver la cuadrícula, con ← → para pasar a la anterior o la siguiente del filtro y Esc para cerrar; en celular el panel se abre a pantalla completa encima, sin cambiar de página. El prompt general y la calidad quedan en un renglón con «Editar» cuando ya hay cartas, y el avance, «Generar las que faltan» y «Usar estas cartas» van en una barra fija abajo. No cambia lo que se guarda ni cómo se genera. Pedido por Carlos el 2026-10-17 al revisar A4 («recorrer 54 cartas es tedioso»), con una maqueta HTML revisada antes de construir; entra como US A6 de esta feature, en la misma rama. _(Descartados: el detalle en una ventana encima, que tapa la cuadrícula; desplegarlo en su lugar dentro de la cuadrícula, que empuja las demás; en celular, una página aparte con su propia dirección.)_
+
+## Diseño
+
+**El prompt que se manda a Replicate** es el prompt general de la lotería seguido de los datos de la carta, en el formato que Carlos ya usa:
+
+```
+<prompt general>
+
+Número: "6"
+Nombre: "LA SIRENA"
+Escena: una sirena con gorro de Santa y cola verde brillante, sentada sobre un témpano de hielo, adornando un pequeño pino con conchas y estrellas de mar.
+```
+
+**Paso 2 · Generar con IA (propuesta, por revisar contra la maqueta de FEAT-48):**
+
+- Arriba: prompt general (texto largo, se guarda con la lotería), calidad, y «Cargar lista» (pegar renglones) o «Usar baraja tradicional».
+- Una fila por carta: número y nombre, escena editable, imagen de entrada (base / referencia / ninguna), el intento elegido grande y los demás chicos para cambiar de elección, y los botones «Generar» / «Rehacer» y «Usar como referencia».
+- Abajo: «Generar las que faltan» (pide confirmar cuántas se van a generar), avance «N de M listas» y «Usar estas cartas», que pasa los intentos elegidos a las cartas de la lotería, en el orden de la lista.
+- Mientras una carta se genera se ve su estado («Generando…»); si falla, se muestra el error en esa fila y se puede reintentar sin perder las demás.
+
+**Servidor.** La llave de Replicate nunca llega al navegador: una función nueva del servidor, solo para administradores, arma la llamada, espera el resultado y guarda la imagen en el espacio privado como un intento de esa carta. Al administrador no se le descuentan tokens; el costo lo paga la cuenta de Replicate.
+
+**Datos (propuesta).** Baraja base: tabla con número, nombre y archivo en un bucket privado. Por lotería: el prompt general y la calidad; por carta: posición, número, nombre, escena, tipo de imagen de entrada e intento elegido; por intento: archivo, fecha y estado. Todo se borra al borrar la lotería, como las cartas de FEAT-48. Las migraciones empiezan en la 056 (decisión 10).
+
+## Preguntas abiertas (se resuelven antes de la historia que las necesita)
+
+1. _(Resuelta: decisión 9.)_
+2. _(Resuelta: decisión 10.)_
+
+## Cambio en la base de conocimiento
+
+Propuesto con los cuatro puntos, confirmado por Carlos («si, aplícalo») y aplicado el 2026-10-17: `docs/contexto-negocio.md` §18 (generar las cartas con IA y la baraja base) y §15 (fila del 2026-10-17); `docs/casos-de-uso.md` CU 28 (flujo alterno «Generar con IA»); `docs/diseno-mockups.md` A1.7 (panel «Baraja base») y A1.7a (modo «Generar con IA» del paso 2), marcados «por construir (FEAT-50)».
+
+---
+
+## Grupo A — Generar cartas con IA
+
+### US A1 — Subir la baraja base   ·   Estado: 🚧 construida, falta la demo
+
+- **Historia** — Como administrador, quiero subir una sola vez las 54 cartas tradicionales con su número y nombre, para usarlas como imagen de entrada en cualquier temática.
+- **Entrega demostrable** — En el Admin hay un lugar donde se ven las 54 cartas base, se suben (varias a la vez, asignadas por orden) y se reemplaza una sola.
+- **Construcción (propuesta)** — Migración con la tabla de la baraja base y un bucket privado solo para administradores (con su prueba en `supabase/tests/`); repositorio; panel en la pestaña Temáticas (decisión 9).
+- **Construido** — 2026-10-17. Migración `056_base_deck.sql`: espacio privado `base-deck` (JPEG, PNG o WebP, hasta 10 MB), solo administradores; cada carta se guarda con su número como nombre (`1` … `54`) y la base rechaza cualquier otro nombre. No hizo falta la tabla que proponía la construcción: el nombre de cada carta sale de la baraja tradicional (`src/utils/traditionalDeck.ts`) y reemplazar es volver a subir al mismo número. `src/utils/baseDeck.ts` asigna los archivos a sus números (por el número al inicio del nombre del archivo o, si no lo traen todos, en orden de nombre desde la 1) y rechaza lo que no es imagen, pesa más de 10 MB o pasa de 54; `BaseDeckRepository`; panel `AdminBaseDeck` abierto con «Baraja base» junto a «Administrar temáticas». Verificado con `supabase/tests/056_base_deck.test.sql` (17 aserciones, escrita antes de la migración y vista fallar), `tests/src/baseDeck.test.ts` (5), typecheck, lint y `npm test`. Migración aplicada en dev el 2026-10-17, tras revisar que no existía nada con esos nombres.
+- **Depende de** — nada.
+- **Cómo se prueba (guion de demo)** — Admin → Temáticas → Baraja base → sube las 54 → deberían verse en orden con su número y nombre → reemplaza La Sirena → debería verse la nueva. Con una cuenta que no es de administrador, la baraja no se puede leer.
+- **Escenarios cubiertos**:
+  - [ ] Subir las 54 de una vez. (Demo.)
+  - [ ] Reemplazar una carta. (Demo.)
+  - [x] Un usuario normal no puede ver ni bajar la baraja base. (Prueba de base de datos; también el visitante.)
+  - [x] La base rechaza números fuera del 1 al 54, con ceros a la izquierda o en carpetas. (Prueba de base de datos.)
+  - [x] Archivos que no son imagen, de más de 10 MB o que pasan de 54 no se suben y se dice por qué. (Prueba automática.)
+
+### US A2 — Generar una carta desde el asistente   ·   Estado: 🚧 construida, falta la demo
+
+- **Historia** — Como administrador, quiero escribir el prompt general, cargar mi lista de cartas y generar una carta, para ver cómo sale antes de seguir.
+- **Entrega demostrable** — En el paso 2, modo «Generar con IA»: prompt general, «Cargar lista» o «Usar baraja tradicional», y «Generar» en una carta muestra la imagen generada en 2:3.
+- **Construcción (propuesta)** — Función del servidor (solo administradores) que llama a `openai/gpt-image-2` con el prompt armado, la imagen de entrada, 2:3, calidad y WebP, y guarda el intento; reutiliza `_shared/replicate.ts`. Migración de cartas e intentos por lotería. Lector de la lista pegada, con prueba. Modo nuevo en `WizardCardsStep`.
+- **Construido** — 2026-10-17. Migración `057_seasonal_ai_cards.sql`: `seasonal_ai_builds` (prompt general, calidad, carta de referencia), `seasonal_ai_cards` (posición, número 1–999, nombre, escena, imagen de entrada; la baraja base solo para 1–54) y `seasonal_ai_attempts` (archivo, calidad, prompt completo), más el espacio privado `seasonal-ai`; el administrador ve, cambia y borra, pero los intentos solo los registra y sube el servidor; todo se borra con la lotería. Función `generate-seasonal-card` (solo administradores, sin tokens): arma el prompt con el formato de Carlos (`_shared/seasonalCard.ts`), toma la carta base o ninguna como entrada, llama a `openai/gpt-image-2` por su nombre (`createPrediction` acepta ahora la ruta del modelo), espera hasta 140 s, guarda la imagen y la deja como intento elegido. Navegador: `src/utils/aiCardList.ts` (lista pegada y plantilla tradicional), `AiCardsRepository`, `useWizardAi` y el modo «Generar con IA» (`WizardAiGenerator`, `WizardAiListLoader`); los pasos siguientes tratan este modo como «Subir mis cartas» (`buildsOnSite`). Borrar una lotería borra también los archivos de sus intentos. «Cargar escenas» (decisión 11, `parseSceneList` y `WizardAiSceneLoader`): pega las escenas de todas las cartas por número sobre la lista ya cargada, sin borrar lo generado; tras «Usar baraja tradicional» se abre solo. Con la decisión 12, un nombre distinto renombra la carta (`SceneUpdate`; nombre vacío o de más de 80 letras se señala) y el nombre se edita en la fila de cada carta; no se puede generar ni guardar una carta sin nombre. La opción «Usar como referencia» se construyó en A3. Verificado con `supabase/tests/057_seasonal_ai_cards.test.sql` (27 aserciones, escrita antes de la migración y vista fallar), `tests/functions/seasonalCard.test.ts` (7), un caso nuevo en `replicate.test.ts`, `tests/src/aiCardList.test.ts` (9, ajustadas a la decisión 12 antes del cambio y vistas fallar), typecheck, lint y `npm test`. En dev, el 2026-10-17: migración aplicada tras revisar que no existía nada con esos nombres, función desplegada y probada sin sesión (responde 401).
+- **Depende de** — A1 (para la imagen de entrada tradicional).
+- **Cómo se prueba (guion de demo)** — Admin → Temáticas → + Nueva lotería temática → paso 2 → Generar con IA → escribe el prompt general → Usar baraja tradicional → se abre «Cargar escenas»: pega varias escenas («6 | escena» o «6 | LA SIRENA | escena») y una con otro nombre («26 | EL DUENDE | escena») → Cargar escenas → cada una aparece en su carta y la 26 se llama EL DUENDE → cambia el nombre de otra carta en su fila → en La Sirena, Generar → en unos segundos debería verse la sirena generada. Sal del asistente y vuelve: la carta y el prompt siguen ahí.
+- **Escenarios cubiertos**:
+  - [ ] Generar con la carta base como entrada. (Demo.)
+  - [ ] Generar sin imagen de entrada. (Demo.)
+  - [x] Lista pegada con un renglón mal escrito: se señala ese renglón y no se pierden los demás. (Prueba automática; en pantalla, demo.)
+  - [ ] Replicate falla o tarda demasiado: error en esa carta, se puede reintentar. (Los mensajes, con prueba automática; en pantalla, demo.)
+  - [x] Escenas pegadas de una vez sobre la baraja tradicional, con «número | escena» o «número | NOMBRE | escena»; los renglones que no sirven se señalan. (Prueba automática; en pantalla, demo.)
+  - [x] Un nombre distinto al pegar escenas renombra la carta; el nombre se edita en la fila (decisión 12). (Prueba automática; en pantalla, demo.)
+  - [x] La función rechaza a quien no es administrador. (Sin sesión, probado en dev; con sesión de usuario normal, revisa `admin_users` antes de llamar a Replicate.)
+  - [x] Un usuario o visitante no ve el prompt, las cartas ni los intentos, y nadie más que el servidor registra intentos. (Prueba de base de datos.)
+
+### US A3 — Rehacer, elegir intento y usar de referencia   ·   Estado: 🚧 construida, falta la demo
+
+- **Historia** — Como administrador, quiero rehacer una carta ajustando su escena, quedarme con el mejor intento y usar una carta que me gustó como referencia de estilo para las demás.
+- **Entrega demostrable** — Cada carta muestra sus intentos (hasta 5) y se elige cuál se queda; «Usar como referencia» hace que las demás cartas puedan generarse con esa imagen de entrada; selector de calidad.
+- **Construcción (propuesta)** — Elección de intento y referencia en la base; borrar el intento más viejo al pasar de 5; opción de imagen de entrada por carta.
+- **Construido** — 2026-10-17. Sin migración: la 057 ya tenía el intento elegido y la carta de referencia. La función `generate-seasonal-card` deja a cada carta sus últimos 5 intentos (`attemptsToPrune` en `_shared/seasonalCard.ts`): al pasar de 5 borra los más viejos, con su archivo, sin tocar el intento nuevo ni el que estaba elegido antes de rehacer (el nuevo queda elegido, así que «nunca el elegido» protege la elección previa); responde qué intentos borró. En la fila de cada carta: los intentos en chico debajo del grande, y tocar uno lo deja como elegido; «Usar como referencia» (en cartas ya generadas), que la marca con «Referencia de estilo» y «Quitar»; y la opción «La carta de referencia» en la imagen de partida, activa cuando hay referencia. El selector de calidad ya venía de A2. Verificado con 4 casos nuevos en `tests/functions/seasonalCard.test.ts` (escritos antes y vistos fallar), typecheck, lint y `npm test`. Función desplegada en dev el 2026-10-17 y probada sin sesión (responde 401).
+- **Depende de** — A2.
+- **Cómo se prueba (guion de demo)** — En una carta ya generada → Rehacer dos veces → deberían verse tres intentos → elige el primero → queda grande. Marca otra carta como referencia → genera una carta sin carta base → debería salir con el estilo de la referencia.
+- **Escenarios cubiertos**:
+  - [ ] Elegir un intento anterior. (Demo.)
+  - [x] Al sexto intento se borra el más viejo (nunca el elegido). (Prueba automática; en pantalla, demo.)
+  - [ ] Generar usando la referencia como entrada. (Demo.)
+
+### US A4 — Generar las que faltan y usarlas en la lotería   ·   Estado: 🚧 construida, falta la demo
+
+- **Historia** — Como administrador, quiero generar de una vez todas las cartas que faltan y pasar las elegidas a la lotería, para seguir con tableros y PDF.
+- **Entrega demostrable** — «Generar las que faltan» con confirmación y avance «N de M listas»; «Usar estas cartas» las deja como las cartas de la lotería y el paso 3 ya puede generar tableros.
+- **Construcción (propuesta)** — Cola en el navegador con pocas generaciones a la vez (para no topar con el límite de Replicate); conversión de los intentos elegidos a las cartas privadas de FEAT-48, en el orden de la lista.
+- **Construido** — 2026-10-17. Sin migración ni cambios en la función. `src/utils/aiCardBatch.ts`: `cardsToGenerate` (las que no tienen intento elegido y no se están generando), `runWithLimit` (8 a la vez, `AI_BATCH_CONCURRENCY`, decisión 13; un fallo no detiene a las demás), `retryWhenBusy` (una carta con «ocupado» espera 20 s y se reintenta hasta 2 veces) y `cardsToUse` (los intentos elegidos en el orden de la lista y cuántas faltan). `WizardAiFooter`, abajo del modo: «N de M listas», «Generar las que faltan (N)» con confirmación, y «Usar estas cartas», activo cuando las cartas con intento elegido llegan al mínimo del modo (24 Clásico, 15 Kids); las que no se generaron se quedan fuera y se dice cuántas. «Usar estas cartas» baja los intentos elegidos (`AiCardsRepository.downloadAttempts`), los prepara como cualquier carta subida y reemplaza las cartas de la lotería (`useWizardCards.replaceAll`): si alguna falla no cambia nada; si la lotería ya tenía cartas, pide confirmar porque se reemplazan y se borran sus tableros. Al salir del asistente la cola deja de empezar cartas nuevas; las que ya se pidieron terminan en el servidor y aparecen al volver. Con 8 a la vez, 51 cartas deberían tardar del orden de 6 a 8 minutos (por confirmar en la demo) y hay que quedarse en la página. Verificado con `tests/src/aiCardBatch.test.ts` (8, escritas antes y vistas fallar), typecheck, lint y `npm test`.
+- **Depende de** — A3.
+- **Cómo se prueba (guion de demo)** — Con 3 cartas generadas de 54 → Generar las que faltan → confirma «51 cartas» → el avance sube hasta 54 → rehaz una que no guste → Usar estas cartas → paso 3 → Generar tableros → los tableros salen con las cartas generadas.
+- **Escenarios cubiertos**:
+  - [x] Generar las que faltan sin tocar las que ya están. (Prueba automática; en pantalla, demo.)
+  - [x] Si algunas fallan, las demás siguen y las fallidas se pueden reintentar. (Prueba automática; en pantalla, demo.)
+  - [ ] Salir a mitad de la generación y volver: lo ya generado sigue ahí. (Demo.)
+  - [ ] «Usar estas cartas» respeta el orden y el mínimo del modo. (El orden, con prueba automática; el mínimo, en la demo.)
+
+### US A5 — Ver que el asistente está trabajando   ·   Estado: 🚧 construida, falta la demo
+
+- **Historia** — Como administrador, quiero ver una animación mientras el asistente de temáticas carga, sube, genera o guarda, para saber que sigue trabajando y cuánto falta.
+- **Entrega demostrable** — En cada espera del asistente (y de la baraja base) se ve algo moverse: círculo junto a «Cargando…» y dentro de los botones que guardan o suben; brillo sobre la carta que se genera con IA; barra «N de M» donde se sabe cuánto falta (subir cartas, generar las que faltan, pasar las cartas a la lotería, subir la baraja base) y barra que va y viene donde no (armar y subir el PDF).
+- **Construcción (propuesta)** — Piezas comunes del asistente (círculo, línea de «cargando», barra con y sin avance) con los estilos ya usados en el sitio, sin animación para quien la tiene desactivada en su equipo; avance de subida en `useWizardCards`; aplicarlas en cada espera.
+- **Construido** — 2026-10-17. `WizardBusy.tsx` y `.css`: `Spinner`, `LoadingLine`, `BusyLabel` (círculo dentro de un botón) y `ProgressBar` (con «N de M» o, sin cuenta, el tramo que va y viene), con el giro `spin` del sitio, el brillo de las cartas de la vista de una lotería y la barra del aviso del PDF; con la animación desactivada en el equipo se ven quietos. `useWizardCards` expone el avance (`progress`) al subir cartas y al pasar las generadas. Aplicado en: cargar la lotería, las cartas, las cartas generadas y la baraja base (círculo); «Elegir imágenes», «Subir otra portada», «Elegir PDF», «Generar»/«Rehacer», «Usar estas cartas», «Siguiente →», «Publicar» y «Guardar cambios» (círculo en el botón); el aviso «Guardando…» de arriba (círculo en vez del punto); la carta que se genera (brillo); subir cartas, generar las que faltan, pasar las cartas y subir la baraja base (barra «N de M»); armar, subir y guardar el PDF (barra sin cuenta). Verificado con typecheck, lint y `npm test`; el aspecto, en la demo.
+- **Depende de** — A4.
+- **Cómo se prueba (guion de demo)** — Abre una lotería en el asistente → mientras carga se ve el círculo → paso 2, Subir mis cartas → elige 10 imágenes → la barra sube de 1 a 10 → Generar con IA → Generar en una carta → su hueco brilla y su botón gira → Generar las que faltan → la barra sube con cada carta → Usar estas cartas → barra al pasarlas → Tableros → Siguiente → barra mientras se arma y se sube el PDF → Publicar → el botón gira mientras guarda. En Temáticas → Baraja base, al subir varias, barra «N de 54».
+- **Escenarios cubiertos**:
+  - [ ] Cada espera del asistente se ve en movimiento. (Demo.)
+  - [ ] Con la animación desactivada en el equipo, se ve igual el estado, sin movimiento. (Demo.)
+
+### US A6 — Ver las cartas en cuadrícula y editarlas en un panel   ·   Estado: 🚧 construida, falta la demo
+
+- **Historia** — Como administrador, quiero ver las 54 cartas de un vistazo y abrir solo la que voy a ajustar, para no recorrer una lista larguísima carta por carta.
+- **Entrega demostrable** — En el modo «Generar con IA», las cartas en cuadrícula con su estado, filtros, un panel de detalle a la derecha (pantalla completa en celular) que se recorre con flechas, el prompt general compacto y una barra fija abajo con el avance y los dos botones del lote (decisión 15).
+- **Construcción (propuesta)** — Estado y filtros de cada carta en una función aparte, con prueba (`src/utils/aiCardView.ts`); `WizardAiGenerator` pasa de filas a cuadrícula + panel (`WizardAiCardPanel`); `WizardAiFooter` se queda igual por dentro y pasa a la barra fija. Sin cambios en la base ni en la función del servidor.
+- **Construido** — 2026-10-18. Sin migración ni cambios en la función. `src/utils/aiCardView.ts`: `aiCardStatus` (generando manda sobre todo y un error manda sobre lista), `filterAiCards` y `countAiCardFilters` (los cinco filtros; «Sin generar» incluye las que se están generando) y `neighborCardId` (la carta de al lado dentro del filtro). `WizardAiCardPanel`: el detalle que antes tenía cada fila (intentos, nombre, referencia, escena, imagen de partida, Generar / Rehacer / Reintentar), con ← → y ✕ arriba. `WizardAiGenerator`: cuadrícula de miniaturas con número, «Ref.», número de intentos, nombre, estado y «Sin escena»; filtros con su cuenta; panel a la derecha que se queda a la vista al bajar; ← → y Esc con el teclado (Esc suelta antes el campo para que se guarde lo escrito); el prompt y la calidad en un renglón con «Editar» cuando ya hay cartas y prompt. `WizardAiFooter` no cambió por dentro: su barra queda fija abajo. En celular (hasta 900 px) el panel ocupa toda la pantalla y la página de atrás no se desplaza (`usePageScrollLock`, agregado el 2026-10-18 al aplicar el cambio en la máquina de Carlos). El panel y la barra de abajo usan `sticky`, que funciona desde que FEAT-49 dejó `html` y `body` con `overflow-x: clip`. Verificado con `tests/src/aiCardView.test.ts` (6, escritas antes del código) y, el 2026-10-18 en la máquina de Carlos, typecheck, lint y `npm test` completos (1377 pruebas). El 2026-10-18, a pedido de Carlos (no encontraba cómo cambiar la baraja tradicional por otra lista), «Cargar escenas» y «Cambiar la lista» pasan de enlaces a botones, y el cuadro de «Cambiar la lista» tiene «Cancelar»; mientras está abierto se ocultan la cuadrícula y la barra de abajo de la lista anterior, que volvían a mostrar las 54. Fila A1.7a de `docs/diseno-mockups.md` actualizada el 2026-10-18, tras la confirmación de Carlos (propuesta con los cuatro puntos).
+- **Depende de** — A5.
+- **Cómo se prueba (guion de demo)** — Paso 2 → Generar con IA, con la baraja tradicional cargada → se ven las 54 en cuadrícula, cada una con su estado → toca La Sirena → a la derecha se abre su detalle con la imagen, intentos, nombre, escena e imagen de partida → ← → pasa a la carta de al lado; Esc cierra → filtro «Sin escena» → solo quedan las que no tienen escena, y las flechas recorren solo esas → Generar en una: su miniatura brilla mientras se genera → baja por la cuadrícula: la barra de abajo con «N de 54 listas» sigue visible → «Editar» en el prompt lo despliega con la calidad. En el celular, tocar una carta la abre a pantalla completa y ✕ regresa a la cuadrícula.
+- **Escenarios cubiertos**:
+  - [x] Cada carta muestra su estado correcto: sin generar, generando, lista, con error; y la marca «Sin escena». (Prueba automática; en pantalla, demo.)
+  - [x] Los filtros dejan solo las cartas de ese estado y las flechas recorren solo esas. (Prueba automática; en pantalla, demo.)
+  - [ ] Editar nombre, escena e imagen de partida en el panel se guarda como antes. (Demo.)
+  - [ ] En celular el detalle se abre a pantalla completa. (Demo.)

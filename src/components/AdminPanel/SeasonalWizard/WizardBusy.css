@@ -1,0 +1,125 @@
+/* Animaciones de espera del asistente de temáticas (FEAT-50, US A5). Reusan `spin` (App.css), el brillo de
+   las cartas de SetCardsSection y la barra de PdfProgressDialog. */
+
+.wizard-busy__spinner {
+  display: inline-block;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.wizard-busy__spinner--inline {
+  width: 1em;
+  height: 1em;
+  border-width: 2px;
+  border-color: currentColor;
+  border-top-color: transparent;
+}
+
+.wizard-busy__line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.wizard-busy__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wizard-busy__progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.wizard-busy__progress-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.wizard-busy__bar {
+  width: 100%;
+  height: 10px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+}
+
+.wizard-busy__bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+}
+
+.wizard-busy__bar-fill--unknown {
+  width: 40%;
+  animation: wizard-busy-slide 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes wizard-busy-slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(150%);
+  }
+}
+
+/* Brillo sobre el hueco de una carta que se está generando. */
+.wizard-busy__shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-subtle) 25%,
+    var(--color-primary-lightest) 50%,
+    var(--color-bg-subtle) 75%
+  );
+  background-size: 200% 100%;
+  animation: wizard-busy-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes wizard-busy-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Sin movimiento para quien lo desactivó en su equipo: el estado se sigue viendo. */
+@media (prefers-reduced-motion: reduce) {
+  .wizard-busy__spinner {
+    animation: none;
+    border-top-color: var(--color-primary);
+  }
+
+  .wizard-busy__spinner--inline {
+    border-color: currentColor;
+    opacity: 0.6;
+  }
+
+  .wizard-busy__bar-fill {
+    transition: none;
+  }
+
+  .wizard-busy__bar-fill--unknown {
+    width: 100%;
+    animation: none;
+    opacity: 0.5;
+  }
+
+  .wizard-busy__shimmer {
+    animation: none;
+  }
+}
