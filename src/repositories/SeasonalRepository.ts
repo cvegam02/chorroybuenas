@@ -1,4 +1,5 @@
 import { supabase } from '../utils/supabaseClient';
+import { AiCardsRepository } from './AiCardsRepository';
 import { logger } from '../utils/logger';
 import { SEASONAL_PDF_MIME_TYPE, type SeasonalLoteriaInput } from '../utils/seasonalLoteria';
 import type { CatalogLoteria, CatalogSeason } from '../utils/seasonalCatalog';
@@ -419,8 +420,9 @@ export class SeasonalRepository {
 
   /** Borra la ficha y, si la base lo permitió, sus archivos. */
   static async deleteLoteria(loteria: AdminSeasonalLoteria): Promise<boolean> {
-    // Las cartas guardadas se leen antes: su registro se borra junto con la lotería.
+    // Las cartas guardadas y los intentos de la IA se leen antes: sus registros se borran con la lotería.
     const build = await this.getBuild(loteria.id);
+    const aiPaths = await AiCardsRepository.getAttemptPaths(loteria.id);
     const { error } = await supabase.from('seasonal_loterias').delete().eq('id', loteria.id);
     if (error) {
       logger.error('SeasonalRepository.deleteLoteria:', error.message);
@@ -429,6 +431,7 @@ export class SeasonalRepository {
     if (loteria.pdf) await this.removePdfObject(loteria.pdf.path);
     await this.removePreviews([loteria.cover_path, ...loteria.sample_paths].filter((path): path is string => !!path));
     await this.removeCards((build ?? EMPTY_BUILD).cards.map((card) => card.path));
+    await AiCardsRepository.removeAttemptFiles(aiPaths ?? []);
     return true;
   }
 

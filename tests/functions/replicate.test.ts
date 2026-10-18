@@ -29,6 +29,16 @@ describe('createPrediction', () => {
     expect(await createPrediction(d, 'key', {})).toMatchObject({ id: 'p1' });
   });
 
+  it('por defecto crea en /predictions; un modelo oficial se llama por su ruta (FEAT-50)', async () => {
+    const d = deps([res(201, { id: 'p1', status: 'starting' }), res(201, { id: 'p2', status: 'starting' })]);
+    await createPrediction(d, 'key', {});
+    await createPrediction(d, 'key', {}, 3, '/models/openai/gpt-image-2/predictions');
+    expect(d.calls).toEqual([
+      'https://api.replicate.com/v1/predictions',
+      'https://api.replicate.com/v1/models/openai/gpt-image-2/predictions',
+    ]);
+  });
+
   it('reintenta en 429 y respeta retry_after con tope de 30 s', async () => {
     const d = deps([res(429, { retry_after: 999 }), res(201, { id: 'p1', status: 'starting' })]);
     await createPrediction(d, 'key', {});

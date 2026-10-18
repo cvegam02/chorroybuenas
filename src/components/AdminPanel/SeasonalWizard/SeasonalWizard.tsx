@@ -8,6 +8,7 @@ import {
 } from '../../../repositories/SeasonalRepository';
 import { WizardScreen } from './WizardScreen';
 import './SeasonalWizard.css';
+import { LoadingLine } from './WizardBusy';
 
 /** La ruta de una lotería que todavía no existe. */
 export const NEW_LOTERIA_PARAM = 'nueva';
@@ -67,7 +68,7 @@ export const SeasonalWizard = () => {
           <Link to="/admin" state={{ tab: 'temporada' }} className="seasonal-wizard__back-link">
             ← Volver a Temáticas
           </Link>
-          {load.status === 'loading' && <p className="seasonal-wizard__muted">Cargando la lotería…</p>}
+          {load.status === 'loading' && <LoadingLine text="Cargando la lotería…" />}
           {load.status === 'failed' && (
             <p className="seasonal-wizard__field-error" role="alert">
               No se pudo cargar la lotería. Revisa tu conexión y vuelve a abrir esta página.

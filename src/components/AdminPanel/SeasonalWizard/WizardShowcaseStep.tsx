@@ -2,8 +2,9 @@ import { useRef } from 'react';
 import { PREVIEW_ACCEPTED_MIME_TYPES } from '../../../utils/seasonalPreview';
 import { AdminSeasonalPreviews } from '../AdminSeasonalPreviews';
 import type { WizardCardsState } from './useWizardCards';
-import type { CardsMode } from './WizardCardsStep';
+import { buildsOnSite, type CardsMode } from './WizardCardsStep';
 import type { WizardShowcaseState } from './useWizardShowcase';
+import { BusyLabel } from './WizardBusy';
 
 interface WizardShowcaseStepProps {
   mode: CardsMode;
@@ -80,7 +81,7 @@ const CardsShowcase = ({ cards, showcase }: Omit<WizardShowcaseStepProps, 'mode'
           <img className="seasonal-wizard__own-cover-img" src={showcase.ownCover.url} alt="Portada subida aparte, ya protegida" />
         )}
         <button type="button" className="seasonal-wizard__btn" onClick={() => inputRef.current?.click()} disabled={busy}>
-          {showcase.isPreparing ? 'Preparando la portada…' : 'Subir otra portada'}
+          <BusyLabel busy={showcase.isPreparing} text={showcase.isPreparing ? 'Preparando la portada…' : 'Subir otra portada'} />
         </button>
         <span className="seasonal-wizard__muted">
           {showcase.ownCover ? 'Esta es la portada. Para usar una carta, toca «Usar de portada».' : 'O usa la carta marcada con ★.'} A todas
@@ -111,10 +112,10 @@ export const WizardShowcaseStep = ({ mode, cards, showcase }: WizardShowcaseStep
         Vitrina
       </h1>
       <p className="seasonal-wizard__muted">
-        Lo que ve la gente en el catálogo antes de comprar.{mode === 'cards' ? ' Toca una carta para marcarla.' : ''}
+        Lo que ve la gente en el catálogo antes de comprar.{buildsOnSite(mode) ? ' Toca una carta para marcarla.' : ''}
       </p>
     </div>
-    {mode === 'cards' ? (
+    {buildsOnSite(mode) ? (
       <CardsShowcase cards={cards} showcase={showcase} />
     ) : (
       <AdminSeasonalPreviews
