@@ -136,6 +136,8 @@ export const WizardAiGenerator = ({ ai, children }: { ai: WizardAiState; childre
   }
 
   const hasAttempts = cards.some((card) => card.attempts.length > 0);
+  // Mientras se elige otra lista, la de ahora no se muestra: se va a reemplazar.
+  const showCards = cards.length > 0 && panel !== 'list';
   const counts = countAiCardFilters(cards, ai.generating, ai.cardErrors);
 
   return (
@@ -197,15 +199,16 @@ export const WizardAiGenerator = ({ ai, children }: { ai: WizardAiState; childre
             if (ok) setPanel(texts.every((text) => text.scene === '') ? 'scenes' : null);
             return ok;
           }}
+          onCancel={cards.length > 0 ? () => setPanel(null) : undefined}
         />
       ) : (
         <div className="seasonal-wizard__counter-row">
           <b>{cards.length === 1 ? '1 carta en la lista' : `${cards.length} cartas en la lista`}</b>
-          <span>
-            <button type="button" className="seasonal-wizard__link-btn" onClick={() => setPanel('scenes')}>
+          <span className="wizard-ai__list-actions">
+            <button type="button" className="seasonal-wizard__btn" onClick={() => setPanel('scenes')}>
               Cargar escenas
-            </button>{' '}
-            <button type="button" className="seasonal-wizard__link-btn" onClick={() => setPanel('list')}>
+            </button>
+            <button type="button" className="seasonal-wizard__btn" onClick={() => setPanel('list')}>
               Cambiar la lista
             </button>
           </span>
@@ -222,7 +225,7 @@ export const WizardAiGenerator = ({ ai, children }: { ai: WizardAiState; childre
         </p>
       )}
 
-      {cards.length > 0 && (
+      {showCards && (
         <>
           <div className="wizard-ai__filters" role="group" aria-label="Filtrar cartas">
             {(Object.keys(FILTER_LABELS) as AiCardFilter[]).map((key) => (
@@ -280,7 +283,7 @@ export const WizardAiGenerator = ({ ai, children }: { ai: WizardAiState; childre
         </>
       )}
 
-      {cards.length > 0 && children}
+      {showCards && children}
     </div>
   );
 };

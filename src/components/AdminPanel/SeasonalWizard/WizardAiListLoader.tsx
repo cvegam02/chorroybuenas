@@ -14,6 +14,8 @@ interface WizardAiListLoaderProps {
   hasAttempts: boolean;
   isSaving: boolean;
   onLoad: (texts: readonly AiCardText[], source: AiInputSource) => Promise<boolean>;
+  /** Con una lista ya cargada, cierra el cuadro sin cambiar nada. */
+  onCancel?: () => void;
 }
 
 interface Pending {
@@ -24,7 +26,7 @@ interface Pending {
 const EXAMPLE = '1 | EL GALLO | un gallo con bufanda roja cantando sobre un trineo\n6 | LA SIRENA | una sirena con gorro de Santa…';
 
 /** «Cargar lista» o «Usar baraja tradicional» (FEAT-50, decisiones 4 y 6). */
-export const WizardAiListLoader = ({ hasAttempts, isSaving, onLoad }: WizardAiListLoaderProps) => {
+export const WizardAiListLoader = ({ hasAttempts, isSaving, onLoad, onCancel }: WizardAiListLoaderProps) => {
   const [text, setText] = useState('');
   const [errors, setErrors] = useState<AiCardListError[]>([]);
   const [pending, setPending] = useState<Pending | null>(null);
@@ -78,6 +80,11 @@ export const WizardAiListLoader = ({ hasAttempts, isSaving, onLoad }: WizardAiLi
         >
           Usar baraja tradicional
         </button>
+        {onCancel && (
+          <button type="button" className="seasonal-wizard__btn" disabled={isSaving} onClick={onCancel}>
+            Cancelar
+          </button>
+        )}
         <span className="seasonal-wizard__muted">La baraja tradicional llena las 54 con su número y nombre; tú escribes las escenas.</span>
       </div>
 

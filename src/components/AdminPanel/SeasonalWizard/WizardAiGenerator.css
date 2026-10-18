@@ -133,6 +133,13 @@
 }
 
 
+/* «Cargar escenas» y «Cambiar la lista»: botones a la vista, no enlaces (FEAT-50, US A6). */
+.wizard-ai__list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 /* Prompt general compacto cuando ya hay cartas (decisión 15). */
 .wizard-ai__prompt-summary {
   display: flex;
