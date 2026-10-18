@@ -1,12 +1,21 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import type { AiCard } from '../../../repositories/AiCardsRepository';
-import { AI_CARD_NAME_MAX_LENGTH, AI_CARD_SCENE_MAX_LENGTH, AI_GENERAL_PROMPT_MAX_LENGTH, type AiInputSource, type AiQuality } from '../../../utils/aiCardList';
-import { BASE_DECK_SIZE } from '../../../utils/baseDeck';
+import { AI_GENERAL_PROMPT_MAX_LENGTH, type AiQuality } from '../../../utils/aiCardList';
+import {
+  aiCardStatus,
+  countAiCardFilters,
+  filterAiCards,
+  hasNoScene,
+  neighborCardId,
+  type AiCardFilter,
+  type AiCardStatus,
+} from '../../../utils/aiCardView';
 import type { WizardAiState } from './useWizardAi';
+import { WizardAiCardPanel } from './WizardAiCardPanel';
 import { WizardAiListLoader } from './WizardAiListLoader';
 import { WizardAiSceneLoader } from './WizardAiSceneLoader';
 import './WizardAiGenerator.css';
-import { BusyLabel, LoadingLine } from './WizardBusy';
+import { LoadingLine } from './WizardBusy';
 
 const QUALITIES: { value: AiQuality; label: string }[] = [
   { value: 'low', label: 'Low (para probar)' },
@@ -14,145 +23,105 @@ const QUALITIES: { value: AiQuality; label: string }[] = [
   { value: 'high', label: 'High' },
 ];
 
-interface CardRowProps {
-  card: AiCard;
-  ai: WizardAiState;
-}
-
-/** Los intentos de una carta en chico, para cambiar cuál se queda (US A3). */
-const AttemptStrip = ({ card, ai }: CardRowProps) => {
-  if (card.attempts.length < 2) return null;
-  return (
-    <div className="wizard-ai__attempts" role="group" aria-label={`Intentos de la carta ${card.number}`}>
-      {card.attempts.map((attempt, index) => {
-        const url = ai.urls.get(attempt.path);
-        const isChosen = attempt.id === card.chosenAttemptId;
-        return (
-          <button
-            key={attempt.id}
-            type="button"
-            className={`wizard-ai__attempt${isChosen ? ' wizard-ai__attempt--chosen' : ''}`}
-            aria-pressed={isChosen}
-            aria-label={`Intento ${index + 1}${isChosen ? ', elegido' : ''}`}
-            disabled={ai.generating.has(card.id)}
-            onClick={() => ai.chooseAttempt(card.id, attempt.id)}
-          >
-            {url ? <img src={url} alt="" /> : <span>{index + 1}</span>}
-          </button>
-        );
-      })}
-    </div>
-  );
+const FILTER_LABELS: Record<AiCardFilter, string> = {
+  all: 'Todas',
+  noScene: 'Sin escena',
+  pending: 'Sin generar',
+  ready: 'Listas',
+  error: 'Con error',
 };
 
-const AiCardRow = ({ card, ai }: CardRowProps) => {
+const STATUS_LABELS: Record<AiCardStatus, string> = {
+  generating: 'Generando',
+  error: 'Con error',
+  ready: 'Lista',
+  pending: 'Sin generar',
+};
+
+interface GridCardProps {
+  card: AiCard;
+  ai: WizardAiState;
+  status: AiCardStatus;
+  isSelected: boolean;
+  onSelect: () => void;
+}
+
+/** Una carta en la cuadrícula (decisión 15): miniatura 2:3, número, nombre y estado. */
+const GridCard = ({ card, ai, status, isSelected, onSelect }: GridCardProps) => {
   const chosen = card.attempts.find((attempt) => attempt.id === card.chosenAttemptId);
   const url = chosen ? ai.urls.get(chosen.path) : undefined;
-  const isGenerating = ai.generating.has(card.id);
-  const error = ai.cardErrors.get(card.id);
-  const sceneId = `wizard-ai-scene-${card.id}`;
-  const { referenceCardId } = ai.build;
-  const isReference = referenceCardId === card.id;
-
+  const noScene = hasNoScene(card);
   return (
-    <li className="wizard-ai__card">
-      <div className="wizard-ai__media">
-        <div
-          className={`wizard-ai__result${url ? '' : ' wizard-ai__result--empty'}${isGenerating ? ' wizard-busy__shimmer' : ''}`}
-          aria-busy={isGenerating}
+    <li id={`wizard-ai-tile-${card.id}`}>
+      <button
+        type="button"
+        className={`wizard-ai__tile${isSelected ? ' wizard-ai__tile--selected' : ''}`}
+        aria-pressed={isSelected}
+        aria-label={`Carta ${card.number}, ${card.name}: ${STATUS_LABELS[status]}${noScene ? ', sin escena' : ''}`}
+        onClick={onSelect}
+      >
+        <span
+          className={`wizard-ai__thumb${url && status !== 'generating' ? '' : ' wizard-ai__thumb--empty'}${status === 'generating' ? ' wizard-busy__shimmer' : ''}`}
         >
-          {isGenerating ? (
-            <BusyLabel busy text="Generando…" />
-          ) : url ? (
-            <img src={url} alt={`Carta ${card.number}, ${card.name}, generada`} />
-          ) : (
-            <span>Sin generar</span>
-          )}
-        </div>
-        <AttemptStrip card={card} ai={ai} />
-      </div>
-      <div className="wizard-ai__card-body">
-        <div className="wizard-ai__card-head">
-          <span className="wizard-ai__card-title">
-            <b>{card.number}</b>
-            <input
-              aria-label={`Nombre de la carta ${card.number}`}
-              className="seasonal-wizard__field wizard-ai__name"
-              maxLength={AI_CARD_NAME_MAX_LENGTH}
-              value={card.name}
-              onChange={(e) => ai.setName(card.id, e.target.value)}
-              onBlur={() => ai.saveCard(card.id)}
-            />
-          </span>
-          {isReference ? (
-            <span className="wizard-ai__reference">
-              <span className="wizard-ai__reference-badge">Referencia de estilo</span>
-              <button type="button" className="seasonal-wizard__link-btn" onClick={() => ai.setReference(null)}>
-                Quitar
-              </button>
-            </span>
-          ) : (
-            chosen && (
-              <button type="button" className="seasonal-wizard__link-btn" onClick={() => ai.setReference(card.id)}>
-                Usar como referencia
-              </button>
-            )
-          )}
-        </div>
-        <label htmlFor={sceneId} className="seasonal-wizard__muted">
-          Escena
-        </label>
-        <textarea
-          id={sceneId}
-          className="seasonal-wizard__field seasonal-wizard__textarea"
-          rows={3}
-          maxLength={AI_CARD_SCENE_MAX_LENGTH}
-          value={card.scene}
-          onChange={(e) => ai.setScene(card.id, e.target.value)}
-          onBlur={() => ai.saveCard(card.id)}
-        />
-        <div className="wizard-ai__card-actions">
-          <label className="wizard-ai__source">
-            <span className="seasonal-wizard__muted">Imagen de partida</span>
-            <select
-              className="seasonal-wizard__field"
-              value={card.inputSource}
-              onChange={(e) => ai.saveCard(card.id, { inputSource: e.target.value as AiInputSource })}
-            >
-              <option value="base" disabled={card.number > BASE_DECK_SIZE}>
-                Su carta de la baraja base
-              </option>
-              <option value="reference" disabled={!referenceCardId}>
-                La carta de referencia
-              </option>
-              <option value="none">Ninguna, solo el prompt</option>
-            </select>
-          </label>
-          <button
-            type="button"
-            className="seasonal-wizard__btn seasonal-wizard__btn--primary"
-            disabled={isGenerating}
-            onClick={() => void ai.generate(card.id)}
-          >
-            <BusyLabel busy={isGenerating} text={isGenerating ? 'Generando…' : chosen ? 'Rehacer' : 'Generar'} />
-          </button>
-        </div>
-        {error && (
-          <p className="seasonal-wizard__field-error" role="alert">
-            {error}
-          </p>
-        )}
-      </div>
+          {url && status !== 'generating' && <img src={url} alt="" loading="lazy" />}
+          <span className="wizard-ai__tile-number">{card.number}</span>
+          {ai.build.referenceCardId === card.id && <span className="wizard-ai__tile-ref">Ref.</span>}
+          {card.attempts.length > 1 && <span className="wizard-ai__tile-tries">{card.attempts.length}</span>}
+        </span>
+        <span className="wizard-ai__tile-name">{card.name || 'Sin nombre'}</span>
+        <span className="wizard-ai__tile-tags">
+          <span className={`wizard-ai__status wizard-ai__status--${status}`}>{STATUS_LABELS[status]}</span>
+          {noScene && <span className="wizard-ai__status wizard-ai__status--no-scene">Sin escena</span>}
+        </span>
+      </button>
     </li>
   );
 };
 
+const isTyping = () => {
+  const tag = document.activeElement?.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+};
+
 /**
- * Modo «Generar con IA» del paso 2 (FEAT-50, US A2 y A3): prompt general, lista de cartas, generar una
+ * Modo «Generar con IA» del paso 2 (FEAT-50, US A2, A3 y A6): prompt general, lista de cartas en cuadrícula
+ * con filtros y el detalle de la carta elegida en un panel (decisión 15); generar una
  * por una, elegir intento y marcar una carta como referencia de estilo. Abajo, `children` (US A4).
  */
 export const WizardAiGenerator = ({ ai, children }: { ai: WizardAiState; children?: ReactNode }) => {
   const [panel, setPanel] = useState<'list' | 'scenes' | null>(null);
+  const [filter, setFilter] = useState<AiCardFilter>('all');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isEditingPrompt, setIsEditingPrompt] = useState(false);
+
+  const { cards } = ai.build;
+  const shown = filterAiCards(cards, filter, ai.generating, ai.cardErrors);
+  const selected = cards.find((card) => card.id === selectedId) ?? null;
+  const previousId = selectedId ? neighborCardId(shown, selectedId, -1) : null;
+  const nextId = selectedId ? neighborCardId(shown, selectedId, 1) : null;
+
+  // ← → cambian de carta y Esc cierra el panel, salvo mientras se escribe en un campo.
+  useEffect(() => {
+    if (!selectedId) return undefined;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        // Al cerrar escribiendo, se suelta el campo primero para que se guarde lo escrito (se guarda al salir de él).
+        if (isTyping() && document.activeElement instanceof HTMLElement) document.activeElement.blur();
+        setSelectedId(null);
+        return;
+      }
+      if (isTyping()) return;
+      if (event.key === 'ArrowLeft' && previousId) setSelectedId(previousId);
+      if (event.key === 'ArrowRight' && nextId) setSelectedId(nextId);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [selectedId, previousId, nextId]);
+
+  // La carta elegida se mantiene a la vista en la cuadrícula al pasar con las flechas.
+  useEffect(() => {
+    if (selectedId) document.getElementById(`wizard-ai-tile-${selectedId}`)?.scrollIntoView({ block: 'nearest' });
+  }, [selectedId]);
 
   if (ai.status === 'loading' || ai.status === 'idle') return <LoadingLine text="Cargando las cartas generadas…" />;
   if (ai.status === 'failed') {
@@ -166,36 +135,57 @@ export const WizardAiGenerator = ({ ai, children }: { ai: WizardAiState; childre
     );
   }
 
-  const { cards } = ai.build;
   const hasAttempts = cards.some((card) => card.attempts.length > 0);
+  const counts = countAiCardFilters(cards, ai.generating, ai.cardErrors);
 
   return (
     <div className="wizard-ai">
-      <div className="seasonal-wizard__label">
-        <label htmlFor="wizard-ai-prompt">Prompt general de la temática</label>
-        <textarea
-          id="wizard-ai-prompt"
-          className="seasonal-wizard__field seasonal-wizard__textarea"
-          rows={4}
-          maxLength={AI_GENERAL_PROMPT_MAX_LENGTH}
-          value={ai.build.generalPrompt}
-          placeholder="Ej.: Carta de lotería mexicana navideña, estilo litografía antigua…"
-          onChange={(e) => ai.setGeneralPrompt(e.target.value)}
-          onBlur={() => void ai.saveSettings()}
-        />
-        <span className="seasonal-wizard__muted">A cada carta se le agrega su número, su nombre y su escena.</span>
-      </div>
+      {cards.length > 0 && !isEditingPrompt && ai.build.generalPrompt.trim() !== '' ? (
+        <div className="wizard-ai__prompt-summary">
+          <span className="wizard-ai__prompt-text">
+            <b>Prompt general:</b> {ai.build.generalPrompt}
+          </span>
+          <span className="wizard-ai__quality-chip">Calidad: {QUALITIES.find((q) => q.value === ai.build.quality)?.label}</span>
+          <button type="button" className="seasonal-wizard__link-btn" onClick={() => setIsEditingPrompt(true)}>
+            Editar
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="seasonal-wizard__label">
+            <label htmlFor="wizard-ai-prompt">Prompt general de la temática</label>
+            <textarea
+              id="wizard-ai-prompt"
+              className="seasonal-wizard__field seasonal-wizard__textarea"
+              rows={4}
+              maxLength={AI_GENERAL_PROMPT_MAX_LENGTH}
+              value={ai.build.generalPrompt}
+              placeholder="Ej.: Carta de lotería mexicana navideña, estilo litografía antigua…"
+              onChange={(e) => ai.setGeneralPrompt(e.target.value)}
+              onBlur={() => void ai.saveSettings()}
+            />
+            <span className="seasonal-wizard__muted">A cada carta se le agrega su número, su nombre y su escena.</span>
+          </div>
 
-      <label className="wizard-ai__quality">
-        <span className="seasonal-wizard__muted">Calidad</span>
-        <select className="seasonal-wizard__field" value={ai.build.quality} onChange={(e) => ai.setQuality(e.target.value as AiQuality)}>
-          {QUALITIES.map((quality) => (
-            <option key={quality.value} value={quality.value}>
-              {quality.label}
-            </option>
-          ))}
-        </select>
-      </label>
+          <div className="wizard-ai__quality-row">
+            <label className="wizard-ai__quality">
+              <span className="seasonal-wizard__muted">Calidad</span>
+              <select className="seasonal-wizard__field" value={ai.build.quality} onChange={(e) => ai.setQuality(e.target.value as AiQuality)}>
+                {QUALITIES.map((quality) => (
+                  <option key={quality.value} value={quality.value}>
+                    {quality.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {isEditingPrompt && (
+              <button type="button" className="seasonal-wizard__btn" onClick={() => setIsEditingPrompt(false)}>
+                Listo
+              </button>
+            )}
+          </div>
+        </>
+      )}
 
       {cards.length === 0 || panel === 'list' ? (
         <WizardAiListLoader
@@ -233,11 +223,61 @@ export const WizardAiGenerator = ({ ai, children }: { ai: WizardAiState; childre
       )}
 
       {cards.length > 0 && (
-        <ul className="wizard-ai__cards">
-          {cards.map((card) => (
-            <AiCardRow key={card.id} card={card} ai={ai} />
-          ))}
-        </ul>
+        <>
+          <div className="wizard-ai__filters" role="group" aria-label="Filtrar cartas">
+            {(Object.keys(FILTER_LABELS) as AiCardFilter[]).map((key) => (
+              <button
+                key={key}
+                type="button"
+                className={`wizard-ai__filter${filter === key ? ' wizard-ai__filter--on' : ''}`}
+                aria-pressed={filter === key}
+                onClick={() => {
+                  setFilter(key);
+                  // Si la carta abierta no está en el filtro nuevo, el panel se cierra.
+                  if (selectedId && !filterAiCards(cards, key, ai.generating, ai.cardErrors).some((card) => card.id === selectedId)) {
+                    setSelectedId(null);
+                  }
+                }}
+              >
+                {FILTER_LABELS[key]}
+                <span className="wizard-ai__filter-count">{counts[key]}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className={`wizard-ai__work${selected ? ' wizard-ai__work--detail' : ''}`}>
+            {shown.length > 0 ? (
+              <ul className="wizard-ai__grid">
+                {shown.map((card) => (
+                  <GridCard
+                    key={card.id}
+                    card={card}
+                    ai={ai}
+                    status={aiCardStatus(card, ai.generating, ai.cardErrors)}
+                    isSelected={card.id === selectedId}
+                    onSelect={() => setSelectedId(card.id === selectedId ? null : card.id)}
+                  />
+                ))}
+              </ul>
+            ) : (
+              <p className="wizard-ai__grid-empty seasonal-wizard__muted">No hay cartas en este filtro.</p>
+            )}
+            {selected && (
+              <WizardAiCardPanel
+                key={selected.id}
+                card={selected}
+                ai={ai}
+                position={(() => {
+                  const index = shown.findIndex((card) => card.id === selected.id);
+                  return index < 0 ? '' : `${index + 1} de ${shown.length}${filter === 'all' ? '' : ` · ${FILTER_LABELS[filter]}`}`;
+                })()}
+                onPrevious={previousId ? () => setSelectedId(previousId) : null}
+                onNext={nextId ? () => setSelectedId(nextId) : null}
+                onClose={() => setSelectedId(null)}
+              />
+            )}
+          </div>
+        </>
       )}
 
       {cards.length > 0 && children}
