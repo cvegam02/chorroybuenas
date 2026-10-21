@@ -11,6 +11,7 @@ import { composeCard } from './cardCompose/compose';
 import type { CardComposer } from './cardCompose/input';
 import { readStoredCardImage } from './cardImage';
 import { withCardNumbers, withNumbersFrom } from '../utils/cardNumbers';
+import type { CardLabels } from '../utils/cardLabels';
 
 export { downloadPDF } from './pdf/download';
 export { pdfFileName } from './pdf/fileName';
@@ -24,6 +25,8 @@ export interface GeneratePDFOptions {
   title?: string;
   /** Cómo se compone cada carta (foto, marco y nombre). Por defecto, en el navegador. */
   composeCard?: CardComposer;
+  /** Qué se ve en las cartas de la lotería (FEAT-51). Por defecto, nombre y número. */
+  cardLabels?: CardLabels;
 }
 
 /**
@@ -45,6 +48,7 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
     readImage: getBase64ForPDF,
     compose: options?.composeCard ?? composeCard,
     finishedCards,
+    cardLabels: options?.cardLabels,
   });
 
   // Cartas de la baraja: las que se pasan (usuario con sesión) o las del navegador (invitados).

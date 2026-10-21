@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { BoardStorage, Card, GridSize } from '../../src/types';
+import type { CardLabels } from '../../src/utils/cardLabels';
 import {
   MAX_TRANSFER_ATTEMPTS,
   keepsOwnDestination,
@@ -25,6 +26,8 @@ interface World {
   account: Map<string, string[]>;
   savedBoards: Array<{ setId: string; cardIds: string[] }>;
   gridSizes: Map<string, GridSize>;
+  localCardLabels: CardLabels | null;
+  cardLabels: Map<string, CardLabels>;
   cleared: boolean;
 }
 
@@ -38,6 +41,8 @@ const makeWorld = (overrides: Partial<World> = {}): World => ({
   account: new Map(),
   savedBoards: [],
   gridSizes: new Map(),
+  localCardLabels: null,
+  cardLabels: new Map(),
   cleared: false,
   ...overrides,
 });
@@ -68,6 +73,10 @@ const depsOf = (world: World): VisitorTransferDeps => ({
   },
   setGridSize: async (setId, _userId, gridSize) => {
     world.gridSizes.set(setId, gridSize);
+  },
+  loadLocalCardLabels: () => world.localCardLabels,
+  setCardLabels: async (setId, _userId, labels) => {
+    world.cardLabels.set(setId, labels);
   },
   saveCard: async (_userId, setId, localCard) => {
     if (world.failing.has(localCard.id)) throw new Error('sin conexión');
@@ -166,6 +175,24 @@ describe('traspaso del trabajo de visitante a la cuenta (FEAT-41, US A1)', () =>
     });
     await run(world);
     expect(world.gridSizes.get('new:Nueva lotería 2')).toBe(9);
+  });
+
+  it('lo que se ve en las cartas pasa a la lotería de la cuenta (FEAT-51)', async () => {
+    const world = makeWorld({ localCards: cards(4), localCardLabels: 'number' });
+    await run(world);
+    expect(world.cardLabels.get('set-1')).toBe('number');
+  });
+
+  it('también pasa a una lotería nueva (FEAT-51)', async () => {
+    const world = makeWorld({ localCards: cards(4), localCardLabels: 'none', cardCounts: new Map([['set-1', 24]]) });
+    await run(world);
+    expect(world.cardLabels.get('new:Nueva lotería 2')).toBe('none');
+  });
+
+  it('si el visitante no lo cambió, la lotería se queda como estaba (FEAT-51)', async () => {
+    const world = makeWorld({ localCards: cards(4) });
+    await run(world);
+    expect(world.cardLabels.size).toBe(0);
   });
 
   it('ignora tableros que no son de estas cartas', async () => {

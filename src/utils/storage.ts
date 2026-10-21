@@ -3,6 +3,7 @@ import { Card, Board, BoardStorage, BoardsCollection } from '../types';
 import type { TransferPending } from '../services/visitorTransfer';
 import { saveImage as saveImageToIndexedDB } from './indexedDB';
 import { logger } from './logger';
+import { CARD_LABELS, type CardLabels } from './cardLabels';
 
 const CARDS_KEY = 'loteria_cards';
 const BOARDS_KEY = 'loteria_boards';
@@ -10,6 +11,7 @@ const BOARD_COUNT_KEY = 'loteria_board_count';
 const MIGRATION_FLAG_KEY = 'loteria_migrated_to_indexeddb';
 const CURRENT_SET_PREFIX = 'loteria_current_set_';
 const TRANSFER_PENDING_KEY = 'loteria_transfer_pending';
+const CARD_LABELS_KEY = 'loteria_card_labels';
 
 // Card metadata (without images) for localStorage
 interface CardMetadata {
@@ -340,6 +342,24 @@ export const saveTransferPending = (pending: TransferPending): void => {
   }
 };
 
+/** Lo que el visitante eligió que se vea en sus cartas (FEAT-51), o `null` si no lo cambió. */
+export const loadVisitorCardLabels = (): CardLabels | null => {
+  try {
+    const stored = localStorage.getItem(CARD_LABELS_KEY);
+    return CARD_LABELS.find((labels) => labels === stored) ?? null;
+  } catch {
+    return null;
+  }
+};
+
+export const saveVisitorCardLabels = (labels: CardLabels): void => {
+  try {
+    localStorage.setItem(CARD_LABELS_KEY, labels);
+  } catch (error) {
+    logger.warn('Could not persist the card labels:', error);
+  }
+};
+
 export const saveBoardCount = (count: number): void => {
   try {
     localStorage.setItem(BOARD_COUNT_KEY, JSON.stringify(count));
@@ -383,6 +403,7 @@ export const clearAllData = async (): Promise<void> => {
     localStorage.removeItem(BOARD_COUNT_KEY);
     localStorage.removeItem(MIGRATION_FLAG_KEY);
     localStorage.removeItem(TRANSFER_PENDING_KEY);
+    localStorage.removeItem(CARD_LABELS_KEY);
     // No borrar CURRENT_SET_* aquí; se limpian al cerrar sesión
 
     // Clear IndexedDB images

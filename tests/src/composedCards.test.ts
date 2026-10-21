@@ -4,6 +4,7 @@ import type { Card } from '../../src/types';
 vi.mock('../../src/utils/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn(), log: vi.fn() } }));
 
 import { createComposedCardStore } from '../../src/services/cardCompose/composedCards';
+import { labeledForCompose } from '../../src/utils/cardLabels';
 
 // Cartas de una lotería guardada: su imagen es una dirección remota y se compone con la copia guardada.
 const photoCard: Card = { id: 'c1', title: 'El Gallo', image: 'https://storage/foto' };
@@ -131,6 +132,30 @@ describe('cartas compuestas para la pantalla (FEAT-29, US A4)', () => {
 
     expect(store.peek(photoCard)).toBeNull();
     await store.get(photoCard);
+    expect(compose).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('qué se ve en las cartas (FEAT-51, US A1)', () => {
+  it('al cambiar el ajuste la carta se vuelve a componer, sin nombre ni número', async () => {
+    const { store, compose } = newStore();
+    const numbered: Card = { ...photoCard, number: 3 };
+
+    await store.get(labeledForCompose(numbered, 'both'));
+    expect(await store.get(labeledForCompose(numbered, 'none'))).toBe('compuesta:guardada:c1:');
+
+    expect(compose).toHaveBeenCalledTimes(2);
+    expect(compose).toHaveBeenLastCalledWith({ photo: 'guardada:c1', name: '', framed: true, number: undefined });
+  });
+
+  it('volver al ajuste anterior usa la carta ya compuesta', async () => {
+    const { store, compose } = newStore();
+    const numbered: Card = { ...photoCard, number: 3 };
+
+    await store.get(labeledForCompose(numbered, 'both'));
+    await store.get(labeledForCompose(numbered, 'name'));
+
+    expect(store.peek(labeledForCompose(numbered, 'both'))).toBe('compuesta:guardada:c1:El Gallo');
     expect(compose).toHaveBeenCalledTimes(2);
   });
 });
