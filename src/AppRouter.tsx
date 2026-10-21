@@ -38,6 +38,8 @@ import { Board, GridSize } from './types';
 import { logger } from './utils/logger';
 import { pdfErrorMessage } from './utils/pdfErrorMessage';
 import { withNumbersFrom } from './utils/cardNumbers';
+import { CardLabelsProvider } from './contexts/CardLabelsContext';
+import { useCardLabelsChoice } from './hooks/useCardLabelsChoice';
 
 type AppStep = 'cards' | 'board-count' | 'preview' | 'confirmation';
 
@@ -70,6 +72,7 @@ function AppContent() {
   const [pdfError, setPdfError] = useState<string | null>(null);
   const { generateBoards, isGenerating } = useBoard();
   const visitorTransfer = useVisitorTransfer();
+  const { labels: cardLabels, changeLabels: changeCardLabels } = useCardLabelsChoice();
 
   // Initialize step based on current route
   useEffect(() => {
@@ -235,6 +238,7 @@ function AppContent() {
       const pdfBlob = await generatePDF(boardsWithHydratedImages, {
         ...(deckCards ? { allCards: deckCards } : {}),
         title: setName,
+        cardLabels,
       });
       downloadPDF(pdfBlob, pdfFileName(setName));
       setShowConfirmation(true);
@@ -403,35 +407,43 @@ function AppContent() {
         <Route
           path="/cards"
           element={
-            <CardEditor
-              onNext={handleCardsNext}
-              onCancel={handleCancelProcess}
-              gridSize={gridSize}
-              onGridSizeChange={setGridSize}
-            />
+            <CardLabelsProvider value={cardLabels}>
+              <CardEditor
+                onNext={handleCardsNext}
+                onCancel={handleCancelProcess}
+                gridSize={gridSize}
+                onGridSizeChange={setGridSize}
+                cardLabels={cardLabels}
+                onCardLabelsChange={changeCardLabels}
+              />
+            </CardLabelsProvider>
           }
         />
         <Route
           path="/board-count"
           element={
-            <BoardCountSelector
-              onGenerate={handleBoardCountGenerate}
-              onBack={handlePreviewModify}
-              gridSize={gridSize}
-            />
+            <CardLabelsProvider value={cardLabels}>
+              <BoardCountSelector
+                onGenerate={handleBoardCountGenerate}
+                onBack={handlePreviewModify}
+                gridSize={gridSize}
+              />
+            </CardLabelsProvider>
           }
         />
         <Route
           path="/preview"
           element={
             boards.length > 0 ? (
-              <BoardPreview
-                boards={boardsWithHydratedImages}
-                onModify={handlePreviewModify}
-                onConfirm={handlePreviewConfirm}
-                onRegenerate={handlePreviewRegenerate}
-                error={pdfError}
-              />
+              <CardLabelsProvider value={cardLabels}>
+                <BoardPreview
+                  boards={boardsWithHydratedImages}
+                  onModify={handlePreviewModify}
+                  onConfirm={handlePreviewConfirm}
+                  onRegenerate={handlePreviewRegenerate}
+                  error={pdfError}
+                />
+              </CardLabelsProvider>
             ) : (
               <div style={{ padding: '48px', textAlign: 'center' }}>
                 <h2>{t('common.loading')}</h2>

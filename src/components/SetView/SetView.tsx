@@ -24,6 +24,8 @@ import './SetView.css';
 import { logger } from '../../utils/logger';
 import { pdfErrorMessage } from '../../utils/pdfErrorMessage';
 import { withNumbersFrom } from '../../utils/cardNumbers';
+import { cardLabelsOrDefault } from '../../utils/cardLabels';
+import { CardLabelsProvider } from '../../contexts/CardLabelsContext';
 
 export const SetView = () => {
   const { setId } = useParams<{ setId: string }>();
@@ -115,7 +117,11 @@ export const SetView = () => {
     setPdfError(null);
     setIsGeneratingPDF(true);
     try {
-      const blob = await generatePDF(boards, { allCards: cards, title: set?.name });
+      const blob = await generatePDF(boards, {
+        allCards: cards,
+        title: set?.name,
+        cardLabels: cardLabelsOrDefault(set?.card_labels),
+      });
       downloadPDF(blob, pdfFileName(set?.name));
     } catch (err) {
       logger.error('Error generating PDF:', err);
@@ -176,118 +182,120 @@ export const SetView = () => {
   }
 
   return (
-    <div className="set-view">
-      <SetHeader
-        name={setName}
-        savedName={set?.name ?? ''}
-        details={
-          isLoaded
-            ? {
-                gridSize,
-                cardCount: cards.length,
-                boardCount: boards.length,
-                tokensSpent: tokensSpentInSet,
-                state: viewState,
-              }
-            : null
-        }
-        thumbnailCard={cards[0]}
-        isDownloading={isGeneratingPDF}
-        onRename={renameSet}
-        onDownload={handleDownloadPDF}
-        onShuffleBoards={() => setShowRegenerateBoardsModal(true)}
-        onClearBoards={() => setShowClearBoardsModal(true)}
-        onDelete={() => setShowDeleteDialog(true)}
-      />
-
-      {!isLoaded ? (
-        <div className="set-view__loading">
-          <div className="set-view__spinner" />
-          <p>{user ? t('setView.loadingCards') : t('common.loading')}</p>
-          {user && (
-            <p className="set-view__loading-patience">{t('setView.loadingCardsPatience')}</p>
-          )}
-        </div>
-      ) : (
-        <div className="set-view__body">
-          <SetStatusNotice state={viewState} gridSize={gridSize} cardCount={cards.length} boardCount={boards.length} />
-          {pdfError && (
-            <p className="set-view__error" role="alert">
-              {pdfError}
-            </p>
-          )}
-
-          <SetCardsSection cards={cards} state={viewState} gridSize={gridSize} onOpenCard={setSelectedCardIndex} />
-
-          <SetBoardsSection
-            boards={boardsWithHydratedImages}
-            state={viewState}
-            gridSize={gridSize}
-            onOpenBoard={setSelectedBoardIndex}
-            onShuffle={() => setShowRegenerateBoardsModal(true)}
-          />
-
-          {selectedCard && selectedCardIndex !== null && (
-            <CardPreviewModal
-              card={selectedCard}
-              isOpen={true}
-              onClose={() => setSelectedCardIndex(null)}
-              navigation={{ index: selectedCardIndex, total: cards.length, onChange: setSelectedCardIndex }}
-              onEdit={() => navigate('/cards', { state: { gridSize, editCardId: selectedCard.id } })}
-            />
-          )}
-
-          {selectedBoardIndex !== null && (
-            <BoardModal
-              boards={boardsWithHydratedImages}
-              selectedIndex={selectedBoardIndex}
-              isOpen={true}
-              onClose={() => setSelectedBoardIndex(null)}
-              onChangeIndex={setSelectedBoardIndex}
-            />
-          )}
-        </div>
-      )}
-
-      {isGeneratingPDF && <PdfProgressDialog cards={cards} boardCount={boards.length} />}
-
-      {showRegenerateBoardsModal && (
-        <SetConfirmDialog
-          icon={<FaRandom />}
-          tone="primary"
-          title={t('setView.shuffleConfirmTitle', { count: boards.length })}
-          text={t('setView.shuffleConfirmText')}
-          confirmLabel={t('setView.shuffleConfirmAction')}
-          cancelLabel={t('common.cancel')}
-          onConfirm={handleConfirmRegenerateBoards}
-          onClose={() => setShowRegenerateBoardsModal(false)}
-        />
-      )}
-
-      {showClearBoardsModal && (
-        <SetConfirmDialog
-          icon={<FaRegWindowClose />}
-          tone="danger"
-          title={t('setView.clearConfirmTitle', { count: boards.length })}
-          text={t('setView.clearConfirmText', { count: cards.length })}
-          confirmLabel={t('setView.clearConfirmAction')}
-          cancelLabel={t('setView.clearConfirmCancel')}
-          onConfirm={handleConfirmClearBoards}
-          onClose={() => setShowClearBoardsModal(false)}
-        />
-      )}
-
-      {showDeleteDialog && (
-        <DeleteLoteriaDialog
+    <CardLabelsProvider value={cardLabelsOrDefault(set?.card_labels)}>
+      <div className="set-view">
+        <SetHeader
           name={setName}
-          cardCount={isLoaded ? cards.length : null}
-          canDownload={isLoaded && viewState.kind === 'ready'}
+          savedName={set?.name ?? ''}
+          details={
+            isLoaded
+              ? {
+                  gridSize,
+                  cardCount: cards.length,
+                  boardCount: boards.length,
+                  tokensSpent: tokensSpentInSet,
+                  state: viewState,
+                }
+              : null
+          }
+          thumbnailCard={cards[0]}
           isDownloading={isGeneratingPDF}
+          onRename={renameSet}
           onDownload={handleDownloadPDF}
-          onConfirm={deleteSet}
-          onClose={() => setShowDeleteDialog(false)}
+          onShuffleBoards={() => setShowRegenerateBoardsModal(true)}
+          onClearBoards={() => setShowClearBoardsModal(true)}
+          onDelete={() => setShowDeleteDialog(true)}
         />
-      )}
-    </div>
+
+        {!isLoaded ? (
+          <div className="set-view__loading">
+            <div className="set-view__spinner" />
+            <p>{user ? t('setView.loadingCards') : t('common.loading')}</p>
+            {user && (
+              <p className="set-view__loading-patience">{t('setView.loadingCardsPatience')}</p>
+            )}
+          </div>
+        ) : (
+          <div className="set-view__body">
+            <SetStatusNotice state={viewState} gridSize={gridSize} cardCount={cards.length} boardCount={boards.length} />
+            {pdfError && (
+              <p className="set-view__error" role="alert">
+                {pdfError}
+              </p>
+            )}
+
+            <SetCardsSection cards={cards} state={viewState} gridSize={gridSize} onOpenCard={setSelectedCardIndex} />
+
+            <SetBoardsSection
+              boards={boardsWithHydratedImages}
+              state={viewState}
+              gridSize={gridSize}
+              onOpenBoard={setSelectedBoardIndex}
+              onShuffle={() => setShowRegenerateBoardsModal(true)}
+            />
+
+            {selectedCard && selectedCardIndex !== null && (
+              <CardPreviewModal
+                card={selectedCard}
+                isOpen={true}
+                onClose={() => setSelectedCardIndex(null)}
+                navigation={{ index: selectedCardIndex, total: cards.length, onChange: setSelectedCardIndex }}
+                onEdit={() => navigate('/cards', { state: { gridSize, editCardId: selectedCard.id } })}
+              />
+            )}
+
+            {selectedBoardIndex !== null && (
+              <BoardModal
+                boards={boardsWithHydratedImages}
+                selectedIndex={selectedBoardIndex}
+                isOpen={true}
+                onClose={() => setSelectedBoardIndex(null)}
+                onChangeIndex={setSelectedBoardIndex}
+              />
+            )}
+          </div>
+        )}
+
+        {isGeneratingPDF && <PdfProgressDialog cards={cards} boardCount={boards.length} />}
+
+        {showRegenerateBoardsModal && (
+          <SetConfirmDialog
+            icon={<FaRandom />}
+            tone="primary"
+            title={t('setView.shuffleConfirmTitle', { count: boards.length })}
+            text={t('setView.shuffleConfirmText')}
+            confirmLabel={t('setView.shuffleConfirmAction')}
+            cancelLabel={t('common.cancel')}
+            onConfirm={handleConfirmRegenerateBoards}
+            onClose={() => setShowRegenerateBoardsModal(false)}
+          />
+        )}
+
+        {showClearBoardsModal && (
+          <SetConfirmDialog
+            icon={<FaRegWindowClose />}
+            tone="danger"
+            title={t('setView.clearConfirmTitle', { count: boards.length })}
+            text={t('setView.clearConfirmText', { count: cards.length })}
+            confirmLabel={t('setView.clearConfirmAction')}
+            cancelLabel={t('setView.clearConfirmCancel')}
+            onConfirm={handleConfirmClearBoards}
+            onClose={() => setShowClearBoardsModal(false)}
+          />
+        )}
+
+        {showDeleteDialog && (
+          <DeleteLoteriaDialog
+            name={setName}
+            cardCount={isLoaded ? cards.length : null}
+            canDownload={isLoaded && viewState.kind === 'ready'}
+            isDownloading={isGeneratingPDF}
+            onDownload={handleDownloadPDF}
+            onConfirm={deleteSet}
+            onClose={() => setShowDeleteDialog(false)}
+          />
+        )}
+      </div>
+    </CardLabelsProvider>
   );
 };

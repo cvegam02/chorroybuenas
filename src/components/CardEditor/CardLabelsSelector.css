@@ -1,0 +1,100 @@
+/* Qué se ve en las cartas: cuatro botones con su carta miniatura (FEAT-51, US A1). Mismo estilo que el tipo de lotería. */
+
+.card-labels-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-labels-selector__label {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.card-labels-selector__options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.card-labels-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 2px solid var(--color-primary-lightest);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.card-labels-option:hover {
+  border-color: var(--color-primary-lighter);
+}
+
+.card-labels-option--active,
+.card-labels-option--active:hover {
+  border-color: var(--color-primary);
+  background: var(--color-bg-subtle);
+}
+
+.card-labels-option:focus-visible {
+  outline: 3px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
+
+/* La carta miniatura: 2:3, con el número arriba a la izquierda y el nombre abajo. */
+.card-labels-option__card {
+  position: relative;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 33px;
+  border: 2px solid var(--color-primary-lighter);
+  border-radius: 3px;
+}
+
+.card-labels-option__number {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: var(--color-primary-lighter);
+}
+
+.card-labels-option__name {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  left: 3px;
+  height: 4px;
+  border-radius: 1px;
+  background: var(--color-primary-lighter);
+}
+
+.card-labels-option--active .card-labels-option__card {
+  border-color: var(--color-primary);
+}
+
+.card-labels-option--active .card-labels-option__number,
+.card-labels-option--active .card-labels-option__name {
+  background: var(--color-primary);
+}
+
+.card-labels-option__title {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.deck__labels-error {
+  margin: -4px 0 0;
+  color: var(--color-danger);
+  font-size: 13px;
+}

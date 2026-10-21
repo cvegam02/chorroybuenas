@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { composeCard } from '../services/cardCompose/compose';
 import { logger } from '../utils/logger';
+import { useCardLabels } from '../contexts/CardLabelsContext';
+import { labeledForCompose } from '../utils/cardLabels';
 
 /** Espera a que se deje de escribir antes de volver a componer la carta. */
 const COMPOSE_DELAY_MS = 250;
@@ -18,8 +20,11 @@ interface CardPreviewInput {
  * Usa el mismo compositor que las cartas de la cuadrícula. Devuelve `null` mientras se compone la primera
  * vez o si no se pudo: ahí quien la usa muestra la foto. No guarda nada.
  */
-export const useCardPreview = ({ photo, name, number, framed = true }: CardPreviewInput): string | null => {
+export const useCardPreview = ({ photo, name: typedName, number: cardNumber, framed = true }: CardPreviewInput): string | null => {
   const [preview, setPreview] = useState<{ photo: string; url: string } | null>(null);
+  // Con el nombre y el número que pide el ajuste de la lotería (FEAT-51).
+  const cardLabels = useCardLabels();
+  const { title: name, number } = labeledForCompose({ id: '', title: typedName, number: cardNumber }, cardLabels);
 
   useEffect(() => {
     if (!photo) return;
