@@ -6,6 +6,7 @@ import {
     loadBoardsCollection,
     loadCards,
     loadTransferPending,
+    loadVisitorCardLabels,
     saveCards,
     saveTransferPending,
 } from '../utils/storage';
@@ -66,6 +67,10 @@ const deps: VisitorTransferDeps = {
     createSet: (userId, name, gridSize) => SetRepository.createSet(userId, name, gridSize),
     setGridSize: async (setId, userId, gridSize) => {
         await SetRepository.updateSet(setId, userId, { grid_size: gridSize });
+    },
+    loadLocalCardLabels: loadVisitorCardLabels,
+    setCardLabels: async (setId, userId, cardLabels) => {
+        await SetRepository.updateSet(setId, userId, { card_labels: cardLabels });
     },
     saveCard,
     saveBoard: async (userId, setId, cardIds) => {

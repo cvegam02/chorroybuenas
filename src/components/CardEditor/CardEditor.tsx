@@ -17,6 +17,7 @@ import { CardEditModal } from './CardEditModal';
 import { BatchUploadModal } from './BatchUploadModal';
 import { UploadProgressModal } from './UploadProgressModal';
 import { GridModeSelector } from '../BoardGenerator/GridModeSelector';
+import { CardLabelsSelector } from './CardLabelsSelector';
 import { SetRepository } from '../../repositories/SetRepository';
 import { AIBatchModal } from './AIBatchModal';
 import { useCardAI } from './useCardAI';
@@ -31,15 +32,26 @@ import './CardEditor.css';
 import './CardEditorDeck.css';
 import { logger } from '../../utils/logger';
 import { minCardsForGrid } from '../../utils/gridRules';
+import type { CardLabels } from '../../utils/cardLabels';
 
 interface CardEditorProps {
   onNext: () => void;
   onCancel: () => void;
   gridSize: GridSize;
   onGridSizeChange: (size: GridSize) => void;
+  cardLabels: CardLabels;
+  /** Cambia qué se ve en las cartas; `false` si no se pudo guardar (FEAT-51). */
+  onCardLabelsChange: (labels: CardLabels) => Promise<boolean>;
 }
 
-export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: CardEditorProps) => {
+export const CardEditor = ({
+  onNext,
+  onCancel,
+  gridSize,
+  onGridSizeChange,
+  cardLabels,
+  onCardLabelsChange,
+}: CardEditorProps) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { sets, currentSetId, setSets } = useSetContext();
@@ -49,6 +61,7 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
   /** Usuario logueado sin lotería seleccionada: esperar a que SetContext cargue o crear una. */
   const waitingForSet = user && !currentSetId;
   const [isRenaming, setIsRenaming] = useState(false);
+  const [cardLabelsError, setCardLabelsError] = useState(false);
   const [renameValue, setRenameValue] = useState('');
   const [isSavingName, setIsSavingName] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -265,6 +278,11 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
     }
   };
 
+  const handleCardLabelsChange = async (labels: CardLabels) => {
+    setCardLabelsError(false);
+    setCardLabelsError(!(await onCardLabelsChange(labels)));
+  };
+
   const handleAIBulkClick = () => {
     if (cardsToTransform.length === 0) {
       setShowAllTransformedModal(true);
@@ -328,6 +346,13 @@ export const CardEditor = ({ onNext, onCancel, gridSize, onGridSizeChange }: Car
           </div>
 
           <GridModeSelector selectedSize={gridSize} onChange={handleGridSizeChange} t={t} />
+
+          <CardLabelsSelector selected={cardLabels} onChange={handleCardLabelsChange} />
+          {cardLabelsError && (
+            <p className="deck__labels-error" role="alert">
+              {t('cardEditor.labels.saveError')}
+            </p>
+          )}
 
           <div className="deck__progress">
             <div className="deck__progress-head">

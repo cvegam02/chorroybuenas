@@ -1,4 +1,5 @@
 import type { BoardStorage, Card, GridSize } from '../types';
+import type { CardLabels } from '../utils/cardLabels';
 import { logger } from '../utils/logger';
 
 /** Intentos antes de dejar de insistir con las cartas que no se pudieron guardar. */
@@ -38,6 +39,9 @@ export interface VisitorTransferDeps {
   getCardCounts: (userId: string) => Promise<ReadonlyMap<string, number>>;
   createSet: (userId: string, name: string, gridSize: GridSize) => Promise<{ id: string }>;
   setGridSize: (setId: string, userId: string, gridSize: GridSize) => Promise<void>;
+  /** Lo que el visitante eligió que se vea en sus cartas, o `null` si no lo cambió (FEAT-51). */
+  loadLocalCardLabels: () => CardLabels | null;
+  setCardLabels: (setId: string, userId: string, labels: CardLabels) => Promise<void>;
   /** Sube la carta a la cuenta. Si ya estaba, termina sin error. */
   saveCard: (userId: string, setId: string, card: Card) => Promise<void>;
   saveBoard: (userId: string, setId: string, cardIds: string[]) => Promise<void>;
@@ -147,6 +151,8 @@ export async function runVisitorTransfer(
     setId = target.setId;
     if (gridSize !== undefined) await deps.setGridSize(setId, userId, gridSize);
   }
+  const cardLabels = deps.loadLocalCardLabels();
+  if (cardLabels !== null) await deps.setCardLabels(setId, userId, cardLabels);
 
   const { saved, failed } = await saveCards(deps, userId, setId, localCards, options.onProgress);
 

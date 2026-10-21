@@ -1,5 +1,6 @@
 import { supabase } from '../utils/supabaseClient';
 import { logger } from '../utils/logger';
+import type { CardLabels } from '../utils/cardLabels';
 import { PREVIEW_CARD_COUNT, parseSetSummaryRows, type SetSummaryRow } from '../utils/setSummary';
 
 const SETS_CACHE_TTL_MS = 15 * 1000; // 15 segundos
@@ -15,6 +16,8 @@ export interface LoteriaSet {
   created_at: string;
   /** 9 = Kids 3x3, 16 = Classic 4x4. Defaults to 16 if missing (pre-migration). */
   grid_size?: GridSize;
+  /** Qué se ve en las cartas (FEAT-51). Falta en las bases sin la migración 058: se toma nombre y número. */
+  card_labels?: CardLabels;
 }
 
 function invalidateSetsCache(userId: string): void {
@@ -132,7 +135,7 @@ export class SetRepository {
     return data;
   }
 
-  static async updateSet(setId: string, userId: string, updates: { name?: string; grid_size?: GridSize }): Promise<LoteriaSet> {
+  static async updateSet(setId: string, userId: string, updates: { name?: string; grid_size?: GridSize; card_labels?: CardLabels }): Promise<LoteriaSet> {
     invalidateSetsCache(userId);
     const { data, error } = await supabase
       .from('loteria_sets')
