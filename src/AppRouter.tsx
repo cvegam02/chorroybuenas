@@ -9,6 +9,7 @@ import { ConfirmationModal } from './components/ConfirmationModal/ConfirmationMo
 import { WarningModal } from './components/ConfirmationModal/WarningModal';
 import { HowToPlay } from './components/HowToPlay/HowToPlay';
 import { AboutLoteria } from './components/AboutLoteria/AboutLoteria';
+import { TraditionalBoardsPage } from './components/TraditionalBoards/TraditionalBoardsPage';
 import { PrivacyNotice } from './components/PrivacyNotice/PrivacyNotice';
 import BenefitsPage from './components/BenefitsPage/BenefitsPage';
 import { SetView } from './components/SetView/SetView';
@@ -379,6 +380,14 @@ function AppContent() {
         <Route
           path="/que-es-la-loteria"
           element={<AboutLoteria />}
+        />
+        <Route
+          path="/arma-tus-tableros"
+          element={<TraditionalBoardsPage />}
+        />
+        <Route
+          path="/arma-tus-tableros/:gameId"
+          element={<TraditionalBoardsPage />}
         />
         <Route
           path="/tematicas"

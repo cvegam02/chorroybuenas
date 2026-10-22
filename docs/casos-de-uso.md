@@ -4,9 +4,9 @@ Complementa a [`contexto-negocio.md`](contexto-negocio.md) sin introducir reglas
 
 Los casos marcados con 🔧 describen una regla ya definida que el sitio todavía no cumple (ver §17 del contexto): el caso dice cómo debe funcionar, no cómo funciona hoy.
 
-Son 28 casos en 6 bloques. Formato de cada caso: actor, precondiciones, flujo principal, excepciones, resultado, estados afectados, notificaciones y auditoría. No se usa "Tareas generadas": el producto no tiene tablero de tareas.
+Son 29 casos en 7 bloques. Formato de cada caso: actor, precondiciones, flujo principal, excepciones, resultado, estados afectados, notificaciones y auditoría. No se usa "Tareas generadas": el producto no tiene tablero de tareas.
 
-Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo día (FEAT-17); hasta el 2026-10-07 se llamaron «loterías de temporada» (renombradas con FEAT-24, sin cambiar ningún flujo).
+Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo día (FEAT-17); hasta el 2026-10-07 se llamaron «loterías de temporada» (renombradas con FEAT-24, sin cambiar ningún flujo). El bloque 7 («Arma tus tableros») se agregó el 2026-10-22 (FEAT-53).
 
 ---
 
@@ -313,5 +313,18 @@ Todos los casos de este bloque están por construir (§17, §18).
 - **Excepciones**: Precio menor a $10.00 MXN: se rechaza. Lotería incompleta: no se puede publicar. Lotería con ventas: no se puede borrar, solo despublicar. Reemplazar el PDF de una lotería vendida: se le avisa que los compradores descargarán la versión nueva.
 - **Resultado**: La lotería queda creada, cambiada, publicada, retirada o eliminada.
 - **Estados afectados**: Lotería temática (§11).
+- **Notificaciones**: Ninguna.
+- **Auditoría**: No.
+
+## Bloque 7 — Arma tus tableros
+
+### 29. Armar tableros personalizados 🔧
+- **Actor(es)**: Visitante o usuario registrado.
+- **Precondiciones**: Ninguna.
+- **Flujo principal**: (1) Abre «Arma tus tableros» (en el menú, «Crear» → «Arma tus tableros»). (2) Ve un tablero vacío y elige el modo, Clásico o Kids. (3) Elige sus cartas de la suerte casilla por casilla, tocándolas o arrastrándolas desde la baraja; si no quiere elegirlas todas, pulsa «Llenar al azar» y se llenan solo las vacías. (4) Si quiere más, agrega otro tablero, vacío o al azar (hasta 50); fija las cartas que quiere conservar y revuelve un tablero o todos. (5) Descarga el PDF con sus tableros (§19).
+- **Flujo alterno — con sesión**: al poner la primera carta, lo armado se guarda como un juego en «Mis tableros de la suerte», de «Mi cuenta», donde puede abrir, renombrar, descargar o eliminar cada juego. Si armó tableros sin sesión, al entrar se le ofrece guardarlos en la cuenta.
+- **Excepciones**: Hay casillas vacías al descargar: se le avisa cuántos tableros están incompletos y se le ofrece llenarlas al azar. Pone en un tablero una carta que ya está en él: las dos casillas se intercambian. Deja dos tableros iguales: se le avisa, sin impedírselo. Llega a 50 tableros: no se agregan más. Cambia de modo con cartas puestas: se le pide confirmación.
+- **Resultado**: La persona tiene sus tableros en PDF para imprimir.
+- **Estados afectados**: Juego de «Arma tus tableros», solo con sesión.
 - **Notificaciones**: Ninguna.
 - **Auditoría**: No.

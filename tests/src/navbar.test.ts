@@ -3,6 +3,7 @@ import es from '../../src/locales/es/translation.json';
 import en from '../../src/locales/en/translation.json';
 import {
   NAV_LINKS,
+  barLinksFor,
   displayFirstName,
   isNavLinkActive,
   navLinksFor,
@@ -16,7 +17,7 @@ const link = (to: string) => {
 };
 
 describe('barra superior (FEAT-33, US A1)', () => {
-  it('tiene los cinco enlaces, en el orden de la maqueta', () => {
+  it('tiene cinco entradas, en el orden de la maqueta; «Crear lotería» es un grupo (FEAT-53)', () => {
     expect(NAV_LINKS.map((item) => item.to)).toEqual([
       '/cards',
       '/tematicas',
@@ -24,6 +25,7 @@ describe('barra superior (FEAT-33, US A1)', () => {
       '/como-se-juega',
       '/que-es-la-loteria',
     ]);
+    expect(link('/cards').children?.map((item) => item.to)).toEqual(['/cards', '/arma-tus-tableros']);
   });
 
   it('sin sesión, «Inicio» va primero; con sesión no aparece', () => {
@@ -36,6 +38,28 @@ describe('barra superior (FEAT-33, US A1)', () => {
       '/que-es-la-loteria',
     ]);
     expect(navLinksFor(true)).toEqual(NAV_LINKS);
+  });
+
+  it('sin sesión, la barra ancha no repite «Crear lotería»: para eso está el botón naranja (FEAT-53)', () => {
+    expect(barLinksFor(false).map((item) => item.to)).toEqual([
+      '/',
+      '/tematicas',
+      '/beneficios',
+      '/como-se-juega',
+      '/que-es-la-loteria',
+    ]);
+    expect(barLinksFor(true)).toEqual(NAV_LINKS);
+  });
+
+  it('el grupo «Crear lotería» se marca en cualquiera de sus opciones, también en un juego guardado', () => {
+    const create = link('/cards');
+    expect(isNavLinkActive(create, '/cards')).toBe(true);
+    expect(isNavLinkActive(create, '/arma-tus-tableros')).toBe(true);
+    expect(isNavLinkActive(create, '/arma-tus-tableros/abc-123')).toBe(true);
+    expect(isNavLinkActive(create, '/tematicas')).toBe(false);
+    const [photos, traditional] = create.children ?? [];
+    expect(isNavLinkActive(photos, '/arma-tus-tableros')).toBe(false);
+    expect(isNavLinkActive(traditional, '/arma-tus-tableros/abc-123')).toBe(true);
   });
 
   it('«Inicio» solo se marca en la página principal', () => {

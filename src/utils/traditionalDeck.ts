@@ -1,6 +1,7 @@
 /**
  * Los nombres de las 54 cartas de la lotería tradicional, en su orden (FEAT-33, US A6). Son nombres
- * propios de la baraja: no se traducen. Solo nombres: nunca las ilustraciones de la baraja comercial.
+ * propios de la baraja: no se traducen. En «¿Qué es la lotería?» van solos, sin las ilustraciones de la baraja
+ * comercial; «Arma tus tableros» (FEAT-53) los usa como texto alternativo de sus cartas.
  */
 export const TRADITIONAL_DECK: readonly string[] = [
   'El Gallo', 'El Diablito', 'La Dama', 'El Catrín', 'El Paraguas', 'La Sirena', 'La Escalera', 'La Botella', 'El Barril',

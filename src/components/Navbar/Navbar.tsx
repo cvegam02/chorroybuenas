@@ -13,7 +13,8 @@ import { logger } from '../../utils/logger';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { MOBILE_MENU_ID, MobileMenu } from './MobileMenu';
 import { OfferPromoPill, OfferPromoTab, useMenuPromo } from '../OfferBanner/OfferPromoIndicator';
-import { displayFirstName, isNavLinkActive, navLinksFor } from './navLinks';
+import { CREATE_GROUP, barLinksFor, displayFirstName, isNavLinkActive } from './navLinks';
+import { NavGroup } from './NavGroup';
 import { UserAvatar } from './UserAvatar';
 import { UserMenuPanel } from './UserMenuPanel';
 import './Navbar.css';
@@ -130,7 +131,8 @@ export const Navbar = () => {
         </Link>
 
         <ul className="navbar__links navbar__wide-only">
-          {navLinksFor(!!user).map((link) => {
+          {barLinksFor(!!user).map((link) => {
+            if (link.children) return <NavGroup key={link.to} group={link} />;
             const isActive = isNavLinkActive(link, pathname);
             return (
               <li key={link.to}>
@@ -157,9 +159,13 @@ export const Navbar = () => {
               <button type="button" className="navbar__sign-in navbar__wide-only" onClick={() => openAuth('login')}>
                 {t('navbar.signIn')}
               </button>
-              <Link to="/cards" className="navbar__cta">
-                <span className="navbar__wide-only">{t('navbar.createFree')}</span>
-                <span className="navbar__narrow-only">{t('navbar.createShort')}</span>
+              {/* En la barra ancha el botón abre «Tu lotería con fotos» y «Arma tus tableros» (FEAT-53); en la compacta
+                  va directo a crear, y las dos opciones están en el menú. */}
+              <span className="navbar__wide-only">
+                <NavGroup group={CREATE_GROUP} cta={{ label: t('navbar.createFree') }} />
+              </span>
+              <Link to="/cards" className="navbar__cta navbar__narrow-only">
+                {t('navbar.createShort')}
               </Link>
             </>
           )}

@@ -134,17 +134,21 @@ export const MobileMenu = ({ pathname, user, onClose, onGoogle, onSignUp, onLogi
               </button>
             </li>
           )}
-          {navLinksFor(user !== null).map((link) => {
+          {navLinksFor(user !== null)
+            .flatMap((group) => (group.children ?? [group]).map((link) => ({ link, group })))
+            .map(({ link, group }) => {
             const isActive = isNavLinkActive(link, pathname);
+            // Las opciones de un grupo («Crear», FEAT-53) van en renglones propios, con el grupo delante.
+            const label = group.children ? `${t(group.labelKey)}: ${t(link.labelKey)}` : t(link.labelKey);
             return (
-              <li key={link.to}>
+              <li key={`${group.to}-${link.to}`}>
                 <Link
                   to={link.to}
                   className={`mobile-menu__link ${isActive ? 'mobile-menu__link--active' : ''}`}
                   aria-current={isActive ? 'page' : undefined}
                   onClick={onClose}
                 >
-                  {t(link.labelKey)}
+                  {label}
                   <span className="mobile-menu__link-arrow" aria-hidden="true">
                     ›
                   </span>

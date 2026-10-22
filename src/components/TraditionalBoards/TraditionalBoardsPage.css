@@ -1,0 +1,525 @@
+/* P8 «Arma tus tableros» (FEAT-53). El héroe viene de PageHero y la hoja de cada tablero, de
+   BoardThumbnail (C3). */
+
+.traditional-boards__body {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg) 16px var(--spacing-xl);
+}
+
+.traditional-boards__toolbar {
+  display: grid;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.traditional-boards__primary,
+.traditional-boards__secondary,
+.traditional-boards__item-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  min-height: 44px;
+  padding: 0 var(--spacing-md);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.traditional-boards__primary {
+  border: none;
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+}
+
+.traditional-boards__primary:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.traditional-boards__secondary,
+.traditional-boards__item-button {
+  border: 1px solid var(--color-primary-lighter);
+  background: var(--color-bg-surface);
+  color: var(--color-primary-dark);
+}
+
+.traditional-boards__secondary:hover:not(:disabled),
+.traditional-boards__item-button:hover {
+  background: var(--color-primary-lightest);
+}
+
+.traditional-boards__primary:disabled,
+.traditional-boards__secondary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.traditional-boards__count {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.traditional-boards__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.traditional-boards__empty {
+  padding: var(--spacing-xl) var(--spacing-md);
+  border: 2px dashed var(--color-primary-lighter);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  text-align: center;
+}
+
+.traditional-boards__empty-title {
+  margin: 0 0 var(--spacing-sm);
+  color: var(--color-text-main);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.traditional-boards__empty-text {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.traditional-boards__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--spacing-lg);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.traditional-boards__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.traditional-boards__sheet {
+  cursor: default;
+}
+
+/* Las cartas tradicionales vienen en su proporción original, un poco más angosta que 2:3. Cada casilla es un
+   botón: se toca para elegir carta o recibe una arrastrada (US A2). */
+.traditional-boards__cell {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  aspect-ratio: 1292 / 2048;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.traditional-boards__cell:hover,
+.traditional-boards__cell:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+/* Casilla vacía (US A3): punteada, con un «+» para elegir carta. */
+.traditional-boards__cell--empty {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed var(--color-primary-lighter);
+  background: var(--color-bg-surface);
+  color: var(--color-primary-light);
+  font-size: 14px;
+}
+
+/* Carta fijada (US A3): marco turquesa y candado en la esquina. */
+.traditional-boards__cell--fixed {
+  position: relative;
+  box-shadow: inset 0 0 0 2px var(--color-secondary-dark);
+}
+
+.traditional-boards__cell--fixed .board-thumbnail__card-image {
+  opacity: 0.92;
+}
+
+.traditional-boards__lock {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  background: var(--color-secondary-dark);
+  color: var(--color-text-inverted);
+  font-size: 8px;
+}
+
+.traditional-boards__cell--drop {
+  outline: 3px solid var(--color-secondary-dark);
+  outline-offset: 1px;
+  transform: scale(1.06);
+  box-shadow: var(--shadow-lg);
+}
+
+.traditional-boards__how {
+  margin: 0 0 var(--spacing-md);
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.traditional-boards__same {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  margin: 0;
+  color: var(--color-primary-dark);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.traditional-boards__item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.traditional-boards__item-button {
+  min-height: 40px;
+  font-size: 14px;
+}
+
+.traditional-boards__item-button--fill {
+  border-color: var(--color-secondary-dark);
+  color: var(--color-text-main);
+}
+
+.traditional-boards__item-button--danger {
+  border-color: var(--color-border-dark);
+  color: var(--color-danger);
+}
+
+/* Con la baraja a un lado (computadora), los tableros a la izquierda y la baraja pegada a la derecha. */
+.traditional-boards__workspace--deck {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  align-items: start;
+  gap: var(--spacing-lg);
+}
+
+.traditional-deck {
+  position: sticky;
+  top: 96px;
+  max-height: calc(100vh - 112px);
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.traditional-deck__title {
+  margin: 0 0 var(--spacing-xs);
+  color: var(--color-text-main);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.traditional-deck__hint {
+  margin: 0 0 var(--spacing-md);
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.traditional-deck__grid,
+.traditional-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.traditional-deck__card {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1292 / 2048;
+  border-radius: 3px;
+  object-fit: cover;
+  cursor: grab;
+}
+
+.traditional-deck__card:active {
+  cursor: grabbing;
+}
+
+/* Ventana para elegir la carta de una casilla; en celular, hoja que ocupa casi toda la pantalla. */
+.traditional-picker__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  background: color-mix(in srgb, var(--color-text-main) 55%, transparent);
+}
+
+.traditional-picker {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.traditional-picker__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.traditional-picker__title {
+  margin: 0;
+  color: var(--color-text-main);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.traditional-picker__hint {
+  margin: var(--spacing-xs) 0 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.traditional-picker__fix {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-height: 36px;
+  margin-top: var(--spacing-sm);
+  padding: 0 var(--spacing-md);
+  border: 1px solid var(--color-secondary-dark);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.traditional-picker__fix--on {
+  background: var(--color-secondary-light);
+}
+
+.traditional-picker__close {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-main);
+  cursor: pointer;
+}
+
+.traditional-picker__grid {
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg);
+  overflow-y: auto;
+}
+
+.traditional-picker__card {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.traditional-picker__card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1292 / 2048;
+  object-fit: cover;
+}
+
+.traditional-picker__card:hover,
+.traditional-picker__card:focus-visible {
+  border-color: var(--color-primary);
+}
+
+.traditional-picker__card--current {
+  border-color: var(--color-secondary-dark);
+}
+
+.traditional-picker__tag {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 2px;
+  background: var(--color-text-main);
+  color: var(--color-text-inverted);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .traditional-picker__overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .traditional-picker {
+    max-height: 92vh;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
+
+  .traditional-picker__grid {
+    grid-template-columns: repeat(4, 1fr);
+    padding: var(--spacing-md);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .traditional-boards__cell {
+    transition: none;
+  }
+}
+
+/* Con sesión (US A5): el juego abierto y el aviso para pasar a la cuenta lo hecho sin sesión. */
+.traditional-game,
+.traditional-transfer {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+}
+
+.traditional-transfer {
+  border-color: var(--color-secondary-dark);
+  background: color-mix(in srgb, var(--color-secondary-light) 35%, var(--color-bg-surface));
+}
+
+.traditional-game__name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.traditional-game__name {
+  margin: 0;
+  color: var(--color-text-main);
+  font-size: 20px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.traditional-game__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  color: var(--color-primary-dark);
+  cursor: pointer;
+}
+
+.traditional-game__status,
+.traditional-transfer__text {
+  margin: var(--spacing-xs) 0 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.traditional-game__status--error,
+.traditional-transfer__error {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.traditional-game__actions,
+.traditional-transfer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm) var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.traditional-game__link {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.traditional-game__link:hover {
+  text-decoration: underline;
+}
+
+.traditional-transfer__title {
+  margin: 0;
+  color: var(--color-text-main);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.traditional-boards__empty .traditional-boards__primary {
+  margin-top: var(--spacing-md);
+  text-decoration: none;
+}
+
+@media (min-width: 900px) {
+  .traditional-boards__toolbar {
+    grid-template-columns: auto 1fr;
+    align-items: start;
+  }
+
+  .traditional-boards__count {
+    grid-column: 1 / -1;
+  }
+}
