@@ -4,6 +4,7 @@ import { FaArrowRight, FaCropAlt, FaForward, FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { ImageEditor } from './ImageEditor';
 import { CardLivePreview } from './CardLivePreview';
+import { UploadProgressModal } from './UploadProgressModal';
 import { convertFileToBase64, validateImageFile, compressImage, adjustImageToCardAspectRatio } from '../../utils/imageUtils';
 import './CardUploadModal.css';
 import './CardForm.css';
@@ -12,7 +13,7 @@ import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { usePageScrollLock } from '../../hooks/usePageScrollLock';
 import { useVisualViewportFit } from '../../hooks/useVisualViewportFit';
-import { nextCardNumber, queueItemState, queuePercent } from '../../utils/uploadQueue';
+import { nextCardNumber, queueItemState, queuePercent, readingPercent } from '../../utils/uploadQueue';
 import { logger } from '../../utils/logger';
 import { isPrintableCardTitle } from '../../utils/cardTitle';
 
@@ -44,6 +45,8 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
   const [currentTitle, setCurrentTitle] = useState('');
   const [showEditor, setShowEditor] = useState(false);
   const [wasEdited, setWasEdited] = useState(false); // Track if current image was edited/cropped
+  // Fotos leídas de las elegidas, para el aviso «Preparando tus fotos…»; null cuando no se está leyendo (FEAT-52).
+  const [reading, setReading] = useState<{ read: number; total: number } | null>(null);
   // Use ref to track completed cards to avoid state update issues
   const completedCardsRef = useRef<Array<{ image: string; title: string }>>([]);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -52,19 +55,27 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
   const isPhone = useMediaQuery('(max-width: 640px)');
 
   useEffect(() => {
+    let cancelled = false;
     if (isOpen && files.length > 0) {
       // Initialize pending images from files
       const loadImages = async () => {
         const validFiles = files.filter(validateImageFile);
         const loadedImages: PendingImage[] = [];
 
-        for (const file of validFiles) {
-          const preview = await convertFileToBase64(file);
-          loadedImages.push({
-            file,
-            id: `${file.name}-${Date.now()}-${Math.random()}`,
-            preview,
-          });
+        setReading({ read: 0, total: validFiles.length });
+        try {
+          for (const file of validFiles) {
+            const preview = await convertFileToBase64(file);
+            if (cancelled) return;
+            loadedImages.push({
+              file,
+              id: `${file.name}-${Date.now()}-${Math.random()}`,
+              preview,
+            });
+            setReading({ read: loadedImages.length, total: validFiles.length });
+          }
+        } finally {
+          if (!cancelled) setReading(null);
         }
 
         setPendingImages(loadedImages);
@@ -79,7 +90,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
         }
       };
 
-      loadImages();
+      loadImages().catch(error => logger.error('No se pudieron leer las fotos elegidas', error));
     } else if (!isOpen) {
       // Reset when modal closes
       setPendingImages([]);
@@ -88,7 +99,11 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
       setCurrentTitle('');
       completedCardsRef.current = [];
       setShowEditor(false);
+      setReading(null);
     }
+    return () => {
+      cancelled = true;
+    };
   }, [isOpen, files]);
 
   const handleImageCrop = async (croppedImage: string) => {
@@ -243,7 +258,15 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
     queue.scrollLeft = thumb.offsetLeft - (queue.clientWidth - thumb.offsetWidth) / 2;
   }, [currentIndex, isShown]);
 
-  if (!isShown) return null;
+  if (!isShown) {
+    return (
+      <UploadProgressModal
+        isOpen={isOpen && reading !== null}
+        progress={reading ? readingPercent(reading.read, reading.total) : 0}
+        title={t('batchUpload.preparing')}
+      />
+    );
+  }
 
   const currentFile = pendingImages[currentIndex];
   const isLastPhoto = currentIndex === pendingImages.length - 1;

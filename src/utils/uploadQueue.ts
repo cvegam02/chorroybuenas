@@ -18,3 +18,9 @@ export function queuePercent(currentIndex: number, total: number): number {
   if (total <= 0) return 0;
   return Math.min(100, Math.round(((currentIndex + 1) / total) * 100));
 }
+
+/** Avance al preparar las fotos antes de abrir «Nombra tus fotos», de 0 a 100 (FEAT-52). */
+export function readingPercent(read: number, total: number): number {
+  if (total <= 0) return 0;
+  return Math.min(100, Math.round((read / total) * 100));
+}
