@@ -3,11 +3,15 @@ import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { PromoVideo } from './PromoVideo';
 import type { LandingPrices } from './useLandingPrices';
+import { TraditionalHeroArt } from '../TraditionalBoards/TraditionalHeroArt';
 import './LandingPaths.css';
 
 const THEMED_IMAGE = '/media/inicio/tematica-halloween.jpg';
 
-/** Las otras dos formas de tener una lotería: transformar las fotos con IA o comprar una temática. */
+/**
+ * Las otras formas de tener una lotería: transformar las fotos con IA, comprar una temática o, gratis, armar tus
+ * tableros de la suerte con las cartas tradicionales (FEAT-53).
+ */
 export const LandingPaths = ({ aiPrice, themedPrice }: LandingPrices) => {
   const { t } = useTranslation();
   // En celular la tarjeta de IA lleva imagen fija, para no poner dos videos seguidos.
@@ -46,6 +50,20 @@ export const LandingPaths = ({ aiPrice, themedPrice }: LandingPrices) => {
           )}
           <span className="landing-paths__cta">
             {t('landing.paths.themed.cta')} <span aria-hidden="true">→</span>
+          </span>
+        </div>
+      </Link>
+
+      <Link to="/arma-tus-tableros" className="landing-paths__card landing-paths__card--themed landing-paths__card--boards">
+        <div className="landing-paths__media landing-paths__media--art">
+          <TraditionalHeroArt />
+        </div>
+        <div className="landing-paths__body">
+          <h3 className="landing-paths__card-title">{t('landing.paths.boards.title')}</h3>
+          <p className="landing-paths__description">{t('landing.paths.boards.description')}</p>
+          <span className="landing-paths__price">{t('landing.paths.boards.price')}</span>
+          <span className="landing-paths__cta">
+            {t('landing.paths.boards.cta')} <span aria-hidden="true">→</span>
           </span>
         </div>
       </Link>

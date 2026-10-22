@@ -1,0 +1,164 @@
+/* Imagen del héroe de P8 «Arma tus tableros» (FEAT-53), del diseño `hero-tableros.html` de Carlos. Se escala sola
+   al ancho de su contenedor (container queries). Los colores del diseño se pasaron a los tokens más cercanos: papel
+   de las hojas de tablero, texto principal y naranja oscuro. */
+
+.lh-art {
+  --lh-cream: var(--color-paper-cream);
+  --lh-ink: var(--color-text-main);
+  --lh-accent: var(--color-primary-dark);
+  container-type: inline-size;
+  width: 100%;
+  max-width: 400px;
+}
+
+.lh-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1.08;
+}
+
+.lh-board {
+  position: absolute;
+  width: 62cqw;
+  box-sizing: border-box;
+  padding: 2.6cqw 3cqw 3.2cqw;
+  border-radius: 3cqw;
+  background: var(--lh-cream);
+  box-shadow: 0 4cqw 8cqw color-mix(in srgb, var(--lh-ink) 22%, transparent);
+}
+
+.lh-board--back {
+  top: 3cqw;
+  left: 35cqw;
+  opacity: 0.9;
+  transform: rotate(9deg);
+}
+
+.lh-board--mid {
+  top: 9cqw;
+  left: 2cqw;
+  opacity: 0.95;
+  transform: rotate(-8deg);
+}
+
+.lh-board--front {
+  top: 13cqw;
+  left: 18cqw;
+  transform: rotate(-1.5deg);
+}
+
+.lh-title {
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+  margin-bottom: 2cqw;
+  color: var(--lh-ink);
+  font: 700 3cqw/1 var(--font-display);
+  letter-spacing: 0.06em;
+}
+
+.lh-title::before,
+.lh-title::after {
+  content: '';
+  flex: 1;
+  height: 0.35cqw;
+  background: var(--lh-ink);
+}
+
+.lh-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.3cqw;
+}
+
+/* Las cartas en su proporción original, como en los tableros de la página. */
+.lh-card {
+  aspect-ratio: 1292 / 2048;
+  border-radius: 1cqw;
+  background: var(--color-bg-surface);
+  box-shadow: 0 0.3cqw 0.6cqw color-mix(in srgb, var(--lh-ink) 25%, transparent);
+  overflow: hidden;
+}
+
+.lh-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lh-slot {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1292 / 2048;
+  border: 0.4cqw dashed var(--lh-accent);
+  border-radius: 1cqw;
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--lh-cream));
+  color: var(--lh-accent);
+}
+
+.lh-slot svg {
+  width: 5cqw;
+  height: 5cqw;
+}
+
+.lh-float {
+  position: absolute;
+  z-index: 2;
+  top: 36cqw;
+  left: 77cqw;
+  width: 17cqw;
+  border-radius: 1.4cqw;
+  box-shadow: 0 4cqw 6cqw color-mix(in srgb, var(--lh-ink) 32%, transparent);
+  transform: rotate(12deg);
+}
+
+.lh-arrow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.lh-arrow path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Borde blanco por debajo, para que la línea se vea sobre el naranja del héroe y sobre el papel del tablero. */
+.lh-arrow__halo {
+  stroke: var(--color-bg-surface);
+  stroke-width: 1.6;
+}
+
+.lh-arrow__line {
+  stroke: var(--lh-accent);
+  stroke-width: 0.7;
+  stroke-dasharray: 1.6 1.4;
+}
+
+.lh-arrow__head {
+  stroke: var(--lh-accent);
+  stroke-width: 0.7;
+}
+
+.lh-cursor {
+  position: absolute;
+  z-index: 3;
+  top: 56cqw;
+  left: 88cqw;
+  width: 6cqw;
+  fill: var(--color-bg-surface);
+  stroke: var(--lh-ink);
+  filter: drop-shadow(0 0.5cqw 0.6cqw color-mix(in srgb, var(--lh-ink) 30%, transparent));
+}
+
+@media (max-width: 768px) {
+  .lh-art {
+    max-width: 280px;
+  }
+}

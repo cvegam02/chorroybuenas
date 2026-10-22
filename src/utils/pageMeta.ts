@@ -60,6 +60,10 @@ const PUBLIC_PAGES: Record<string, PublicPage> = {
     description: (t) => t('landing.benefitsPage.subtitle'),
     image: shareImage('og-beneficios.jpg', 1200, 670),
   },
+  '/arma-tus-tableros': {
+    title: (t) => t('traditional.metaTitle'),
+    description: (t) => t('traditional.metaDescription'),
+  },
   '/tematicas': {
     title: (t) => withSiteName(t('seasonal.catalog.title')),
     description: (t) => t('seasonal.catalog.subtitle'),
