@@ -18,7 +18,7 @@ Sitio web para crear una **lotería mexicana personalizada**: la persona sube su
 
 Está pensado para reuniones familiares y de amigos (cumpleaños, fiestas, eventos), no para uso comercial masivo. _(confirmado el 2026-10-06)_
 
-El negocio cobra por dos cosas: la **transformación de fotos con inteligencia artificial** al estilo de la lotería tradicional, que se paga con tokens, y las **loterías temáticas**, ya hechas, que se pagan en pesos (§18). Crear cartas, generar tableros y descargar el PDF de la lotería propia es gratis. _(confirmado el 2026-10-06; las loterías temáticas se agregaron ese mismo día, FEAT-17)_
+El negocio cobra por dos cosas: la **transformación de fotos con inteligencia artificial** al estilo de la lotería tradicional, que se paga con tokens, y las **loterías temáticas**, ya hechas, que se pagan en pesos (§18). Crear cartas, generar tableros y descargar el PDF de la lotería propia es gratis. _(confirmado el 2026-10-06; las loterías temáticas se agregaron ese mismo día, FEAT-17)_ También es gratis «Arma tus tableros»: tableros personalizados de la lotería tradicional, con las cartas de la suerte de cada quien (§19; 2026-10-22, FEAT-53).
 
 ## 2. Principio central — DEFINIDO
 
@@ -170,6 +170,7 @@ El administrador puede: _(confirmado el 2026-10-06)_
 | Temática (`seasons`) — por construir | Nombre (español; inglés opcional) y orden | — |
 | Lotería temática (`seasonal_loterias`) — por construir | Nombre, descripción, modo, número de cartas y de tableros, precio, publicada, fechas, portada, muestras y PDF | Pertenece a una temática |
 | Compra de lotería temática (`seasonal_purchases`) — por construir | Monto pagado, pago de Mercado Pago y estado | Pertenece a un usuario y a una lotería temática |
+| Juego de «Arma tus tableros» (`traditional_games`) | Nombre, modo y sus hasta 50 tableros (números de carta, casillas vacías y cartas fijadas) | Pertenece a un usuario (2026-10-22, FEAT-53) |
 
 ## 12. Permisos de acceso a datos — DEFINIDO
 
@@ -187,6 +188,7 @@ El administrador puede: _(confirmado el 2026-10-06)_
 | Lotería temática no visible | Los administradores; quien la compró | Los administradores |
 | PDF de una lotería temática | Quien tiene una compra aprobada de esa lotería; los administradores | Los administradores |
 | Compras de loterías temáticas | Su dueño; los administradores | Solo el servidor |
+| Juegos de «Arma tus tableros» | Su dueño | Su dueño (sin sesión, nadie; 2026-10-22, FEAT-53) |
 
 Decidido el 2026-10-06 (remediación del code review). El detalle técnico está en las migraciones 022 a 025. Los cinco renglones de loterías temáticas se agregaron el 2026-10-06 (FEAT-17) y están por construir.
 
@@ -273,6 +275,8 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-15 | Existen las ofertas: un descuento con fechas, una vigente a la vez, sobre el precio de la cantidad libre y de todos los packs (no de las loterías temáticas), redondeado al centavo; las promociones dan sus tokens extra encima; vale el precio del momento en que se inició el pago; cada compra guarda su oferta; con banner opcional en Inicio y Mi cuenta (§9). _(Descartado: bajar solo el precio por token, porque la cantidad libre quedaba más barata que los packs de 10 y 20 y nadie los compraría. Origen: FEAT-49.)_ |
 | 2026-10-17 | El administrador puede generar con IA las cartas de una lotería temática dentro del asistente (prompt general + número, nombre y escena por carta; imagen de entrada de la baraja base, de una carta de referencia o ninguna; hasta 5 intentos por carta, elige uno). Existe una baraja base privada de 54 cartas tradicionales que se sube una vez. Generar no descuenta tokens (§18). _(Descartados: una pantalla aparte de generación; subir la baraja base en cada lotería; que cada intento reemplace al anterior. Origen: FEAT-50.)_ |
 | 2026-10-20 | Cada lotería elige qué se ve en sus cartas: nombre y número (por defecto), solo nombre, solo número o nada. Un solo ajuste para toda la lotería, en la pantalla de cartas, guardado con la lotería (o en el navegador sin sesión). Vale en la cuadrícula, la vista previa y el PDF. Cambia la regla del 2026-10-09 de que el número se dibuja siempre. _(Descartados: elegir carta por carta, o lotería con excepciones por carta; poner el ajuste en la vista previa o en ambas pantallas; no guardarlo. Origen: FEAT-51.)_ |
+| 2026-10-22 | Se pueden armar gratis tableros de lotería tradicional con las 54 cartas tradicionales, en una página pública aparte del recorrido «Crear», sin cuenta (con sesión, además se guardan en «Mi cuenta»). Reglas en §19. Usa los dibujos tradicionales de la baraja: Carlos decidió asumir el riesgo de derechos de autor, señalado en la conversación; es una excepción a la regla de FEAT-33 para «¿Qué es la lotería?», que sigue sin mostrarlos. _(Descartados: hacer dibujos propios de las 54 con IA; usarlos solo como provisionales en dev; cobrarlo; meterlo como atajo dentro de «Crear». Origen: FEAT-53.)_ |
+| 2026-10-22 | Cambia el enfoque de la sección del renglón anterior, antes de publicarse: se llama «Arma tus tableros» (`/arma-tus-tableros`) y sirve para armar tableros personalizados con las cartas de la suerte de cada quien, no para generar muchos tableros para una fiesta. Empieza con un tablero vacío; cada tablero se puede «Llenar al azar»; se quitan «Agregar varios» y la cantidad sugerida; en el menú, el grupo «Crear» abre «Tu lotería con fotos» y «Arma tus tableros»; en Mi cuenta, «Mis tableros de la suerte»; un juego nuevo se llama «Mis tableros · <fecha>». _(Descartados: los nombres «Tableros de la suerte» (elegido primero y cambiado por Carlos), «Tableros personalizados» y «Lotería tradicional»; empezar con un tablero al azar; dejarla como estaba cambiando solo los textos; un enlace propio en la barra; dejar `/loteria-tradicional`. Origen: FEAT-53.)_ |
 
 ## 16. Pendientes por definir
 
@@ -295,6 +299,7 @@ Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en
 | Ofertas con descuento y banner | §8, §9 | No existen. Anotada el 2026-10-15; se construye con `docs/features/FEAT-49-ofertas-con-banner.md` |
 | Elegir qué se ve en las cartas (nombre, número, ambos o nada) | §4 | Siempre dibuja nombre y número. Anotada el 2026-10-20; se construye con `docs/features/FEAT-51-nombre-y-numero-en-cartas.md` |
 | Tableros del PDF en tamaño carta | §5 | El PDF sale en hoja A4. Anotada el 2026-10-09; se corrige con `docs/features/FEAT-26-pdf-impresion-y-recorte.md` |
+| «Arma tus tableros» | §19 | No existe. Anotada el 2026-10-22; se construye con `docs/features/FEAT-53-tableros-loteria-tradicional.md` |
 
 ## 18. Loterías temáticas — DEFINIDO
 
@@ -354,3 +359,14 @@ Definido con Carlos el 2026-10-06 (FEAT-17). Por construir. Hasta el 2026-10-07 
 **Historial.** El comprador ve estas compras en su historial, mezcladas por fecha con las de tokens y los regalos. El administrador las ve en la lista de compras, distinguidas por tipo, y ve cuántas ventas lleva cada lotería.
 
 **Avisos.** Al usuario, ninguno por ahora; al administrador, la alerta de un pago cobrado sin entregar (§13; por construir; agregado el 2026-10-13, fase 3).
+
+## 19. «Arma tus tableros» — DEFINIDO (2026-10-22, FEAT-53)
+
+Cualquiera puede armar sus propios tableros de la lotería tradicional, eligiendo sus cartas de la suerte, y bajarlos en PDF para jugar con su baraja de siempre. En México mucha gente cree que jugar con un tablero propio, armado a su gusto, trae buena suerte: la sección es para eso, no para hacer una lotería para una fiesta. Es gratis. _(El enfoque se cambió el 2026-10-22, antes de publicarse: primero se pensó como «Lotería tradicional», para generar muchos tableros al azar.)_
+
+- **Dónde:** una página pública, «Arma tus tableros» (`/arma-tus-tableros`), aparte del recorrido de la lotería con fotos. No pide cuenta: sin sesión, lo armado se guarda en el navegador; con sesión, además se guarda en «Mi cuenta», en la sección «Mis tableros de la suerte», donde caben varios juegos (abrir, cambiar nombre, descargar PDF, eliminar). Con sesión, el juego abierto se guarda solo en cada cambio (se crea al poner la primera carta, como «Mis tableros · <fecha>») y «Nuevo juego» empieza otro sin borrar el anterior. Al iniciar sesión se ofrece guardar en la cuenta, como juego nuevo, lo armado sin sesión (si tiene alguna carta puesta); si se descarta, se borra del navegador.
+- **Cartas:** las 54 tradicionales, con sus dibujos tradicionales (salvo la carta 1, El Gallo, que usa el dibujo propio del sitio para no mostrar el logotipo de la marca; 2026-10-22), guardadas como archivos fijos del sitio (una versión ligera para la pantalla y otra de buena calidad para el PDF). No es la baraja base del administrador (§18), que sigue privada.
+- **Modos:** Clásico (4 × 4) y Kids (3 × 3), como en §4. Cambiar de modo con cartas puestas pide confirmación, porque se pierden; sin cartas puestas cambia sin preguntar.
+- **Tableros:** la página empieza con un tablero vacío, para elegir las cartas a mano. Cada tablero se puede «Llenar al azar» (solo sus casillas vacías; lo puesto se queda), revolver (cambian las cartas no fijadas) o borrar. Se agregan más con «Agregar tablero vacío» o «Agregar tablero al azar», hasta 50, y se pueden revolver todos. No hay cantidad sugerida. Dos tableros nunca salen idénticos al generarse; si la persona deja dos iguales a mano, se le avisa pero no se le impide.
+- **Cambiar cartas:** arrastrando una carta de la baraja a una casilla, o entre casillas del mismo tablero (en computadora), o tocando la casilla y eligiendo la carta (en cualquier pantalla). Una carta no se repite en un tablero: si se pone una que ya está en él, las dos casillas se intercambian. Una carta se puede **fijar**: al revolver, las fijadas no se mueven.
+- **PDF:** solo los tableros, sin la baraja para recortar. No se descarga con casillas vacías: se avisa cuántos tableros están incompletos y se ofrece llenar al azar las vacías, respetando lo ya puesto.

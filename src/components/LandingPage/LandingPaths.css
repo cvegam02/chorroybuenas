@@ -1,4 +1,4 @@
-/* Dos caminos de la página de inicio: IA y temáticas (FEAT-32, P1) */
+/* Caminos de la página de inicio: IA y temáticas (FEAT-32, P1); desde FEAT-53, «Arma tus tableros». */
 
 .landing-paths {
   display: grid;
@@ -55,6 +55,14 @@
   aspect-ratio: 1;
   border-radius: var(--radius-md);
   object-fit: cover;
+}
+
+/* La imagen de los tableros encimados (FEAT-53), en el mismo lugar que la foto de las otras tarjetas. */
+.landing-paths__media--art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: auto;
 }
 
 .landing-paths__body {
@@ -138,8 +146,11 @@
     padding: 24px;
   }
 
+  /* Con tres tarjetas en fila (FEAT-53) la imagen baja a su propio renglón: ahí va centrada. Junto al texto, el
+     margen automático no se nota, porque el texto ocupa el espacio libre. */
   .landing-paths__media {
     width: 200px;
+    margin-inline: auto;
   }
 
   .landing-paths__body {

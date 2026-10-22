@@ -13,6 +13,7 @@ import { PurchaseHistoryModal } from './PurchaseHistoryModal';
 import { buildTokenHistory, sumGiftTokens, summarizeTokens, type TokenHistoryEntry } from '../../utils/tokenHistory';
 import { ChangePasswordModal } from './ChangePasswordModal';
 import { MySeasonalLoterias } from './MySeasonalLoterias';
+import { MyTraditionalGames } from './MyTraditionalGames';
 import { TokenMovements } from './TokenMovements';
 import { AccountHeader } from './AccountHeader';
 import { AccountDetails } from './AccountDetails';
@@ -219,6 +220,7 @@ export const Dashboard = () => {
 
           <div className="dashboard__columns">
             <MySeasonalLoterias />
+            <MyTraditionalGames />
             <TokenMovements
               received={isLoading ? null : totalEverReceived}
               spent={isLoading ? null : tokensSpent}

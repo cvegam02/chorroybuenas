@@ -200,3 +200,32 @@ describe('¿Qué es la lotería? pre-generada (FEAT-33, US A6)', () => {
   });
 });
 
+
+describe('«Arma tus tableros» pre-generada (FEAT-53)', () => {
+  it('trae su título para buscadores, un solo título principal y el texto de cómo crear tableros', async () => {
+    const { html, meta } = await render('/arma-tus-tableros');
+    const page = es.traditional;
+    expect(meta.title).toBe(page.metaTitle);
+    expect(meta.description).toBe(page.metaDescription);
+    expect(meta.indexable).toBe(true);
+    expect(countOf(html, 'h1')).toBe(1);
+    expect(html).toContain(page.hero.title);
+    expect(html).toContain(page.seo.steps.title);
+    expect(html).toContain(page.seo.about.title);
+    expect(html).toContain('/media/loteria-tradicional/pantalla/');
+  });
+
+  it('sus datos FAQPage dicen lo mismo que las seis preguntas visibles', async () => {
+    const { html } = await render('/arma-tus-tableros');
+    const data = faqPageOf(html);
+    expect(data.mainEntity).toHaveLength(6);
+    expect(data.mainEntity[0].name).toBe(es.traditional.seo.faq.free.question);
+    expect(data.mainEntity[5].acceptedAnswer.text).toBe(es.traditional.seo.faq.why.answer);
+  });
+
+  it('Inicio la presenta en «Más formas de crear tu lotería»', async () => {
+    const { html } = await render('/');
+    expect(html).toContain('href="/arma-tus-tableros"');
+    expect(html).toContain(es.landing.paths.boards.title);
+  });
+});

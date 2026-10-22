@@ -32,6 +32,7 @@ export const Footer = () => {
                     {!user && <Link to={{ pathname: '/', hash: `#${ABOUT_SECTION_ID}` }}>{t('footer.about')}</Link>}
                     <Link to="/como-se-juega">{t('footer.howToPlay')}</Link>
                     <Link to="/que-es-la-loteria">{t('footer.whatIsLoteria')}</Link>
+                    <Link to="/arma-tus-tableros">{t('footer.traditional')}</Link>
                     <Link to="/privacidad">{t('footer.privacy')}</Link>
                 </nav>
             </div>

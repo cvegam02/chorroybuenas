@@ -27,6 +27,8 @@ export interface GeneratePDFOptions {
   composeCard?: CardComposer;
   /** Qué se ve en las cartas de la lotería (FEAT-51). Por defecto, nombre y número. */
   cardLabels?: CardLabels;
+  /** Si va la baraja para recortar después de los tableros. Por defecto sí; la lotería tradicional no (FEAT-53). */
+  includeDeck?: boolean;
 }
 
 /**
@@ -73,9 +75,10 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
   }
 
   // Páginas con todas las cartas (baraja completa)
-  const allCards: Card[] = await Promise.all(deckCards.map(prepareCard));
-
-  failedCards.push(...(await drawDeckPages(pdfDoc, allCards, embedCache, finishedCards)));
+  if (options?.includeDeck ?? true) {
+    const allCards: Card[] = await Promise.all(deckCards.map(prepareCard));
+    failedCards.push(...(await drawDeckPages(pdfDoc, allCards, embedCache, finishedCards)));
+  }
 
   if (failedCards.length > 0) throw new PdfCardsFailedError(uniqueFailedCards(failedCards));
 

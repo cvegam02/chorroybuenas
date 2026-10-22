@@ -5,7 +5,7 @@ Sitio web para crear una lotería mexicana personalizada con fotos propias y des
 ## Documentación de referencia (leer antes de tocar reglas de negocio)
 
 - [`docs/contexto-negocio.md`](docs/contexto-negocio.md) — documento maestro de reglas de negocio: propósito, roles, loterías y tableros, IA, tokens, compras, promociones, administración, permisos y avisos. **Las decisiones marcadas como definidas no se reabren sin que el usuario lo pida explícitamente** — están listadas en la sección «Decisiones definidas» (§15) de ese documento. La §17 lista las reglas ya definidas que el sitio todavía no cumple.
-- [`docs/casos-de-uso.md`](docs/casos-de-uso.md) — 28 casos de uso formales en 6 bloques; complementa el documento de negocio sin introducir reglas nuevas.
+- [`docs/casos-de-uso.md`](docs/casos-de-uso.md) — 29 casos de uso formales en 7 bloques; complementa el documento de negocio sin introducir reglas nuevas.
 - [`docs/diseno-mockups.md`](docs/diseno-mockups.md) — índice de pantallas con su código, estructura de navegación y fuente viva del diseño (el sitio ya construido).
 
 Antes de empezar cualquier tarea, leer las partes de estos documentos que la tarea toca, y el archivo de la fase o feature activa. Si una tarea nueva parece contradecir algo del documento de negocio, señalarlo y pedir confirmación antes de cambiarlo — no reinterpretar en silencio.
