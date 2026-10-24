@@ -333,10 +333,10 @@ Todos los casos de este bloque están por construir (§17, §18).
 
 ### 30. Cantar una partida
 - **Actor(es)**: Usuario registrado.
-- **Precondiciones**: Tener una lotería con fotos con el mínimo de cartas de su modo (§4, §20). Usar un navegador con voz en español.
+- **Precondiciones**: Tener una lotería con fotos con el mínimo de cartas de su modo (§4, §20). Usar un navegador con voz en español, salvo que la lotería tenga voz con IA.
 - **Flujo principal**: (1) En su lotería guardada pulsa «Cantar»; el cantador se abre a pantalla completa (donde el navegador lo permite) y mantiene la pantalla encendida. (2) Elige el ritmo, si no quiere el tradicional, y pulsa «Empezar a cantar». (3) El cantador dice «Se va y se corre con…» y saca las cartas solas, al ritmo elegido, diciendo el título de cada una. (4) Cuando alguien grita «¡Lotería!», pausa y revisa las cartas cantadas: la tira de las últimas, «Anterior» y «Siguiente», o «Ver todas». (5) Sigue cantando, o empieza una partida nueva.
-- **Flujo alterno — voz con IA** 🔧: en el cantador pulsa «Mejorar la voz», ve el costo (5 tokens) y su saldo, y confirma; desde ese momento la lotería se canta con la voz con IA (§20). Sin saldo suficiente, se le lleva a comprar tokens.
-- **Excepciones**: Faltan cartas: el botón «Cantar» sale apagado con el motivo. El navegador no tiene voz en español: no se puede cantar y se le dice en qué navegadores sí. La lotería no es suya o no existe: se le dice que no se encontró. Se acaba la baraja: se le avisa y se le ofrece una partida nueva.
+- **Flujo alterno — voz con IA** 🔧: en el cantador pulsa «Mejorar la voz», escucha y escoge una de las cuatro voces, ve el costo (5 tokens) y su saldo, y confirma; la voz escogida ya no se puede cambiar; desde ese momento la lotería se canta con la voz con IA (§20). Sin saldo suficiente, se le lleva a comprar tokens.
+- **Excepciones**: Faltan cartas: el botón «Cantar» sale apagado con el motivo. El navegador no tiene voz en español: no se puede cantar y se le dice en qué navegadores sí; si la lotería tiene voz con IA, sí se canta con sus audios y las cartas sin audio salen sin voz. La lotería no es suya o no existe: se le dice que no se encontró. Se acaba la baraja: se le avisa y se le ofrece una partida nueva.
 - **Resultado**: La partida se juega sin recortar la baraja.
 - **Estados afectados**: Ninguno en la cuenta; la partida en curso se guarda en el navegador. Con voz con IA: el saldo, el uso de tokens y los audios de las cartas (§11).
 - **Notificaciones**: Ninguna.
