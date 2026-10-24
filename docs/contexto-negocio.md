@@ -172,7 +172,7 @@ El administrador puede: _(confirmado el 2026-10-06)_
 | Lotería temática (`seasonal_loterias`) — por construir | Nombre, descripción, modo, número de cartas y de tableros, precio, publicada, fechas, portada, muestras y PDF | Pertenece a una temática |
 | Compra de lotería temática (`seasonal_purchases`) — por construir | Monto pagado, pago de Mercado Pago y estado | Pertenece a un usuario y a una lotería temática |
 | Juego de «Arma tus tableros» (`traditional_games`) | Nombre, modo y sus hasta 50 tableros (números de carta, casillas vacías y cartas fijadas) | Pertenece a un usuario (2026-10-22, FEAT-53) |
-| Audio de carta — por construir | El audio con voz de IA del título de una carta, para el cantador | Pertenece a una carta; se borra con ella (2026-10-23, FEAT-55). La lotería guarda qué voz se escogió (2026-10-24) |
+| Audio de carta | El audio con voz de IA del título de una carta, para el cantador | Pertenece a una carta; se borra con ella (2026-10-23, FEAT-55). La lotería guarda qué voz se escogió (2026-10-24) |
 
 ## 12. Permisos de acceso a datos — DEFINIDO
 
@@ -191,7 +191,7 @@ El administrador puede: _(confirmado el 2026-10-06)_
 | PDF de una lotería temática | Quien tiene una compra aprobada de esa lotería; los administradores | Los administradores |
 | Compras de loterías temáticas | Su dueño; los administradores | Solo el servidor |
 | Juegos de «Arma tus tableros» | Su dueño | Su dueño (sin sesión, nadie; 2026-10-22, FEAT-53) |
-| Audios de las cartas (voz con IA del cantador) | Su dueño | Solo el servidor (2026-10-23, FEAT-55; por construir) |
+| Audios de las cartas (voz con IA del cantador) | Su dueño | Solo el servidor (2026-10-23, FEAT-55) |
 
 Decidido el 2026-10-06 (remediación del code review). El detalle técnico está en las migraciones 022 a 025. Los cinco renglones de loterías temáticas se agregaron el 2026-10-06 (FEAT-17) y están por construir.
 
@@ -306,7 +306,7 @@ Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en
 | Ofertas con descuento y banner | §8, §9 | No existen. Anotada el 2026-10-15; se construye con `docs/features/FEAT-49-ofertas-con-banner.md` |
 | Elegir qué se ve en las cartas (nombre, número, ambos o nada) | §4 | Siempre dibuja nombre y número. Anotada el 2026-10-20; se construye con `docs/features/FEAT-51-nombre-y-numero-en-cartas.md` |
 | Tableros del PDF en tamaño carta | §5 | El PDF sale en hoja A4. Anotada el 2026-10-09; se corrige con `docs/features/FEAT-26-pdf-impresion-y-recorte.md` |
-| Voz con IA del cantador | §20 | No existe; el cantador usa la voz del navegador. Anotada el 2026-10-23; se construye con la US A6 de `docs/features/FEAT-55-cantador.md` |
+| Voz con IA del cantador | §20 | En producción, no existe: el cantador usa la voz del navegador. Construida el 2026-10-24 con la US A6 de `docs/features/FEAT-55-cantador.md` y llevada a dev con el PR #73; se retira de esta lista al publicarse en producción |
 | «Arma tus tableros» | §19 | No existe. Anotada el 2026-10-22; se construye con `docs/features/FEAT-53-tableros-loteria-tradicional.md` |
 
 ## 18. Loterías temáticas — DEFINIDO
