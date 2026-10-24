@@ -1,4 +1,4 @@
-import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, Navigate, matchPath } from 'react-router-dom';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LandingPage } from './components/LandingPage/LandingPage';
@@ -13,6 +13,7 @@ import { TraditionalBoardsPage } from './components/TraditionalBoards/Traditiona
 import { PrivacyNotice } from './components/PrivacyNotice/PrivacyNotice';
 import BenefitsPage from './components/BenefitsPage/BenefitsPage';
 import { SetView } from './components/SetView/SetView';
+import { CallerPage } from './components/Caller/CallerPage';
 import { BuyTokensPage } from './components/BuyTokens/BuyTokensPage';
 import { SeasonalCatalog } from './components/Seasonal/SeasonalCatalog';
 import { SeasonalDetail } from './components/Seasonal/SeasonalDetail';
@@ -59,6 +60,8 @@ function AppContent() {
   const { cards } = useCards();
   const navigate = useNavigate();
   const location = useLocation();
+  // El cantador ocupa toda la pantalla: sin la barra del sitio ni el pie (FEAT-55)
+  const isCallerPage = matchPath('/loteria/:setId/cantar', location.pathname) !== null;
   const [currentStep, setCurrentStep] = useState<AppStep | null>(null);
   const [boards, setBoards] = useState<Board[]>([]);
   const [, setBoardCount] = useState<number>(8);
@@ -331,8 +334,8 @@ function AppContent() {
   return (
     <>
       <PageMeta />
-      <Navbar />
-      <CreateSteps />
+      {!isCallerPage && <Navbar />}
+      {!isCallerPage && <CreateSteps />}
       <UploadProgressModal
         isOpen={visitorTransfer.isSaving}
         progress={visitorTransfer.progress}
@@ -410,6 +413,10 @@ function AppContent() {
           element={<SetView />}
         />
         <Route
+          path="/loteria/:setId/cantar"
+          element={<CallerPage />}
+        />
+        <Route
           path="/comprar-tokens"
           element={<BuyTokensPage />}
         />
@@ -465,7 +472,7 @@ function AppContent() {
         />
       </Routes>
 
-      <Footer />
+      {!isCallerPage && <Footer />}
 
       {isGenerating && (
         <div className="app__loading" role="status" aria-live="polite">

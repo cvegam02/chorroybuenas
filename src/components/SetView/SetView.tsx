@@ -23,6 +23,7 @@ import { GridSize } from '../../types';
 import './SetView.css';
 import { logger } from '../../utils/logger';
 import { pdfErrorMessage } from '../../utils/pdfErrorMessage';
+import { enterFullscreen } from '../../utils/fullscreen';
 import { withNumbersFrom } from '../../utils/cardNumbers';
 import { cardLabelsOrDefault } from '../../utils/cardLabels';
 import { CardLabelsProvider } from '../../contexts/CardLabelsContext';
@@ -202,6 +203,10 @@ export const SetView = () => {
           isDownloading={isGeneratingPDF}
           onRename={renameSet}
           onDownload={handleDownloadPDF}
+          onSing={() => {
+            enterFullscreen();
+            navigate(`/loteria/${setId}/cantar`);
+          }}
           onShuffleBoards={() => setShowRegenerateBoardsModal(true)}
           onClearBoards={() => setShowClearBoardsModal(true)}
           onDelete={() => setShowDeleteDialog(true)}
