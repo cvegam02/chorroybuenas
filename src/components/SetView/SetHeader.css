@@ -167,6 +167,20 @@
   gap: 10px;
 }
 
+/* «Cantar» con su motivo debajo cuando está apagado (FEAT-55) */
+.set-header__sing {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.set-header__sing-reason {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
 @media (max-width: 768px) {
   .set-header__inner {
     gap: 12px;
@@ -210,5 +224,9 @@
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
+  }
+
+  .set-header__sing {
+    align-items: stretch;
   }
 }

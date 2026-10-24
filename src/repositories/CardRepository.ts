@@ -2,6 +2,7 @@ import { supabase } from '../utils/supabaseClient';
 import { Card } from '../types';
 import { z } from 'zod';
 import { logger } from '../utils/logger';
+import { CallerVoiceService } from '../services/CallerVoiceService';
 import { createConcurrencyLimit } from '../utils/concurrencyLimit';
 import { createKeyedSingleFlight } from '../utils/singleFlight';
 
@@ -294,5 +295,7 @@ export class CardRepository {
                 logger.warn('Error removing card images from storage (card already deleted from DB):', storageErr);
             }
         }
+        // Su audio con voz de IA del cantador, si tenía (FEAT-55)
+        if (card.user_id && card.set_id) await CallerVoiceService.removeAudios(card.user_id, card.set_id, cardId);
     }
 }

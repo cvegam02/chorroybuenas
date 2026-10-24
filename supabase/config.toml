@@ -36,3 +36,6 @@ content_path = "./supabase/templates/confirmation.html"
 [auth.email.template.recovery]
 subject = "Recupera tu contraseña - chorroybuenas.com.mx"
 content_path = "./supabase/templates/recovery.html"
+
+[functions.caller-voice]
+verify_jwt = false

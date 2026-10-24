@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaArrowLeft, FaDownload, FaPencilAlt, FaPlus } from 'react-icons/fa';
+import { FaArrowLeft, FaBullhorn, FaDownload, FaPencilAlt, FaPlus } from 'react-icons/fa';
 import type { Card, GridSize } from '../../types';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { logger } from '../../utils/logger';
+import { canSing } from '../../utils/callerGame';
+import { minCardsForGrid } from '../../utils/gridRules';
 import { SetMenu } from './SetMenu';
 import type { SetViewState } from './setViewState';
 import './SetHeader.css';
@@ -31,6 +33,8 @@ interface SetHeaderProps {
   /** Guarda el nombre nuevo; si lanza, el campo se queda abierto y avisa. */
   onRename: (name: string) => Promise<void>;
   onDownload: () => void;
+  /** Abre el cantador (FEAT-55). */
+  onSing: () => void;
   onShuffleBoards: () => void;
   onClearBoards: () => void;
   onDelete: () => void;
@@ -45,6 +49,7 @@ export const SetHeader = ({
   isDownloading,
   onRename,
   onDownload,
+  onSing,
   onShuffleBoards,
   onClearBoards,
   onDelete,
@@ -80,6 +85,28 @@ export const SetHeader = ({
       setIsSavingName(false);
     }
   };
+
+  // «Cantar» sale con el mínimo de cartas, tenga tableros o no; sin él, apagado con el motivo (FEAT-55)
+  const singReady = details ? canSing(details.cardCount, details.gridSize) : false;
+  const singButton = details && (
+    <span className="set-header__sing">
+      <button
+        type="button"
+        className="set-button set-button--secondary"
+        onClick={onSing}
+        disabled={!singReady}
+        aria-describedby={singReady ? undefined : 'set-header-sing-reason'}
+      >
+        <FaBullhorn aria-hidden="true" />
+        {t('setView.sing')}
+      </button>
+      {!singReady && (
+        <span id="set-header-sing-reason" className="set-header__sing-reason">
+          {t('setView.singNeedsCards', { count: minCardsForGrid(details.gridSize) - details.cardCount })}
+        </span>
+      )}
+    </span>
+  );
 
   const cardsLink = details ? { to: '/cards', state: { gridSize: details.gridSize } } : null;
   const tokensSpent = details?.tokensSpent ?? 0;
@@ -195,6 +222,7 @@ export const SetHeader = ({
                   {t('setView.downloadPDF')}
                 </button>
               )}
+              {singButton}
               {details.state.kind === 'missingCards' ? (
                 <Link {...cardsLink} className="set-button set-button--primary set-button--large">
                   <FaPlus aria-hidden="true" />
