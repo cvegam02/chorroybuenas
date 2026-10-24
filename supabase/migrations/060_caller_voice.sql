@@ -54,7 +54,8 @@ grant select on public.caller_voices, public.caller_audios to authenticated;
 grant all on public.caller_voices, public.caller_audios to service_role;
 
 -- ---------------------------------------------------------------------------
--- 3. Bucket privado: usuario/lotería/carta.mp3. El dueño descarga; solo el servidor sube.
+-- 3. Bucket privado: usuario/lotería/carta.mp3. El dueño descarga y borra (al borrar la carta o la lotería,
+--    como sus fotos); solo el servidor sube.
 -- ---------------------------------------------------------------------------
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('caller-audio', 'caller-audio', false, 1048576, array['audio/mpeg'])
@@ -66,6 +67,15 @@ on conflict (id) do update set
 drop policy if exists "Users can read own caller audio" on storage.objects;
 create policy "Users can read own caller audio"
 on storage.objects for select
+to authenticated
+using (
+  bucket_id = 'caller-audio'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+drop policy if exists "Users can delete own caller audio" on storage.objects;
+create policy "Users can delete own caller audio"
+on storage.objects for delete
 to authenticated
 using (
   bucket_id = 'caller-audio'

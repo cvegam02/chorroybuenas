@@ -148,6 +148,7 @@ select test.is((select count(*)::int from public.caller_voices), 0, 'otra person
 select test.is((select count(*)::int from public.caller_audios), 0, 'otra persona no ve los audios ajenos');
 select test.is((select count(*)::int from storage.objects where bucket_id = 'caller-audio'), 0,
   'otra persona no puede descargar los audios ajenos');
+delete from storage.objects where bucket_id = 'caller-audio';
 
 select test.as_anon();
 select test.is((select count(*)::int from storage.objects where bucket_id = 'caller-audio'), 0,
@@ -160,6 +161,16 @@ select test.lives($$
   select public.start_caller_voice('00000000-0000-0000-0000-000000006002',
     '00000000-0000-0000-0000-0000000060b1', 'Spanish_Steadymentor')
 $$, 'el servidor sí puede cobrar la voz');
+
+-- El dueño borra sus audios al borrar la carta o la lotería; nadie más puede
+select test.as_postgres();
+select test.is((select count(*)::int from storage.objects where bucket_id = 'caller-audio'), 1,
+  'otra persona no puede borrar los audios ajenos');
+select test.as_user('00000000-0000-0000-0000-000000006001');
+delete from storage.objects where bucket_id = 'caller-audio';
+select test.as_postgres();
+select test.is((select count(*)::int from storage.objects where bucket_id = 'caller-audio'), 0,
+  'el dueño puede borrar sus audios');
 
 -- Borrar una carta borra su audio; borrar la lotería borra su voz y sus audios
 select test.as_postgres();

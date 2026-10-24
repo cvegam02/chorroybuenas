@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaChevronLeft, FaChevronRight, FaPause, FaPlay, FaRandom, FaTimes, FaVolumeMute, FaVolumeUp } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaMagic, FaPause, FaPlay, FaRandom, FaTimes, FaVolumeMute, FaVolumeUp } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import { CardLabelsProvider } from '../../contexts/CardLabelsContext';
 import { useCallerGame } from '../../hooks/useCallerGame';
@@ -17,6 +17,7 @@ import {
   recentBeforeCurrent,
 } from '../../utils/callerGame';
 import { CALL_INTRO } from '../../utils/callerAuto';
+import { AI_VOICE_PRICE } from '../../utils/callerAiVoice';
 import { cardLabelsOrDefault } from '../../utils/cardLabels';
 import { exitFullscreen } from '../../utils/fullscreen';
 import { SetConfirmDialog } from '../SetView/SetConfirmDialog';
@@ -26,6 +27,8 @@ import { useAutoCaller } from './useAutoCaller';
 import { CallerRhythmPicker } from './CallerRhythmPicker';
 import { NoVoiceNotice } from './NoVoiceNotice';
 import { CallerDeckSheet, CallerHistoryStrip } from './CallerHistory';
+import { CallerVoicePicker } from './CallerVoicePicker';
+import { useAiVoice } from './useAiVoice';
 import type { Card } from '../../types';
 import './CallerPage.css';
 
@@ -43,6 +46,7 @@ export const CallerPage = () => {
   // Diciendo «Se va y se corre con…» antes de la primera carta
   const [isIntro, setIsIntro] = useState(false);
   const [deckOpen, setDeckOpen] = useState(false);
+  const [voicePickerOpen, setVoicePickerOpen] = useState(false);
   useKeepScreenOn();
 
   // Sin sesión no hay cantador: igual que la página de la lotería, se regresa a Inicio
@@ -58,6 +62,10 @@ export const CallerPage = () => {
   const cardIds = useMemo(() => (ready && singable ? ready.cards.map((c) => c.id) : null), [ready, singable]);
   const { game, draw, restart } = useCallerGame(setId, cardIds);
   const { say, muted, toggleMuted, voiceStatus } = useCardVoice();
+  const singableCards = useMemo(() => (ready && singable ? ready.cards : null), [ready, singable]);
+  const ai = useAiVoice(setId, singableCards);
+  // Mientras se genera la voz con IA no se puede empezar (decisión 26)
+  const preparingVoice = ai.status === 'generating';
 
   const cardsById = useMemo(() => new Map((ready?.cards ?? []).map((c) => [c.id, c])), [ready]);
   const currentId = game && currentCardId(game);
@@ -81,28 +89,32 @@ export const CallerPage = () => {
       if (!game || isFinished(game)) return;
       const card = cardsById.get(game.order[game.drawn]);
       draw();
-      if (card) say(card.title, onSpoken);
+      if (card) say(card.title, onSpoken, ai.urlFor(card));
     },
-    [game, cardsById, draw, say],
+    [game, cardsById, draw, say, ai],
   );
   const auto = useAutoCaller(game, drawAndSay);
 
   /** Empieza la partida: dice la frase de arranque y sigue en automático (US A5). Va dentro del toque. */
   const begin = useCallback(() => {
     setIsIntro(true);
-    say(CALL_INTRO, () => {
-      setIsIntro(false);
-      auto.start();
-    });
-  }, [say, auto]);
+    say(
+      CALL_INTRO,
+      () => {
+        setIsIntro(false);
+        auto.start();
+      },
+      ai.introUrl,
+    );
+  }, [say, auto, ai.introUrl]);
 
   /** Barra espaciadora: pausa o sigue; antes de la primera carta, empieza la partida. */
   const togglePlay = useCallback(() => {
-    if (isIntro || finished) return;
+    if (isIntro || finished || preparingVoice) return;
     if (auto.running) auto.stop();
     else if (drawnCount === 0) begin();
     else auto.start();
-  }, [isIntro, finished, auto, drawnCount, begin]);
+  }, [isIntro, finished, preparingVoice, auto, drawnCount, begin]);
 
   /** «Anterior» y ←: pausa el automático y muestra la cantada anterior (decisiones 19 y 20). */
   const showPrevious = useCallback(() => {
@@ -132,7 +144,7 @@ export const CallerPage = () => {
 
   // Teclado (decisión 19): espacio pausa o sigue; ← y → recorren las cantadas, sin sacar cartas nuevas
   useEffect(() => {
-    if (!game || confirmRestart || deckOpen) return;
+    if (!game || confirmRestart || deckOpen || voicePickerOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
       // La lista de ritmo usa sus propias teclas
       if (e.target instanceof HTMLElement && e.target.closest('select, input')) return;
@@ -149,7 +161,7 @@ export const CallerPage = () => {
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [game, confirmRestart, deckOpen, togglePlay, showPrevious, showNext]);
+  }, [game, confirmRestart, deckOpen, voicePickerOpen, togglePlay, showPrevious, showNext]);
 
   const close = () => {
     exitFullscreen();
@@ -168,7 +180,10 @@ export const CallerPage = () => {
   );
 
   let body;
-  if (loaded.status === 'loading' || (ready && singable && (!game || voiceStatus === 'checking'))) {
+  if (
+    loaded.status === 'loading' ||
+    (ready && singable && (!game || voiceStatus === 'checking' || ai.status === 'loading'))
+  ) {
     body = (
       <div className="caller__message" role="status">
         <div className="caller__spinner" aria-hidden="true" />
@@ -181,7 +196,16 @@ export const CallerPage = () => {
     body = message(t('caller.loadError'), { to: `/loteria/${setId}`, label: t('caller.backToSet') });
   } else if (!singable || !game) {
     body = message(t('caller.tooFew'), { to: `/loteria/${setId}`, label: t('caller.backToSet') });
-  } else if (voiceStatus === 'none') {
+  } else if (preparingVoice) {
+    body = (
+      <div className="caller__message" role="status">
+        <div className="caller__spinner" aria-hidden="true" />
+        <p>{t('caller.aiVoice.preparing', { done: ai.progress.done, total: ai.progress.total })}</p>
+        <p className="caller__ai-note">{t('caller.aiVoice.preparingHint')}</p>
+      </div>
+    );
+  } else if (voiceStatus === 'none' && ai.status !== 'ready') {
+    // Con voz con IA se canta aunque el navegador no tenga voz en español (decisión 24)
     body = <NoVoiceNotice setId={setId ?? ''} />;
   } else if (!current || !shown) {
     body = isIntro ? (
@@ -195,6 +219,19 @@ export const CallerPage = () => {
           {t('caller.start')}
         </button>
         <CallerRhythmPicker rhythm={auto.rhythm} onChange={auto.changeRhythm} />
+        {ai.status === 'none' && (
+          <>
+            {ai.refunded && (
+              <p className="caller__ai-note" role="status">
+                {t('caller.aiVoice.refunded', { price: AI_VOICE_PRICE })}
+              </p>
+            )}
+            <button type="button" className="caller__ai-voice" onClick={() => setVoicePickerOpen(true)}>
+              <FaMagic aria-hidden="true" />
+              {t('caller.aiVoice.open', { price: AI_VOICE_PRICE })}
+            </button>
+          </>
+        )}
       </div>
     );
   } else {
@@ -268,7 +305,7 @@ export const CallerPage = () => {
                 <span className="caller__new-game-label">{t('caller.newGame')}</span>
               </button>
             )}
-            {voiceStatus === 'ready' && (
+            {(voiceStatus === 'ready' || ai.status === 'ready') && (
               <button
                 type="button"
                 className="caller__icon-button"
@@ -286,6 +323,7 @@ export const CallerPage = () => {
         {deckOpen && ready && (
           <CallerDeckSheet cards={ready.cards} callNumbers={callNumbers} onClose={() => setDeckOpen(false)} />
         )}
+        {voicePickerOpen && <CallerVoicePicker onBuy={ai.buy} onClose={() => setVoicePickerOpen(false)} />}
         {confirmRestart && (
           <SetConfirmDialog
             icon={<FaRandom />}

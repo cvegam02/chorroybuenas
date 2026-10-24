@@ -27,8 +27,9 @@ const saveMuted = (muted: boolean) => {
 const synth = (): SpeechSynthesis | null => (typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null);
 
 /**
- * La voz del navegador del cantador (FEAT-55, US A4): dice los títulos en español, de preferencia de México.
- * `say` debe llamarse desde un toque la primera vez: Safari de iPhone no habla antes.
+ * La voz del cantador (FEAT-55): la del navegador en español, de preferencia de México (US A4), o el audio
+ * con voz de IA de la carta cuando la lotería lo tiene (US A6).
+ * `say` debe llamarse desde un toque la primera vez: Safari de iPhone no habla ni reproduce audio antes.
  * `voiceStatus`: «checking» mientras el navegador da su lista de voces; «none» si ninguna es en español.
  */
 export const useCardVoice = () => {
@@ -37,6 +38,8 @@ export const useCardVoice = () => {
   const [muted, setMuted] = useState(readMuted);
   const mutedRef = useRef(muted);
   mutedRef.current = muted;
+  // Un solo reproductor para los audios con IA: el primer toque lo deja sonar en Safari de iPhone
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const speech = synth();
@@ -59,9 +62,14 @@ export const useCardVoice = () => {
     };
   }, []);
 
-  /** Dice el texto y llama a `onDone` al terminar; en silencio, al segundo; si no hay voz, enseguida. */
+  useEffect(() => () => audioRef.current?.pause(), []);
+
+  /**
+   * Dice el texto y llama a `onDone` al terminar; en silencio, o sin ninguna voz, al segundo.
+   * Con `audioUrl` reproduce ese audio; si no suena, lo dice con la voz del navegador.
+   */
   const say = useCallback(
-    (text: string, onDone?: () => void) => {
+    (text: string, onDone?: () => void, audioUrl?: string) => {
       let finished = false;
       const done = () => {
         if (finished) return;
@@ -73,26 +81,50 @@ export const useCardVoice = () => {
       const fallback = window.setTimeout(done, SPEECH_TIMEOUT_MS);
 
       const speech = synth();
-      if (!speech || !voice) {
-        window.setTimeout(done, 0);
-        return;
-      }
+      speech?.cancel();
+      audioRef.current?.pause();
       if (mutedRef.current) {
         window.setTimeout(done, MUTED_SPEECH_MS);
         return;
       }
-      speech.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.voice = voice;
-      utterance.lang = voice.lang;
-      utterance.rate = 0.95;
-      utterance.onend = done;
-      utterance.onerror = (event) => {
-        // «interrupted» y «canceled» son normales al sacar otra carta antes de que termine
-        if (event.error !== 'interrupted' && event.error !== 'canceled') logger.warn('Speech error:', event.error);
-        done();
+
+      const speak = () => {
+        if (!speech || !voice) {
+          // Sin voz en español solo se canta con voz con IA (decisión 24): se espera como en silencio
+          window.setTimeout(done, MUTED_SPEECH_MS);
+          return;
+        }
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.voice = voice;
+        utterance.lang = voice.lang;
+        utterance.rate = 0.95;
+        utterance.onend = done;
+        utterance.onerror = (event) => {
+          // «interrupted» y «canceled» son normales al sacar otra carta antes de que termine
+          if (event.error !== 'interrupted' && event.error !== 'canceled') logger.warn('Speech error:', event.error);
+          done();
+        };
+        speech.speak(utterance);
       };
-      speech.speak(utterance);
+
+      if (!audioUrl) {
+        speak();
+        return;
+      }
+      const audio = audioRef.current ?? new Audio();
+      audioRef.current = audio;
+      audio.onended = done;
+      audio.onerror = () => {
+        logger.warn('AI voice audio failed; using the browser voice');
+        speak();
+      };
+      audio.src = audioUrl;
+      audio.play().catch((err: unknown) => {
+        // Pausarlo para sacar otra carta también rechaza la reproducción: no es un error
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        logger.warn('AI voice audio could not play; using the browser voice:', err);
+        speak();
+      });
     },
     [voice],
   );
@@ -101,7 +133,10 @@ export const useCardVoice = () => {
     setMuted((prev) => {
       const next = !prev;
       saveMuted(next);
-      if (next) synth()?.cancel();
+      if (next) {
+        synth()?.cancel();
+        audioRef.current?.pause();
+      }
       return next;
     });
   }, []);

@@ -1,5 +1,6 @@
 import { supabase } from '../utils/supabaseClient';
 import { logger } from '../utils/logger';
+import { CallerVoiceService } from '../services/CallerVoiceService';
 import type { CardLabels } from '../utils/cardLabels';
 import { PREVIEW_CARD_COUNT, parseSetSummaryRows, type SetSummaryRow } from '../utils/setSummary';
 
@@ -185,6 +186,8 @@ export class SetRepository {
       }
     }
 
+    // Los audios con voz de IA del cantador (FEAT-55): se listan antes, porque la lista se lee como dueño
+    await CallerVoiceService.removeAudios(userId, setId);
     await this.deleteSet(setId, userId);
   }
 }
