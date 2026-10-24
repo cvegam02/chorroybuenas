@@ -1,13 +1,18 @@
 import { fail, isUuid, type ParseResult } from './validation.ts';
 
-/** Las cuatro voces de MiniMax que escogió Carlos (FEAT-55, decisión 22). Iguales a las de la migración 060. */
+/**
+ * Las 8 voces mexicanas de la biblioteca de ElevenLabs que escogió Carlos (FEAT-55, decisión 29), en el orden
+ * en que se ofrecen. Iguales a las de la migración 060.
+ */
 export const CALLER_VOICES = [
-  'Spanish_Narrator', 'Spanish_Steadymentor', 'Spanish_WiseScholar', 'Spanish_Wiselady',
+  'y2ijeTfmnXjzheHO6zeN', 'qRUgOhnxGASxirG4fKjv', 'gbTn1bmCvNgk0QEAVyfM', 'iDEmt5MnqUotdwCIVplo',
+  'hHjbwzYZW17oh0p05AKv', 'twZzvyYIl5ntDHC1Vatv', 'ay4iqk10DLwc8KGSrf2t', 'JYyJjNPfmNJdaby8LdZs',
 ] as const;
 export type CallerVoiceId = typeof CALLER_VOICES[number];
 
-/** Modelo oficial de Replicate: se llama por su nombre, sin versión. */
-export const SPEECH_MODEL_PATH = '/models/minimax/speech-02-hd/predictions';
+const ELEVENLABS_TTS_URL = 'https://api.elevenlabs.io/v1/text-to-speech';
+/** El modelo de ElevenLabs que mejor dice el español; gasta un crédito por carácter. */
+const SPEECH_MODEL = 'eleven_multilingual_v2';
 
 /** «Se va y se corre con…», con la voz escogida (decisión 23). */
 export const CALLER_INTRO_TEXT = 'Se va y se corre con...';
@@ -42,10 +47,14 @@ export function parseCallerVoiceRequest(body: unknown): ParseResult<CallerVoiceR
   }
 }
 
-/** Cuerpo de la predicción de MiniMax Speech 02 HD. */
-export function buildSpeechBody(text: string, voiceId: CallerVoiceId): { input: Record<string, unknown> } {
+/** La llamada a ElevenLabs que dice el texto con la voz escogida; responde el MP3 directamente. */
+export function buildSpeechRequest(
+  text: string,
+  voiceId: CallerVoiceId,
+): { url: string; body: Record<string, unknown> } {
   return {
-    input: { text, voice_id: voiceId, language_boost: 'Spanish', audio_format: 'mp3' },
+    url: `${ELEVENLABS_TTS_URL}/${voiceId}?output_format=mp3_44100_64`,
+    body: { text, model_id: SPEECH_MODEL, language_code: 'es' },
   };
 }
 

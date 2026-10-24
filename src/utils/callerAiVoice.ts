@@ -13,12 +13,16 @@ export interface AiVoiceOption {
   sample: string;
 }
 
-/** Las cuatro voces (decisiones 22 y 27), con la muestra que se escucha antes de pagar. */
+/** Las 8 voces mexicanas de ElevenLabs (decisión 29), con la muestra que se escucha antes de pagar. */
 export const AI_VOICES: AiVoiceOption[] = [
-  ['Spanish_Narrator', 'locutor'],
-  ['Spanish_Steadymentor', 'pausado'],
-  ['Spanish_WiseScholar', 'maduro'],
-  ['Spanish_Wiselady', 'senora'],
+  ['y2ijeTfmnXjzheHO6zeN', 'jose'],
+  ['qRUgOhnxGASxirG4fKjv', 'david'],
+  ['gbTn1bmCvNgk0QEAVyfM', 'enriqueNieto'],
+  ['iDEmt5MnqUotdwCIVplo', 'enriqueMondragon'],
+  ['hHjbwzYZW17oh0p05AKv', 'gabriela'],
+  ['twZzvyYIl5ntDHC1Vatv', 'angelica'],
+  ['ay4iqk10DLwc8KGSrf2t', 'azucena'],
+  ['JYyJjNPfmNJdaby8LdZs', 'marlene'],
 ].map(([id, name]) => ({ id, name, sample: `/audio/voces/${id}.mp3` }));
 
 interface TitledCard {

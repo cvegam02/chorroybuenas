@@ -3,13 +3,15 @@
 -- (edge function con service role).
 
 -- ---------------------------------------------------------------------------
--- 1. La voz de cada lotería: una por lotería, con la voz escogida (decisión 22).
+-- 1. La voz de cada lotería: una por lotería, con la voz escogida (decisión 22): una de las 8 voces mexicanas
+--    de ElevenLabs (decisión 29), por su id.
 -- ---------------------------------------------------------------------------
 create table if not exists public.caller_voices (
   set_id uuid primary key references public.loteria_sets (id) on delete cascade,
   user_id uuid not null references auth.users (id) on delete cascade,
   voice_id text not null check (voice_id in (
-    'Spanish_Narrator', 'Spanish_Steadymentor', 'Spanish_WiseScholar', 'Spanish_Wiselady')),
+    'y2ijeTfmnXjzheHO6zeN', 'qRUgOhnxGASxirG4fKjv', 'gbTn1bmCvNgk0QEAVyfM', 'iDEmt5MnqUotdwCIVplo',
+    'hHjbwzYZW17oh0p05AKv', 'twZzvyYIl5ntDHC1Vatv', 'ay4iqk10DLwc8KGSrf2t', 'JYyJjNPfmNJdaby8LdZs')),
   -- El cobro, para devolverlo si no sale ninguna carta.
   usage_id uuid references public.token_usage (id) on delete set null,
   -- «Se va y se corre con…» con la voz escogida (decisión 23); vacío si falló.
@@ -96,7 +98,8 @@ declare
   v_usage_id uuid;
 begin
   if p_voice_id is null or p_voice_id not in (
-    'Spanish_Narrator', 'Spanish_Steadymentor', 'Spanish_WiseScholar', 'Spanish_Wiselady') then
+    'y2ijeTfmnXjzheHO6zeN', 'qRUgOhnxGASxirG4fKjv', 'gbTn1bmCvNgk0QEAVyfM', 'iDEmt5MnqUotdwCIVplo',
+    'hHjbwzYZW17oh0p05AKv', 'twZzvyYIl5ntDHC1Vatv', 'ay4iqk10DLwc8KGSrf2t', 'JYyJjNPfmNJdaby8LdZs') then
     raise exception 'INVALID_VOICE';
   end if;
 

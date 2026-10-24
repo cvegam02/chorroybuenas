@@ -27,7 +27,7 @@ select test.is((select allowed_mime_types from storage.buckets where id = 'calle
 -- Cobro (decisión 11): 10 tokens por lotería, tenga las cartas que tenga
 select test.lives($$
   select public.start_caller_voice('00000000-0000-0000-0000-000000006001',
-    '00000000-0000-0000-0000-0000000060a1', 'Spanish_Narrator')
+    '00000000-0000-0000-0000-0000000060a1', 'y2ijeTfmnXjzheHO6zeN')
 $$, 'se cobra la voz con IA de una lotería propia');
 select test.is((select balance from public.user_tokens where user_id = '00000000-0000-0000-0000-000000006001'),
   2, 'cobra 10 tokens');
@@ -41,12 +41,12 @@ select test.is(
   'caller_voice', 'el uso de tokens dice que fue la voz del cantador');
 select test.is(
   (select voice_id from public.caller_voices where set_id = '00000000-0000-0000-0000-0000000060a1'),
-  'Spanish_Narrator', 'la lotería guarda la voz escogida (decisión 22)');
+  'y2ijeTfmnXjzheHO6zeN', 'la lotería guarda la voz escogida (decisión 22)');
 
 -- Una sola vez por lotería (decisiones 3, 13 y 22)
 select test.throws($$
   select public.start_caller_voice('00000000-0000-0000-0000-000000006001',
-    '00000000-0000-0000-0000-0000000060a1', 'Spanish_Wiselady')
+    '00000000-0000-0000-0000-0000000060a1', 'hHjbwzYZW17oh0p05AKv')
 $$, 'VOICE_ALREADY_CREATED', 'no se cobra dos veces la misma lotería ni se cambia la voz');
 select test.is((select balance from public.user_tokens where user_id = '00000000-0000-0000-0000-000000006001'),
   2, 'el segundo intento no cobra');
@@ -55,15 +55,15 @@ select test.is((select balance from public.user_tokens where user_id = '00000000
 update public.user_tokens set balance = 20 where user_id = '00000000-0000-0000-0000-000000006001';
 select test.throws($$
   select public.start_caller_voice('00000000-0000-0000-0000-000000006001',
-    '00000000-0000-0000-0000-0000000060a2', 'English_Wiselady')
-$$, 'INVALID_VOICE', 'solo se aceptan las cuatro voces escogidas');
+    '00000000-0000-0000-0000-0000000060a2', 'Rachel')
+$$, 'INVALID_VOICE', 'solo se aceptan las 8 voces escogidas');
 select test.throws($$
   select public.start_caller_voice('00000000-0000-0000-0000-000000006001',
-    '00000000-0000-0000-0000-0000000060b1', 'Spanish_Narrator')
+    '00000000-0000-0000-0000-0000000060b1', 'y2ijeTfmnXjzheHO6zeN')
 $$, 'SET_NOT_FOUND', 'no se cobra la voz de una lotería ajena');
 select test.throws($$
   select public.start_caller_voice('00000000-0000-0000-0000-000000006001',
-    '00000000-0000-0000-0000-00000000dead', 'Spanish_Narrator')
+    '00000000-0000-0000-0000-00000000dead', 'y2ijeTfmnXjzheHO6zeN')
 $$, 'SET_NOT_FOUND', 'no se cobra la voz de una lotería que no existe');
 select test.is((select balance from public.user_tokens where user_id = '00000000-0000-0000-0000-000000006001'),
   20, 'los intentos rechazados no cobran');
@@ -71,7 +71,7 @@ select test.is((select balance from public.user_tokens where user_id = '00000000
 update public.user_tokens set balance = 9 where user_id = '00000000-0000-0000-0000-000000006001';
 select test.throws($$
   select public.start_caller_voice('00000000-0000-0000-0000-000000006001',
-    '00000000-0000-0000-0000-0000000060a2', 'Spanish_Wiselady')
+    '00000000-0000-0000-0000-0000000060a2', 'hHjbwzYZW17oh0p05AKv')
 $$, 'INSUFFICIENT_TOKENS', 'con menos de 10 tokens no se puede pagar');
 select test.is((select count(*)::int from public.caller_voices where set_id = '00000000-0000-0000-0000-0000000060a2'),
   0, 'sin saldo la lotería queda sin voz con IA');
@@ -83,7 +83,7 @@ select '00000000-0000-0000-0000-000000006001', 1, 'ai_conversion' from generate_
 update public.user_tokens set balance = 15 where user_id = '00000000-0000-0000-0000-000000006001';
 select test.lives($$
   select public.start_caller_voice('00000000-0000-0000-0000-000000006001',
-    '00000000-0000-0000-0000-0000000060a2', 'Spanish_Wiselady')
+    '00000000-0000-0000-0000-0000000060a2', 'hHjbwzYZW17oh0p05AKv')
 $$, 'la voz se cobra aunque haya 10 usos de IA en el último minuto');
 select test.is((select balance from public.user_tokens where user_id = '00000000-0000-0000-0000-000000006001'),
   5, 'y cobra sus 10 tokens');
@@ -125,13 +125,13 @@ select test.is((select count(*)::int from storage.objects where bucket_id = 'cal
   'el dueño puede descargar sus audios');
 select test.throws($$
   select public.start_caller_voice('00000000-0000-0000-0000-000000006001',
-    '00000000-0000-0000-0000-0000000060a2', 'Spanish_Narrator')
+    '00000000-0000-0000-0000-0000000060a2', 'y2ijeTfmnXjzheHO6zeN')
 $$, '42501', 'un usuario no puede cobrarse la voz directamente');
 select test.throws($$ select public.refund_caller_voice('00000000-0000-0000-0000-0000000060a1') $$,
   '42501', 'un usuario no puede devolverse la voz');
 select test.throws($$
   insert into public.caller_voices (set_id, user_id, voice_id)
-  values ('00000000-0000-0000-0000-0000000060a2', '00000000-0000-0000-0000-000000006001', 'Spanish_Narrator')
+  values ('00000000-0000-0000-0000-0000000060a2', '00000000-0000-0000-0000-000000006001', 'y2ijeTfmnXjzheHO6zeN')
 $$, '42501', 'un usuario no puede darse la voz con IA sin pagar');
 select test.throws($$
   insert into public.caller_audios (card_id, set_id, user_id, title, path)
@@ -159,7 +159,7 @@ select test.throws($$ select count(*) from public.caller_audios $$, '42501',
 select test.as_service_role();
 select test.lives($$
   select public.start_caller_voice('00000000-0000-0000-0000-000000006002',
-    '00000000-0000-0000-0000-0000000060b1', 'Spanish_Steadymentor')
+    '00000000-0000-0000-0000-0000000060b1', 'qRUgOhnxGASxirG4fKjv')
 $$, 'el servidor sí puede cobrar la voz');
 
 -- El dueño borra sus audios al borrar la carta o la lotería; nadie más puede

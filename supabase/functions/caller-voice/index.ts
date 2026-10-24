@@ -1,36 +1,55 @@
 // Voz con IA del cantador (FEAT-55, US A6). Tres acciones, porque generar una lotería entera no cabe
 // en el tiempo de una sola llamada:
 //   start    — cobra 5 tokens y guarda la voz escogida (start_caller_voice).
-//   generate — genera, sin costo, el audio de una carta (o de la frase de arranque) de una lotería pagada;
+//   generate — genera con ElevenLabs (decisión 29), sin costo, el audio de una carta (o de la frase de arranque)
+//              de una lotería pagada;
 //              si ya existe con el mismo título, no hace nada (decisión 15).
 //   refund   — devuelve los 5 tokens si no salió ninguna carta (refund_caller_voice).
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { buildCorsHeaders, parseAllowedOrigins } from '../_shared/cors.ts';
-import { createPrediction, firstOutput, waitForPrediction, type ReplicateDeps } from '../_shared/replicate.ts';
 import {
-  audioPath, buildSpeechBody, CALLER_INTRO_TEXT, type CallerVoiceId, INTRO_ID, mapCallerVoiceError, needsAudio,
-  parseCallerVoiceRequest, SPEECH_MODEL_PATH, toCallerVoiceErrorResponse,
+  audioPath, buildSpeechRequest, CALLER_INTRO_TEXT, type CallerVoiceId, INTRO_ID, mapCallerVoiceError, needsAudio,
+  parseCallerVoiceRequest, toCallerVoiceErrorResponse,
 } from '../_shared/callerVoice.ts';
 
 const AUDIO_BUCKET = 'caller-audio';
+/** Lo más que se espera a ElevenLabs por un título. */
+const SPEECH_TIMEOUT_MS = 30_000;
+/** Reintentos cuando ElevenLabs está ocupado (429: el plan limita las peticiones simultáneas). */
+const BUSY_RETRIES = 3;
+const BUSY_WAIT_MS = 2000;
 
-const replicateDeps: ReplicateDeps = {
-  fetchFn: fetch,
-  sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
-  now: () => Date.now(),
-};
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function speak(replicateToken: string, text: string, voiceId: CallerVoiceId): Promise<ArrayBuffer> {
-  const created = await createPrediction(replicateDeps, replicateToken, buildSpeechBody(text, voiceId), 3, SPEECH_MODEL_PATH);
-  const finished = await waitForPrediction(replicateDeps, replicateToken, created, { timeoutMs: 60_000, intervalMs: 1000 });
-  if (finished.status !== 'succeeded') throw new Error(`Predicción ${finished.status}: ${finished.error ?? 'sin detalle'}`);
-  const res = await fetch(firstOutput(finished));
-  if (!res.ok) throw new Error(`descarga del audio (${res.status})`);
-  return await res.arrayBuffer();
+/** Dice el texto con ElevenLabs y devuelve el MP3. Lanza AI_BUSY si sigue ocupado, AI_TIMEOUT si tarda. */
+async function speak(apiKey: string, text: string, voiceId: CallerVoiceId): Promise<ArrayBuffer> {
+  const request = buildSpeechRequest(text, voiceId);
+  for (let attempt = 0; attempt <= BUSY_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), SPEECH_TIMEOUT_MS);
+    try {
+      const res = await fetch(request.url, {
+        method: 'POST',
+        headers: { 'xi-api-key': apiKey, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
+        body: JSON.stringify(request.body),
+        signal: controller.signal,
+      });
+      if (res.ok) return await res.arrayBuffer();
+      const detail = await res.text().catch(() => '');
+      if (res.status !== 429) throw new Error(`ElevenLabs (${res.status}): ${detail.slice(0, 300)}`);
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') throw new Error('AI_TIMEOUT');
+      throw err;
+    } finally {
+      clearTimeout(timer);
+    }
+    await sleep(BUSY_WAIT_MS * (attempt + 1));
+  }
+  throw new Error('AI_BUSY');
 }
 
 async function generate(
-  admin: SupabaseClient, replicateToken: string, userId: string, setId: string, cardId: string,
+  admin: SupabaseClient, elevenLabsKey: string, userId: string, setId: string, cardId: string,
 ): Promise<'generated' | 'exists'> {
   const { data: voice, error: voiceError } = await admin.from('caller_voices')
     .select('voice_id, intro_path').eq('set_id', setId).eq('user_id', userId).maybeSingle();
@@ -51,7 +70,7 @@ async function generate(
     text = card.title;
   }
 
-  const mp3 = await speak(replicateToken, text, voice.voice_id as CallerVoiceId);
+  const mp3 = await speak(elevenLabsKey, text, voice.voice_id as CallerVoiceId);
   const { error: uploadError } = await admin.storage.from(AUDIO_BUCKET)
     .upload(path, mp3, { contentType: 'audio/mpeg', upsert: true });
   if (uploadError) throw new Error(`subida del audio: ${uploadError.message}`);
@@ -82,9 +101,9 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
   const serviceRoleKey = Deno.env.get('SERVICE_ROLE_KEY');
-  const replicateToken = Deno.env.get('REPLICATE_API_TOKEN');
-  if (!serviceRoleKey || !replicateToken) {
-    console.error('caller-voice: falta SERVICE_ROLE_KEY o REPLICATE_API_TOKEN');
+  const elevenLabsKey = Deno.env.get('ELEVENLABS_API_KEY');
+  if (!serviceRoleKey || !elevenLabsKey) {
+    console.error('caller-voice: falta SERVICE_ROLE_KEY o ELEVENLABS_API_KEY');
     return reply(500, { error: 'CONFIG_ERROR', message: 'Servicio de IA no configurado.' });
   }
 
@@ -114,7 +133,7 @@ Deno.serve(async (req) => {
         return reply(200, { status: 'charged' });
       }
       case 'generate':
-        return reply(200, { status: await generate(admin, replicateToken, user.id, request.setId, request.cardId) });
+        return reply(200, { status: await generate(admin, elevenLabsKey, user.id, request.setId, request.cardId) });
       case 'refund':
         await refund(admin, user.id, request.setId);
         return reply(200, { status: 'refunded' });

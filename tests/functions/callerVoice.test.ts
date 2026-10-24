@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  audioPath, buildSpeechBody, CALLER_INTRO_TEXT, CALLER_VOICES, mapCallerVoiceError, needsAudio,
+  audioPath, buildSpeechRequest, CALLER_INTRO_TEXT, CALLER_VOICES, mapCallerVoiceError, needsAudio,
   parseCallerVoiceRequest, toCallerVoiceErrorResponse,
 } from '../../supabase/functions/_shared/callerVoice.ts';
 
@@ -10,13 +10,13 @@ const USER = '11111111-2222-4333-8444-555555555555';
 
 describe('parseCallerVoiceRequest', () => {
   it('acepta cobrar con una de las cuatro voces', () => {
-    expect(parseCallerVoiceRequest({ action: 'start', set_id: SET, voice_id: 'Spanish_Wiselady' })).toEqual({
-      ok: true, value: { action: 'start', setId: SET, voiceId: 'Spanish_Wiselady' },
+    expect(parseCallerVoiceRequest({ action: 'start', set_id: SET, voice_id: 'hHjbwzYZW17oh0p05AKv' })).toEqual({
+      ok: true, value: { action: 'start', setId: SET, voiceId: 'hHjbwzYZW17oh0p05AKv' },
     });
   });
 
   it('rechaza una voz que no es de las cuatro', () => {
-    expect(parseCallerVoiceRequest({ action: 'start', set_id: SET, voice_id: 'English_Wiselady' }).ok).toBe(false);
+    expect(parseCallerVoiceRequest({ action: 'start', set_id: SET, voice_id: 'Rachel' }).ok).toBe(false);
   });
 
   it('acepta generar el audio de una carta o de la frase de arranque', () => {
@@ -46,22 +46,19 @@ describe('parseCallerVoiceRequest', () => {
 });
 
 describe('las voces', () => {
-  it('son las cuatro que escogió Carlos (decisión 22)', () => {
+  it('son las 8 voces mexicanas de ElevenLabs que escogió Carlos (decisión 29)', () => {
     expect([...CALLER_VOICES]).toEqual([
-      'Spanish_Narrator', 'Spanish_Steadymentor', 'Spanish_WiseScholar', 'Spanish_Wiselady',
+      'y2ijeTfmnXjzheHO6zeN', 'qRUgOhnxGASxirG4fKjv', 'gbTn1bmCvNgk0QEAVyfM', 'iDEmt5MnqUotdwCIVplo',
+      'hHjbwzYZW17oh0p05AKv', 'twZzvyYIl5ntDHC1Vatv', 'ay4iqk10DLwc8KGSrf2t', 'JYyJjNPfmNJdaby8LdZs',
     ]);
   });
 });
 
-describe('buildSpeechBody', () => {
-  it('pide a MiniMax el título con la voz escogida, en español y en MP3', () => {
-    expect(buildSpeechBody('La Abuela Chela', 'Spanish_Narrator')).toEqual({
-      input: {
-        text: 'La Abuela Chela',
-        voice_id: 'Spanish_Narrator',
-        language_boost: 'Spanish',
-        audio_format: 'mp3',
-      },
+describe('buildSpeechRequest', () => {
+  it('pide a ElevenLabs el título con la voz escogida, en español y en MP3', () => {
+    expect(buildSpeechRequest('La Abuela Chela', 'y2ijeTfmnXjzheHO6zeN')).toEqual({
+      url: 'https://api.elevenlabs.io/v1/text-to-speech/y2ijeTfmnXjzheHO6zeN?output_format=mp3_44100_64',
+      body: { text: 'La Abuela Chela', model_id: 'eleven_multilingual_v2', language_code: 'es' },
     });
   });
 

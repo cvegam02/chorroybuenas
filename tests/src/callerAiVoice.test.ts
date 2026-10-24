@@ -15,14 +15,18 @@ const cards = [
 ];
 
 describe('las voces con IA', () => {
-  it('son las cuatro de la decisión 22, con sus nombres de la 27 y su muestra', () => {
+  it('son las 8 voces mexicanas de la decisión 29, con su nombre y su muestra', () => {
     expect(AI_VOICES.map((v) => [v.id, v.name])).toEqual([
-      ['Spanish_Narrator', 'locutor'],
-      ['Spanish_Steadymentor', 'pausado'],
-      ['Spanish_WiseScholar', 'maduro'],
-      ['Spanish_Wiselady', 'senora'],
+      ['y2ijeTfmnXjzheHO6zeN', 'jose'],
+      ['qRUgOhnxGASxirG4fKjv', 'david'],
+      ['gbTn1bmCvNgk0QEAVyfM', 'enriqueNieto'],
+      ['iDEmt5MnqUotdwCIVplo', 'enriqueMondragon'],
+      ['hHjbwzYZW17oh0p05AKv', 'gabriela'],
+      ['twZzvyYIl5ntDHC1Vatv', 'angelica'],
+      ['ay4iqk10DLwc8KGSrf2t', 'azucena'],
+      ['JYyJjNPfmNJdaby8LdZs', 'marlene'],
     ]);
-    expect(AI_VOICES[0].sample).toBe('/audio/voces/Spanish_Narrator.mp3');
+    expect(AI_VOICES[0].sample).toBe('/audio/voces/y2ijeTfmnXjzheHO6zeN.mp3');
   });
 
   it('cuesta 10 tokens', () => {
