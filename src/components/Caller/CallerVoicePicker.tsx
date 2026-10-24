@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaMagic, FaPlay, FaStop } from 'react-icons/fa';
+import { FaCheck, FaPlay, FaStop, FaTimes } from 'react-icons/fa';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
-import { AI_VOICE_PRICE, AI_VOICES } from '../../utils/callerAiVoice';
-// Misma ventana que las de Mi cuenta y la página de la lotería: son sus estilos
+import { AI_VOICE_PRICE, AI_VOICES, type AiVoiceOption } from '../../utils/callerAiVoice';
+// El fondo y los botones son los de las ventanas de Mi cuenta
 import '../Dashboard/LoteriaDialogs.css';
-import '../SetView/SetConfirmDialog.css';
+import './CallerVoicePicker.css';
 
 interface CallerVoicePickerProps {
   /** Paga la voz escogida; rechaza con el código del servidor. */
@@ -15,7 +15,12 @@ interface CallerVoicePickerProps {
   onClose: () => void;
 }
 
-/** «Mejorar la voz» (FEAT-55, US A6): escuchar las cuatro voces, escoger una y pagarla. */
+const GROUPS: AiVoiceOption['group'][] = ['men', 'women'];
+
+/**
+ * «Mejorar la voz» (FEAT-55, US A6): las voces en tarjetas agrupadas por hombre y mujer, cada una con su
+ * muestra; el pie con el costo, el saldo y «Pagar» queda fijo para no tener que bajar a buscarlo.
+ */
 export const CallerVoicePicker = ({ onBuy, onClose }: CallerVoicePickerProps) => {
   const { t } = useTranslation();
   const { balance } = useTokenBalance();
@@ -31,18 +36,23 @@ export const CallerVoicePicker = ({ onBuy, onClose }: CallerVoicePickerProps) =>
   useEscapeKey(closeIfIdle);
   useEffect(() => () => sampleRef.current?.pause(), []);
 
-  const toggleSample = (voiceId: string, sample: string) => {
+  const voiceName = (voice: AiVoiceOption) => t(`caller.aiVoice.voices.${voice.name}.name`);
+  const chosenVoice = AI_VOICES.find((voice) => voice.id === chosen) ?? AI_VOICES[0];
+
+  /** ▶ escucha la muestra y escoge esa voz; ■ la detiene. */
+  const toggleSample = (voice: AiVoiceOption) => {
     const audio = sampleRef.current ?? new Audio();
     sampleRef.current = audio;
     audio.pause();
-    if (playing === voiceId) {
+    if (isBusy) return;
+    setChosen(voice.id);
+    if (playing === voice.id) {
       setPlaying(null);
       return;
     }
-    audio.src = sample;
+    audio.src = voice.sample;
     audio.onended = () => setPlaying(null);
-    audio.play().then(() => setPlaying(voiceId)).catch(() => setPlaying(null));
-    setChosen(voiceId);
+    audio.play().then(() => setPlaying(voice.id)).catch(() => setPlaying(null));
   };
 
   const enough = balance !== null && balance >= AI_VOICE_PRICE;
@@ -50,6 +60,7 @@ export const CallerVoicePicker = ({ onBuy, onClose }: CallerVoicePickerProps) =>
   const pay = async () => {
     if (isBusy) return;
     sampleRef.current?.pause();
+    setPlaying(null);
     setIsBusy(true);
     setError(null);
     try {
@@ -70,69 +81,105 @@ export const CallerVoicePicker = ({ onBuy, onClose }: CallerVoicePickerProps) =>
       }}
       role="presentation"
     >
-      <div className="loteria-dialog" role="dialog" aria-modal="true" aria-labelledby="caller-voice-title">
-        <span className="loteria-dialog__icon set-confirm__icon--primary" aria-hidden="true">
-          <FaMagic />
-        </span>
-        <h2 className="loteria-dialog__title" id="caller-voice-title">
-          {t('caller.aiVoice.title')}
-        </h2>
-        <fieldset className="caller-voices">
-          <legend className="caller__sr-only">{t('caller.aiVoice.title')}</legend>
-          {AI_VOICES.map((voice) => (
-            <div key={voice.id} className={`caller-voices__row${chosen === voice.id ? ' caller-voices__row--chosen' : ''}`}>
-              <label className="caller-voices__option">
-                <input
-                  type="radio"
-                  name="caller-voice"
-                  value={voice.id}
-                  checked={chosen === voice.id}
-                  onChange={() => setChosen(voice.id)}
-                  disabled={isBusy}
-                />
-                <span>
-                  <strong>{t(`caller.aiVoice.voices.${voice.name}.name`)}</strong>
-                  <small>{t(`caller.aiVoice.voices.${voice.name}.description`)}</small>
-                </span>
-              </label>
-              <button
-                type="button"
-                className="caller-voices__listen"
-                onClick={() => toggleSample(voice.id, voice.sample)}
-                aria-label={t(playing === voice.id ? 'caller.aiVoice.stopSample' : 'caller.aiVoice.listenTo', {
-                  name: t(`caller.aiVoice.voices.${voice.name}.name`),
-                })}
-              >
-                {playing === voice.id ? <FaStop aria-hidden="true" /> : <FaPlay aria-hidden="true" />}
-                <span>{t(playing === voice.id ? 'caller.aiVoice.stop' : 'caller.aiVoice.listen')}</span>
-              </button>
-            </div>
-          ))}
-        </fieldset>
-        <p className="loteria-dialog__text">
-          {t('caller.aiVoice.cost', { price: AI_VOICE_PRICE })}
-          {balance !== null && ` · ${t('caller.aiVoice.balance', { count: balance })}`}
-        </p>
-        <p className="loteria-dialog__hint">{t('caller.aiVoice.final')}</p>
-        {error && (
-          <p className="loteria-dialog__error" role="alert">
-            {error}
-          </p>
-        )}
-        <div className="loteria-dialog__actions">
-          <button type="button" className="loteria-dialog__button" onClick={closeIfIdle} disabled={isBusy}>
-            {t('common.cancel')}
+      <div className="voice-picker" role="dialog" aria-modal="true" aria-labelledby="voice-picker-title">
+        <header className="voice-picker__head">
+          <div>
+            <h2 className="voice-picker__title" id="voice-picker-title">
+              {t('caller.aiVoice.title')}
+            </h2>
+            <p className="voice-picker__subtitle">{t('caller.aiVoice.subtitle')}</p>
+          </div>
+          <button
+            type="button"
+            className="voice-picker__close"
+            onClick={closeIfIdle}
+            disabled={isBusy}
+            aria-label={t('common.close')}
+          >
+            <FaTimes aria-hidden="true" />
           </button>
-          {enough ? (
-            <button type="button" className="loteria-dialog__button loteria-dialog__button--primary" onClick={pay} disabled={isBusy}>
-              {t(isBusy ? 'caller.aiVoice.paying' : 'caller.aiVoice.pay', { price: AI_VOICE_PRICE })}
-            </button>
-          ) : (
-            <Link to="/comprar-tokens" className="loteria-dialog__button loteria-dialog__button--primary">
-              {t('caller.aiVoice.buyTokens')}
-            </Link>
-          )}
+        </header>
+
+        <div className="voice-picker__body">
+          {GROUPS.map((group) => (
+            <fieldset key={group} className="voice-picker__group" disabled={isBusy}>
+              <legend className="voice-picker__group-title">{t(`caller.aiVoice.group.${group}`)}</legend>
+              <div className="voice-picker__grid">
+                {AI_VOICES.filter((voice) => voice.group === group).map((voice) => {
+                  const isChosen = chosen === voice.id;
+                  const isPlaying = playing === voice.id;
+                  return (
+                    <div key={voice.id} className={`voice-picker__card${isChosen ? ' voice-picker__card--chosen' : ''}`}>
+                      <button
+                        type="button"
+                        className="voice-picker__play"
+                        onClick={() => toggleSample(voice)}
+                        aria-label={t(isPlaying ? 'caller.aiVoice.stopSample' : 'caller.aiVoice.listenTo', {
+                          name: voiceName(voice),
+                        })}
+                      >
+                        {isPlaying ? <FaStop aria-hidden="true" /> : <FaPlay aria-hidden="true" />}
+                      </button>
+                      <label className="voice-picker__option">
+                        <input
+                          type="radio"
+                          name="caller-voice"
+                          value={voice.id}
+                          checked={isChosen}
+                          onChange={() => setChosen(voice.id)}
+                          className="voice-picker__radio"
+                        />
+                        <span className="voice-picker__name">
+                          {voiceName(voice)}
+                          {isPlaying && (
+                            <span className="voice-picker__bars" aria-hidden="true">
+                              <span />
+                              <span />
+                              <span />
+                            </span>
+                          )}
+                        </span>
+                        <span className="voice-picker__description">
+                          {t(`caller.aiVoice.voices.${voice.name}.description`)}
+                        </span>
+                      </label>
+                      {isChosen && <FaCheck className="voice-picker__check" aria-hidden="true" />}
+                    </div>
+                  );
+                })}
+              </div>
+            </fieldset>
+          ))}
         </div>
+
+        <footer className="voice-picker__foot">
+          <p className="voice-picker__cost">
+            {t('caller.aiVoice.cost', { price: AI_VOICE_PRICE })}
+            {balance !== null && ` · ${t('caller.aiVoice.balance', { count: balance })}`}
+          </p>
+          <p className="voice-picker__final">{t('caller.aiVoice.final')}</p>
+          {error && (
+            <p className="loteria-dialog__error" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="loteria-dialog__actions">
+            <button type="button" className="loteria-dialog__button" onClick={closeIfIdle} disabled={isBusy}>
+              {t('common.cancel')}
+            </button>
+            {enough ? (
+              <button type="button" className="loteria-dialog__button loteria-dialog__button--primary" onClick={pay} disabled={isBusy}>
+                {isBusy
+                  ? t('caller.aiVoice.paying')
+                  : t('caller.aiVoice.payWith', { price: AI_VOICE_PRICE, name: voiceName(chosenVoice) })}
+              </button>
+            ) : (
+              <Link to="/comprar-tokens" className="loteria-dialog__button loteria-dialog__button--primary">
+                {t('caller.aiVoice.buyTokens')}
+              </Link>
+            )}
+          </div>
+        </footer>
       </div>
     </div>
   );

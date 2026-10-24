@@ -10,10 +10,12 @@ export interface AiVoiceOption {
   id: string;
   /** Clave de traducción: caller.aiVoice.voices.<name> */
   name: string;
+  /** Para agruparlas en la ventana: «Voces de hombre», «Voces de mujer». */
+  group: 'men' | 'women';
   sample: string;
 }
 
-/** Las 8 voces mexicanas de ElevenLabs (decisión 29), con la muestra que se escucha antes de pagar. */
+/** Las 8 voces mexicanas de ElevenLabs (decisión 29): 4 de hombre y luego 4 de mujer, con su muestra. */
 export const AI_VOICES: AiVoiceOption[] = [
   ['y2ijeTfmnXjzheHO6zeN', 'jose'],
   ['qRUgOhnxGASxirG4fKjv', 'david'],
@@ -23,7 +25,7 @@ export const AI_VOICES: AiVoiceOption[] = [
   ['twZzvyYIl5ntDHC1Vatv', 'angelica'],
   ['ay4iqk10DLwc8KGSrf2t', 'azucena'],
   ['JYyJjNPfmNJdaby8LdZs', 'marlene'],
-].map(([id, name]) => ({ id, name, sample: `/audio/voces/${id}.mp3` }));
+].map(([id, name], index) => ({ id, name, group: index < 4 ? 'men' : 'women', sample: `/audio/voces/${id}.mp3` }));
 
 interface TitledCard {
   id: string;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  audioPath, buildSpeechRequest, CALLER_INTRO_TEXT, CALLER_VOICES, mapCallerVoiceError, needsAudio,
+  audioPath, buildSpeechRequest, callText, CALLER_INTRO_TEXT, CALLER_VOICES, mapCallerVoiceError, needsAudio,
   parseCallerVoiceRequest, toCallerVoiceErrorResponse,
 } from '../../supabase/functions/_shared/callerVoice.ts';
 
@@ -55,15 +55,46 @@ describe('las voces', () => {
 });
 
 describe('buildSpeechRequest', () => {
-  it('pide a ElevenLabs el título con la voz escogida, en español y en MP3', () => {
-    expect(buildSpeechRequest('La Abuela Chela', 'y2ijeTfmnXjzheHO6zeN')).toEqual({
+  it('pide a ElevenLabs v3 el texto con la voz escogida, en español, expresiva y en MP3 (decisión 30)', () => {
+    expect(buildSpeechRequest('[pregonando] ¡Doceee!', 'y2ijeTfmnXjzheHO6zeN')).toEqual({
       url: 'https://api.elevenlabs.io/v1/text-to-speech/y2ijeTfmnXjzheHO6zeN?output_format=mp3_44100_64',
-      body: { text: 'La Abuela Chela', model_id: 'eleven_multilingual_v2', language_code: 'es' },
+      body: {
+        text: '[pregonando] ¡Doceee!',
+        model_id: 'eleven_v3',
+        language_code: 'es',
+        voice_settings: { stability: 0 },
+      },
     });
   });
-
   it('la frase de arranque es la del cantador', () => {
     expect(CALLER_INTRO_TEXT).toBe('Se va y se corre con...');
+  });
+});
+
+describe('callText: el título pregonado, como cantador de lotería (decisión 30)', () => {
+  const TONE = '[pregonando, cantadito, alargando la última sílaba]';
+
+  it('alarga la última vocal y lo dice con exclamación', () => {
+    expect(callText('Doce')).toBe(`${TONE} ¡Doceee!`);
+    expect(callText('La Abuela Chela')).toBe(`${TONE} ¡La Abuela Chelaaa!`);
+  });
+
+  it('si termina en consonante, alarga la vocal de antes, sin el acento en lo que agrega', () => {
+    expect(callText('El Catrín')).toBe(`${TONE} ¡El Catríiin!`);
+    expect(callText('El Tío Beto')).toBe(`${TONE} ¡El Tío Betooo!`);
+  });
+
+  it('quita la puntuación del final y los signos que ya traiga', () => {
+    expect(callText('¡El Gallo!')).toBe(`${TONE} ¡El Gallooo!`);
+    expect(callText('  La Sirena.  ')).toBe(`${TONE} ¡La Sirenaaa!`);
+  });
+
+  it('no alarga si la última palabra no tiene vocal o es un número', () => {
+    expect(callText('Carta 12')).toBe(`${TONE} ¡Carta 12!`);
+  });
+
+  it('la frase de arranque también se pregona', () => {
+    expect(callText(CALLER_INTRO_TEXT)).toBe(`${TONE} ¡Se va y se corre con...!`);
   });
 });
 

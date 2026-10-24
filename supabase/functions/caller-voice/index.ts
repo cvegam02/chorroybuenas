@@ -8,7 +8,7 @@
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { buildCorsHeaders, parseAllowedOrigins } from '../_shared/cors.ts';
 import {
-  audioPath, buildSpeechRequest, CALLER_INTRO_TEXT, type CallerVoiceId, INTRO_ID, mapCallerVoiceError, needsAudio,
+  audioPath, buildSpeechRequest, callText, CALLER_INTRO_TEXT, type CallerVoiceId, INTRO_ID, mapCallerVoiceError, needsAudio,
   parseCallerVoiceRequest, toCallerVoiceErrorResponse,
 } from '../_shared/callerVoice.ts';
 
@@ -70,7 +70,7 @@ async function generate(
     text = card.title;
   }
 
-  const mp3 = await speak(elevenLabsKey, text, voice.voice_id as CallerVoiceId);
+  const mp3 = await speak(elevenLabsKey, callText(text), voice.voice_id as CallerVoiceId);
   const { error: uploadError } = await admin.storage.from(AUDIO_BUCKET)
     .upload(path, mp3, { contentType: 'audio/mpeg', upsert: true });
   if (uploadError) throw new Error(`subida del audio: ${uploadError.message}`);

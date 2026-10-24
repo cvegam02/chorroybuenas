@@ -29,6 +29,10 @@ describe('las voces con IA', () => {
     expect(AI_VOICES[0].sample).toBe('/audio/voces/y2ijeTfmnXjzheHO6zeN.mp3');
   });
 
+  it('las 4 primeras son de hombre y las 4 últimas de mujer, para agruparlas en la ventana', () => {
+    expect(AI_VOICES.map((v) => v.group)).toEqual(['men', 'men', 'men', 'men', 'women', 'women', 'women', 'women']);
+  });
+
   it('cuesta 10 tokens', () => {
     expect(AI_VOICE_PRICE).toBe(10);
   });

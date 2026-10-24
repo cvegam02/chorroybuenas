@@ -11,8 +11,41 @@ export const CALLER_VOICES = [
 export type CallerVoiceId = typeof CALLER_VOICES[number];
 
 const ELEVENLABS_TTS_URL = 'https://api.elevenlabs.io/v1/text-to-speech';
-/** El modelo de ElevenLabs que mejor dice el español; gasta un crédito por carácter. */
-const SPEECH_MODEL = 'eleven_multilingual_v2';
+/** El modelo más expresivo de ElevenLabs: entiende indicaciones de tono entre corchetes (decisión 30). */
+const SPEECH_MODEL = 'eleven_v3';
+/** El tono del cantador de lotería que escogió Carlos (decisión 30). */
+const CALL_TONE = '[pregonando, cantadito, alargando la última sílaba]';
+/** Cuántas veces más se repite la última vocal para que la alargue. */
+const STRETCH = 2;
+const VOWEL_RE = /[aeiouáéíóúü]/i;
+const BASE_VOWEL: Record<string, string> = { á: 'a', é: 'e', í: 'i', ó: 'o', ú: 'u', ü: 'u' };
+
+/** Alarga la última vocal de la última palabra («Catrín» → «Catríiin»); no toca palabras con números. */
+function stretchLastVowel(text: string): string {
+  const start = text.lastIndexOf(' ') + 1;
+  const word = text.slice(start);
+  if (/\d/.test(word)) return text;
+  for (let i = word.length - 1; i >= 0; i--) {
+    if (VOWEL_RE.test(word[i])) {
+      const lower = word[i].toLowerCase();
+      const extra = (BASE_VOWEL[lower] ?? lower).repeat(STRETCH);
+      return text.slice(0, start) + word.slice(0, i + 1) + extra + word.slice(i + 1);
+    }
+  }
+  return text;
+}
+
+/**
+ * Lo que se le pide decir a ElevenLabs: el título pregonado, como cantador de lotería, con exclamación y la
+ * última vocal alargada (decisión 30). La frase de arranque, que termina en «...», se dice sin alargar.
+ */
+export function callText(title: string): string {
+  const trimmed = title.trim();
+  const body = trimmed.endsWith('...')
+    ? trimmed
+    : stretchLastVowel(trimmed.replace(/^[¡!¿?\s]+/, '').replace(/[.,;:!?¡¿\s]+$/, ''));
+  return `${CALL_TONE} ¡${body}!`;
+}
 
 /** «Se va y se corre con…», con la voz escogida (decisión 23). */
 export const CALLER_INTRO_TEXT = 'Se va y se corre con...';
@@ -54,7 +87,8 @@ export function buildSpeechRequest(
 ): { url: string; body: Record<string, unknown> } {
   return {
     url: `${ELEVENLABS_TTS_URL}/${voiceId}?output_format=mp3_44100_64`,
-    body: { text, model_id: SPEECH_MODEL, language_code: 'es' },
+    // Estabilidad 0 («creativa» en v3): la más expresiva
+    body: { text, model_id: SPEECH_MODEL, language_code: 'es', voice_settings: { stability: 0 } },
   };
 }
 
