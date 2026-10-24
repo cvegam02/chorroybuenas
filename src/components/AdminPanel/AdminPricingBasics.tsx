@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { AdminRepository } from '../../repositories/AdminRepository';
 import { AppConfigRepository } from '../../repositories/AppConfigRepository';
 import { welcomeEstimateLabel } from '../../utils/adminPricing';
-import { AdminAiCostCard } from './AdminAiCostCard';
+import { AdminAiCostCard, AI_COST_PER_IMAGE, AI_COST_PER_VOICE } from './AdminAiCostCard';
 import { AdminPriceCard } from './AdminPriceCard';
 
 interface AdminPricingBasicsProps {
@@ -114,7 +114,8 @@ export const AdminPricingBasics = ({ priceCents, priceError, onPriceSaved }: Adm
         )}
       </form>
 
-      <AdminAiCostCard />
+      <AdminAiCostCard setting={AI_COST_PER_IMAGE} />
+      <AdminAiCostCard setting={AI_COST_PER_VOICE} />
     </div>
   );
 };

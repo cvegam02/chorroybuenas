@@ -4,14 +4,15 @@ import { paymentMethodLabel } from './mercadoPagoLabels';
 
 /** Un movimiento de la actividad de la ficha (FEAT-45, US A3), como lo devuelve la base. */
 export interface UserActivityEvent {
-  kind: 'tokens' | 'seasonal' | 'gift' | 'ai' | 'signup';
+  kind: 'tokens' | 'seasonal' | 'gift' | 'ai' | 'voice' | 'signup';
   occurred_at: string;
   status: string | null;
   pack_id: string | null;
   base_tokens: number | null;
+  /** Tokens recibidos en compras y regalos; gastados en la voz del cantador. */
   total_tokens: number | null;
   amount_cents: number | null;
-  /** Temática, o lotería del uso de IA (nulo si se borró). */
+  /** Temática, o lotería del uso de IA o de la voz (nulo si se borró). */
   loteria_name: string | null;
   method_type: string | null;
   method_id: string | null;
@@ -83,6 +84,17 @@ export function activityItem(event: UserActivityEvent, now: Date = new Date()): 
         value: `−${photos}`,
       };
     }
+    case 'voice':
+      return {
+        tone: 'ai',
+        icon: 'IA',
+        title: 'Pagó la voz con IA del cantador',
+        detail: joinDetail(
+          activityDay(event.occurred_at, now),
+          event.loteria_name ? `lotería «${event.loteria_name}»` : 'lotería borrada',
+        ),
+        value: `−${event.total_tokens ?? 0}`,
+      };
     default:
       return { tone: 'signup', icon: '·', title: 'Creó su cuenta', detail: activityDay(event.occurred_at, now), value: '' };
   }

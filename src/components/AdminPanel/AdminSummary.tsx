@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { AdminRepository } from '../../repositories/AdminRepository';
 import { OfferRepository } from '../../repositories/OfferRepository';
 import { TokenPricingRepository } from '../../repositories/TokenPricingRepository';
-import { MAX_CHART_DAYS, periodDays, previousPeriod, type SummaryPeriod } from '../../utils/adminSummary';
+import { MAX_CHART_DAYS, periodDays, previousPeriod, type AiCosts, type SummaryPeriod } from '../../utils/adminSummary';
+
+/** Mientras carga, la gráfica no dibuja gasto en IA. */
+const NO_AI_COSTS: AiCosts = { perImageUsd: 0, perVoiceUsd: 0 };
 import { AdminPeriodPicker, defaultPeriodSelection, type PeriodSelection } from './AdminPeriodPicker';
 import type { SalesPreset } from './AdminSales';
 import {
@@ -66,11 +69,13 @@ export const AdminSummary = ({ onOpenTab, onOpenGifts }: AdminSummaryProps) => {
       TokenPricingRepository.getExchangeRateMxnUsd(),
       AdminRepository.getAiCostPerImage(),
       OfferRepository.getOfferSalesTotal(selection.period),
+      AdminRepository.getAiCostPerVoice(),
     ])
-      .then(([totals, previousTotals, daily, pending, usdPerMxn, aiCostPerImageUsd, offerSales]) => {
+      .then(([totals, previousTotals, daily, pending, usdPerMxn, perImageUsd, offerSales, perVoiceUsd]) => {
         if (!current) return;
-        if (totals && previousTotals && pending && aiCostPerImageUsd != null && (daily || !chartFits)) {
-          setData({ totals, previous: previousTotals, daily, pending, usdPerMxn, aiCostPerImageUsd, offerSales });
+        if (totals && previousTotals && pending && perImageUsd != null && perVoiceUsd != null && (daily || !chartFits)) {
+          const aiCosts = { perImageUsd, perVoiceUsd };
+          setData({ totals, previous: previousTotals, daily, pending, usdPerMxn, aiCosts, offerSales });
         } else {
           setFailed(true);
         }
@@ -111,7 +116,7 @@ export const AdminSummary = ({ onOpenTab, onOpenGifts }: AdminSummaryProps) => {
           <SummaryChart
             daily={loading || !data ? undefined : data.daily}
             usdPerMxn={data?.usdPerMxn ?? 0}
-            aiCostPerImageUsd={data?.aiCostPerImageUsd ?? 0}
+            aiCosts={data?.aiCosts ?? NO_AI_COSTS}
           />
           <SummaryPending pending={loading ? null : data?.pending ?? null} onOpenTab={openTab} />
         </>

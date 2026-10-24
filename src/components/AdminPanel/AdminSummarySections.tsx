@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import {
   percentChange,
   summaryMoney,
+  type AiCosts,
   type DailyTotals,
   type DashboardPending,
   type DashboardSummary,
@@ -29,8 +30,8 @@ export interface SummaryData {
   daily: DailyTotals[] | null;
   pending: DashboardPending;
   usdPerMxn: number;
-  /** Costo de IA por imagen guardado en Precios y promos (FEAT-47). */
-  aiCostPerImageUsd: number;
+  /** Costos de IA guardados en Precios y promos: por imagen (FEAT-47) y por voz del cantador (FEAT-55). */
+  aiCosts: AiCosts;
   /** Compras de tokens aprobadas con oferta en el periodo (FEAT-49, decisión 16); nulo si no se pudo cargar. */
   offerSales: { sales: number; collectedCents: number } | null;
 }
@@ -119,8 +120,8 @@ export const SummarySections = ({ data, loading, onOpenTab }: SummarySectionsPro
   const ready = loading ? null : data;
   const t = ready?.totals ?? null;
   const p = ready?.previous ?? null;
-  const money = ready ? summaryMoney(ready.totals, ready.aiCostPerImageUsd, ready.usdPerMxn) : null;
-  const previousMoney = ready ? summaryMoney(ready.previous, ready.aiCostPerImageUsd, ready.usdPerMxn) : null;
+  const money = ready ? summaryMoney(ready.totals, ready.aiCosts, ready.usdPerMxn) : null;
+  const previousMoney = ready ? summaryMoney(ready.previous, ready.aiCosts, ready.usdPerMxn) : null;
   const value = (text: string) => (t ? text : '…');
   const change = (current: number | null | undefined, previous: number | null | undefined): Change =>
     ready ? (current == null || previous == null ? null : percentChange(current, previous)) : undefined;
@@ -144,9 +145,11 @@ export const SummarySections = ({ data, loading, onOpenTab }: SummarySectionsPro
         <SummaryCard
           label="Gasto en IA"
           value={value(money?.aiCostCents != null ? formatPesos(money.aiCostCents) : '—')}
-          detail={t
-            ? `${plural(t.aiImages, 'imagen', 'imágenes')} · ≈ ${formatUsd(t.aiImages * (ready?.aiCostPerImageUsd ?? 0))}`
-            : 'Imágenes transformadas'}
+          detail={t && ready
+            ? `${plural(t.aiImages, 'imagen', 'imágenes')}` +
+              (t.aiVoices ? ` · ${plural(t.aiVoices, 'voz del cantador', 'voces del cantador')}` : '') +
+              ` · ≈ ${formatUsd(t.aiImages * ready.aiCosts.perImageUsd + t.aiVoices * ready.aiCosts.perVoiceUsd)}`
+            : 'Imágenes transformadas y voces del cantador'}
           change={change(t?.aiImages, p?.aiImages)}
         />
         <SummaryCard

@@ -17,8 +17,21 @@ export interface SummaryPeriod {
 export interface SummaryTotals {
   tokensRevenueCents: number;
   seasonalRevenueCents: number;
+  /** Fotos con IA, sin la voz del cantador (migración 061). */
   aiImages: number;
+  /** Voces con IA del cantador pagadas (FEAT-55, decisión 28). */
+  aiVoices: number;
 }
+
+/** Lo que cuesta la IA en USD, editable en Precios y promos: por imagen y por voz del cantador. */
+export interface AiCosts {
+  perImageUsd: number;
+  perVoiceUsd: number;
+}
+
+/** Gasto en IA en USD: imágenes × costo por imagen + voces × costo por voz. */
+const aiCostUsd = (aiImages: number, aiVoices: number, costs: AiCosts) =>
+  aiImages * costs.perImageUsd + aiVoices * costs.perVoiceUsd;
 
 /** Gente y ventas del periodo (US A2). Lo más vendido es nulo si no hubo ventas. */
 export interface SummaryPeopleSales {
@@ -81,14 +94,14 @@ export function customPeriod(from: string, to: string): SummaryPeriod | null {
 }
 
 /**
- * Ingresos, gasto en IA y ganancia. El gasto en IA se estima así:
- * imágenes × costo por imagen en USD, pasado a pesos con el tipo de cambio (USD por peso).
+ * Ingresos, gasto en IA y ganancia. El gasto en IA se estima así: imágenes × costo por imagen más
+ * voces del cantador × costo por voz, en USD, pasado a pesos con el tipo de cambio (USD por peso).
  * La ganancia no descuenta la comisión de Mercado Pago, que no se guarda.
  */
-export function summaryMoney(totals: SummaryTotals, costPerImageUsd: number, usdPerMxn: number): SummaryMoney {
+export function summaryMoney(totals: SummaryTotals, costs: AiCosts, usdPerMxn: number): SummaryMoney {
   const revenueCents = totals.tokensRevenueCents + totals.seasonalRevenueCents;
   if (!(usdPerMxn > 0)) return { revenueCents, aiCostCents: null, profitCents: null };
-  const aiCostCents = Math.round(((totals.aiImages * costPerImageUsd) / usdPerMxn) * 100);
+  const aiCostCents = Math.round((aiCostUsd(totals.aiImages, totals.aiVoices, costs) / usdPerMxn) * 100);
   return { revenueCents, aiCostCents, profitCents: revenueCents - aiCostCents };
 }
 
@@ -149,6 +162,7 @@ export interface DailyTotals {
   day: string;
   revenueCents: number;
   aiImages: number;
+  aiVoices: number;
 }
 
 export interface DailyMoney {
@@ -160,11 +174,11 @@ export interface DailyMoney {
 }
 
 /** Serie de la gráfica en pesos; el gasto en IA usa el mismo cálculo que las tarjetas. */
-export function dailyMoney(rows: readonly DailyTotals[], costPerImageUsd: number, usdPerMxn: number): DailyMoney[] {
+export function dailyMoney(rows: readonly DailyTotals[], costs: AiCosts, usdPerMxn: number): DailyMoney[] {
   return rows.map((row) => ({
     day: row.day,
     revenue: row.revenueCents / 100,
-    aiCost: usdPerMxn > 0 ? Math.round(((row.aiImages * costPerImageUsd) / usdPerMxn) * 100) / 100 : 0,
+    aiCost: usdPerMxn > 0 ? Math.round((aiCostUsd(row.aiImages, row.aiVoices, costs) / usdPerMxn) * 100) / 100 : 0,
   }));
 }
 
