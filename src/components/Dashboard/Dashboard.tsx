@@ -18,6 +18,7 @@ import { TokenMovements } from './TokenMovements';
 import { AccountHeader } from './AccountHeader';
 import { AccountDetails } from './AccountDetails';
 import { MyLoterias, LOTERIAS_SECTION_ID } from './MyLoterias';
+import { LoteriaInviteRepository } from '../../repositories/LoteriaInviteRepository';
 import { useSetSummaries } from '../../hooks/useSetSummaries';
 import { useSetPdfDownload } from '../../hooks/useSetPdfDownload';
 import { gridSizeOfSet, setStatusOf } from '../../utils/setSummary';
@@ -40,6 +41,7 @@ export const Dashboard = () => {
   const [totalSpent, setTotalSpent] = useState<number | null>(null);
   const [totalGifted, setTotalGifted] = useState<number>(0);
   const [tokensSpentBySet, setTokensSpentBySet] = useState<Record<string, number>>({});
+  const [collectiveSetIds, setCollectiveSetIds] = useState<ReadonlySet<string>>(new Set());
   const [isPurchaseHistoryOpen, setIsPurchaseHistoryOpen] = useState(false);
   const [purchaseHistory, setPurchaseHistory] = useState<TokenHistoryEntry[]>([]);
   const [purchaseHistoryLoading, setPurchaseHistoryLoading] = useState(true);
@@ -96,6 +98,10 @@ export const Dashboard = () => {
           TokenPricingRepository.getTotalTokensReceived(userId).then(setTotalReceived),
           TokenPricingRepository.getTotalTokensSpent(userId).then(setTotalSpent),
           TokenPricingRepository.getTokensSpentBySet(userId).then(setTokensSpentBySet),
+          // Si no carga, las loterías salen sin la etiqueta «Colectiva» (FEAT-56)
+          LoteriaInviteRepository.listCollectiveSetIds()
+            .then(setCollectiveSetIds)
+            .catch((e) => logger.error('Error loading loteria invites:', e)),
           loadHistory(),
         ]);
       } catch (e) {
@@ -205,6 +211,7 @@ export const Dashboard = () => {
             hasError={setSummaries.hasError}
             onRetry={setSummaries.retry}
             tokensSpentBySet={tokensSpentBySet}
+            collectiveSetIds={collectiveSetIds}
             giftTokens={initialTokens}
             isCreating={isCreatingSet}
             onCreate={handleCreateSet}

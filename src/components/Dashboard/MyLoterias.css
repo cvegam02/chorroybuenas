@@ -280,6 +280,19 @@
   color: var(--color-ai);
 }
 
+.loteria-card__collective {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-secondary) 18%, var(--color-bg-surface));
+  color: var(--color-text-main);
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .loteria-card__body {
   position: relative;
   flex: 1 1 auto;

@@ -154,6 +154,14 @@
   color: var(--color-ai);
 }
 
+.set-header__tag--collective {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: color-mix(in srgb, var(--color-secondary) 18%, var(--color-bg-surface));
+  color: var(--color-text-main);
+}
+
 .set-header__tag--tokens {
   border-color: var(--color-primary-lightest);
   background: var(--color-bg-surface);

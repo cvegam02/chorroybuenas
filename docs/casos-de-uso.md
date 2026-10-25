@@ -4,9 +4,9 @@ Complementa a [`contexto-negocio.md`](contexto-negocio.md) sin introducir reglas
 
 Los casos marcados con 🔧 describen una regla ya definida que el sitio todavía no cumple (ver §17 del contexto): el caso dice cómo debe funcionar, no cómo funciona hoy.
 
-Son 30 casos en 8 bloques. Formato de cada caso: actor, precondiciones, flujo principal, excepciones, resultado, estados afectados, notificaciones y auditoría. No se usa "Tareas generadas": el producto no tiene tablero de tareas.
+Son 33 casos en 9 bloques. Formato de cada caso: actor, precondiciones, flujo principal, excepciones, resultado, estados afectados, notificaciones y auditoría. No se usa "Tareas generadas": el producto no tiene tablero de tareas.
 
-Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo día (FEAT-17); hasta el 2026-10-07 se llamaron «loterías de temporada» (renombradas con FEAT-24, sin cambiar ningún flujo). El bloque 7 («Arma tus tableros») se agregó el 2026-10-22 (FEAT-53). El bloque 8 (cantador) se agregó el 2026-10-24 (FEAT-55).
+Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo día (FEAT-17); hasta el 2026-10-07 se llamaron «loterías de temporada» (renombradas con FEAT-24, sin cambiar ningún flujo). El bloque 7 («Arma tus tableros») se agregó el 2026-10-22 (FEAT-53). El bloque 8 (cantador) se agregó el 2026-10-24 (FEAT-55). El bloque 9 (loterías colectivas) se agregó el 2026-10-24 (FEAT-56).
 
 ---
 
@@ -342,3 +342,38 @@ Todos los casos de este bloque están por construir (§17, §18).
 - **Notificaciones**: Ninguna.
 - **Auditoría**: Solo el cobro de la voz con IA, como todo uso de tokens.
 
+
+## Bloque 9 — Loterías colectivas
+
+### 31. Invitar a subir fotos 🔧
+- **Actor(es)**: Usuario registrado, dueño de la lotería (organizador).
+- **Precondiciones**: Tener una lotería guardada en su cuenta.
+- **Flujo principal**: (1) En su lotería (U2) pulsa «Invitar a subir fotos». (2) Ve el enlace y lo copia o lo comparte por WhatsApp con un mensaje ya escrito. (3) La lotería queda como «Colectiva» en Mi cuenta y en la lotería (§21).
+- **Flujo alterno — cerrar o cambiar el enlace**: en la misma ventana pulsa «Cerrar enlace» y nadie más puede unirse ni subir; o «Generar enlace nuevo», y el anterior deja de servir.
+- **Excepciones**: Alguien abre un enlace cerrado, reemplazado o inventado: se le dice que ya no sirve.
+- **Resultado**: La lotería tiene un enlace abierto para que otras personas suban fotos.
+- **Estados afectados**: Invitación de lotería (§11).
+- **Notificaciones**: Ninguna.
+- **Auditoría**: No.
+
+### 32. Unirse a una lotería y subir fotos 🔧
+- **Actor(es)**: Visitante o usuario registrado que recibió el enlace (invitado).
+- **Precondiciones**: El enlace está abierto.
+- **Flujo principal**: (1) Abre el enlace y ve el nombre de la lotería, quién la organiza (si su cuenta tiene nombre; nunca el correo) y cuántas cartas lleva. (2) Pulsa «Entrar para subir fotos»; si no tiene sesión, crea su cuenta (recibe sus tokens de bienvenida) o entra; si la crea con correo, al confirmarlo regresa al enlace y pulsa «Entrar» otra vez. (3) Queda como invitado y llega a la lotería, donde ve todas las cartas y quién subió cada una. (4) Pulsa «Subir fotos», lee el aviso de contenido permitido, elige sus fotos y les pone título. (5) Las fotos entran al final de la baraja con su número (§4, §21).
+- **Flujo alterno — volver después**: en Mi cuenta abre la lotería desde «Loterías donde participo» y sube más fotos.
+- **Excepciones**: Enlace cerrado o inventado: se le dice y se le ofrece ir a Inicio. Ya era invitado: entra directo, sin duplicarse. Es el organizador: llega a su lotería. Título repetido o con emojis: se rechaza con el mensaje de siempre. El organizador cierra el enlace mientras sube: lo ya subido se queda y ya no se aceptan más; sigue viendo la lotería sin «Subir fotos». Lo quitaron: ya no puede abrir la lotería, y si abre el enlace se le dice que ya no puede unirse, aunque el enlace siga abierto (§21).
+- **Resultado**: Las fotos del invitado son cartas de la lotería del organizador.
+- **Estados afectados**: Invitado de lotería y cartas (§11); con cuenta nueva, también su saldo de bienvenida.
+- **Notificaciones**: Ninguna; el organizador ve el contador «N fotos nuevas».
+- **Auditoría**: No.
+
+### 33. Administrar lo que subieron los invitados 🔧
+- **Actor(es)**: Usuario registrado, dueño de la lotería (organizador).
+- **Precondiciones**: Tener una lotería colectiva con fotos de invitados.
+- **Flujo principal**: (1) En Mi cuenta ve «N fotos nuevas» en la lotería y la abre; el contador se borra. (2) Ve en cada carta quién la subió. (3) Cambia títulos, borra cartas (los números se recorren, §4) o las transforma con IA con sus propios tokens.
+- **Flujo alterno — quitar a un invitado**: abre «Invitados», ve cuántas fotos subió cada uno y pulsa «Quitar»; el invitado pierde el acceso y sus fotos se quedan (§21).
+- **Excepciones**: Sin tokens para la IA: igual que en sus propias cartas (§6). El invitado borró su cuenta: sus fotos se quedan.
+- **Resultado**: La lotería queda como el organizador la quiere.
+- **Estados afectados**: Cartas, invitado de lotería (§11); con IA, el saldo y el uso de tokens.
+- **Notificaciones**: Ninguna.
+- **Auditoría**: Solo el cobro de la IA, como todo uso de tokens.

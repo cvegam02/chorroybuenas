@@ -10,6 +10,8 @@ import { WarningModal } from './components/ConfirmationModal/WarningModal';
 import { HowToPlay } from './components/HowToPlay/HowToPlay';
 import { AboutLoteria } from './components/AboutLoteria/AboutLoteria';
 import { TraditionalBoardsPage } from './components/TraditionalBoards/TraditionalBoardsPage';
+import { JoinLoteriaPage } from './components/JoinLoteria/JoinLoteriaPage';
+import { GuestLoteriaPage } from './components/GuestLoteria/GuestLoteriaPage';
 import { PrivacyNotice } from './components/PrivacyNotice/PrivacyNotice';
 import BenefitsPage from './components/BenefitsPage/BenefitsPage';
 import { SetView } from './components/SetView/SetView';
@@ -393,6 +395,10 @@ function AppContent() {
           element={<TraditionalBoardsPage />}
         />
         <Route
+          path="/unirse/:codigo"
+          element={<JoinLoteriaPage />}
+        />
+        <Route
           path="/tematicas"
           element={<SeasonalCatalog />}
         />
@@ -411,6 +417,10 @@ function AppContent() {
         <Route
           path="/loteria/:setId"
           element={<SetView />}
+        />
+        <Route
+          path="/participo/:setId"
+          element={<GuestLoteriaPage />}
         />
         <Route
           path="/loteria/:setId/cantar"

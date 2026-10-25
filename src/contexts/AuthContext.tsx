@@ -16,7 +16,8 @@ interface AuthContextType {
     /** `returnPath`: ruta del sitio a la que se regresa; sin ella, Mi cuenta. */
     signInWithGoogle: (returnPath?: string) => Promise<void>;
     signInWithEmail: (email: string, password: string) => Promise<void>;
-    signUpWithEmail: (email: string, password: string, metadata?: { full_name?: string }) => Promise<void>;
+    /** Con `confirmReturnPath`, el correo de confirmación regresa a esa ruta del sitio (FEAT-56). */
+    signUpWithEmail: (email: string, password: string, metadata?: { full_name?: string }, confirmReturnPath?: string) => Promise<void>;
     signOut: () => Promise<void>;
     resetPasswordForEmail: (email: string) => Promise<void>;
     updatePassword: (newPassword: string) => Promise<void>;
@@ -99,11 +100,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (error) throw error;
     };
 
-    const signUpWithEmail = async (email: string, password: string, metadata?: { full_name?: string }) => {
+    const signUpWithEmail = async (
+        email: string,
+        password: string,
+        metadata?: { full_name?: string },
+        confirmReturnPath?: string
+    ) => {
+        const options = {
+            ...(metadata?.full_name && { data: { full_name: metadata.full_name } }),
+            ...(confirmReturnPath && { emailRedirectTo: googleRedirectUrl(window.location.origin, confirmReturnPath) }),
+        };
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
-            options: metadata?.full_name ? { data: { full_name: metadata.full_name } } : undefined
+            options: Object.keys(options).length > 0 ? options : undefined
         });
         if (error) throw error;
         if (isEmailAlreadyRegistered(data.user)) throw new Error(EMAIL_ALREADY_REGISTERED_MESSAGE);

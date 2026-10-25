@@ -35,8 +35,9 @@ El principio habla de la lotería que cada quien hace con sus fotos. Las loterí
 | **Visitante** | Cualquiera sin cuenta | Crear cartas y tableros y descargar el PDF. Su trabajo se guarda solo en su navegador. Puede ver el catálogo de loterías temáticas (§18). No puede usar la IA, comprar tokens ni comprar loterías temáticas. _(confirmado el 2026-10-06)_ |
 | **Usuario registrado** | Tiene cuenta (correo y contraseña, o Google) | Todo lo del visitante, y además: guardar varias loterías en la nube, usar la IA, comprar tokens, comprar y descargar loterías temáticas (§18), ver su historial y editar su perfil. _(confirmado el 2026-10-06)_ |
 | **Administrador** | Usuario incluido en la lista de administradores | Todo lo del usuario, y además el panel de administración (§10). _(confirmado el 2026-10-06)_ |
+| **Invitado de una lotería** | Usuario registrado que entró con el enlace de una lotería colectiva de otra persona | En esa lotería, ver todas sus cartas y agregar cartas con su título. No puede editarlas ni borrarlas, ni usar la IA, los tableros, el PDF o el cantador de esa lotería (§21). _(decidido el 2026-10-23 y el 2026-10-24, FEAT-56)_ |
 
-- Un usuario solo ve y modifica sus propias loterías, cartas, tableros, compras y saldo. **DEFINIDO** (2026-10-06)
+- Un usuario solo ve y modifica sus propias loterías, cartas, tableros, compras y saldo. **DEFINIDO** (2026-10-06). Excepción: el invitado de una lotería colectiva ve las cartas de esa lotería y agrega cartas a ella (§21; 2026-10-24, FEAT-56).
 - Nadie puede modificar un saldo de tokens desde el navegador: el saldo solo cambia por registro, compra, uso de IA o regalo de un administrador. **DEFINIDO** (2026-10-06)
 - Un administrador nuevo solo lo puede dar de alta otro administrador; el primero se crea directamente en la base. _(confirmado el 2026-10-06)_
 
@@ -57,12 +58,13 @@ El principio habla de la lotería que cada quien hace con sus fotos. Las loterí
 - **Tableros:** se generan al azar con las cartas de la lotería. No se generan dos tableros iguales. _(confirmado el 2026-10-06)_
 - **Cantidad sugerida de tableros:** en Clásico, la que hace que cada carta aparezca unas 8 veces en total; en Kids, un tablero por cada 3 cartas. El usuario puede cambiarla. _(confirmado el 2026-10-06)_
 - **Al iniciar sesión**, lo que el visitante tenía guardado en su navegador se pasa a su cuenta: a su primera lotería si está vacía o, si ya tenía cartas, a una lotería nueva, sin mezclarse con lo que había. Al terminar llega a esa lotería. _(decidido el 2026-10-12, FEAT-41; antes iba siempre a la primera lotería de la cuenta, confirmado el 2026-10-06)_
-- No hay límite de cartas por lotería, de loterías por usuario ni de tableros por lotería. **DEFINIDO** (2026-10-06). Se revisa cuando el almacenamiento empiece a pesar.
+- No hay límite de cartas por lotería, de loterías por usuario ni de tableros por lotería. **DEFINIDO** (2026-10-06). Se revisa cuando el almacenamiento empiece a pesar. Tampoco hay límite de cartas por invitado en una lotería colectiva (2026-10-24, FEAT-56).
+- **Lotería colectiva:** una lotería guardada a la que su dueño abrió un enlace para que otras personas suban fotos. Reglas en §21. _(decidido el 2026-10-23 y el 2026-10-24, FEAT-56)_
 
 ## 5. Imágenes y PDF
 
 - Formatos aceptados para las cartas: PNG, JPEG y WebP, de hasta 5 MB. _(confirmado el 2026-10-06)_
-- Las imágenes de los usuarios registrados son privadas: solo su dueño puede verlas. _(confirmado el 2026-10-06)_
+- Las imágenes de los usuarios registrados son privadas: solo su dueño puede verlas. _(confirmado el 2026-10-06)_ En una lotería colectiva, también las ven sus invitados (§21; 2026-10-24, FEAT-56).
 - La portada y las cartas de muestra de las loterías temáticas son públicas, pero solo en su versión reducida y con marca de agua (§18). **DEFINIDO** (2026-10-06, FEAT-17)
 - El PDF incluye los tableros en tamaño carta con área de corte, y la baraja completa para recortar. Descargarlo es gratis y no requiere cuenta. _(confirmado el 2026-10-06)_
 
@@ -173,6 +175,8 @@ El administrador puede: _(confirmado el 2026-10-06)_
 | Compra de lotería temática (`seasonal_purchases`) — por construir | Monto pagado, pago de Mercado Pago y estado | Pertenece a un usuario y a una lotería temática |
 | Juego de «Arma tus tableros» (`traditional_games`) | Nombre, modo y sus hasta 50 tableros (números de carta, casillas vacías y cartas fijadas) | Pertenece a un usuario (2026-10-22, FEAT-53) |
 | Audio de carta | El audio con voz de IA del título de una carta, para el cantador | Pertenece a una carta; se borra con ella (2026-10-23, FEAT-55). La lotería guarda qué voz se escogió (2026-10-24) |
+| Invitación de lotería — por construir | Código del enlace y si está abierto | Pertenece a una lotería; una vigente a la vez (2026-10-24, FEAT-56) |
+| Invitado de lotería — por construir | Quién entró con el enlace, cuándo y si el organizador lo quitó | Une a un usuario con una lotería. La carta guarda quién la subió (2026-10-24, FEAT-56) |
 
 ## 12. Permisos de acceso a datos — DEFINIDO
 
@@ -192,6 +196,8 @@ El administrador puede: _(confirmado el 2026-10-06)_
 | Compras de loterías temáticas | Su dueño; los administradores | Solo el servidor |
 | Juegos de «Arma tus tableros» | Su dueño | Su dueño (sin sesión, nadie; 2026-10-22, FEAT-53) |
 | Audios de las cartas (voz con IA del cantador) | Su dueño | Solo el servidor (2026-10-23, FEAT-55) |
+| Cartas e imágenes de una lotería colectiva | Su dueño; sus invitados | Su dueño; sus invitados solo agregan cartas nuevas, mientras el enlace esté abierto (2026-10-24, FEAT-56; por construir) |
+| Invitación e invitados de una lotería | Su dueño (el invitado ve solo que él participa) | Su dueño; el invitado se une con el enlace abierto (2026-10-24, FEAT-56; por construir) |
 
 Decidido el 2026-10-06 (remediación del code review). El detalle técnico está en las migraciones 022 a 025. Los cinco renglones de loterías temáticas se agregaron el 2026-10-06 (FEAT-17) y están por construir.
 
@@ -284,6 +290,8 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-24 | La voz con IA del cantador se escoge entre cuatro voces (tres de hombre y una de mujer), escuchando una muestra antes de pagar; la elección es definitiva para esa lotería. La voz con IA pasa de 5 a 10 tokens por lotería. Con voz con IA se puede cantar aunque el navegador no tenga voz en español. Mientras se genera la voz no se puede empezar a cantar. Reglas en §20. _(Descartados: empezar a cantar mientras se genera, con la voz del navegador en las cartas sin audio; bloquear el cantador igual en ese navegador; una sola voz para todas las loterías, como se había decidido el 2026-10-23; poder cambiar la voz pagando otra vez. Origen: FEAT-55.)_ |
 | 2026-10-24 | El panel de administración cuenta la voz con IA del cantador aparte de las fotos: el gasto en IA del Resumen la suma con su propio costo por lotería, editable en Precios y promos (0.10 US$ al empezar), y la ficha del usuario la muestra como su propio renglón. _(Descartados: contarla como fotos con IA; un costo fijo en el código. Origen: FEAT-55, decisión 28.)_ |
 | 2026-10-24 | La voz con IA del cantador pasa a generarse con ElevenLabs directo (cuenta con plan Starter), con 8 voces mexicanas de su biblioteca para escoger. _(Descartados: Replicate con MiniMax, lo decidido el 2026-10-23; las voces de ElevenLabs en Replicate, de origen inglés; dos voces que piden el plan Creator. Origen: FEAT-55, decisión 29.)_ |
+| 2026-10-24 | Existen las loterías colectivas: el dueño de cualquier lotería guardada abre un enlace para que otras personas, con cuenta, suban fotos a ella. Las fotos entran directo, sin aprobación y sin límite por invitado; el invitado les pone título y ve todas las cartas, pero no edita, borra, usa IA, tableros, PDF ni cantador. El enlace queda abierto hasta que el dueño lo cierra o genera otro. Al quitar a un invitado sus fotos se quedan. El dueño ve «N fotos nuevas» en Mi cuenta, sin correo. Reglas en §21 (decisiones del 2026-10-23 y el 2026-10-24). _(Descartados: subir sin cuenta; aprobar cada foto antes de que entre; que el invitado borre o cambie sus fotos o use la IA; fecha límite del enlace; tope de fotos por invitado; borrar sus fotos al quitarlo; que solo se abran loterías creadas como colectivas; avisar por correo; que el invitado vea los tableros o descargue el PDF. Origen: FEAT-56.)_ |
+| 2026-10-24 | En las loterías colectivas: un invitado quitado no vuelve a unirse con el enlace aunque siga abierto; la página del enlace muestra el nombre de quien organiza (nada si no tiene; nunca el correo); quien crea su cuenta con correo desde el enlace regresa a él al confirmar su correo (§21). _(Descartados: que el quitado vuelva a entrar con el enlace abierto; mostrar solo el primer nombre o ningún organizador; que al confirmar el correo llegue al Inicio. Origen: FEAT-56, decisiones 10, 11 y 13.)_ |
 
 ## 16. Pendientes por definir
 
@@ -308,6 +316,7 @@ Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en
 | Tableros del PDF en tamaño carta | §5 | El PDF sale en hoja A4. Anotada el 2026-10-09; se corrige con `docs/features/FEAT-26-pdf-impresion-y-recorte.md` |
 | Voz con IA del cantador | §20 | En producción, no existe: el cantador usa la voz del navegador. Construida el 2026-10-24 con la US A6 de `docs/features/FEAT-55-cantador.md` y llevada a dev con el PR #73; se retira de esta lista al publicarse en producción |
 | «Arma tus tableros» | §19 | No existe. Anotada el 2026-10-22; se construye con `docs/features/FEAT-53-tableros-loteria-tradicional.md` |
+| Loterías colectivas | §3, §12, §21 | No existen: solo el dueño ve y modifica su lotería. Anotada el 2026-10-24; se construye con `docs/features/FEAT-56-loterias-colectivas.md` |
 
 ## 18. Loterías temáticas — DEFINIDO
 
@@ -388,3 +397,15 @@ El cantador sirve para jugar sin recortar la baraja: revuelve las cartas de una 
 - **Voz del navegador:** dice solo el título de cada carta, siempre en español (de preferencia de México), aunque el sitio esté en inglés. Sin ninguna voz en español en el navegador no se puede cantar: se dice en qué navegadores sí funciona; salvo que la lotería tenga voz con IA, que entonces se canta con sus audios y las cartas cuyo audio falló salen sin voz _(2026-10-24, FEAT-55)_. Silenciarla a propósito sí se permite.
 - **Automático:** la partida empieza diciendo «Se va y se corre con…» y sigue sola. Ritmo «Tradicional» (tres cartas con 1.5 s entre una y otra y una pausa de 3 s) o una carta cada 4, 6, 8 o 10 s, contando desde que la voz termina; se elige antes de empezar.
 - **Voz con IA (opcional, de pago):** cuesta 10 tokens por lotería _(5 hasta el 2026-10-24)_ y se paga una sola vez; el servidor cobra antes de generar un audio por carta y los guarda en privado (solo los oye el dueño, §12). Si fallan algunas cartas, esas se dicen con la voz del navegador y no se devuelve nada; si fallan todas, se devuelven los 10 tokens. No tiene el límite de 10 por minuto de §6: cada lotería la genera una vez. Los audios de cartas agregadas o renombradas después se generan sin costo al abrir el cantador. Mientras se genera la voz no se puede empezar a cantar; si al terminar alguna carta falló, se deja empezar y esa carta se dice con la voz del navegador _(2026-10-24, FEAT-55)_. Los títulos no se revisan antes de generar: la regla de contenido no permitido (§6) es norma de uso. Usa ElevenLabs, con 8 voces mexicanas de su biblioteca, 4 de hombre y 4 de mujer _(2026-10-24, FEAT-55; antes Replicate con cuatro voces de MiniMax)_. Antes de pagar, el usuario escucha una muestra y escoge una; la elección es definitiva para esa lotería y las cartas agregadas después salen con la misma voz _(2026-10-24, FEAT-55; reemplaza «una sola voz para todas las loterías»)_. Borrar una carta o la lotería borra sus audios.
+
+## 21. Loterías colectivas — DEFINIDO (2026-10-24, FEAT-56)
+
+Sirven para juntar las fotos de varias personas: el dueño de una lotería manda un enlace (por ejemplo, por WhatsApp) y cada invitado sube sus fotos directo a ella. Decisiones del 2026-10-23 y el 2026-10-24.
+
+- **Quién la abre:** el dueño de cualquier lotería guardada en su cuenta, desde la lotería (U2). Al generar su primer enlace pasa a ser «Colectiva». El recorrido «Crear» no cambia.
+- **El enlace:** queda abierto hasta que el dueño lo cierra. Puede generar uno nuevo, y el anterior deja de servir. Hay un enlace vigente a la vez por lotería. No tiene fecha límite.
+- **Invitados:** necesitan cuenta. Quien abre el enlace sin sesión crea su cuenta (con sus tokens de bienvenida, §7) o entra, y queda como invitado de esa lotería. Entrar de nuevo no lo duplica. El dueño que abre su propio enlace llega a su lotería. Quien crea su cuenta con correo desde el enlace regresa a él al confirmar su correo; con Google, también _(2026-10-24, FEAT-56)_. La página del enlace muestra el nombre de la lotería, cuántas cartas lleva y el nombre de quien la organiza tal como está en su cuenta; si no tiene nombre, no se muestra organizador. Nunca se muestra su correo _(2026-10-24, FEAT-56)_.
+- **Qué hace el invitado:** ve todas las cartas de la lotería, con quién subió cada una, y agrega fotos con su título. Las fotos entran directo, sin aprobación, al final de la baraja con su número (§4), con las mismas reglas del título (único en la lotería, sin emojis) y el aviso de contenido permitido (§6). No hay límite de fotos por invitado. No puede cambiar ni borrar cartas, ni siquiera las suyas, ni usar la IA, los tableros, el PDF o el cantador de esa lotería. Si el enlace se cierra, sigue viendo la lotería, pero ya no puede subir.
+- **Qué hace el dueño:** con las cartas de sus invitados hace lo mismo que con las suyas: cambiar el título, borrarlas y transformarlas con IA, con sus propios tokens. Ve la lista de invitados con cuántas fotos subió cada uno y puede quitar a cualquiera: el invitado pierde el acceso y sus fotos se quedan en la lotería. Un invitado quitado no puede volver a unirse con el enlace, aunque siga abierto _(2026-10-24, FEAT-56)_.
+- **Aviso al dueño:** un contador «N fotos nuevas» en la lotería, en Mi cuenta (U1) y en la lotería (U2), que se borra al abrirla. No se manda correo (§13 no cambia).
+- **Contenido permitido:** las fotos que suben los invitados sin IA no pasan por ningún filtro (§6). Lo mitigan que los invitados tienen cuenta y que el dueño puede borrar cualquier carta.

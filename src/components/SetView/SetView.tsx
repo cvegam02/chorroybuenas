@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useSetContext } from '../../contexts/SetContext';
 import { useCards } from '../../hooks/useCards';
 import { useBoard } from '../../hooks/useBoard';
+import { useGuestCardsLive } from '../../hooks/useGuestCardsLive';
 import { SetRepository, type LoteriaSet } from '../../repositories/SetRepository';
 import { TokenPricingRepository } from '../../repositories/TokenPricingRepository';
 import { BoardModal } from '../BoardGenerator/BoardModal';
@@ -15,6 +16,8 @@ import { SetCardsSection } from './SetCardsSection';
 import { SetConfirmDialog } from './SetConfirmDialog';
 import { PdfProgressDialog } from './PdfProgressDialog';
 import { SetHeader } from './SetHeader';
+import { InviteDialog } from './InviteDialog';
+import { LoteriaInviteRepository } from '../../repositories/LoteriaInviteRepository';
 import { SetStatusNotice } from './SetStatusNotice';
 import { setViewStateOf } from './setViewState';
 import { DeleteLoteriaDialog } from '../Dashboard/LoteriaDialogs';
@@ -34,7 +37,7 @@ export const SetView = () => {
   const { t } = useTranslation();
   const { user, isLoading: authLoading } = useAuth();
   const { sets, setSets, refreshSets, currentSetId, setCurrentSetId } = useSetContext();
-  const { cards, isLoading: cardsLoading } = useCards();
+  const { cards, isLoading: cardsLoading, refreshFromCloud } = useCards();
   const { boards, clearBoards, isBoardsLoading } = useBoard();
   const [selectedBoardIndex, setSelectedBoardIndex] = useState<number | null>(null);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
@@ -45,6 +48,8 @@ export const SetView = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [tokensSpentInSet, setTokensSpentInSet] = useState<number | null>(null);
   const [fetchedSet, setFetchedSet] = useState<LoteriaSet | null>(null);
+  const [isCollective, setIsCollective] = useState(false);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
 
   useEffect(() => {
     if (setId) setCurrentSetId(setId);
@@ -73,6 +78,21 @@ export const SetView = () => {
       setTokensSpentInSet(null);
     }
   }, [user, setId]);
+
+  // «Colectiva» si la lotería ya tiene enlace para invitar (FEAT-56)
+  useEffect(() => {
+    if (!setId || !userId) return;
+    let cancelled = false;
+    LoteriaInviteRepository.listCollectiveSetIds()
+      .then((ids) => {
+        if (!cancelled) setIsCollective(ids.has(setId));
+      })
+      .catch((err) => logger.error('Error loading loteria invites:', err));
+    return () => { cancelled = true; };
+  }, [setId, userId]);
+
+  // En una lotería colectiva, las fotos de los invitados aparecen solas (FEAT-56)
+  useGuestCardsLive(setId, isCollective, refreshFromCloud);
 
   useEffect(() => {
     if (authLoading) return;
@@ -196,6 +216,7 @@ export const SetView = () => {
                   boardCount: boards.length,
                   tokensSpent: tokensSpentInSet,
                   state: viewState,
+                  isCollective,
                 }
               : null
           }
@@ -207,6 +228,7 @@ export const SetView = () => {
             enterFullscreen();
             navigate(`/loteria/${setId}/cantar`);
           }}
+          onInvite={() => setShowInviteDialog(true)}
           onShuffleBoards={() => setShowRegenerateBoardsModal(true)}
           onClearBoards={() => setShowClearBoardsModal(true)}
           onDelete={() => setShowDeleteDialog(true)}
@@ -286,6 +308,15 @@ export const SetView = () => {
             cancelLabel={t('setView.clearConfirmCancel')}
             onConfirm={handleConfirmClearBoards}
             onClose={() => setShowClearBoardsModal(false)}
+          />
+        )}
+
+        {showInviteDialog && (
+          <InviteDialog
+            setId={setId}
+            setName={setName}
+            onInviteReady={() => setIsCollective(true)}
+            onClose={() => setShowInviteDialog(false)}
           />
         )}
 

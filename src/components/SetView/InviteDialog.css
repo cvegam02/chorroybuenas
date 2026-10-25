@@ -1,0 +1,238 @@
+/* M18 — «Invitar a subir fotos» (FEAT-56, US B1). El cascarón (caja y hoja en celular) es AuthDialog.css */
+
+.invite-dialog__lead {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding-right: 32px;
+}
+
+.invite-dialog__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 6px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--color-secondary) 20%, var(--color-bg-surface));
+  color: var(--color-text-main);
+  font-size: 22px;
+}
+
+.invite-dialog__lead h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.invite-dialog__lead p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.invite-dialog__loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 0;
+  color: var(--color-text-muted);
+  font-size: 15px;
+}
+
+.invite-dialog__spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--color-primary-lightest);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: invite-dialog-spin 0.8s linear infinite;
+}
+
+@keyframes invite-dialog-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.invite-dialog__link-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.invite-dialog__state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-primary-dark);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.invite-dialog__state::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-secondary-dark);
+}
+
+.invite-dialog__url {
+  margin: 0;
+  color: var(--color-text-main);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.invite-dialog__share {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.invite-dialog__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.invite-dialog__action:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.invite-dialog__action--primary {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+
+.invite-dialog__action--primary:hover {
+  border-color: var(--color-primary-dark);
+  background: var(--color-primary-dark);
+}
+
+.invite-dialog__action svg {
+  flex: 0 0 auto;
+  font-size: 18px;
+}
+
+.invite-dialog__action:disabled,
+.invite-dialog__manage-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.invite-dialog__closed {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.invite-dialog__closed svg {
+  flex: 0 0 auto;
+  margin-top: 3px;
+}
+
+.invite-dialog__closed p {
+  margin: 0;
+}
+
+.invite-dialog__error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.invite-dialog__manage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.invite-dialog__manage-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.invite-dialog__manage-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-primary-dark);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.invite-dialog__manage-button:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.invite-dialog__hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+/* Celular: la hoja ocupa el ancho; los botones de compartir, uno sobre otro */
+@media (max-width: 640px) {
+  .invite-dialog__lead h2 {
+    font-size: 22px;
+  }
+
+  .invite-dialog__share {
+    grid-template-columns: 1fr;
+  }
+
+  .invite-dialog__manage-buttons {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .invite-dialog__manage-button {
+    justify-content: center;
+    min-height: 44px;
+  }
+}
