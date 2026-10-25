@@ -280,6 +280,30 @@
   color: var(--color-ai);
 }
 
+.loteria-card__guest-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-self: flex-start;
+  gap: 6px;
+}
+
+/* Fotos de invitados desde la última visita (FEAT-56); lleva a la lotería */
+.loteria-card__new-photos {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.loteria-card__new-photos:hover {
+  background: var(--color-primary-dark);
+}
+
 .loteria-card__collective {
   display: inline-flex;
   align-self: flex-start;

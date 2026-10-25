@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   GuestLoteriaRepository,
   type GuestCard,
@@ -6,6 +6,10 @@ import {
 } from '../../repositories/GuestLoteriaRepository';
 import type { LoteriaMember } from '../../utils/guestCards';
 import { logger } from '../../utils/logger';
+import { supabase } from '../../utils/supabaseClient';
+
+/** Si llegan varios avisos seguidos (una transformación, un lote), se recarga una sola vez. */
+const RELOAD_DELAY_MS = 800;
 
 export type GuestLoteriaState =
   | { kind: 'loading' }
@@ -48,6 +52,36 @@ export const useGuestLoteria = (setId: string | undefined, userId: string | unde
   useEffect(() => {
     load(true);
   }, [load]);
+
+  // Las cartas que se ven ahora, para reconocer los avisos de borrado (llegan sin la lotería)
+  const shownCardIds = useRef<ReadonlySet<string>>(new Set());
+  shownCardIds.current = new Set(state.kind === 'ready' ? state.cards.map((card) => card.id) : []);
+
+  // En vivo: lo que cambia el organizador u otro invitado (cartas nuevas, títulos, IA, borradas) se ve sin
+  // recargar (FEAT-56, US B4, decisión 17; avisos de la migración 065, con las reglas de acceso de `cards`).
+  useEffect(() => {
+    if (!setId || !userId) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const scheduleReload = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => load(false), RELOAD_DELAY_MS);
+    };
+    const filter = `set_id=eq.${setId}`;
+    const channel = supabase
+      .channel(`guest-loteria-${setId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'cards', filter }, scheduleReload)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'cards', filter }, scheduleReload)
+      // Realtime no filtra los borrados: solo cuentan los de cartas que están en pantalla
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'cards' }, (payload) => {
+        const id = (payload.old as { id?: string }).id;
+        if (id && shownCardIds.current.has(id)) scheduleReload();
+      })
+      .subscribe();
+    return () => {
+      clearTimeout(timer);
+      supabase.removeChannel(channel);
+    };
+  }, [setId, userId, load]);
 
   /** Vuelve a pedir la lotería sin mostrar la carga (después de subir fotos). */
   const reload = useCallback(() => load(false), [load]);

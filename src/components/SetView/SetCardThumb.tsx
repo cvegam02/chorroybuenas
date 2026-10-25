@@ -5,11 +5,15 @@ import { useComposedCard } from '../../hooks/useComposedCard';
 
 interface SetCardThumbProps {
   card: Card;
+  /** «Subida por …» en las cartas de invitados (FEAT-56). */
+  uploaderLabel?: string;
+  /** Llegó de un invitado desde la última visita (FEAT-56). */
+  isNew?: boolean;
   onOpen: () => void;
 }
 
 /** Una carta de la lista de la lotería guardada: como sale impresa; mientras no está lista, la foto con su nombre. */
-export const SetCardThumb = ({ card, onOpen }: SetCardThumbProps) => {
+export const SetCardThumb = ({ card, uploaderLabel, isNew = false, onOpen }: SetCardThumbProps) => {
   const { t } = useTranslation();
   const composedUrl = useComposedCard(card);
   const imageUrl = composedUrl ?? card.image;
@@ -33,7 +37,9 @@ export const SetCardThumb = ({ card, onOpen }: SetCardThumbProps) => {
         <span className="set-cards__placeholder">{t('setView.noImage')}</span>
       )}
       {card.isAiGenerated && <span className="set-cards__ai">{t('setView.aiBadge')}</span>}
+      {isNew && <span className="set-cards__new">{t('invite.newBadge')}</span>}
       {!composedUrl && <span className="set-cards__name">{card.title}</span>}
+      {uploaderLabel && <span className="set-cards__uploader">{uploaderLabel}</span>}
     </button>
   );
 };

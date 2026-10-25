@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FaCheck, FaCopy, FaLock, FaRedo, FaUsers, FaWhatsapp } from 'react-icons/fa';
+import { FaCheck, FaCopy, FaLock, FaRedo, FaUserFriends, FaUsers, FaWhatsapp } from 'react-icons/fa';
 import { usePageScrollLock } from '../../hooks/usePageScrollLock';
 import { LoteriaInviteRepository } from '../../repositories/LoteriaInviteRepository';
 import { inviteLink, whatsAppShareLink, type LoteriaInvite } from '../../utils/loteriaInvite';
@@ -13,6 +13,8 @@ interface InviteDialogProps {
   setName: string;
   /** La lotería ya tiene enlace: es «Colectiva». */
   onInviteReady: (invite: LoteriaInvite) => void;
+  /** Abre «Invitados» (M19, US B4). */
+  onShowInvitees: () => void;
   onClose: () => void;
 }
 
@@ -20,7 +22,7 @@ interface InviteDialogProps {
  * M18 — «Invitar a subir fotos»: el enlace de la lotería, compartirlo, cerrarlo o cambiarlo (FEAT-56, US B1).
  * Usa el cascarón de las ventanas de cuenta: caja centrada en computadora y hoja desde abajo en celular.
  */
-export const InviteDialog = ({ setId, setName, onInviteReady, onClose }: InviteDialogProps) => {
+export const InviteDialog = ({ setId, setName, onInviteReady, onShowInvitees, onClose }: InviteDialogProps) => {
   const { t } = useTranslation();
   const [invite, setInvite] = useState<LoteriaInvite | null>(null);
   const [isBusy, setIsBusy] = useState(true);
@@ -125,6 +127,15 @@ export const InviteDialog = ({ setId, setName, onInviteReady, onClose }: InviteD
       {invite && (
         <div className="invite-dialog__manage">
           <div className="invite-dialog__manage-buttons">
+            <button
+              type="button"
+              className="invite-dialog__manage-button"
+              onClick={onShowInvitees}
+              disabled={isBusy}
+            >
+              <FaUserFriends aria-hidden="true" />
+              {t('invite.invitees')}
+            </button>
             {invite.isOpen && (
               <button
                 type="button"

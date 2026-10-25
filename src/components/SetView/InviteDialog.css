@@ -216,6 +216,69 @@
   font-size: 13px;
 }
 
+/* M19 — «Invitados» (FEAT-56, US B4): un renglón por invitado con sus fotos y «Quitar» */
+.invitees-dialog__list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.invitees-dialog__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.invitees-dialog__row:last-child {
+  border-bottom: none;
+}
+
+.invitees-dialog__who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.invitees-dialog__name {
+  overflow: hidden;
+  color: var(--color-text-main);
+  font-size: 15px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invitees-dialog__count {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.invitees-dialog__confirm {
+  display: flex;
+  flex: 1 0 100%;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.invitees-dialog__confirm p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.invite-dialog__manage-button.invitees-dialog__remove {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+  color: var(--color-text-inverted);
+}
+
 /* Celular: la hoja ocupa el ancho; los botones de compartir, uno sobre otro */
 @media (max-width: 640px) {
   .invite-dialog__lead h2 {

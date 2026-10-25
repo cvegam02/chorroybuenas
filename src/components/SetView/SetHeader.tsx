@@ -20,6 +20,8 @@ export interface SetHeaderDetails {
   state: SetViewState;
   /** Tiene enlace para invitar a subir fotos (FEAT-56). */
   isCollective: boolean;
+  /** Fotos de invitados que llegaron desde la última visita (FEAT-56). */
+  newPhotoCount: number;
 }
 
 interface SetHeaderProps {
@@ -209,6 +211,11 @@ export const SetHeader = ({
                   <li className="set-header__tag set-header__tag--collective">
                     <FaUsers aria-hidden="true" />
                     {t('invite.collective')}
+                  </li>
+                )}
+                {details.newPhotoCount > 0 && (
+                  <li className="set-header__tag set-header__tag--new">
+                    {t('invite.newPhotos', { count: details.newPhotoCount })}
                   </li>
                 )}
                 {tokensSpent > 0 && (

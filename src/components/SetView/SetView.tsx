@@ -7,6 +7,7 @@ import { useSetContext } from '../../contexts/SetContext';
 import { useCards } from '../../hooks/useCards';
 import { useBoard } from '../../hooks/useBoard';
 import { useGuestCardsLive } from '../../hooks/useGuestCardsLive';
+import { useOwnerGuestCards } from '../../hooks/useOwnerGuestCards';
 import { SetRepository, type LoteriaSet } from '../../repositories/SetRepository';
 import { TokenPricingRepository } from '../../repositories/TokenPricingRepository';
 import { BoardModal } from '../BoardGenerator/BoardModal';
@@ -17,6 +18,7 @@ import { SetConfirmDialog } from './SetConfirmDialog';
 import { PdfProgressDialog } from './PdfProgressDialog';
 import { SetHeader } from './SetHeader';
 import { InviteDialog } from './InviteDialog';
+import { InviteesDialog } from './InviteesDialog';
 import { LoteriaInviteRepository } from '../../repositories/LoteriaInviteRepository';
 import { SetStatusNotice } from './SetStatusNotice';
 import { setViewStateOf } from './setViewState';
@@ -49,7 +51,8 @@ export const SetView = () => {
   const [tokensSpentInSet, setTokensSpentInSet] = useState<number | null>(null);
   const [fetchedSet, setFetchedSet] = useState<LoteriaSet | null>(null);
   const [isCollective, setIsCollective] = useState(false);
-  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  // M18 (el enlace) o M19 (los invitados), que se abre desde M18
+  const [guestDialog, setGuestDialog] = useState<'invite' | 'invitees' | null>(null);
 
   useEffect(() => {
     if (setId) setCurrentSetId(setId);
@@ -91,8 +94,13 @@ export const SetView = () => {
     return () => { cancelled = true; };
   }, [setId, userId]);
 
-  // En una lotería colectiva, las fotos de los invitados aparecen solas (FEAT-56)
-  useGuestCardsLive(setId, isCollective, refreshFromCloud);
+  // Quién subió cada carta y cuáles son nuevas; las fotos de los invitados aparecen solas (FEAT-56)
+  const guestCards = useOwnerGuestCards(setId, isCollective);
+  const refreshGuestCards = guestCards.refresh;
+  useGuestCardsLive(setId, isCollective, () => {
+    void refreshFromCloud();
+    refreshGuestCards();
+  });
 
   useEffect(() => {
     if (authLoading) return;
@@ -217,6 +225,7 @@ export const SetView = () => {
                   tokensSpent: tokensSpentInSet,
                   state: viewState,
                   isCollective,
+                  newPhotoCount: cards.filter((card) => guestCards.newCardIds.has(card.id)).length,
                 }
               : null
           }
@@ -228,7 +237,7 @@ export const SetView = () => {
             enterFullscreen();
             navigate(`/loteria/${setId}/cantar`);
           }}
-          onInvite={() => setShowInviteDialog(true)}
+          onInvite={() => setGuestDialog('invite')}
           onShuffleBoards={() => setShowRegenerateBoardsModal(true)}
           onClearBoards={() => setShowClearBoardsModal(true)}
           onDelete={() => setShowDeleteDialog(true)}
@@ -251,7 +260,14 @@ export const SetView = () => {
               </p>
             )}
 
-            <SetCardsSection cards={cards} state={viewState} gridSize={gridSize} onOpenCard={setSelectedCardIndex} />
+            <SetCardsSection
+              cards={cards}
+              state={viewState}
+              gridSize={gridSize}
+              members={guestCards.members}
+              newCardIds={guestCards.newCardIds}
+              onOpenCard={setSelectedCardIndex}
+            />
 
             <SetBoardsSection
               boards={boardsWithHydratedImages}
@@ -311,12 +327,21 @@ export const SetView = () => {
           />
         )}
 
-        {showInviteDialog && (
+        {guestDialog === 'invite' && (
           <InviteDialog
             setId={setId}
             setName={setName}
             onInviteReady={() => setIsCollective(true)}
-            onClose={() => setShowInviteDialog(false)}
+            onShowInvitees={() => setGuestDialog('invitees')}
+            onClose={() => setGuestDialog(null)}
+          />
+        )}
+
+        {guestDialog === 'invitees' && (
+          <InviteesDialog
+            setId={setId}
+            onBack={() => setGuestDialog('invite')}
+            onClose={() => setGuestDialog(null)}
           />
         )}
 

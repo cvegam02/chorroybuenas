@@ -87,6 +87,34 @@
   line-height: 1.4;
 }
 
+/* Carta de un invitado que llegó desde la última visita (FEAT-56) */
+.set-cards__new {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--color-card-ink) 25%, transparent);
+  color: var(--color-text-inverted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* Quién subió la carta, en las de invitados (FEAT-56) */
+.set-cards__uploader {
+  display: block;
+  overflow: hidden;
+  padding: 4px 6px 6px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* El nombre bajo la foto: solo mientras la carta todavía no se ve como sale impresa */
 .set-cards__name {
   display: block;
@@ -141,6 +169,18 @@
   }
 
   .set-cards__name {
+    padding: 3px 4px 4px;
+    font-size: 10px;
+  }
+
+  .set-cards__new {
+    top: 4px;
+    left: 4px;
+    padding: 1px 5px;
+    font-size: 10px;
+  }
+
+  .set-cards__uploader {
     padding: 3px 4px 4px;
     font-size: 10px;
   }

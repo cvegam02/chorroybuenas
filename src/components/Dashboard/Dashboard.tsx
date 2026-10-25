@@ -42,6 +42,7 @@ export const Dashboard = () => {
   const [totalGifted, setTotalGifted] = useState<number>(0);
   const [tokensSpentBySet, setTokensSpentBySet] = useState<Record<string, number>>({});
   const [collectiveSetIds, setCollectiveSetIds] = useState<ReadonlySet<string>>(new Set());
+  const [newGuestCardCounts, setNewGuestCardCounts] = useState<ReadonlyMap<string, number>>(new Map());
   const [isPurchaseHistoryOpen, setIsPurchaseHistoryOpen] = useState(false);
   const [purchaseHistory, setPurchaseHistory] = useState<TokenHistoryEntry[]>([]);
   const [purchaseHistoryLoading, setPurchaseHistoryLoading] = useState(true);
@@ -102,6 +103,10 @@ export const Dashboard = () => {
           LoteriaInviteRepository.listCollectiveSetIds()
             .then(setCollectiveSetIds)
             .catch((e) => logger.error('Error loading loteria invites:', e)),
+          // Si no carga, no sale «N fotos nuevas» (FEAT-56)
+          LoteriaInviteRepository.listNewGuestCardCounts()
+            .then(setNewGuestCardCounts)
+            .catch((e) => logger.error('Error loading new guest cards:', e)),
           loadHistory(),
         ]);
       } catch (e) {
@@ -212,6 +217,7 @@ export const Dashboard = () => {
             onRetry={setSummaries.retry}
             tokensSpentBySet={tokensSpentBySet}
             collectiveSetIds={collectiveSetIds}
+            newGuestCardCounts={newGuestCardCounts}
             giftTokens={initialTokens}
             isCreating={isCreatingSet}
             onCreate={handleCreateSet}

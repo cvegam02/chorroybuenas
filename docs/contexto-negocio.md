@@ -175,8 +175,8 @@ El administrador puede: _(confirmado el 2026-10-06)_
 | Compra de lotería temática (`seasonal_purchases`) — por construir | Monto pagado, pago de Mercado Pago y estado | Pertenece a un usuario y a una lotería temática |
 | Juego de «Arma tus tableros» (`traditional_games`) | Nombre, modo y sus hasta 50 tableros (números de carta, casillas vacías y cartas fijadas) | Pertenece a un usuario (2026-10-22, FEAT-53) |
 | Audio de carta | El audio con voz de IA del título de una carta, para el cantador | Pertenece a una carta; se borra con ella (2026-10-23, FEAT-55). La lotería guarda qué voz se escogió (2026-10-24) |
-| Invitación de lotería — por construir | Código del enlace y si está abierto | Pertenece a una lotería; una vigente a la vez (2026-10-24, FEAT-56) |
-| Invitado de lotería — por construir | Quién entró con el enlace, cuándo y si el organizador lo quitó | Une a un usuario con una lotería. La carta guarda quién la subió (2026-10-24, FEAT-56) |
+| Invitación de lotería | Código del enlace, si está abierto y hasta cuándo el dueño ya vio las fotos de sus invitados | Pertenece a una lotería; una vigente a la vez (2026-10-24, FEAT-56) |
+| Invitado de lotería | Quién entró con el enlace, cuándo y si el organizador lo quitó | Une a un usuario con una lotería. La carta guarda quién la subió (2026-10-24, FEAT-56) |
 
 ## 12. Permisos de acceso a datos — DEFINIDO
 
@@ -196,8 +196,8 @@ El administrador puede: _(confirmado el 2026-10-06)_
 | Compras de loterías temáticas | Su dueño; los administradores | Solo el servidor |
 | Juegos de «Arma tus tableros» | Su dueño | Su dueño (sin sesión, nadie; 2026-10-22, FEAT-53) |
 | Audios de las cartas (voz con IA del cantador) | Su dueño | Solo el servidor (2026-10-23, FEAT-55) |
-| Cartas e imágenes de una lotería colectiva | Su dueño; sus invitados | Su dueño; sus invitados solo agregan cartas nuevas, mientras el enlace esté abierto (2026-10-24, FEAT-56; por construir) |
-| Invitación e invitados de una lotería | Su dueño (el invitado ve solo que él participa) | Su dueño; el invitado se une con el enlace abierto (2026-10-24, FEAT-56; por construir) |
+| Cartas e imágenes de una lotería colectiva | Su dueño; sus invitados | Su dueño; sus invitados solo agregan cartas nuevas, mientras el enlace esté abierto (2026-10-24, FEAT-56) |
+| Invitación e invitados de una lotería | Su dueño (el invitado ve solo que él participa) | Su dueño; el invitado se une con el enlace abierto (2026-10-24, FEAT-56) |
 
 Decidido el 2026-10-06 (remediación del code review). El detalle técnico está en las migraciones 022 a 025. Los cinco renglones de loterías temáticas se agregaron el 2026-10-06 (FEAT-17) y están por construir.
 
@@ -407,5 +407,5 @@ Sirven para juntar las fotos de varias personas: el dueño de una lotería manda
 - **Invitados:** necesitan cuenta. Quien abre el enlace sin sesión crea su cuenta (con sus tokens de bienvenida, §7) o entra, y queda como invitado de esa lotería. Entrar de nuevo no lo duplica. El dueño que abre su propio enlace llega a su lotería. Quien crea su cuenta con correo desde el enlace regresa a él al confirmar su correo; con Google, también _(2026-10-24, FEAT-56)_. La página del enlace muestra el nombre de la lotería, cuántas cartas lleva y el nombre de quien la organiza tal como está en su cuenta; si no tiene nombre, no se muestra organizador. Nunca se muestra su correo _(2026-10-24, FEAT-56)_.
 - **Qué hace el invitado:** ve todas las cartas de la lotería, con quién subió cada una, y agrega fotos con su título. Las fotos entran directo, sin aprobación, al final de la baraja con su número (§4), con las mismas reglas del título (único en la lotería, sin emojis) y el aviso de contenido permitido (§6). No hay límite de fotos por invitado. No puede cambiar ni borrar cartas, ni siquiera las suyas, ni usar la IA, los tableros, el PDF o el cantador de esa lotería. Si el enlace se cierra, sigue viendo la lotería, pero ya no puede subir.
 - **Qué hace el dueño:** con las cartas de sus invitados hace lo mismo que con las suyas: cambiar el título, borrarlas y transformarlas con IA, con sus propios tokens. Ve la lista de invitados con cuántas fotos subió cada uno y puede quitar a cualquiera: el invitado pierde el acceso y sus fotos se quedan en la lotería. Un invitado quitado no puede volver a unirse con el enlace, aunque siga abierto _(2026-10-24, FEAT-56)_.
-- **Aviso al dueño:** un contador «N fotos nuevas» en la lotería, en Mi cuenta (U1) y en la lotería (U2), que se borra al abrirla. No se manda correo (§13 no cambia).
+- **Aviso al dueño:** un contador «N fotos nuevas» en la lotería, en Mi cuenta (U1) y en la lotería (U2), que se borra al abrirla. No se manda correo (§13 no cambia). En U2 el aviso se ve durante la visita en que se abre la lotería, con cada foto nueva marcada; abrirla ya las cuenta como vistas, así que en U1 desaparece y la siguiente visita ya no lo muestra _(2026-10-24, FEAT-56, decisión 16)_.
 - **Contenido permitido:** las fotos que suben los invitados sin IA no pasan por ningún filtro (§6). Lo mitigan que los invitados tienen cuenta y que el dueño puede borrar cualquier carta.

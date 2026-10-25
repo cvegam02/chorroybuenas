@@ -14,6 +14,8 @@ interface LoteriaCardProps {
   tokensSpent: number;
   /** Tiene enlace para invitar a subir fotos (FEAT-56). */
   isCollective: boolean;
+  /** Fotos de invitados que llegaron desde la última vez que la abrió (FEAT-56). */
+  newPhotoCount: number;
   onEditCards: () => void;
   onMakeBoards: () => void;
   /** Se está armando el PDF de esta lotería. */
@@ -29,6 +31,7 @@ export const LoteriaCard = ({
   summary,
   tokensSpent,
   isCollective,
+  newPhotoCount,
   onEditCards,
   onMakeBoards,
   isDownloading,
@@ -138,11 +141,20 @@ export const LoteriaCard = ({
             )}
           </p>
         )}
-        {isCollective && (
-          <span className="loteria-card__collective">
-            <FaUsers aria-hidden="true" />
-            {t('invite.collective')}
-          </span>
+        {(isCollective || newPhotoCount > 0) && (
+          <div className="loteria-card__guest-tags">
+            {isCollective && (
+              <span className="loteria-card__collective">
+                <FaUsers aria-hidden="true" />
+                {t('invite.collective')}
+              </span>
+            )}
+            {newPhotoCount > 0 && (
+              <Link to={openPath} className="loteria-card__new-photos">
+                {t('invite.newPhotos', { count: newPhotoCount })}
+              </Link>
+            )}
+          </div>
         )}
         {renderStatus()}
         <div className="loteria-card__actions">
