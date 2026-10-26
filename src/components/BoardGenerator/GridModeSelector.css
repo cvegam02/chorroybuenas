@@ -88,3 +88,12 @@
     color: var(--color-text-muted);
     font-size: 13px;
 }
+
+.grid-mode-option:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.grid-mode-option:disabled:not(.grid-mode-option--active):hover {
+    border-color: var(--color-primary-lightest);
+}

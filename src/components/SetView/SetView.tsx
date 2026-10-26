@@ -1,16 +1,23 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaRandom, FaRegWindowClose } from 'react-icons/fa';
+import { FaRegWindowClose } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSetContext } from '../../contexts/SetContext';
 import { useCards } from '../../hooks/useCards';
+import { useCardLabelsChoice } from '../../hooks/useCardLabelsChoice';
+import { useDeckEditing } from '../CardEditor/useDeckEditing';
+import { DeckDialogs } from '../CardEditor/DeckDialogs';
+import { SetCardSettingsDialog } from './SetCardSettingsDialog';
 import { useBoard } from '../../hooks/useBoard';
 import { useGuestCardsLive } from '../../hooks/useGuestCardsLive';
 import { useOwnerGuestCards } from '../../hooks/useOwnerGuestCards';
+import { useLoteriaSharing } from '../../hooks/useLoteriaSharing';
 import { SetRepository, type LoteriaSet } from '../../repositories/SetRepository';
 import { TokenPricingRepository } from '../../repositories/TokenPricingRepository';
 import { BoardModal } from '../BoardGenerator/BoardModal';
+import { BoardCountSelector } from '../BoardGenerator/BoardCountSelector';
+import { AuthDialog } from '../Auth/AuthDialog';
 import { CardPreviewModal } from './CardPreviewModal';
 import { SetBoardsSection } from './SetBoardsSection';
 import { SetCardsSection } from './SetCardsSection';
@@ -18,7 +25,6 @@ import { SetConfirmDialog } from './SetConfirmDialog';
 import { PdfProgressDialog } from './PdfProgressDialog';
 import { SetHeader } from './SetHeader';
 import { InviteDialog } from './InviteDialog';
-import { InviteesDialog } from './InviteesDialog';
 import { LoteriaInviteRepository } from '../../repositories/LoteriaInviteRepository';
 import { SetStatusNotice } from './SetStatusNotice';
 import { setViewStateOf } from './setViewState';
@@ -30,7 +36,7 @@ import { logger } from '../../utils/logger';
 import { pdfErrorMessage } from '../../utils/pdfErrorMessage';
 import { enterFullscreen } from '../../utils/fullscreen';
 import { withNumbersFrom } from '../../utils/cardNumbers';
-import { cardLabelsOrDefault } from '../../utils/cardLabels';
+import { cardLabelsOrDefault, type CardLabels } from '../../utils/cardLabels';
 import { CardLabelsProvider } from '../../contexts/CardLabelsContext';
 
 export const SetView = () => {
@@ -39,20 +45,27 @@ export const SetView = () => {
   const { t } = useTranslation();
   const { user, isLoading: authLoading } = useAuth();
   const { sets, setSets, refreshSets, currentSetId, setCurrentSetId } = useSetContext();
-  const { cards, isLoading: cardsLoading, refreshFromCloud } = useCards();
-  const { boards, clearBoards, isBoardsLoading } = useBoard();
+  const cardsApi = useCards();
+  const { cards, isLoading: cardsLoading, refreshFromCloud } = cardsApi;
+  // Las cartas se editan aquí mismo, con las mismas ventanas que C1 (FEAT-57)
+  const deck = useDeckEditing(cardsApi);
+  const { labels: cardLabels, changeLabels } = useCardLabelsChoice();
+  const [showSettings, setShowSettings] = useState(false);
+  const [labelsError, setLabelsError] = useState(false);
+  const { boards, clearBoards, isBoardsLoading, generateBoards, isGenerating } = useBoard();
   const [selectedBoardIndex, setSelectedBoardIndex] = useState<number | null>(null);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [showClearBoardsModal, setShowClearBoardsModal] = useState(false);
-  const [showRegenerateBoardsModal, setShowRegenerateBoardsModal] = useState(false);
+  // Ventana para elegir cuántos tableros: armarlos por primera vez o revolverlos (FEAT-57)
+  const [boardsDialog, setBoardsDialog] = useState<'build' | 'shuffle' | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [tokensSpentInSet, setTokensSpentInSet] = useState<number | null>(null);
   const [fetchedSet, setFetchedSet] = useState<LoteriaSet | null>(null);
   const [isCollective, setIsCollective] = useState(false);
-  // M18 (el enlace) o M19 (los invitados), que se abre desde M18
-  const [guestDialog, setGuestDialog] = useState<'invite' | 'invitees' | null>(null);
+  // M18: el enlace y, si ya es colectiva, quiénes participan (FEAT-57, US A4)
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
 
   useEffect(() => {
     if (setId) setCurrentSetId(setId);
@@ -94,12 +107,16 @@ export const SetView = () => {
     return () => { cancelled = true; };
   }, [setId, userId]);
 
+  const loteriaSharing = useLoteriaSharing(setId, isCollective);
+
   // Quién subió cada carta y cuáles son nuevas; las fotos de los invitados aparecen solas (FEAT-56)
   const guestCards = useOwnerGuestCards(setId, isCollective);
   const refreshGuestCards = guestCards.refresh;
   useGuestCardsLive(setId, isCollective, () => {
     void refreshFromCloud();
     refreshGuestCards();
+    // Una foto nueva puede ser de alguien que acaba de unirse: «Compartida · N» se vuelve a contar, una vez por tanda
+    loteriaSharing.refreshSoon();
   });
 
   useEffect(() => {
@@ -110,6 +127,10 @@ export const SetView = () => {
     }
   }, [authLoading, user, setId, navigate]);
 
+  // «Armar tableros» desde Mi cuenta abre la ventana de tableros al llegar (FEAT-57)
+  const location = useLocation();
+  const openBoardsOnArrival = (location.state as { openBoards?: boolean } | null)?.openBoards === true;
+
   const set = sets.find(s => s.id === setId) ?? fetchedSet ?? null;
   const setName = set?.name ?? t('setView.defaultSetName');
   const isSynced = Boolean(setId && currentSetId === setId);
@@ -117,6 +138,12 @@ export const SetView = () => {
   /** grid_size del set: 9 (3x3 Kids) o 16 (4x4 Classic). Desde DB (set) o tableros existentes. */
   const gridSize: GridSize = set?.grid_size ?? (boards.length > 0 ? (boards[0].gridSize ?? 16) : 16);
   const isLoaded = isSynced && !cardsLoading && !isBoardsLoading;
+  useEffect(() => {
+    if (!openBoardsOnArrival || !isLoaded) return;
+    if (boards.length === 0) setBoardsDialog('build');
+    navigate(location.pathname, { replace: true, state: null });
+  }, [openBoardsOnArrival, isLoaded, boards.length, navigate, location.pathname]);
+
   const selectedCard = selectedCardIndex !== null ? cards[selectedCardIndex] ?? null : null;
   const viewState = setViewStateOf({ cardCount: cards.length, boardCount: boards.length, gridSize });
 
@@ -141,6 +168,24 @@ export const SetView = () => {
     setSets(prev => prev.map(s => (s.id === setId ? { ...s, name: updated.name } : s)));
   };
 
+  /** Tipo de lotería desde «Ajustes»; solo sin tableros, que son de un tipo. */
+  const changeGridSize = async (size: GridSize) => {
+    if (!setId || !user || boards.length > 0 || size === gridSize) return;
+    try {
+      const updated = await SetRepository.updateSet(setId, user.id, { grid_size: size });
+      setSets(prev => prev.map(s => (s.id === setId ? { ...s, grid_size: updated.grid_size } : s)));
+      setFetchedSet(prev => (prev ? { ...prev, grid_size: updated.grid_size } : prev));
+    } catch (err) {
+      logger.error('Error saving grid size:', err);
+      alert(t('common.error'));
+    }
+  };
+
+  const changeCardLabels = async (labels: CardLabels) => {
+    setLabelsError(false);
+    setLabelsError(!(await changeLabels(labels)));
+  };
+
   const handleDownloadPDF = async () => {
     if (boards.length === 0) return;
     setPdfError(null);
@@ -160,15 +205,16 @@ export const SetView = () => {
     }
   };
 
-  const handleConfirmRegenerateBoards = async () => {
+  /** Arma los tableros elegidos en la ventana; los de antes se reemplazan. */
+  const handleGenerateBoards = async (count: number, size: GridSize) => {
     try {
-      await clearBoards();
+      await generateBoards(count, size);
       setSelectedBoardIndex(null);
-      setShowRegenerateBoardsModal(false);
-      navigate('/board-count', { state: { gridSize } });
+      setBoardsDialog(null);
     } catch (err) {
-      logger.error('Error clearing boards before regenerate:', err);
-      alert(t('common.error'));
+      logger.error('Error generating boards:', err);
+      const message = err instanceof Error ? err.message : t('common.error');
+      alert(`${t('boardGenerator.errors.generateError')}: ${message}. ${t('boardGenerator.errors.tryAgain')}`);
     }
   };
 
@@ -211,7 +257,7 @@ export const SetView = () => {
   }
 
   return (
-    <CardLabelsProvider value={cardLabelsOrDefault(set?.card_labels)}>
+    <CardLabelsProvider value={cardLabels}>
       <div className="set-view">
         <SetHeader
           name={setName}
@@ -226,6 +272,7 @@ export const SetView = () => {
                   state: viewState,
                   isCollective,
                   newPhotoCount: cards.filter((card) => guestCards.newCardIds.has(card.id)).length,
+                  sharing: loteriaSharing.sharing,
                 }
               : null
           }
@@ -237,8 +284,9 @@ export const SetView = () => {
             enterFullscreen();
             navigate(`/loteria/${setId}/cantar`);
           }}
-          onInvite={() => setGuestDialog('invite')}
-          onShuffleBoards={() => setShowRegenerateBoardsModal(true)}
+          onInvite={() => setIsInviteOpen(true)}
+          onAddPhotos={deck.openFilePicker}
+          onShuffleBoards={() => setBoardsDialog('shuffle')}
           onClearBoards={() => setShowClearBoardsModal(true)}
           onDelete={() => setShowDeleteDialog(true)}
         />
@@ -253,7 +301,13 @@ export const SetView = () => {
           </div>
         ) : (
           <div className="set-view__body">
-            <SetStatusNotice state={viewState} gridSize={gridSize} cardCount={cards.length} boardCount={boards.length} />
+            <SetStatusNotice
+              state={viewState}
+              cardCount={cards.length}
+              boardCount={boards.length}
+              onBuildBoards={() => setBoardsDialog('build')}
+              onAddPhotos={deck.openFilePicker}
+            />
             {pdfError && (
               <p className="set-view__error" role="alert">
                 {pdfError}
@@ -261,12 +315,12 @@ export const SetView = () => {
             )}
 
             <SetCardsSection
-              cards={cards}
               state={viewState}
-              gridSize={gridSize}
+              deck={deck}
               members={guestCards.members}
               newCardIds={guestCards.newCardIds}
               onOpenCard={setSelectedCardIndex}
+              onOpenSettings={() => setShowSettings(true)}
             />
 
             <SetBoardsSection
@@ -274,7 +328,8 @@ export const SetView = () => {
               state={viewState}
               gridSize={gridSize}
               onOpenBoard={setSelectedBoardIndex}
-              onShuffle={() => setShowRegenerateBoardsModal(true)}
+              onShuffle={() => setBoardsDialog('shuffle')}
+              onBuild={() => setBoardsDialog('build')}
             />
 
             {selectedCard && selectedCardIndex !== null && (
@@ -283,7 +338,10 @@ export const SetView = () => {
                 isOpen={true}
                 onClose={() => setSelectedCardIndex(null)}
                 navigation={{ index: selectedCardIndex, total: cards.length, onChange: setSelectedCardIndex }}
-                onEdit={() => navigate('/cards', { state: { gridSize, editCardId: selectedCard.id } })}
+                onEdit={() => {
+                  setSelectedCardIndex(null);
+                  deck.handleEditCard(selectedCard);
+                }}
               />
             )}
 
@@ -299,19 +357,40 @@ export const SetView = () => {
           </div>
         )}
 
+        <DeckDialogs deck={deck} />
+
+        {showSettings && (
+          <SetCardSettingsDialog
+            gridSize={gridSize}
+            hasBoards={boards.length > 0}
+            cardLabels={cardLabels}
+            labelsError={labelsError}
+            onGridSizeChange={changeGridSize}
+            onCardLabelsChange={changeCardLabels}
+            onClose={() => setShowSettings(false)}
+          />
+        )}
+
         {isGeneratingPDF && <PdfProgressDialog cards={cards} boardCount={boards.length} />}
 
-        {showRegenerateBoardsModal && (
-          <SetConfirmDialog
-            icon={<FaRandom />}
-            tone="primary"
-            title={t('setView.shuffleConfirmTitle', { count: boards.length })}
-            text={t('setView.shuffleConfirmText')}
-            confirmLabel={t('setView.shuffleConfirmAction')}
-            cancelLabel={t('common.cancel')}
-            onConfirm={handleConfirmRegenerateBoards}
-            onClose={() => setShowRegenerateBoardsModal(false)}
-          />
+        {boardsDialog && (
+          <AuthDialog
+            titleId="boards-dialog-title"
+            onClose={() => !isGenerating && setBoardsDialog(null)}
+            focusKey={boardsDialog}
+            variant="tall"
+          >
+            <BoardCountSelector
+              variant="dialog"
+              titleId="boards-dialog-title"
+              gridSize={gridSize}
+              initialCount={boardsDialog === 'shuffle' ? boards.length : undefined}
+              notice={boardsDialog === 'shuffle' ? t('setView.shuffleNotice', { count: boards.length }) : undefined}
+              isGenerating={isGenerating}
+              onGenerate={handleGenerateBoards}
+              onBack={() => setBoardsDialog(null)}
+            />
+          </AuthDialog>
         )}
 
         {showClearBoardsModal && (
@@ -327,21 +406,13 @@ export const SetView = () => {
           />
         )}
 
-        {guestDialog === 'invite' && (
+        {isInviteOpen && (
           <InviteDialog
             setId={setId}
             setName={setName}
             onInviteReady={() => setIsCollective(true)}
-            onShowInvitees={() => setGuestDialog('invitees')}
-            onClose={() => setGuestDialog(null)}
-          />
-        )}
-
-        {guestDialog === 'invitees' && (
-          <InviteesDialog
-            setId={setId}
-            onBack={() => setGuestDialog('invite')}
-            onClose={() => setGuestDialog(null)}
+            onSharingChange={loteriaSharing.refresh}
+            onClose={() => setIsInviteOpen(false)}
           />
         )}
 

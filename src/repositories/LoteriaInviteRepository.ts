@@ -34,6 +34,17 @@ export class LoteriaInviteRepository {
     return inviteFromRow(data);
   }
 
+  /** El enlace de la lotería, sin crearlo; null si no tiene (no es colectiva). Para «Compartida · N» (FEAT-57, US A4). */
+  static async get(setId: string): Promise<LoteriaInvite | null> {
+    const { data, error } = await supabase
+      .from('loteria_invites')
+      .select('set_id, code, is_open')
+      .eq('set_id', setId)
+      .maybeSingle();
+    if (error) throw error;
+    return data ? inviteFromRow(data) : null;
+  }
+
   /** Las loterías de la cuenta que son colectivas (tienen enlace, abierto o cerrado). */
   static async listCollectiveSetIds(): Promise<Set<string>> {
     const { data, error } = await supabase.from('loteria_invites').select('set_id');

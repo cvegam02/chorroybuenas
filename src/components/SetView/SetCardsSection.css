@@ -191,3 +191,83 @@
     font-size: 15px;
   }
 }
+
+/* Edición de cartas en U2 (FEAT-57): botones, saldo, recuadro para soltar fotos y la casilla «Agregar» */
+
+.set-cards__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.set-cards__balance {
+  margin: -8px 0 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.set-cards__balance a {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
+button.set-cards__slot {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.set-section--dropping {
+  outline: 3px dashed var(--color-primary);
+  outline-offset: 8px;
+  border-radius: var(--radius-md);
+}
+
+.set-cards__dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 48px 20px;
+  border: 2px dashed var(--color-primary-lighter);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.set-cards__dropzone:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: var(--color-primary-lightest);
+}
+
+.set-cards__dropzone svg {
+  color: var(--color-primary);
+  font-size: 28px;
+}
+
+.set-cards__dropzone strong {
+  color: var(--color-text-main);
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.set-cards__wide-only {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .set-cards__add-tile,
+  .set-cards__narrow-only {
+    display: none;
+  }
+
+  .set-cards__wide-only {
+    display: inline;
+  }
+}

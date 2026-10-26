@@ -22,9 +22,15 @@ interface CardPreviewProps {
   disabledDuringBatch?: boolean;
   /** Carta en transformación individual; mantiene overlay visible hasta que termine */
   isTransforming?: boolean;
+  /** Con mouse, tocar la carta la abre en grande en lugar de editarla; el lápiz sigue editando (U2, FEAT-57). */
+  onOpen?: (card: Card) => void;
+  /** «Subida por …» en las cartas de invitados (FEAT-56). */
+  uploaderLabel?: string;
+  /** Llegó de un invitado desde la última visita (FEAT-56). */
+  isNew?: boolean;
 }
 
-export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTransformButton, onClick, disabledDuringBatch, isTransforming }: CardPreviewProps) => {
+export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTransformButton, onClick, disabledDuringBatch, isTransforming, onOpen, uploaderLabel, isNew = false }: CardPreviewProps) => {
   const { t } = useTranslation();
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -47,7 +53,7 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
     if (isTouchDevice) {
       setShowActionsMenu(true);
     } else {
-      onClick?.(card);
+      (onOpen ?? onClick)?.(card);
     }
   };
 
@@ -100,7 +106,8 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
           <button
             type="button"
             className="card-sheet__item"
-            onClick={() => handleMenuAction(() => setShowLargeView(true))}
+            // En U2 abre la vista grande con flechas (M10) de la página; en C1, la de la carta
+            onClick={() => handleMenuAction(() => (onOpen ? onOpen(card) : setShowLargeView(true)))}
           >
             <FaSearchPlus aria-hidden="true" />
             <span>{t('cardEditor.cardActions.view')}</span>
@@ -155,17 +162,18 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
   return (
     <>
       <div
-        className={`card-preview ${onClick ? 'card-preview--clickable' : ''} ${disabledDuringBatch ? 'card-preview--batch-locked' : ''}`}
+        className={`card-preview ${onClick || onOpen ? 'card-preview--clickable' : ''} ${disabledDuringBatch ? 'card-preview--batch-locked' : ''}`}
         onClick={handleCardClick}
-        role={onClick ? "button" : undefined}
-        tabIndex={onClick ? 0 : undefined}
+        role={onClick || onOpen ? "button" : undefined}
+        tabIndex={onClick || onOpen ? 0 : undefined}
         onKeyDown={(e) => {
           if (disabledDuringBatch) return;
           // Solo cuando el foco está en la carta, no en uno de sus botones.
           if (e.target !== e.currentTarget) return;
-          if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+          const open = onOpen ?? onClick;
+          if (open && (e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault();
-            onClick(card);
+            open(card);
           }
         }}
       >
@@ -191,8 +199,10 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
           {card.isAiGenerated && !card.isProcessing && !isTransforming && (
             <span className="card-preview__ai-tag">{t('cardEditor.cardActions.aiTag')}</span>
           )}
+          {isNew && <span className="card-preview__new-tag">{t('invite.newBadge')}</span>}
         </div>
         {!composedUrl && <div className="card-preview__title">{card.title}</div>}
+        {uploaderLabel && <div className="card-preview__uploader">{uploaderLabel}</div>}
 
         {/* Con mouse: botones redondos de editar y borrar. Lo de la IA está en la ventana de editar. */}
         {!isTouchDevice && !disabledDuringBatch && (

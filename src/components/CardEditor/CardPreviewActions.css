@@ -14,6 +14,31 @@
   letter-spacing: 0.04em;
 }
 
+/* Foto de un invitado que llegó desde la última visita (FEAT-56), arriba a la derecha */
+.card-preview__new-tag {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* «Subida por …»: un renglón, recortado con «…» para no ensanchar la columna en celular */
+.card-preview__uploader {
+  overflow: hidden;
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .card-preview__image-container {
   position: relative;
 }

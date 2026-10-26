@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FaRandom } from 'react-icons/fa';
 import type { Board, GridSize } from '../../types';
@@ -14,6 +13,8 @@ interface SetBoardsSectionProps {
   /** Abre el tablero grande; recibe su lugar en la lista, empezando en 0. */
   onOpenBoard: (index: number) => void;
   onShuffle: () => void;
+  /** Abre la ventana para elegir cuántos tableros (FEAT-57). */
+  onBuild: () => void;
 }
 
 /** Tablerito dibujado, sin cartas: adorna el bloque de «todavía no hay tableros». */
@@ -29,7 +30,7 @@ const BlankBoard = ({ gridSize }: { gridSize: GridSize }) => (
  * Los tableros de una lotería guardada. Sin tableros muestra un bloque punteado: con el botón para armarlos
  * si las cartas ya alcanzan, o bloqueado mientras falten cartas.
  */
-export const SetBoardsSection = ({ boards, state, gridSize, onOpenBoard, onShuffle }: SetBoardsSectionProps) => {
+export const SetBoardsSection = ({ boards, state, gridSize, onOpenBoard, onShuffle, onBuild }: SetBoardsSectionProps) => {
   const { t } = useTranslation();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const hasBoards = boards.length > 0;
@@ -81,9 +82,9 @@ export const SetBoardsSection = ({ boards, state, gridSize, onOpenBoard, onShuff
               {t('setView.buildBoards')}
             </button>
           ) : (
-            <Link to="/board-count" state={{ gridSize }} className="set-button set-button--primary">
+            <button type="button" onClick={onBuild} className="set-button set-button--primary">
               {t('setView.buildBoards')}
-            </Link>
+            </button>
           )}
         </div>
       )}
