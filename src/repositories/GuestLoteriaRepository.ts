@@ -20,6 +20,17 @@ export interface GuestCard extends Card {
   uploadedBy: string | null;
 }
 
+/** Una lotería donde participa quien tiene la sesión («Loterías donde participo», US B5). */
+export interface MyGuestLoteria {
+  id: string;
+  name: string;
+  /** El nombre de la cuenta de quien organiza; null si no tiene. */
+  organizerName: string | null;
+  cardCount: number;
+  /** El enlace sigue abierto: puede subir fotos. */
+  canUpload: boolean;
+}
+
 export class GuestCardRejected extends Error {
   constructor(readonly reason: GuestCardError) {
     super(reason);
@@ -47,6 +58,26 @@ export class GuestLoteriaRepository {
       gridSize: data.grid_size === 9 ? 9 : 16,
       cardLabels: data.card_labels ?? undefined,
     };
+  }
+
+  /** Las loterías donde participa como invitado vigente, la más reciente primero (migración 067). */
+  static async listMine(): Promise<MyGuestLoteria[]> {
+    const { data, error } = await supabase.rpc('list_my_guest_loterias');
+    if (error) throw error;
+    const rows = (data ?? []) as Array<{
+      set_id: string;
+      name: string;
+      organizer_name: string | null;
+      card_count: number;
+      can_upload: boolean;
+    }>;
+    return rows.map((row) => ({
+      id: row.set_id,
+      name: row.name,
+      organizerName: row.organizer_name,
+      cardCount: row.card_count,
+      canUpload: row.can_upload,
+    }));
   }
 
   /** Si todavía puede subir fotos (es invitado y el enlace está abierto). */

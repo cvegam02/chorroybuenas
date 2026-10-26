@@ -9,6 +9,7 @@
 .set-cards__card {
   position: relative;
   display: block;
+  min-width: 0;
   padding: 0;
   border: none;
   border-radius: var(--radius-sm);
@@ -157,7 +158,8 @@
 
 @media (max-width: 768px) {
   .set-cards__grid {
-    grid-template-columns: repeat(4, 1fr);
+    /* minmax(0, …): un texto largo («Subida por …») no ensancha la columna, se recorta */
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
   }
 

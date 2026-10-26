@@ -12,6 +12,7 @@ import { AppConfigRepository } from '../../repositories/AppConfigRepository';
 import { PurchaseHistoryModal } from './PurchaseHistoryModal';
 import { buildTokenHistory, sumGiftTokens, summarizeTokens, type TokenHistoryEntry } from '../../utils/tokenHistory';
 import { ChangePasswordModal } from './ChangePasswordModal';
+import { MyGuestLoterias } from './MyGuestLoterias';
 import { MySeasonalLoterias } from './MySeasonalLoterias';
 import { MyTraditionalGames } from './MyTraditionalGames';
 import { TokenMovements } from './TokenMovements';
@@ -232,6 +233,7 @@ export const Dashboard = () => {
           />
 
           <div className="dashboard__columns">
+            <MyGuestLoterias />
             <MySeasonalLoterias />
             <MyTraditionalGames />
             <TokenMovements

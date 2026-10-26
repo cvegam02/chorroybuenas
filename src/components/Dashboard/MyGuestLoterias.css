@@ -1,0 +1,29 @@
+/* «Loterías donde participo» de Mi cuenta (U1, FEAT-56 US B5). Filas y tarjeta vienen de «Mis temáticas». */
+
+.my-guest-loterias__upload,
+.my-guest-loterias__closed {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.my-guest-loterias__upload {
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  text-decoration: none;
+}
+
+.my-guest-loterias__upload:hover {
+  background: var(--color-primary-dark);
+}
+
+.my-guest-loterias__closed {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+}
