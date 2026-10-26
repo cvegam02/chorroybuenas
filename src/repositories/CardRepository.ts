@@ -248,7 +248,8 @@ export class CardRepository {
             originalImage: dbCard.original_image_path ? urlMap.get(dbCard.original_image_path) : undefined,
             imagePath: dbCard.image_path ?? undefined,
             originalImagePath: dbCard.original_image_path ?? undefined,
-            isAiGenerated: dbCard.is_ai_generated
+            isAiGenerated: dbCard.is_ai_generated,
+            uploadedBy: dbCard.uploaded_by ?? undefined
         }));
     }
 

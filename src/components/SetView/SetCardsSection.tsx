@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FaPencilAlt, FaPlus } from 'react-icons/fa';
 import type { Card, GridSize } from '../../types';
+import { uploaderName, type LoteriaMember } from '../../utils/guestCards';
 import { SetCardThumb } from './SetCardThumb';
 import { missingCardNumbers, type SetViewState } from './setViewState';
 import './SetCardsSection.css';
@@ -10,15 +11,26 @@ interface SetCardsSectionProps {
   cards: Card[];
   state: SetViewState;
   gridSize: GridSize;
+  /** Quiénes participan en la lotería colectiva, para decir quién subió cada carta (FEAT-56). */
+  members: ReadonlyMap<string, LoteriaMember>;
+  /** Cartas de invitados nuevas en esta visita (FEAT-56). */
+  newCardIds: ReadonlySet<string>;
   /** Abre la carta grande; recibe su lugar en la lista, empezando en 0. */
   onOpenCard: (index: number) => void;
 }
 
 /** Las cartas de una lotería guardada: todas, y un espacio punteado por cada una que falta para el mínimo. */
-export const SetCardsSection = ({ cards, state, gridSize, onOpenCard }: SetCardsSectionProps) => {
+export const SetCardsSection = ({ cards, state, gridSize, members, newCardIds, onOpenCard }: SetCardsSectionProps) => {
   const { t } = useTranslation();
   const aiCount = cards.filter((card) => card.isAiGenerated).length;
   const cardsLink = { to: '/cards', state: { gridSize } };
+
+  // Solo las cartas de invitados dicen quién las subió; las del dueño no llevan nada
+  const uploaderLabel = (card: Card) => {
+    if (!card.uploadedBy) return undefined;
+    const uploader = uploaderName(card.uploadedBy, members);
+    return uploader.kind === 'named' ? t('guest.uploadedBy', { name: uploader.name }) : t('guest.uploadedByGuest');
+  };
 
   return (
     <section className="set-section">
@@ -39,7 +51,13 @@ export const SetCardsSection = ({ cards, state, gridSize, onOpenCard }: SetCards
 
       <div className="set-cards__grid">
         {cards.map((card, index) => (
-          <SetCardThumb key={card.id} card={card} onOpen={() => onOpenCard(index)} />
+          <SetCardThumb
+            key={card.id}
+            card={card}
+            uploaderLabel={uploaderLabel(card)}
+            isNew={newCardIds.has(card.id)}
+            onOpen={() => onOpenCard(index)}
+          />
         ))}
         {missingCardNumbers(state, cards.length).map((number) => (
           <Link

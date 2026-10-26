@@ -12,12 +12,14 @@ import { AppConfigRepository } from '../../repositories/AppConfigRepository';
 import { PurchaseHistoryModal } from './PurchaseHistoryModal';
 import { buildTokenHistory, sumGiftTokens, summarizeTokens, type TokenHistoryEntry } from '../../utils/tokenHistory';
 import { ChangePasswordModal } from './ChangePasswordModal';
+import { MyGuestLoterias } from './MyGuestLoterias';
 import { MySeasonalLoterias } from './MySeasonalLoterias';
 import { MyTraditionalGames } from './MyTraditionalGames';
 import { TokenMovements } from './TokenMovements';
 import { AccountHeader } from './AccountHeader';
 import { AccountDetails } from './AccountDetails';
 import { MyLoterias, LOTERIAS_SECTION_ID } from './MyLoterias';
+import { LoteriaInviteRepository } from '../../repositories/LoteriaInviteRepository';
 import { useSetSummaries } from '../../hooks/useSetSummaries';
 import { useSetPdfDownload } from '../../hooks/useSetPdfDownload';
 import { gridSizeOfSet, setStatusOf } from '../../utils/setSummary';
@@ -40,6 +42,8 @@ export const Dashboard = () => {
   const [totalSpent, setTotalSpent] = useState<number | null>(null);
   const [totalGifted, setTotalGifted] = useState<number>(0);
   const [tokensSpentBySet, setTokensSpentBySet] = useState<Record<string, number>>({});
+  const [collectiveSetIds, setCollectiveSetIds] = useState<ReadonlySet<string>>(new Set());
+  const [newGuestCardCounts, setNewGuestCardCounts] = useState<ReadonlyMap<string, number>>(new Map());
   const [isPurchaseHistoryOpen, setIsPurchaseHistoryOpen] = useState(false);
   const [purchaseHistory, setPurchaseHistory] = useState<TokenHistoryEntry[]>([]);
   const [purchaseHistoryLoading, setPurchaseHistoryLoading] = useState(true);
@@ -96,6 +100,14 @@ export const Dashboard = () => {
           TokenPricingRepository.getTotalTokensReceived(userId).then(setTotalReceived),
           TokenPricingRepository.getTotalTokensSpent(userId).then(setTotalSpent),
           TokenPricingRepository.getTokensSpentBySet(userId).then(setTokensSpentBySet),
+          // Si no carga, las loterías salen sin la etiqueta «Colectiva» (FEAT-56)
+          LoteriaInviteRepository.listCollectiveSetIds()
+            .then(setCollectiveSetIds)
+            .catch((e) => logger.error('Error loading loteria invites:', e)),
+          // Si no carga, no sale «N fotos nuevas» (FEAT-56)
+          LoteriaInviteRepository.listNewGuestCardCounts()
+            .then(setNewGuestCardCounts)
+            .catch((e) => logger.error('Error loading new guest cards:', e)),
           loadHistory(),
         ]);
       } catch (e) {
@@ -205,6 +217,8 @@ export const Dashboard = () => {
             hasError={setSummaries.hasError}
             onRetry={setSummaries.retry}
             tokensSpentBySet={tokensSpentBySet}
+            collectiveSetIds={collectiveSetIds}
+            newGuestCardCounts={newGuestCardCounts}
             giftTokens={initialTokens}
             isCreating={isCreatingSet}
             onCreate={handleCreateSet}
@@ -219,6 +233,7 @@ export const Dashboard = () => {
           />
 
           <div className="dashboard__columns">
+            <MyGuestLoterias />
             <MySeasonalLoterias />
             <MyTraditionalGames />
             <TokenMovements

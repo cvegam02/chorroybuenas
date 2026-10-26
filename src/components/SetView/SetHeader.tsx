@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaArrowLeft, FaBullhorn, FaDownload, FaPencilAlt, FaPlus } from 'react-icons/fa';
+import { FaArrowLeft, FaBullhorn, FaDownload, FaPencilAlt, FaPlus, FaUsers } from 'react-icons/fa';
 import type { Card, GridSize } from '../../types';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { logger } from '../../utils/logger';
@@ -18,6 +18,10 @@ export interface SetHeaderDetails {
   /** Tokens gastados en esta lotería; null si no se sabe. */
   tokensSpent: number | null;
   state: SetViewState;
+  /** Tiene enlace para invitar a subir fotos (FEAT-56). */
+  isCollective: boolean;
+  /** Fotos de invitados que llegaron desde la última visita (FEAT-56). */
+  newPhotoCount: number;
 }
 
 interface SetHeaderProps {
@@ -35,6 +39,8 @@ interface SetHeaderProps {
   onDownload: () => void;
   /** Abre el cantador (FEAT-55). */
   onSing: () => void;
+  /** Abre «Invitar a subir fotos» (FEAT-56, M18). */
+  onInvite: () => void;
   onShuffleBoards: () => void;
   onClearBoards: () => void;
   onDelete: () => void;
@@ -50,6 +56,7 @@ export const SetHeader = ({
   onRename,
   onDownload,
   onSing,
+  onInvite,
   onShuffleBoards,
   onClearBoards,
   onDelete,
@@ -200,6 +207,17 @@ export const SetHeader = ({
                 {details.boardCount > 0 && (
                   <li className="set-header__tag">{t('setView.boards', { count: details.boardCount })}</li>
                 )}
+                {details.isCollective && (
+                  <li className="set-header__tag set-header__tag--collective">
+                    <FaUsers aria-hidden="true" />
+                    {t('invite.collective')}
+                  </li>
+                )}
+                {details.newPhotoCount > 0 && (
+                  <li className="set-header__tag set-header__tag--new">
+                    {t('invite.newPhotos', { count: details.newPhotoCount })}
+                  </li>
+                )}
                 {tokensSpent > 0 && (
                   <li className="set-header__tag set-header__tag--tokens">
                     {t('dashboard.loterias.tokensUsed', { count: tokensSpent })}
@@ -223,6 +241,10 @@ export const SetHeader = ({
                 </button>
               )}
               {singButton}
+              <button type="button" className="set-button set-button--secondary" onClick={onInvite}>
+                <FaUsers aria-hidden="true" />
+                {t('invite.open')}
+              </button>
               {details.state.kind === 'missingCards' ? (
                 <Link {...cardsLink} className="set-button set-button--primary set-button--large">
                   <FaPlus aria-hidden="true" />

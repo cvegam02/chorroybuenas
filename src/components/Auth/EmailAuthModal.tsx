@@ -14,6 +14,8 @@ interface EmailAuthModalProps {
   initialMode?: 'login' | 'signup';
   /** Ruta del sitio a la que regresa quien entra con Google desde esta ventana; sin ella, Mi cuenta. */
   googleReturnPath?: string;
+  /** Ruta a la que regresa el correo de confirmación de quien crea su cuenta aquí (FEAT-56: el enlace de invitación). */
+  confirmReturnPath?: string;
 }
 
 type EmailAuthDialogProps = Omit<EmailAuthModalProps, 'isOpen'>;
@@ -26,11 +28,11 @@ const VARIANT_BY_VIEW: Record<AuthView, AuthDialogVariant> = {
   signupSent: 'notice',
 };
 
-const EmailAuthDialog = ({ onClose, initialMode = 'login', googleReturnPath }: EmailAuthDialogProps) => {
+const EmailAuthDialog = ({ onClose, initialMode = 'login', googleReturnPath, confirmReturnPath }: EmailAuthDialogProps) => {
   const { t } = useTranslation();
   const titleId = useId();
   const welcomeTokens = useWelcomeTokens();
-  const form = useEmailAuthForm({ initialView: initialMode, googleReturnPath, onSignedIn: onClose });
+  const form = useEmailAuthForm({ initialView: initialMode, googleReturnPath, confirmReturnPath, onSignedIn: onClose });
   const { view, goTo, isLoading, alert } = form;
 
   const wrongCredentials = alert?.kind === 'credentials';
