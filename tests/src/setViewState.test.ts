@@ -101,7 +101,7 @@ describe('espacios de las cartas que faltan (FEAT-36, US A2)', () => {
     expect(missingCardNumbers(setViewStateOf({ cardCount: 3, boardCount: 2, gridSize: 16 }), 3)).toEqual([]);
   });
 
-  it.each(['cardsCountWithAi', 'aiBadge', 'cardsNote', 'missingCardsNote', 'addCardSlot'])(
+  it.each(['cardsCountWithAi', 'aiBadge', 'cardsNoteEdit', 'cardsNoteEditTouch', 'transformAi', 'aiStatus', 'emptyCardsTitle', 'missingCardsNote', 'addCardSlot'])(
     '«%s» existe en español y en inglés',
     (key) => {
       expect((es.setView as Record<string, string>)[key]).toBeTruthy();
@@ -147,10 +147,8 @@ describe('textos de Tableros y de «Preparando tu PDF…» (FEAT-36, US A4)', ()
 describe('textos del menú y de las confirmaciones (FEAT-36, US A5)', () => {
   it.each([
     'deleteLoteria',
-    'shuffleConfirmTitle_one',
-    'shuffleConfirmTitle_other',
-    'shuffleConfirmText',
-    'shuffleConfirmAction',
+    'shuffleNotice_one',
+    'shuffleNotice_other',
     'clearConfirmTitle_one',
     'clearConfirmTitle_other',
     'clearConfirmText_one',

@@ -1,6 +1,6 @@
-/* M18 — «Invitar a subir fotos» (FEAT-56, US B1). El cascarón (caja y hoja en celular) es AuthDialog.css */
+/* M18 — Compartir lotería (FEAT-56; rehecha compacta en FEAT-57, US A4), sobre el cascarón de las ventanas de cuenta */
 
-.invite-dialog__lead {
+.share-dialog__head {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -8,31 +8,176 @@
   padding-right: 32px;
 }
 
-.invite-dialog__badge {
+.share-dialog__badge {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  margin-bottom: 6px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 4px;
   border-radius: 16px;
   background: color-mix(in srgb, var(--color-secondary) 20%, var(--color-bg-surface));
   color: var(--color-text-main);
-  font-size: 22px;
+  font-size: 20px;
 }
 
-.invite-dialog__lead h2 {
+.share-dialog__head h2 {
   margin: 0;
   font-family: var(--font-display);
   font-size: 24px;
   line-height: 1.2;
 }
 
-.invite-dialog__lead p {
+.share-dialog__head p {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
+}
+
+/* Estado en una pastilla: turquesa abierto, gris con candado cerrado */
+.share-dialog__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-secondary) 18%, var(--color-bg-surface));
+  color: var(--color-text-main);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.share-dialog__status--closed {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+}
+
+.share-dialog__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-secondary-dark);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-secondary) 30%, transparent);
+}
+
+.share-dialog__share {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* El enlace en un renglón, con «Copiar» pegado a la derecha */
+.share-dialog__link {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.share-dialog__url {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  padding: 12px 14px;
+  color: var(--color-text-main);
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: all;
+}
+
+.share-dialog__copy {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  border: none;
+  border-left: 1px solid var(--color-primary-lightest);
+  background: var(--color-bg-surface);
+  color: var(--color-primary-dark);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.share-dialog__copy:hover:not(:disabled) {
+  background: var(--color-primary-lightest);
+}
+
+.share-dialog__whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 30%, transparent);
+  color: var(--color-text-inverted);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.share-dialog__whatsapp:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  color: var(--color-text-inverted);
+}
+
+.share-dialog__whatsapp svg {
+  font-size: 18px;
+}
+
+/* Acciones discretas: «Enlace nuevo», «Dejar de compartir» y «Quitar» */
+.share-dialog__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.share-dialog__quiet {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-primary-dark);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.share-dialog__quiet:hover:not(:disabled) {
+  background: var(--color-bg-subtle);
+}
+
+.share-dialog__quiet--danger {
+  color: var(--color-danger);
+}
+
+.share-dialog__copy:disabled,
+.share-dialog__whatsapp:disabled,
+.share-dialog__quiet:disabled,
+.invite-dialog__manage-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .invite-dialog__loading {
@@ -59,116 +204,6 @@
   }
 }
 
-.invite-dialog__link-box {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 14px 16px;
-  border: 1px solid var(--color-primary-lightest);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-subtle);
-}
-
-.invite-dialog__state {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-primary-dark);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.invite-dialog__state::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-secondary-dark);
-}
-
-.invite-dialog__url {
-  margin: 0;
-  color: var(--color-text-main);
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
-  user-select: all;
-}
-
-.invite-dialog__share {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.invite-dialog__action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 48px;
-  padding: 12px 16px;
-  border: 1px solid var(--color-primary-lightest);
-  border-radius: var(--radius-full);
-  background: var(--color-bg-surface);
-  color: var(--color-text-main);
-  font: inherit;
-  font-size: 15px;
-  font-weight: 700;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.invite-dialog__action:hover:not(:disabled) {
-  border-color: var(--color-primary);
-}
-
-.invite-dialog__action--primary {
-  border-color: var(--color-primary);
-  background: var(--color-primary);
-  color: var(--color-text-inverted);
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 30%, transparent);
-}
-
-.invite-dialog__action--primary:hover {
-  border-color: var(--color-primary-dark);
-  background: var(--color-primary-dark);
-}
-
-.invite-dialog__action svg {
-  flex: 0 0 auto;
-  font-size: 18px;
-}
-
-.invite-dialog__action:disabled,
-.invite-dialog__manage-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.invite-dialog__closed {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 14px 16px;
-  border-radius: var(--radius-md);
-  background: var(--color-bg-subtle);
-  color: var(--color-text-muted);
-  font-size: 15px;
-  line-height: 1.5;
-}
-
-.invite-dialog__closed svg {
-  flex: 0 0 auto;
-  margin-top: 3px;
-}
-
-.invite-dialog__closed p {
-  margin: 0;
-}
-
 .invite-dialog__error {
   margin: 0;
   color: var(--color-danger);
@@ -176,12 +211,111 @@
   font-weight: 600;
 }
 
-.invite-dialog__manage {
+.invite-dialog__hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+/* «Quiénes participan»: círculo con iniciales, nombre, fotos y «Quitar» */
+.invitees-list {
   display: flex;
   flex-direction: column;
+  gap: 4px;
+}
+
+.invitees-list__title {
+  display: flex;
+  align-items: center;
   gap: 8px;
-  padding-top: 16px;
-  border-top: 1px solid var(--color-border);
+  margin: 0 0 4px;
+  color: var(--color-text-main);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.invitees-list__count {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.invitees-dialog__list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.invitees-dialog__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.invitees-dialog__row:last-child {
+  border-bottom: none;
+}
+
+.invitees-list__avatar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-primary-lightest);
+  color: var(--color-primary-dark);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.invitees-dialog__who {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.invitees-dialog__name {
+  overflow: hidden;
+  color: var(--color-text-main);
+  font-size: 15px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invitees-dialog__count {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.invitees-dialog__confirm {
+  display: flex;
+  flex: 1 0 100%;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.invitees-dialog__confirm p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .invite-dialog__manage-buttons {
@@ -210,92 +344,14 @@
   border-color: var(--color-primary);
 }
 
-.invite-dialog__hint {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: 13px;
-}
-
-/* M19 — «Invitados» (FEAT-56, US B4): un renglón por invitado con sus fotos y «Quitar» */
-.invitees-dialog__list {
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.invitees-dialog__row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.invitees-dialog__row:last-child {
-  border-bottom: none;
-}
-
-.invitees-dialog__who {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.invitees-dialog__name {
-  overflow: hidden;
-  color: var(--color-text-main);
-  font-size: 15px;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.invitees-dialog__count {
-  color: var(--color-text-muted);
-  font-size: 13px;
-}
-
-.invitees-dialog__confirm {
-  display: flex;
-  flex: 1 0 100%;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.invitees-dialog__confirm p {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
 .invite-dialog__manage-button.invitees-dialog__remove {
   border-color: var(--color-danger);
   background: var(--color-danger);
   color: var(--color-text-inverted);
 }
 
-/* Celular: la hoja ocupa el ancho; los botones de compartir, uno sobre otro */
 @media (max-width: 640px) {
-  .invite-dialog__lead h2 {
+  .share-dialog__head h2 {
     font-size: 22px;
-  }
-
-  .invite-dialog__share {
-    grid-template-columns: 1fr;
-  }
-
-  .invite-dialog__manage-buttons {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .invite-dialog__manage-button {
-    justify-content: center;
-    min-height: 44px;
   }
 }

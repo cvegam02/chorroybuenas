@@ -31,9 +31,29 @@ interface BoardCountSelectorProps {
   onGenerate: (count: number, gridSize: GridSize) => void;
   onBack: () => void;
   gridSize: GridSize;
+  /** `dialog`: dentro de la ventana de U2 (FEAT-57), sin fondo ni márgenes de página y con «Cancelar». */
+  variant?: 'page' | 'dialog';
+  /** `id` del título, para nombrar la ventana. */
+  titleId?: string;
+  /** Cantidad con la que empieza, en lugar de la sugerida (al revolver, los tableros que ya hay). */
+  initialCount?: number;
+  /** Aviso arriba del número (al revolver: los tableros de ahora se reemplazan). */
+  notice?: string;
+  /** Se están armando: el botón se apaga. */
+  isGenerating?: boolean;
 }
 
-export const BoardCountSelector = ({ onGenerate, onBack, gridSize }: BoardCountSelectorProps) => {
+export const BoardCountSelector = ({
+  onGenerate,
+  onBack,
+  gridSize,
+  variant = 'page',
+  titleId,
+  initialCount,
+  notice,
+  isGenerating = false,
+}: BoardCountSelectorProps) => {
+  const isDialog = variant === 'dialog';
   const { t } = useTranslation();
   const { user } = useAuth();
   const userId = user?.id;
@@ -78,6 +98,9 @@ export const BoardCountSelector = ({ onGenerate, onBack, gridSize }: BoardCountS
         if (gridSize === 9 && defaultCount > suggested) {
           defaultCount = suggested;
         }
+        if (initialCount !== undefined && initialCount > 0) {
+          defaultCount = Math.min(initialCount, maxUniqueBoards(loadedCardCount, gridSize));
+        }
 
         setBoardCount(defaultCount);
         setInputValue(defaultCount.toString());
@@ -88,7 +111,7 @@ export const BoardCountSelector = ({ onGenerate, onBack, gridSize }: BoardCountS
       }
     };
     loadCardCount();
-  }, [gridSize, userId, currentSetId]); // Re-run when gridSize or card source changes
+  }, [gridSize, userId, currentSetId, initialCount]); // Re-run when gridSize or card source changes
 
   // La muestra se elige una vez por baraja: no cambia al mover el número de tableros.
   const deckSize = deckCards.length;
@@ -174,16 +197,29 @@ export const BoardCountSelector = ({ onGenerate, onBack, gridSize }: BoardCountS
   };
 
   return (
-    <div className="board-count">
+    <div className={`board-count${isDialog ? ' board-count--dialog' : ''}`}>
       <div className="board-count__inner">
         <form onSubmit={handleSubmit} className="board-count__panel">
           <div>
-            <h1 className="board-count__title">{t('boardGenerator.count.title')}</h1>
+            {isDialog ? (
+              <h2 id={titleId} className="board-count__title">{t('boardGenerator.count.title')}</h2>
+            ) : (
+              <h1 id={titleId} className="board-count__title">{t('boardGenerator.count.title')}</h1>
+            )}
             <p className="board-count__subtitle">
               {modeLabel}
               {!isLoadingCards && ` · ${t('boardGenerator.count.deckCards', { count: cardCount })}`}
             </p>
           </div>
+
+          {notice && (
+            <div className="board-count__warning">
+              <span className="board-count__note-icon">
+                <FaExclamationTriangle aria-hidden="true" />
+              </span>
+              <p className="board-count__note-text">{notice}</p>
+            </div>
+          )}
 
           {!isLoadingCards && cardCount < minCards && (
             <div className="board-count__warning" role="alert">
@@ -274,17 +310,17 @@ export const BoardCountSelector = ({ onGenerate, onBack, gridSize }: BoardCountS
           )}
 
           <div className="board-count__actions">
-            <button type="button" onClick={onBack} className="board-count__back">
-              <FaArrowLeft aria-hidden="true" />
-              {t('boardGenerator.count.back')}
+            <button type="button" onClick={onBack} className="board-count__back" disabled={isGenerating}>
+              {!isDialog && <FaArrowLeft aria-hidden="true" />}
+              {isDialog ? t('common.cancel') : t('boardGenerator.count.back')}
             </button>
             <button
               type="submit"
-              disabled={boardCount < 1 || cardCount < minCards}
+              disabled={boardCount < 1 || cardCount < minCards || isGenerating}
               className="board-count__generate"
             >
-              {t('boardGenerator.count.generate', { count: boardCount })}
-              <FaArrowRight aria-hidden="true" />
+              {isGenerating ? t('boardGenerator.count.generating') : t('boardGenerator.count.generate', { count: boardCount })}
+              {!isGenerating && <FaArrowRight aria-hidden="true" />}
             </button>
           </div>
         </form>

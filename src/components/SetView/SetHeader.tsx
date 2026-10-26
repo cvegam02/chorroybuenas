@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaArrowLeft, FaBullhorn, FaDownload, FaPencilAlt, FaPlus, FaUsers } from 'react-icons/fa';
+import { FaArrowLeft, FaBullhorn, FaDownload, FaLock, FaPencilAlt, FaPlus, FaUsers } from 'react-icons/fa';
 import type { Card, GridSize } from '../../types';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { logger } from '../../utils/logger';
 import { canSing } from '../../utils/callerGame';
 import { minCardsForGrid } from '../../utils/gridRules';
 import { SetMenu } from './SetMenu';
+import type { LoteriaSharing } from '../../hooks/useLoteriaSharing';
 import type { SetViewState } from './setViewState';
 import './SetHeader.css';
 
@@ -22,6 +23,8 @@ export interface SetHeaderDetails {
   isCollective: boolean;
   /** Fotos de invitados que llegaron desde la última visita (FEAT-56). */
   newPhotoCount: number;
+  /** Cómo se comparte, para «Compartida · N»; null si no es colectiva o aún no carga (FEAT-57, US A4). */
+  sharing: LoteriaSharing | null;
 }
 
 interface SetHeaderProps {
@@ -41,6 +44,8 @@ interface SetHeaderProps {
   onSing: () => void;
   /** Abre «Invitar a subir fotos» (FEAT-56, M18). */
   onInvite: () => void;
+  /** «Agregar fotos» cuando faltan cartas: abre «Subir fotos» aquí mismo (FEAT-57). */
+  onAddPhotos: () => void;
   onShuffleBoards: () => void;
   onClearBoards: () => void;
   onDelete: () => void;
@@ -57,6 +62,7 @@ export const SetHeader = ({
   onDownload,
   onSing,
   onInvite,
+  onAddPhotos,
   onShuffleBoards,
   onClearBoards,
   onDelete,
@@ -115,7 +121,6 @@ export const SetHeader = ({
     </span>
   );
 
-  const cardsLink = details ? { to: '/cards', state: { gridSize: details.gridSize } } : null;
   const tokensSpent = details?.tokensSpent ?? 0;
 
   // El «⋮» va junto a los botones en computadora y arriba, frente al regreso, en celular
@@ -227,7 +232,7 @@ export const SetHeader = ({
             )}
           </div>
 
-          {details && cardsLink && (
+          {details && (
             <div className="set-header__actions">
               {details.state.kind === 'ready' && (
                 <button
@@ -242,19 +247,18 @@ export const SetHeader = ({
               )}
               {singButton}
               <button type="button" className="set-button set-button--secondary" onClick={onInvite}>
-                <FaUsers aria-hidden="true" />
-                {t('invite.open')}
+                {details.sharing && !details.sharing.isOpen ? <FaLock aria-hidden="true" /> : <FaUsers aria-hidden="true" />}
+                {!details.sharing
+                  ? t('invite.open')
+                  : details.sharing.isOpen
+                    ? t('invite.sharedButton', { count: details.sharing.inviteeCount })
+                    : t('invite.sharedClosed')}
               </button>
-              {details.state.kind === 'missingCards' ? (
-                <Link {...cardsLink} className="set-button set-button--primary set-button--large">
+              {details.state.kind === 'missingCards' && (
+                <button type="button" onClick={onAddPhotos} className="set-button set-button--primary set-button--large">
                   <FaPlus aria-hidden="true" />
                   {t('setView.addPhotos')}
-                </Link>
-              ) : (
-                <Link {...cardsLink} className="set-button set-button--secondary">
-                  <FaPencilAlt aria-hidden="true" />
-                  {t('setView.editCards')}
-                </Link>
+                </button>
               )}
               {!isMobile && menu}
             </div>

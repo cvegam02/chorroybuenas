@@ -1,30 +1,37 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FaUserFriends } from 'react-icons/fa';
-import { usePageScrollLock } from '../../hooks/usePageScrollLock';
 import { LoteriaInviteRepository, type LoteriaInvitee } from '../../repositories/LoteriaInviteRepository';
 import { logger } from '../../utils/logger';
-import { AuthDialog } from '../Auth/AuthDialog';
-import './InviteDialog.css';
 
-interface InviteesDialogProps {
+/** Las iniciales del círculo de cada invitado: hasta dos letras de su nombre. */
+const initialsOf = (name: string | null): string =>
+  name
+    ? name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((word) => word[0]?.toUpperCase() ?? '')
+        .join('')
+    : '?';
+
+interface InviteesListProps {
   setId: string;
-  /** Regresa a M18. */
-  onBack: () => void;
-  onClose: () => void;
+  /** Se quitó a alguien: la ventana y el botón del encabezado se actualizan. */
+  onChange: () => void;
+  /** Está quitando a alguien: la ventana no se cierra a medias. */
+  onBusyChange: (isBusy: boolean) => void;
 }
 
 /**
- * M19 — «Invitados»: quiénes se unieron a la lotería, cuántas fotos subió cada uno y «Quitar» (FEAT-56, US B4).
- * Al quitar a alguien pierde el acceso y sus fotos se quedan. Se abre desde M18, con el mismo cascarón.
+ * «Quiénes participan» dentro de M18 (FEAT-57, US A4; antes la ventana M19 de FEAT-56): cada invitado con
+ * cuántas fotos subió y «Quitar», que se confirma en el mismo renglón. Al quitarlo pierde el acceso y sus fotos se quedan.
  */
-export const InviteesDialog = ({ setId, onBack, onClose }: InviteesDialogProps) => {
+export const InviteesList = ({ setId, onChange, onBusyChange }: InviteesListProps) => {
   const { t } = useTranslation();
   const [invitees, setInvitees] = useState<LoteriaInvitee[] | null>(null);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [hasError, setHasError] = useState(false);
-  usePageScrollLock();
 
   useEffect(() => {
     let cancelled = false;
@@ -43,38 +50,28 @@ export const InviteesDialog = ({ setId, onBack, onClose }: InviteesDialogProps) 
 
   const remove = async (userId: string) => {
     setIsBusy(true);
+    onBusyChange(true);
     setHasError(false);
     try {
       await LoteriaInviteRepository.removeInvitee(setId, userId);
       setInvitees((prev) => prev?.filter((invitee) => invitee.userId !== userId) ?? null);
       setConfirmingId(null);
+      onChange();
     } catch (err) {
       logger.error('Error removing loteria invitee:', err);
       setHasError(true);
     } finally {
       setIsBusy(false);
+      onBusyChange(false);
     }
   };
 
-  const closeIfIdle = () => {
-    if (!isBusy) onClose();
-  };
-
   return (
-    <AuthDialog
-      titleId="invitees-dialog-title"
-      onClose={closeIfIdle}
-      onBack={isBusy ? undefined : onBack}
-      variant="back"
-      focusKey={invitees ? 'ready' : 'loading'}
-    >
-      <div className="invite-dialog__lead">
-        <span className="invite-dialog__badge" aria-hidden="true">
-          <FaUserFriends />
-        </span>
-        <h2 id="invitees-dialog-title">{t('invite.inviteesTitle')}</h2>
-        <p>{t('invite.inviteesText')}</p>
-      </div>
+    <section className="invitees-list" aria-labelledby="invitees-list-title">
+      <h3 id="invitees-list-title" className="invitees-list__title">
+        {t('invite.participantsLoading')}
+        {invitees && <span className="invitees-list__count">{invitees.length}</span>}
+      </h3>
 
       {!invitees && !hasError && (
         <div className="invite-dialog__loading" aria-live="polite">
@@ -92,6 +89,9 @@ export const InviteesDialog = ({ setId, onBack, onClose }: InviteesDialogProps) 
             const isConfirming = confirmingId === invitee.userId;
             return (
               <li key={invitee.userId} className="invitees-dialog__row">
+                <span className="invitees-list__avatar" aria-hidden="true">
+                  {initialsOf(invitee.name)}
+                </span>
                 <div className="invitees-dialog__who">
                   <span className="invitees-dialog__name">{name}</span>
                   <span className="invitees-dialog__count">
@@ -123,7 +123,7 @@ export const InviteesDialog = ({ setId, onBack, onClose }: InviteesDialogProps) 
                 ) : (
                   <button
                     type="button"
-                    className="invite-dialog__manage-button"
+                    className="share-dialog__quiet share-dialog__quiet--danger"
                     onClick={() => setConfirmingId(invitee.userId)}
                     disabled={isBusy}
                     aria-label={t('invite.removeLabel', { name })}
@@ -142,6 +142,6 @@ export const InviteesDialog = ({ setId, onBack, onClose }: InviteesDialogProps) 
           {t('invite.error')}
         </p>
       )}
-    </AuthDialog>
+    </section>
   );
 };

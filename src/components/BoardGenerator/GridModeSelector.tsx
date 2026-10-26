@@ -7,6 +7,8 @@ interface GridModeSelectorProps {
     selectedSize: GridSize;
     onChange: (size: GridSize) => void;
     t?: TFunction; // Allow passing t for consistency with other components or use internally
+    /** Apagado: se ve el tipo elegido, pero no se puede cambiar (U2 con tableros, FEAT-57). */
+    disabled?: boolean;
 }
 
 const MODES: readonly { size: GridSize; id: 'classic' | 'kids' }[] = [
@@ -15,7 +17,7 @@ const MODES: readonly { size: GridSize; id: 'classic' | 'kids' }[] = [
 ];
 
 /** Tipo de lotería: Clásico 4×4 o Kids 3×3, cada uno con su mini cuadrícula dibujada (FEAT-34). */
-export const GridModeSelector = ({ selectedSize, onChange, t: propsT }: GridModeSelectorProps) => {
+export const GridModeSelector = ({ selectedSize, onChange, t: propsT, disabled = false }: GridModeSelectorProps) => {
     const { t: localT } = useTranslation();
     const t = propsT || localT;
 
@@ -31,6 +33,7 @@ export const GridModeSelector = ({ selectedSize, onChange, t: propsT }: GridMode
                         className={`grid-mode-option ${selectedSize === size ? 'grid-mode-option--active' : ''}`}
                         onClick={() => onChange(size)}
                         type="button"
+                        disabled={disabled}
                         aria-pressed={selectedSize === size}
                     >
                         <span className={`grid-mode-option__grid grid-mode-option__grid--${id}`} aria-hidden="true">

@@ -99,7 +99,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 ### 9. Generar tableros
 - **Actor(es)**: Visitante o usuario registrado.
 - **Precondiciones**: La lotería tiene al menos el mínimo de cartas de su modo (§4).
-- **Flujo principal**: (1) Ve la cantidad de tableros sugerida y puede cambiarla (§4). (2) Genera los tableros. (3) Los revisa uno por uno. (4) Desde la vista previa puede revolverlos: se genera otra vez la misma cantidad, en el mismo modo; con sesión se le pide confirmar, porque reemplaza los tableros guardados (2026-10-11, FEAT-34).
+- **Flujo principal**: (1) Ve la cantidad de tableros sugerida y puede cambiarla (§4). (2) Genera los tableros. (3) Los revisa uno por uno. (4) Desde la vista previa puede revolverlos: se genera otra vez la misma cantidad, en el mismo modo; con sesión se le pide confirmar, porque reemplaza los tableros guardados (2026-10-11, FEAT-34). Con sesión, desde el 2026-10-25 (FEAT-57), los tableros se arman y se revuelven desde la página de la lotería, en una ventana donde elige cuántos; los de antes se reemplazan solo al confirmar la cantidad.
 - **Excepciones**: Faltan cartas para el mínimo (24 en Clásico, 15 en Kids): no puede generar y se le dice cuántas faltan. Si pide más tableros distintos de los que sus cartas permiten, no todos saldrán diferentes.
 - **Resultado**: La lotería tiene sus tableros, armados al azar y sin repetidos (§4).
 - **Estados afectados**: Tableros (§11).
@@ -349,7 +349,7 @@ Todos los casos de este bloque están por construir (§17, §18).
 - **Actor(es)**: Usuario registrado, dueño de la lotería (organizador).
 - **Precondiciones**: Tener una lotería guardada en su cuenta.
 - **Flujo principal**: (1) En su lotería (U2) pulsa «Invitar a subir fotos». (2) Ve el enlace y lo copia o lo comparte por WhatsApp con un mensaje ya escrito. (3) La lotería queda como «Colectiva» en Mi cuenta y en la lotería (§21).
-- **Flujo alterno — cerrar o cambiar el enlace**: en la misma ventana pulsa «Cerrar enlace» y nadie más puede unirse ni subir; o «Generar enlace nuevo», y el anterior deja de servir.
+- **Flujo alterno — dejar de compartir o cambiar el enlace**: en la misma ventana pulsa «Dejar de compartir» (antes «Cerrar enlace»; 2026-10-25, FEAT-57) y nadie más puede unirse ni subir, aunque quienes ya participan siguen viendo las cartas; o «Generar enlace nuevo», y el anterior deja de servir. Con el enlace cerrado, «Volver a compartir» abre uno nuevo. Ya colectiva, el botón de la lotería dice «Compartida · N» o «Compartida · cerrada».
 - **Excepciones**: Alguien abre un enlace cerrado, reemplazado o inventado: se le dice que ya no sirve.
 - **Resultado**: La lotería tiene un enlace abierto para que otras personas suban fotos.
 - **Estados afectados**: Invitación de lotería (§11).
@@ -371,7 +371,7 @@ Todos los casos de este bloque están por construir (§17, §18).
 - **Actor(es)**: Usuario registrado, dueño de la lotería (organizador).
 - **Precondiciones**: Tener una lotería colectiva con fotos de invitados.
 - **Flujo principal**: (1) En Mi cuenta ve «N fotos nuevas» en la lotería y la abre; el contador se borra. (2) Ve en cada carta quién la subió. (3) Cambia títulos, borra cartas (los números se recorren, §4) o las transforma con IA con sus propios tokens.
-- **Flujo alterno — quitar a un invitado**: abre «Invitados», ve cuántas fotos subió cada uno y pulsa «Quitar»; el invitado pierde el acceso y sus fotos se quedan (§21).
+- **Flujo alterno — quitar a un invitado**: abre la ventana de compartir («Compartida · N»; hasta el 2026-10-25 era una ventana «Invitados» aparte, FEAT-57), ve cuántas fotos subió cada uno y pulsa «Quitar»; el invitado pierde el acceso y sus fotos se quedan (§21).
 - **Excepciones**: Sin tokens para la IA: igual que en sus propias cartas (§6). El invitado borró su cuenta: sus fotos se quedan.
 - **Resultado**: La lotería queda como el organizador la quiere.
 - **Estados afectados**: Cartas, invitado de lotería (§11); con IA, el saldo y el uso de tokens.

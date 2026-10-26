@@ -79,6 +79,16 @@
   background: var(--color-bg-subtle);
 }
 
+.set-button--ai,
+.set-button--ai:hover {
+  background: var(--color-ai);
+  color: var(--color-text-inverted);
+}
+
+.set-button--ai:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-ai) 85%, var(--color-card-ink));
+}
+
 .set-button--large {
   padding: 14px 26px;
   font-size: 17px;

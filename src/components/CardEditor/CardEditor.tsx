@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -6,28 +6,20 @@ import {
   FaUpload,
   FaArrowRight,
   FaMagic,
-  FaExclamationTriangle,
-  FaPencilAlt
 } from 'react-icons/fa';
 import { useCards } from '../../hooks/useCards';
 import { CardPreview } from './CardPreview';
 import { CardUploadThumb } from './CardUploadThumb';
-import { CardUploadModal } from './CardUploadModal';
-import { CardEditModal } from './CardEditModal';
-import { BatchUploadModal } from './BatchUploadModal';
-import { UploadProgressModal } from './UploadProgressModal';
 import { GridModeSelector } from '../BoardGenerator/GridModeSelector';
 import { CardLabelsSelector } from './CardLabelsSelector';
 import { SetRepository } from '../../repositories/SetRepository';
-import { AIBatchModal } from './AIBatchModal';
-import { useCardAI } from './useCardAI';
 import { WarningModal } from '../ConfirmationModal/WarningModal';
-import { Card, GridSize } from '../../types';
+import { GridSize } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSetContext } from '../../contexts/SetContext';
-import { useTokenBalance } from '../../contexts/TokenContext';
-import { aiDeckSummary, deckProgress, pickImageFiles } from '../../utils/deckProgress';
-import { newUuid } from '../../utils/newUuid';
+import { deckProgress } from '../../utils/deckProgress';
+import { useDeckEditing } from './useDeckEditing';
+import { DeckDialogs } from './DeckDialogs';
 import './CardEditor.css';
 import './CardEditorDeck.css';
 import { logger } from '../../utils/logger';
@@ -54,158 +46,35 @@ export const CardEditor = ({
 }: CardEditorProps) => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { sets, currentSetId, setSets } = useSetContext();
-  const { balance: tokenBalance, refreshBalance } = useTokenBalance();
-  const currentSet = sets.find(s => s.id === currentSetId);
-  const { cards, addCard, addCards, removeCard, updateCard, clearCards, cardCount, isCardRecentlySynced } = useCards();
-  /** Usuario logueado sin lotería seleccionada: esperar a que SetContext cargue o crear una. */
-  const waitingForSet = user && !currentSetId;
-  const [isRenaming, setIsRenaming] = useState(false);
+  const { currentSetId, setSets } = useSetContext();
+  const cardsApi = useCards();
+  const { clearCards, cardCount } = cardsApi;
+  const deck = useDeckEditing(cardsApi);
+  const { cards, removeCard, isCardRecentlySynced, waitingForSet, tokenBalance, ai, aiSummary, noTokensForSingle } = deck;
+  const { transformingCardId, cardsToTransformIds, isAIBatchProcessing } = ai;
   const [cardLabelsError, setCardLabelsError] = useState(false);
-  const [renameValue, setRenameValue] = useState('');
-  const [isSavingName, setIsSavingName] = useState(false);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
-  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
-  const [batchFiles, setBatchFiles] = useState<File[]>([]);
-  const batchInputRef = useRef<HTMLInputElement>(null);
-  const {
-    aiErrorMessage,
-    setAiErrorMessage,
-    aiBatchStatus,
-    aiBatchCurrentIndex,
-    aiBatchTotalCount,
-    aiBatchCardIds,
-    aiBatchSkippedCount,
-    aiBatchError,
-    showBatchCompleteMessage,
-    setShowBatchCompleteMessage,
-    transformingCardId,
-    batchModalClosedDuringProcessingRef,
-    cardsToTransform,
-    cardsToTransformIds,
-    isAIBatchProcessing,
-    handleSingleAI,
-    handleAIStart,
-  } = useCardAI({ cards, updateCard, userId: user?.id, currentSetId, refreshBalance, t, isAIModalOpen });
-  const [editingCard, setEditingCard] = useState<Card | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const editCardIdFromRoute = (location.state as { editCardId?: string } | null)?.editCardId;
-  // La carta como está ahora: la ventana de editar ve al momento una versión con IA recién guardada.
-  const liveEditingCard = editingCard ? cards.find(card => card.id === editingCard.id) ?? editingCard : null;
-  const [showUploadProgress, setShowUploadProgress] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(-1);
-  const [showAllTransformedModal, setShowAllTransformedModal] = useState(false);
+  const { setEditingCard } = deck;
 
   // Mínimo de cartas según el modo (ver utils/gridRules)
   const minCards = minCardsForGrid(gridSize);
   const hasMinimumCards = cardCount >= minCards;
   const progress = deckProgress(cardCount, minCards);
-  const aiSummary = aiDeckSummary(cards);
   const [isDraggingFiles, setIsDraggingFiles] = useState(false);
-  const noTokensForSingle = user && tokenBalance !== null && tokenBalance < 1;
-
-  const normalizeTitle = (value: string) => value.replace(/\s+/g, ' ').trim().toLowerCase();
-
-  const existingTitleSet = useMemo(
-    () => new Set(cards.map(card => normalizeTitle(card.title))),
-    [cards]
-  );
-
-  const handleCardAdd = async (image: string, title: string) => {
-    const normalizedTitle = normalizeTitle(title);
-    if (existingTitleSet.has(normalizedTitle)) {
-      alert(t('cardEditor.errors.duplicateTitle'));
-      return false;
-    }
-    const newCard: Card = {
-      id: newUuid(),
-      title,
-      image,
-    };
-    setShowUploadProgress(true);
-    setUploadProgress(-1);
-    try {
-      await addCard(newCard);
-      setUploadProgress(100);
-      await new Promise(r => setTimeout(r, 300));
-      return true;
-    } finally {
-      setShowUploadProgress(false);
-    }
-  };
-
-  const handleBatchCardsAdd = async (cardsToAdd: Array<{ image: string; title: string }>) => {
-    const seenTitles = new Set(existingTitleSet);
-    const duplicateTitles: string[] = [];
-    for (const card of cardsToAdd) {
-      const normalizedTitle = normalizeTitle(card.title);
-      if (seenTitles.has(normalizedTitle)) {
-        duplicateTitles.push(card.title);
-      } else {
-        seenTitles.add(normalizedTitle);
-      }
-    }
-
-    if (duplicateTitles.length > 0) {
-      alert(t('cardEditor.errors.batchDuplicates', { titles: duplicateTitles.join(', ') }));
-      return;
-    }
-
-    // Create all new cards with unique UUIDs (required for Supabase cards table)
-    const newCards: Card[] = cardsToAdd.map(({ image, title }) => ({
-      id: newUuid(),
-      title,
-      image,
-    }));
-
-    setShowUploadProgress(true);
-    setUploadProgress(user ? 0 : -1);
-    try {
-      await addCards(newCards, user ? {
-        onProgress: (current, total) => setUploadProgress((current / total) * 100)
-      } : undefined);
-      setUploadProgress(100);
-      await new Promise(r => setTimeout(r, 300));
-    } finally {
-      setShowUploadProgress(false);
-    }
-  };
-
-  const handleBatchClick = () => {
-    batchInputRef.current?.click();
-  };
-
-  const openBatchWith = (files: File[]) => {
-    if (files.length > 0) {
-      setBatchFiles(files);
-      setIsBatchModalOpen(true);
-    }
-  };
-
-  const handleBatchFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    openBatchWith(Array.from(event.target.files || []));
-    // Reset input so same files can be selected again
-    if (batchInputRef.current) {
-      batchInputRef.current.value = '';
-    }
-  };
 
   // Arrastrar fotos al recuadro lleva a la misma ventana que «Subir fotos».
   const handleFilesDrop = (event: React.DragEvent<HTMLButtonElement>) => {
     event.preventDefault();
     setIsDraggingFiles(false);
-    if (waitingForSet) return;
-    openBatchWith(pickImageFiles(Array.from(event.dataTransfer.files)));
+    deck.handleFilesDropped(Array.from(event.dataTransfer.files));
   };
 
   const handleClearCards = async () => {
     await clearCards();
-    setIsUploadModalOpen(false);
-    setIsBatchModalOpen(false);
-    setBatchFiles([]);
+    deck.closeUploads();
     setIsClearModalOpen(false);
   };
 
@@ -217,55 +86,7 @@ export const CardEditor = ({
     if (!card) return;
     if (!card.isProcessing && transformingCardId !== card.id) setEditingCard(card);
     navigate(location.pathname, { replace: true, state: { ...location.state, editCardId: undefined } });
-  }, [editCardIdFromRoute, cards, transformingCardId, location.pathname, location.state, navigate]);
-
-  const handleEditCard = (card: Card) => {
-    // Mientras la IA pinta la carta no se abre: al terminar, la carta ya trae su versión nueva.
-    if (card.isProcessing || transformingCardId === card.id) return;
-    setEditingCard(card);
-  };
-
-
-  const handleRevertCard = async (id: string) => {
-    const card = cards.find(c => c.id === id);
-    if (card && card.originalImage) {
-      await updateCard(id, {
-        image: card.originalImage,
-        originalImage: undefined,
-        isAiGenerated: false
-      });
-    }
-  };
-
-
-  const handleRenameStart = () => {
-    setRenameValue(currentSet?.name ?? '');
-    setIsRenaming(true);
-  };
-
-  const handleRenameSave = async () => {
-    const name = renameValue.trim();
-    if (!name || !currentSet?.id || !user) return;
-    if (name === currentSet.name) {
-      setIsRenaming(false);
-      return;
-    }
-    setIsSavingName(true);
-    try {
-      const updated = await SetRepository.updateSet(currentSet.id, user.id, { name });
-      setSets(prev => prev.map(s => (s.id === currentSet.id ? { ...s, name: updated.name } : s)));
-      setIsRenaming(false);
-    } catch (err) {
-      logger.error('Error renaming set:', err);
-    } finally {
-      setIsSavingName(false);
-    }
-  };
-
-  const handleRenameCancel = () => {
-    setRenameValue(currentSet?.name ?? '');
-    setIsRenaming(false);
-  };
+  }, [editCardIdFromRoute, cards, transformingCardId, location.pathname, location.state, navigate, setEditingCard]);
 
   const handleGridSizeChange = (size: GridSize) => {
     onGridSizeChange(size);
@@ -283,66 +104,14 @@ export const CardEditor = ({
     setCardLabelsError(!(await onCardLabelsChange(labels)));
   };
 
-  const handleAIBulkClick = () => {
-    if (cardsToTransform.length === 0) {
-      setShowAllTransformedModal(true);
-      return;
-    }
-    // Sin tokens suficientes también se abre la ventana, que dice cuántos faltan (FEAT-34, US A3).
-    setIsAIModalOpen(true);
-  };
-
   return (
     <div className="deck">
       <div className="deck__columns">
         <aside className="deck__aside">
           <div className="deck__header">
-            {user && currentSet && <span className="deck__kicker">{t('cardEditor.deck.yourLoteria')}</span>}
-            {user && currentSet ? (
-              isRenaming ? (
-                <div className="card-editor__rename">
-                  <input
-                    type="text"
-                    className="card-editor__rename-input"
-                    value={renameValue}
-                    onChange={(e) => setRenameValue(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleRenameSave();
-                      if (e.key === 'Escape') handleRenameCancel();
-                    }}
-                    placeholder={t('setView.renamePlaceholder')}
-                    autoFocus
-                    disabled={isSavingName}
-                    aria-label={t('setView.renameSet')}
-                  />
-                  <div className="card-editor__rename-actions">
-                    <button type="button" onClick={handleRenameCancel} disabled={isSavingName} className="card-editor__rename-cancel">
-                      {t('common.cancel')}
-                    </button>
-                    <button type="button" onClick={handleRenameSave} disabled={isSavingName || !renameValue.trim()} className="card-editor__rename-save">
-                      {isSavingName ? t('common.loading') : t('common.save')}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="card-editor__title-row">
-                  <h1 className="deck__title">{currentSet.name}</h1>
-                  <button type="button" className="card-editor__rename-btn" onClick={handleRenameStart} aria-label={t('setView.renameSet')} title={t('setView.renameSet')}>
-                    <FaPencilAlt />
-                  </button>
-                </div>
-              )
-            ) : (
-              <h1 className="deck__title">{t('cardEditor.title')}</h1>
-            )}
-            {user && currentSet ? (
-              <p className="deck__subtitle">
-                <span className="deck__wide-only">{t('cardEditor.deck.autosave')}</span>
-                <span className="deck__narrow-only">{t('createSteps.saved')}</span>
-              </p>
-            ) : (
-              <p className="deck__subtitle">{t('cardEditor.subtitle')}</p>
-            )}
+            {/* C1 es solo para visitantes (FEAT-57): con sesión, la lotería se trabaja en U2 */}
+            <h1 className="deck__title">{t('cardEditor.title')}</h1>
+            <p className="deck__subtitle">{t('cardEditor.subtitle')}</p>
           </div>
 
           <GridModeSelector selectedSize={gridSize} onChange={handleGridSizeChange} t={t} />
@@ -388,7 +157,7 @@ export const CardEditor = ({
           </div>
 
           <div className="deck__add">
-            <button type="button" onClick={handleBatchClick} className="deck__button deck__button--primary" disabled={Boolean(waitingForSet)}>
+            <button type="button" onClick={deck.openFilePicker} className="deck__button deck__button--primary" disabled={Boolean(waitingForSet)}>
               <FaUpload aria-hidden="true" />
               {t('cardEditor.deck.uploadPhotos')}
             </button>
@@ -409,7 +178,7 @@ export const CardEditor = ({
                 <Link to="/comprar-tokens">{t('cardEditor.deck.buy')}</Link>
               </p>
               {aiSummary.remaining > 0 ? (
-                <button type="button" onClick={handleAIBulkClick} className="deck__button deck__button--ai">
+                <button type="button" onClick={deck.handleAIBulkClick} className="deck__button deck__button--ai">
                   {t('cardEditor.deck.transformRest', { count: aiSummary.remaining })}
                 </button>
               ) : (
@@ -435,16 +204,9 @@ export const CardEditor = ({
                 {t('cardEditor.deck.clear')}
               </button>
             )}
-            {user ? (
-              // Con sesión todo está guardado: salir no borra nada.
-              <Link to="/dashboard#mis-loterias" className="deck__link">
-                {t('cardEditor.deck.goToMine')}
-              </Link>
-            ) : (
-              <button type="button" onClick={onCancel} className="deck__link">
-                {t('cardEditor.deck.exit')}
-              </button>
-            )}
+            <button type="button" onClick={onCancel} className="deck__link">
+              {t('cardEditor.deck.exit')}
+            </button>
           </div>
         </aside>
 
@@ -477,17 +239,17 @@ export const CardEditor = ({
           <div className="deck__grid">
             {/* En celular la cuadrícula empieza con la casilla «Agregar»; en computadora está el recuadro de abajo. */}
             <div className="deck__add-tile deck__narrow-only">
-              <CardUploadThumb onSingleClick={() => !waitingForSet && setIsUploadModalOpen(true)} />
+              <CardUploadThumb onSingleClick={deck.openSingleUpload} />
             </div>
             {cards.map((card) => (
               <CardPreview
                 key={card.id}
                 card={card}
                 onRemove={removeCard}
-                onRevert={user ? handleRevertCard : undefined}
-                onTransform={user ? handleSingleAI : undefined}
+                onRevert={user ? deck.handleRevertCard : undefined}
+                onTransform={user ? ai.handleSingleAI : undefined}
                 disableTransformButton={!!(user && (isCardRecentlySynced(card.id) || noTokensForSingle))}
-                onClick={handleEditCard}
+                onClick={deck.handleEditCard}
                 disabledDuringBatch={isAIBatchProcessing && cardsToTransformIds.has(card.id)}
                 isTransforming={transformingCardId === card.id}
               />
@@ -497,7 +259,7 @@ export const CardEditor = ({
           <button
             type="button"
             className={`deck__dropzone deck__wide-only ${isDraggingFiles ? 'deck__dropzone--over' : ''}`}
-            onClick={handleBatchClick}
+            onClick={deck.openFilePicker}
             onDragOver={(event) => {
               event.preventDefault();
               setIsDraggingFiles(true);
@@ -513,63 +275,7 @@ export const CardEditor = ({
         </section>
       </div>
 
-      <CardUploadModal
-        isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
-        onCardAdd={handleCardAdd}
-        existingTitles={cards.map(card => card.title)}
-      />
-
-      <UploadProgressModal isOpen={showUploadProgress} progress={uploadProgress} />
-
-      {liveEditingCard && (
-        <CardEditModal
-          key={liveEditingCard.id}
-          card={liveEditingCard}
-          totalCards={cards.length}
-          otherTitles={cards.filter(card => card.id !== liveEditingCard.id).map(card => card.title)}
-          onClose={() => setEditingCard(null)}
-          onSave={async (updates) => Boolean(await updateCard(liveEditingCard.id, updates))}
-          onGenerate={user ? handleSingleAI : undefined}
-          tokenBalance={tokenBalance}
-          aiBlockedNote={isCardRecentlySynced(liveEditingCard.id) ? t('cardEditor.syncingMessage') : undefined}
-        />
-      )}
-
-      <BatchUploadModal
-        isOpen={isBatchModalOpen}
-        onClose={() => {
-          setIsBatchModalOpen(false);
-          setBatchFiles([]);
-        }}
-        onCardsAdd={handleBatchCardsAdd}
-        files={batchFiles}
-        existingTitles={cards.map(card => card.title)}
-      />
-
-      <AIBatchModal
-        isOpen={isAIModalOpen}
-        onClose={() => setIsAIModalOpen(false)}
-        onCloseAndContinue={() => { batchModalClosedDuringProcessingRef.current = true; }}
-        cards={cardsToTransform}
-        allCards={cards}
-        batchCardIds={aiBatchCardIds}
-        onStart={(limit) => handleAIStart(limit)}
-        status={aiBatchStatus}
-        currentIndex={aiBatchCurrentIndex}
-        skippedCount={aiBatchSkippedCount}
-        error={aiBatchError}
-        tokenBalance={tokenBalance}
-      />
-
-      <input
-        ref={batchInputRef}
-        type="file"
-        accept="image/jpeg,image/jpg,image/png,image/webp"
-        multiple
-        onChange={handleBatchFileSelect}
-        style={{ display: 'none' }}
-      />
+      <DeckDialogs deck={deck} />
 
       <WarningModal
         isOpen={isClearModalOpen}
@@ -581,79 +287,6 @@ export const CardEditor = ({
         type="danger"
       />
 
-      <WarningModal
-        isOpen={showAllTransformedModal}
-        title={t('common.success')}
-        message={t('aiBatchModal.allAlreadyTransformed')}
-        confirmText={t('common.close')}
-        onConfirm={() => setShowAllTransformedModal(false)}
-        onCancel={() => setShowAllTransformedModal(false)}
-        singleButton
-      />
-
-      {aiErrorMessage && (
-        <div
-          className="card-editor__ai-error-overlay"
-          onClick={() => setAiErrorMessage(null)}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="card-editor-ai-error-title"
-        >
-          <div className="card-editor__ai-error-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="card-editor__ai-error-icon">
-              <FaExclamationTriangle />
-            </div>
-            <h2 id="card-editor-ai-error-title" className="card-editor__ai-error-title">
-              {t('common.warning')}
-            </h2>
-            <p className="card-editor__ai-error-message">{aiErrorMessage}</p>
-            <button
-              type="button"
-              className="card-editor__ai-error-close"
-              onClick={() => setAiErrorMessage(null)}
-            >
-              {t('common.close')}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {showBatchCompleteMessage && (
-        <div
-          className="card-editor__batch-complete-overlay"
-          onClick={() => setShowBatchCompleteMessage(false)}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="card-editor-batch-complete-title"
-        >
-          <div className="card-editor__batch-complete-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="card-editor__batch-complete-icon">
-              <FaCheckCircle />
-            </div>
-            <h2 id="card-editor-batch-complete-title" className="card-editor__batch-complete-title">
-              {aiBatchTotalCount - aiBatchSkippedCount > 0
-                ? t('aiBatchModal.done', { count: aiBatchTotalCount - aiBatchSkippedCount })
-                : t('aiBatchModal.doneNone')}
-            </h2>
-            <p className="card-editor__batch-complete-message">
-              {t('aiBatchModal.revertHint')}
-            </p>
-            {aiBatchSkippedCount > 0 && (
-              <p className="card-editor__batch-complete-skipped">
-                {t('aiBatchModal.rejected', { count: aiBatchSkippedCount })}{' '}
-                {t('aiBatchModal.refunded', { count: aiBatchSkippedCount })}
-              </p>
-            )}
-            <button
-              type="button"
-              className="card-editor__batch-complete-close"
-              onClick={() => setShowBatchCompleteMessage(false)}
-            >
-              {t('common.close')}
-            </button>
-          </div>
-        </div>
-      )}
     </div >
   );
 };

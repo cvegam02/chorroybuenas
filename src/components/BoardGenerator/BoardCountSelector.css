@@ -374,3 +374,28 @@
     --u: 1px;
   }
 }
+
+/* Dentro de la ventana de U2 (FEAT-57): sin fondo ni márgenes de página; la muestra va arriba, más chica */
+.board-count--dialog {
+  background: transparent;
+}
+
+.board-count--dialog .board-count__inner {
+  flex-direction: column-reverse;
+  gap: 16px;
+  padding: 0;
+}
+
+.board-count--dialog .board-count__panel {
+  flex: none;
+  width: 100%;
+  gap: 16px;
+}
+
+.board-count--dialog .board-count__title {
+  font-size: 24px;
+}
+
+.board-count--dialog .board-pile {
+  --u: 0.5px;
+}
