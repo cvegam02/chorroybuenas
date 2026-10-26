@@ -1,6 +1,6 @@
 # FEAT-56 — Loterías colectivas: invitar a subir fotos
 
-**Estado:** definida con Carlos el 2026-10-23 y el 2026-10-24. B1 a B4 hechas el 2026-10-24 y B5 el 2026-10-25: la feature está completa en `feature/loterias-colectivas`. Se trabaja en la rama `feature/loterias-colectivas` (creada el 2026-10-24 desde `dev`). Cambios a la base de conocimiento aprobados por Carlos y aplicados el 2026-10-24 (ver el final).
+**Estado:** definida con Carlos el 2026-10-23 y el 2026-10-24. B1 a B4 hechas el 2026-10-24 y B5 el 2026-10-25: la feature está completa en `feature/loterias-colectivas` y va a `dev` con el PR #74 (2026-10-25). Las migraciones 062 a 067 están en el Supabase de dev; faltan en producción, con permiso de Carlos, antes de fusionar a `main`. Se trabaja en la rama `feature/loterias-colectivas` (creada el 2026-10-24 desde `dev`). Cambios a la base de conocimiento aprobados por Carlos y aplicados el 2026-10-24 (ver el final).
 
 **Contexto.** Juntar 24 fotos o más es el paso donde más gente se atora. En una posada o un cumpleaños las fotos están repartidas en los celulares de toda la familia. Con esta feature el organizador manda un enlace por WhatsApp y cada invitado sube sus fotos directo a la lotería. De paso, cada invitado crea su cuenta y conoce el sitio.
 

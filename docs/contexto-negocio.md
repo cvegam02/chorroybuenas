@@ -316,7 +316,7 @@ Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en
 | Tableros del PDF en tamaño carta | §5 | El PDF sale en hoja A4. Anotada el 2026-10-09; se corrige con `docs/features/FEAT-26-pdf-impresion-y-recorte.md` |
 | Voz con IA del cantador | §20 | En producción, no existe: el cantador usa la voz del navegador. Construida el 2026-10-24 con la US A6 de `docs/features/FEAT-55-cantador.md` y llevada a dev con el PR #73; se retira de esta lista al publicarse en producción |
 | «Arma tus tableros» | §19 | No existe. Anotada el 2026-10-22; se construye con `docs/features/FEAT-53-tableros-loteria-tradicional.md` |
-| Loterías colectivas | §3, §12, §21 | En producción, no existen: solo el dueño ve y modifica su lotería. Construidas el 2026-10-24 y el 2026-10-25 con las US B1 a B5 de `docs/features/FEAT-56-loterias-colectivas.md`; se retira de esta lista al publicarse en producción |
+| Loterías colectivas | §3, §12, §21 | En producción, no existen: solo el dueño ve y modifica su lotería. Construidas el 2026-10-24 y el 2026-10-25 con las US B1 a B5 de `docs/features/FEAT-56-loterias-colectivas.md` y llevadas a dev con el PR #74; se retira de esta lista al publicarse en producción |
 
 ## 18. Loterías temáticas — DEFINIDO
 
