@@ -1,6 +1,6 @@
 # FEAT-57 — Una sola casa para cada lotería
 
-**Estado:** definida con Carlos el 2026-10-25. A1 y A2 hechas el 2026-10-25; A3 y A4 (agregada a pedido de Carlos) hechas el mismo día. Falta el commit y el PR a `dev`. Se trabaja en la rama `feature/una-sola-casa` (creada el 2026-10-25 desde `dev`).
+**Estado:** definida con Carlos el 2026-10-25. A1 y A2 hechas el 2026-10-25; A3 y A4 (agregada a pedido de Carlos) hechas el mismo día. La feature está completa y va a `dev` con el PR #75 (2026-10-26). Sin migraciones ni edge functions. Se trabaja en la rama `feature/una-sola-casa` (creada el 2026-10-25 desde `dev`).
 
 **Contexto.** Con sesión, una misma lotería vive en dos lugares que se reparten las funciones. Crear (C1 → C2 → C3) sirve para editar cartas y tableros, pero no tiene Cantar, Invitar ni nada de lo colectivo. La lotería guardada (U2) tiene todo eso, pero para editar manda de vuelta a Crear, que se ve distinta y tiene otra navegación. Carlos lo siente enredado.
 
