@@ -426,10 +426,42 @@
   cursor: pointer;
 }
 
+/* Código + «Aplicar» (FEAT-58, decisión 3) */
+.buy-tokens__promo-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.buy-tokens__promo-apply {
+  flex: 0 0 auto;
+  padding: 0 18px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.buy-tokens__promo-apply:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.buy-tokens__promo-error {
+  display: block;
+  margin-top: 10px;
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
 .buy-tokens__promo-input {
   box-sizing: border-box;
+  flex: 1 1 auto;
+  min-width: 0;
   width: 100%;
-  margin-top: 14px;
   padding: 12px 14px;
   border: 1px solid var(--color-primary-lighter);
   border-radius: var(--radius-md);

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { FaPlus } from 'react-icons/fa';
 import { AdminRepository, type AdminTokenPack } from '../../repositories/AdminRepository';
+import { OfferRepository } from '../../repositories/OfferRepository';
+import { pendingOfferPercent } from '../../utils/adminOffers';
 import { summaryPeriod } from '../../utils/adminSummary';
 import { AdminPackCard } from './AdminPackCard';
 import { AdminPackForm } from './AdminPackForm';
@@ -22,14 +24,20 @@ export const AdminTokenPacks = ({ priceCents, titleId }: AdminTokenPacksProps) =
   const [showNewForm, setShowNewForm] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [offerPercent, setOfferPercent] = useState<number | null>(null);
 
   useEffect(() => {
     let current = true;
-    Promise.all([AdminRepository.getTokenPacks(), AdminRepository.getPackSales(summaryPeriod('month'))]).then(
-      ([data, monthSales]) => {
+    Promise.all([
+      AdminRepository.getTokenPacks(),
+      AdminRepository.getPackSales(summaryPeriod('month')),
+      OfferRepository.getAdminOffers(),
+    ]).then(
+      ([data, monthSales, offers]) => {
         if (!current) return;
         setPacks(data);
         setSales(monthSales);
+        setOfferPercent(pendingOfferPercent(offers ?? []));
         setIsLoading(false);
       },
     );
@@ -77,7 +85,7 @@ export const AdminTokenPacks = ({ priceCents, titleId }: AdminTokenPacksProps) =
       </div>
 
       {showNewForm && (
-        <AdminPackForm sortOrder={packs.length} onSaved={addPack} onCancel={() => setShowNewForm(false)} />
+        <AdminPackForm offerPercent={offerPercent} sortOrder={packs.length} onSaved={addPack} onCancel={() => setShowNewForm(false)} />
       )}
 
       {error && <p className="admin-packs__error" role="alert">{error}</p>}
@@ -96,6 +104,7 @@ export const AdminTokenPacks = ({ priceCents, titleId }: AdminTokenPacksProps) =
               <AdminPackForm
                 key={p.id}
                 pack={p}
+                offerPercent={offerPercent}
                 sortOrder={p.sort_order}
                 onSaved={replacePack}
                 onCancel={() => setEditingId(null)}

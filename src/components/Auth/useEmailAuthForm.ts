@@ -46,6 +46,7 @@ export const useEmailAuthForm = ({ initialView, googleReturnPath, confirmReturnP
 
   const alertFor = (err: unknown): AuthAlertState => {
     const kind = authErrorKind(err);
+    if (kind === 'disposable') return { kind: 'message', text: t('common.auth.errors.disposableEmail'), field: 'email' };
     if (kind !== 'other') return { kind };
     return { kind: 'message', text: getErrorMessage(err) || t('common.auth.errors.authFailed') };
   };

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import type { AdminTokenPack } from '../../repositories/AdminRepository';
 import { OfferRepository, type OfferSave } from '../../repositories/OfferRepository';
+import { offerMinimumError } from '../../utils/purchaseRules';
 import {
   datetimeInputFromIso,
   endsAtIso,
@@ -98,6 +99,13 @@ export const AdminOfferForm = ({ data, offer: initialOffer, initialNotice }: Adm
     setBannerErrors(part2);
     if (!part1.ok || Object.keys(part2).length > 0) {
       setMessage({ ok: false, text: 'Revisa los campos marcados.' });
+      return null;
+    }
+    // Ningún pack activo puede quedar por debajo del mínimo de compra (FEAT-58, decisión 2)
+    const belowMinimum = offerMinimumError(data.packs, part1.value.discount_percent);
+    if (belowMinimum) {
+      setErrors({ percent: belowMinimum });
+      setMessage({ ok: false, text: belowMinimum });
       return null;
     }
     const clash = overlappingOffer(others, part1.value.starts_at, part1.value.ends_at, null);
