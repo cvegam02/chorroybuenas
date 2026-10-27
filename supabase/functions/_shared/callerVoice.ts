@@ -54,6 +54,7 @@ export const INTRO_ID = 'intro';
 export type CallerVoiceRequest =
   | { action: 'start'; setId: string; voiceId: CallerVoiceId }
   | { action: 'generate'; setId: string; cardId: string }
+  | { action: 'expand'; setId: string }
   | { action: 'refund'; setId: string };
 
 function isVoice(v: unknown): v is CallerVoiceId {
@@ -73,6 +74,8 @@ export function parseCallerVoiceRequest(body: unknown): ParseResult<CallerVoiceR
     case 'generate':
       if (raw.card_id !== INTRO_ID && !isUuid(raw.card_id)) return fail('Se requiere card_id.');
       return { ok: true, value: { action: 'generate', setId, cardId: raw.card_id as string } };
+    case 'expand':
+      return { ok: true, value: { action: 'expand', setId } };
     case 'refund':
       return { ok: true, value: { action: 'refund', setId } };
     default:
@@ -97,9 +100,20 @@ export function audioPath(userId: string, setId: string, cardId: string): string
   return `${userId}/${setId}/${cardId}.mp3`;
 }
 
+/**
+ * Audio compartido entre cuentas (FEAT-58, decisión 12): misma voz y mismo texto, sin importar mayúsculas ni
+ * espacios. Va en `shared/`, que no es la carpeta de ningún usuario: nadie lo lee desde el sitio.
+ */
+export async function sharedAudioPath(voiceId: CallerVoiceId, text: string): Promise<string> {
+  const normalized = text.normalize('NFC').trim().replace(/\s+/g, ' ').toLowerCase();
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalized));
+  const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  return `shared/${voiceId}/${hex}.mp3`;
+}
+
 const RPC_CODES = [
   'INSUFFICIENT_TOKENS', 'VOICE_ALREADY_CREATED', 'INVALID_VOICE', 'SET_NOT_FOUND', 'AUDIOS_EXIST',
-  'VOICE_NOT_PAID', 'CARD_NOT_FOUND', 'VOICE_LIMIT', 'RATE_LIMITED',
+  'VOICE_NOT_PAID', 'CARD_NOT_FOUND', 'VOICE_LIMIT', 'RATE_LIMITED', 'VOICE_NOT_COVERED', 'NOTHING_TO_EXPAND',
 ];
 
 /** Traduce el error de las RPC de la voz (migraciones 060 y 069) a un código público, o conserva el detalle. */
@@ -119,6 +133,10 @@ const PUBLIC_ERRORS: Record<string, { status: number; message: string }> = {
   // FEAT-58, decisión 7: pasado el tope, la carta se canta con la voz del navegador
   VOICE_LIMIT: { status: 403, message: 'Esta lotería ya usó sus audios con IA gratis.' },
   RATE_LIMITED: { status: 429, message: 'Demasiados audios seguidos. Intenta en un minuto.' },
+  // FEAT-58, decisiones 8 y 11
+  VOICE_NOT_COVERED: { status: 403, message: 'Esta carta no está cubierta por la voz pagada. Amplía la voz.' },
+  NOTHING_TO_EXPAND: { status: 409, message: 'La voz ya cubre todas las cartas.' },
+  VOICE_UNAVAILABLE: { status: 503, message: 'La voz con IA no está disponible por ahora. Intenta más tarde.' },
   AI_BUSY: { status: 503, message: 'La IA está ocupada. Intenta de nuevo en un momento.' },
   AI_TIMEOUT: { status: 504, message: 'La IA tardó demasiado. Intenta de nuevo.' },
 };

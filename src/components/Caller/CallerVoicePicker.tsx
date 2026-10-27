@@ -4,12 +4,16 @@ import { useTranslation } from 'react-i18next';
 import { FaCheck, FaPlay, FaStop, FaTimes } from 'react-icons/fa';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
-import { AI_VOICE_PRICE, AI_VOICES, type AiVoiceOption } from '../../utils/callerAiVoice';
+import { AI_VOICES, type AiVoiceOption } from '../../utils/callerAiVoice';
 // El fondo y los botones son los de las ventanas de Mi cuenta
 import '../Dashboard/LoteriaDialogs.css';
 import './CallerVoicePicker.css';
 
 interface CallerVoicePickerProps {
+  /** Lo que cuesta según las cartas de la lotería, cuántas son y cuántas cubre (FEAT-58, decisión 8). */
+  price: number;
+  cards: number;
+  coverage: number;
   /** Paga la voz escogida; rechaza con el código del servidor. */
   onBuy: (voiceId: string) => Promise<void>;
   onClose: () => void;
@@ -21,7 +25,7 @@ const GROUPS: AiVoiceOption['group'][] = ['men', 'women'];
  * «Mejorar la voz» (FEAT-55, US A6): las voces en tarjetas agrupadas por hombre y mujer, cada una con su
  * muestra; el pie con el costo, el saldo y «Pagar» queda fijo para no tener que bajar a buscarlo.
  */
-export const CallerVoicePicker = ({ onBuy, onClose }: CallerVoicePickerProps) => {
+export const CallerVoicePicker = ({ price, cards, coverage, onBuy, onClose }: CallerVoicePickerProps) => {
   const { t } = useTranslation();
   const { balance } = useTokenBalance();
   const [chosen, setChosen] = useState(AI_VOICES[0].id);
@@ -55,7 +59,7 @@ export const CallerVoicePicker = ({ onBuy, onClose }: CallerVoicePickerProps) =>
     audio.play().then(() => setPlaying(voice.id)).catch(() => setPlaying(null));
   };
 
-  const enough = balance !== null && balance >= AI_VOICE_PRICE;
+  const enough = balance !== null && balance >= price;
 
   const pay = async () => {
     if (isBusy) return;
@@ -68,7 +72,8 @@ export const CallerVoicePicker = ({ onBuy, onClose }: CallerVoicePickerProps) =>
       onClose();
     } catch (err) {
       const code = err instanceof Error ? err.message : '';
-      setError(t(code === 'INSUFFICIENT_TOKENS' ? 'caller.aiVoice.errorTokens' : 'caller.aiVoice.errorGeneric'));
+      const key = code === 'INSUFFICIENT_TOKENS' ? 'errorTokens' : code === 'VOICE_UNAVAILABLE' ? 'errorUnavailable' : 'errorGeneric';
+      setError(t(`caller.aiVoice.${key}`));
       setIsBusy(false);
     }
   };
@@ -154,10 +159,10 @@ export const CallerVoicePicker = ({ onBuy, onClose }: CallerVoicePickerProps) =>
 
         <footer className="voice-picker__foot">
           <p className="voice-picker__cost">
-            {t('caller.aiVoice.cost', { price: AI_VOICE_PRICE })}
+            {t('caller.aiVoice.cost', { price, count: cards })}
             {balance !== null && ` · ${t('caller.aiVoice.balance', { count: balance })}`}
           </p>
-          <p className="voice-picker__final">{t('caller.aiVoice.final')}</p>
+          <p className="voice-picker__final">{t('caller.aiVoice.final', { coverage })}</p>
           {error && (
             <p className="loteria-dialog__error" role="alert">
               {error}
@@ -171,7 +176,7 @@ export const CallerVoicePicker = ({ onBuy, onClose }: CallerVoicePickerProps) =>
               <button type="button" className="loteria-dialog__button loteria-dialog__button--primary" onClick={pay} disabled={isBusy}>
                 {isBusy
                   ? t('caller.aiVoice.paying')
-                  : t('caller.aiVoice.payWith', { price: AI_VOICE_PRICE, name: voiceName(chosenVoice) })}
+                  : t('caller.aiVoice.payWith', { price, name: voiceName(chosenVoice) })}
               </button>
             ) : (
               <Link to="/comprar-tokens" className="loteria-dialog__button loteria-dialog__button--primary">

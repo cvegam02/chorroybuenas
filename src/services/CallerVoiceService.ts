@@ -13,6 +13,8 @@ const STORAGE_PAGE = 1000;
 export interface CallerVoiceState {
   voiceId: string;
   hasIntro: boolean;
+  /** Cartas que cubre lo pagado (FEAT-58, decisión 8). */
+  coveredCards: number;
   /** carta → título con el que se generó su audio */
   audioTitles: Map<string, string>;
   /** carta (o «intro») → enlace firmado al audio */
@@ -22,11 +24,12 @@ export interface CallerVoiceState {
 type CallerVoiceBody =
   | { action: 'start'; set_id: string; voice_id: string }
   | { action: 'generate'; set_id: string; card_id: string }
+  | { action: 'expand'; set_id: string }
   | { action: 'refund'; set_id: string };
 
 /**
  * Llama a la edge function caller-voice. Rechaza con un Error cuyo message es el código del servidor
- * (NOT_LOGGED_IN, INSUFFICIENT_TOKENS, VOICE_ALREADY_CREATED, AI_BUSY, AI_TIMEOUT, AI_ERROR…).
+ * (NOT_LOGGED_IN, INSUFFICIENT_TOKENS, VOICE_ALREADY_CREATED, VOICE_UNAVAILABLE, AI_BUSY, AI_TIMEOUT, AI_ERROR…).
  */
 async function call(body: CallerVoiceBody): Promise<void> {
   const { data: { session } } = await supabase.auth.getSession();
@@ -80,20 +83,23 @@ export const CallerVoiceService = {
     }
   },
 
-  /** Cobra la voz con IA de la lotería (10 tokens, una sola vez). */
+  /** Cobra la voz con IA de la lotería según sus cartas (10 tokens hasta 60 y 2 por cada 10 más). */
   start: (setId: string, voiceId: string) => call({ action: 'start', set_id: setId, voice_id: voiceId }),
 
   /** Genera, sin costo, el audio de una carta o de la frase de arranque. */
   generate: (setId: string, cardId: string) => call({ action: 'generate', set_id: setId, card_id: cardId }),
 
-  /** Pide de vuelta los tokens si no salió ninguna carta. */
+  /** «Ampliar la voz»: cobra los bloques de cartas que pasan de lo pagado (FEAT-58, decisión 8). */
+  expand: (setId: string) => call({ action: 'expand', set_id: setId }),
+
+  /** Pide de vuelta los tokens si no salió ninguna carta ni la frase de arranque. */
   refund: (setId: string) => call({ action: 'refund', set_id: setId }),
 
   /** La voz con IA de la lotería y sus audios, o null si no la tiene. */
   async load(setId: string): Promise<CallerVoiceState | null> {
     const { data: voice, error: voiceError } = await supabase
       .from('caller_voices')
-      .select('voice_id, intro_path')
+      .select('voice_id, intro_path, covered_cards')
       .eq('set_id', setId)
       .maybeSingle();
     if (voiceError) throw voiceError;
@@ -123,6 +129,7 @@ export const CallerVoiceService = {
     return {
       voiceId: voice.voice_id as string,
       hasIntro: Boolean(voice.intro_path),
+      coveredCards: voice.covered_cards as number,
       audioTitles: new Map((audios ?? []).map((a) => [a.card_id as string, a.title as string])),
       urls,
     };

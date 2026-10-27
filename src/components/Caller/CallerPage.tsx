@@ -17,7 +17,6 @@ import {
   recentBeforeCurrent,
 } from '../../utils/callerGame';
 import { CALL_INTRO } from '../../utils/callerAuto';
-import { AI_VOICE_PRICE } from '../../utils/callerAiVoice';
 import { cardLabelsOrDefault } from '../../utils/cardLabels';
 import { exitFullscreen } from '../../utils/fullscreen';
 import { SetConfirmDialog } from '../SetView/SetConfirmDialog';
@@ -27,6 +26,7 @@ import { useAutoCaller } from './useAutoCaller';
 import { CallerRhythmPicker } from './CallerRhythmPicker';
 import { NoVoiceNotice } from './NoVoiceNotice';
 import { CallerDeckSheet, CallerHistoryStrip } from './CallerHistory';
+import { CallerVoiceExpand } from './CallerVoiceExpand';
 import { CallerVoicePicker } from './CallerVoicePicker';
 import { useAiVoice } from './useAiVoice';
 import type { Card } from '../../types';
@@ -221,16 +221,19 @@ export const CallerPage = () => {
         <CallerRhythmPicker rhythm={auto.rhythm} onChange={auto.changeRhythm} />
         {ai.status === 'none' && (
           <>
-            {ai.refunded && (
+            {ai.refunded !== null && (
               <p className="caller__ai-note" role="status">
-                {t('caller.aiVoice.refunded', { price: AI_VOICE_PRICE })}
+                {t('caller.aiVoice.refunded', { price: ai.refunded })}
               </p>
             )}
             <button type="button" className="caller__ai-voice" onClick={() => setVoicePickerOpen(true)}>
               <FaMagic aria-hidden="true" />
-              {t('caller.aiVoice.open', { price: AI_VOICE_PRICE })}
+              {t('caller.aiVoice.open', { price: ai.price })}
             </button>
           </>
+        )}
+        {ai.status === 'ready' && ai.uncovered > 0 && (
+          <CallerVoiceExpand uncovered={ai.uncovered} price={ai.expandPrice} onExpand={ai.expand} />
         )}
       </div>
     );
@@ -323,7 +326,15 @@ export const CallerPage = () => {
         {deckOpen && ready && (
           <CallerDeckSheet cards={ready.cards} callNumbers={callNumbers} onClose={() => setDeckOpen(false)} />
         )}
-        {voicePickerOpen && <CallerVoicePicker onBuy={ai.buy} onClose={() => setVoicePickerOpen(false)} />}
+        {voicePickerOpen && (
+          <CallerVoicePicker
+            price={ai.price}
+            cards={singableCards?.length ?? 0}
+            coverage={ai.coverage}
+            onBuy={ai.buy}
+            onClose={() => setVoicePickerOpen(false)}
+          />
+        )}
         {confirmRestart && (
           <SetConfirmDialog
             icon={<FaRandom />}
