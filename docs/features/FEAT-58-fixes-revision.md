@@ -49,7 +49,7 @@ Acordadas con Carlos el 2026-10-26. Cada fase es una rama y un PR a `dev`, y se 
 | Fase | Qué entra | Decisiones que necesita | Rama | Estado |
 |---|---|---|---|---|
 | 1 — Arreglos sin decisiones (producción expuesta hoy) | A1; A8; de A6 solo H10; de A12 solo H20 y H22 | 13 (confirmada) | `feature/fixes-revision-f1` | construida; llevada a `dev` con el PR #76; Supabase dev desplegado; falta que Carlos la pruebe en dev |
-| 2 — Cerrar los huecos de `dev` antes de producción | A3, A5, A4 | 6, 7, 8, 9, 10, 11, 12 | `feature/fixes-revision-f2` (sale de la rama de la fase 1) | en construcción: A3 y A5 construidas; A4 con decisiones cerradas, por construir |
+| 2 — Cerrar los huecos de `dev` antes de producción | A3, A5, A4 | 6, 7, 8, 9, 10, 11, 12 | `feature/fixes-revision-f2` (sale de la rama de la fase 1) | A3 y A5 construidas y llevadas a `dev` con el PR #77; A4 con decisiones cerradas, por construir |
 | 3 — Abusos y cobros | A2, A9 y el resto de A6 (H4) | 1, 2, 3 | `feature/fixes-revision-f3` | por empezar |
 | 4 — Robustez | A7, A10, A11 y el resto de A12 (H11, H12, H13, H21) | 4, 5 | `feature/fixes-revision-f4` | por empezar |
 
@@ -87,7 +87,7 @@ Una por una, antes de la historia que la necesita. Entre paréntesis, la recomen
 - **2026-10-26 — Decisión 11 (H18, cupo de ElevenLabs):** antes de cobrar (al pagar la voz o al ampliarla), el servidor consulta los créditos que quedan en ElevenLabs; si no alcanzan para esa lotería, no cobra y el cantador dice que la voz con IA no está disponible por ahora (si la consulta falla, tampoco cobra). Al bajar del 20 % del cupo, correo de alerta al administrador (Resend, a la dirección fija de la alerta de §13), uno por mes. Descartados: solo revisar sin correo; solo la alerta.
 - **2026-10-26 — Decisión 12 (H19, audios compartidos):** sí, frase y títulos. La frase de arranque se genera una sola vez por voz (8 audios); un título ya generado con la misma voz (sin importar mayúsculas ni espacios) se copia a la carpeta del usuario en lugar de generarse. Nadie ve los audios de otros. Se anota en §12 que el servidor reutiliza audios con el mismo texto entre cuentas. Descartados: solo la frase; nada compartido.
 - **2026-10-26 — Base de conocimiento de la fase 2:** Carlos confirmó los cuatro grupos de cambios. Aplicados en `contexto-negocio.md` (§4 título de 50 y tope de invitados; §11 cuenta de audios y «Audio compartido»; §12 audios compartidos; §13 alerta de cupo de voz; §15 cuatro filas; §17 tres renglones de A4 por construir; §20 topes, devolución, precio por bloques, cupo y audios compartidos; §21 tope de invitados y «Borrar fotos»), `casos-de-uso.md` (casos 30, 32 y 33) y `diseno-mockups.md` (M18). U4 se actualiza al diseñar A4.
-- **2026-10-26 — Despliegue de la fase 2 (A3 y A5) en Supabase dev:** hecho el 2026-10-26, a pedido de Carlos: migraciones `069_caller_voice_limits.sql` y `070_guest_card_limits.sql` por la Management API (antes se revisó que la base de dev coincidía con el repo y se respaldaron `refund_caller_voice` y `add_guest_card`); las dos voces ya pagadas empezaron con `generated_audios` igual a sus audios (24 y 31). Función `caller-voice` desplegada. Producción: sin tocar. El sitio (editor, invitados, «Borrar fotos») llega a `dev.chorroybuenas.com.mx` con el PR de la fase 2.
+- **2026-10-26 — Despliegue de la fase 2 (A3 y A5) en Supabase dev:** hecho el 2026-10-26, a pedido de Carlos: migraciones `069_caller_voice_limits.sql` y `070_guest_card_limits.sql` por la Management API (antes se revisó que la base de dev coincidía con el repo y se respaldaron `refund_caller_voice` y `add_guest_card`); las dos voces ya pagadas empezaron con `generated_audios` igual a sus audios (24 y 31). Función `caller-voice` desplegada. Producción: sin tocar. El sitio (editor, invitados, «Borrar fotos») llega a `dev.chorroybuenas.com.mx` con el PR #77.
 - **2026-10-26 — Orden de las fases:** Carlos dejó la fase 1 sin subir mientras se cerraban las decisiones de la fase 2; ese mismo día pidió subirla (PR #76). La rama de la fase 2 sale de la de la fase 1.
 
 ## Hallazgos
@@ -290,7 +290,7 @@ Orden sugerido: A1, A2, A3, A4, A5 (antes de llevar 060–067 a producción), lu
 - **Escenarios cubiertos:** correo, Google, correo sin confirmar, confirmar dos veces (no duplica), cuentas ya existentes (no cambian).
 - **Construido:** —
 
-### US A3 — Voz con IA: cerrar abusos   ·   Estado: construida y desplegada en Supabase dev; falta el PR y probar en dev   ·   Pruebas primero
+### US A3 — Voz con IA: cerrar abusos   ·   Estado: construida, desplegada en Supabase dev y llevada a `dev` con el PR #77; falta probar en dev   ·   Pruebas primero
 
 - **Historia:** Como dueño del negocio, quiero que la voz con IA no se pueda generar sin fin, para que el cupo alcance para quienes pagan.
 - **Entrega demostrable:** títulos de máximo 50 caracteres en la base; tope de regeneraciones gratis por lotería y límite por minuto en `generate`; la devolución falla si ya hay frase o audios y no compite con una generación en curso. Resuelve H14 y H17.
@@ -309,7 +309,7 @@ Orden sugerido: A1, A2, A3, A4, A5 (antes de llevar 060–067 a producción), lu
 - **Notas para construir (2026-10-26):** (a) la medición quedó en «Decisiones tomadas», no en FEAT-55; (b) con el precio por bloques, el tope de A3 pasa a ser *cartas cubiertas por lo pagado* (mínimo entre cartas de la lotería y 60 + 10 por bloque) *más 10*; las cartas fuera de lo cubierto reciben `VOICE_LIMIT` y se cantan con la voz del navegador hasta «Ampliar la voz»; (c) un audio copiado de los compartidos no gasta créditos: no cuenta para el tope ni para el límite por minuto; (d) la revisión del cupo calcula ~26 créditos por carta que falte más 48 de la frase si no está compartida; (e) «Ampliar la voz» y «La voz con IA no está disponible por ahora» son UI nueva del cantador (U4 y la ventana de voces): seguir `docs/workflow-fe.md` y confirmar el diseño con Carlos.
 - **Construido:** —
 
-### US A5 — Invitados: tope y una imagen por carta   ·   Estado: construida y desplegada en Supabase dev; falta el PR y probar en dev   ·   Pruebas primero (permisos)
+### US A5 — Invitados: tope y una imagen por carta   ·   Estado: construida, desplegada en Supabase dev y llevada a `dev` con el PR #77; falta probar en dev   ·   Pruebas primero (permisos)
 
 - **Historia:** Como organizador, quiero que un invitado no pueda llenar mi lotería de cartas basura, para que mi lotería siga funcionando.
 - **Entrega demostrable:** `add_guest_card` exige que la imagen exista y no se haya usado, aplica el tope por invitado y el límite por minuto; en M19, «Borrar sus fotos» por invitado. Resuelve H16.
