@@ -32,7 +32,7 @@ describe('createPrediction', () => {
   it('por defecto crea en /predictions; un modelo oficial se llama por su ruta (FEAT-50)', async () => {
     const d = deps([res(201, { id: 'p1', status: 'starting' }), res(201, { id: 'p2', status: 'starting' })]);
     await createPrediction(d, 'key', {});
-    await createPrediction(d, 'key', {}, 3, '/models/openai/gpt-image-2/predictions');
+    await createPrediction(d, 'key', {}, { path: '/models/openai/gpt-image-2/predictions' });
     expect(d.calls).toEqual([
       'https://api.replicate.com/v1/predictions',
       'https://api.replicate.com/v1/models/openai/gpt-image-2/predictions',
@@ -54,8 +54,21 @@ describe('createPrediction', () => {
 
   it('se rinde tras maxRetries 429 seguidos', async () => {
     const d = deps([res(429, {}), res(429, {}), res(429, {})]);
-    await expect(createPrediction(d, 'key', {}, 2)).rejects.toThrow('AI_BUSY');
+    await expect(createPrediction(d, 'key', {}, { maxRetries: 2 })).rejects.toThrow('AI_BUSY');
     expect(d.calls).toHaveLength(3);
+  });
+
+  it('con plazo total, no espera un 429 si la espera pasaría el plazo: AI_BUSY de inmediato (FEAT-58, H3)', async () => {
+    const d = deps([res(429, { retry_after: 20 })]);
+    await expect(createPrediction(d, 'key', {}, { deadlineAt: 15_000 })).rejects.toThrow('AI_BUSY');
+    expect(d.calls).toHaveLength(1);
+    expect(d.clock.t).toBe(0);
+  });
+
+  it('con plazo total, reintenta un 429 si la espera cabe en el plazo', async () => {
+    const d = deps([res(429, { retry_after: 5 }), res(201, { id: 'p1', status: 'starting' })]);
+    expect(await createPrediction(d, 'key', {}, { deadlineAt: 15_000 })).toMatchObject({ id: 'p1' });
+    expect(d.clock.t).toBe(5000);
   });
 
   it('propaga el detalle de un error de la API', async () => {
@@ -100,6 +113,20 @@ describe('waitForPrediction', () => {
       .rejects.toThrow('AI_TIMEOUT');
   });
 
+  it('con plazo total anterior al tope propio, cancela al llegar al plazo sin pasarse (FEAT-58, H3)', async () => {
+    const d = deps([
+      res(200, { id: 'p1', status: 'processing' }),
+      res(200, { id: 'p1', status: 'processing' }),
+      res(200, { id: 'p1', status: 'canceled' }),
+    ]);
+    d.clock.t = 1000;
+    await expect(waitForPrediction(d, 'key', { id: 'p1', status: 'starting' }, {
+      timeoutMs: 120_000, intervalMs: 3000, deadlineAt: 5000,
+    })).rejects.toThrow('AI_TIMEOUT');
+    expect(d.clock.t).toBe(5000);
+    expect(d.calls.at(-1)).toContain('/predictions/p1/cancel');
+  });
+
   it('un error de polling se propaga', async () => {
     const d = deps([res(500, { detail: 'boom' })]);
     await expect(waitForPrediction(d, 'key', { id: 'p1', status: 'starting' })).rejects.toThrow('Replicate poll (500)');
@@ -128,6 +155,28 @@ describe('runCharged', () => {
     const refund = vi.fn(async () => {});
     await expect(runCharged({ spend: async () => 'u1', refund, run: async () => { throw new Error('AI_TIMEOUT'); } }))
       .rejects.toThrow('AI_TIMEOUT');
+    expect(refund).toHaveBeenCalledWith('u1');
+  });
+
+  it('429 seguidos y predicción lenta con un solo plazo: cancela antes del plazo y reembolsa (FEAT-58, H3)', async () => {
+    const d = deps([
+      res(429, { retry_after: 30 }),
+      res(429, { retry_after: 30 }),
+      res(201, { id: 'p1', status: 'starting' }),
+      ...Array.from({ length: 40 }, () => res(200, { id: 'p1', status: 'processing' })),
+    ]);
+    const deadlineAt = 120_000;
+    const refund = vi.fn(async () => {});
+    await expect(runCharged({
+      spend: async () => 'u1',
+      refund,
+      run: async () => {
+        const created = await createPrediction(d, 'key', {}, { deadlineAt });
+        return waitForPrediction(d, 'key', created, { timeoutMs: 120_000, intervalMs: 3000, deadlineAt });
+      },
+    })).rejects.toThrow('AI_TIMEOUT');
+    expect(d.clock.t).toBeLessThanOrEqual(deadlineAt);
+    expect(d.calls.at(-1)).toContain('/predictions/p1/cancel');
     expect(refund).toHaveBeenCalledWith('u1');
   });
 

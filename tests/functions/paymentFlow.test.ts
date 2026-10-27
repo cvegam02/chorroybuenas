@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
-  creditPayment, findApprovedPayment, parseNotification, trackUnapprovedSeasonal, type PaymentDeps,
+  creditPayment, findApprovedPayment, parseNotification, reversalReason, trackUnapprovedSeasonal, type PaymentDeps,
 } from '../../supabase/functions/_shared/paymentFlow.ts';
 
 const USER = 'user-1';
@@ -395,5 +395,24 @@ describe('trackUnapprovedSeasonal', () => {
   it('si falla el registro, el error se propaga (para que Mercado Pago reintente)', async () => {
     const { d } = deps(routes('pending'), { recordPendingSeasonal: vi.fn(async () => { throw new Error('rpc falló'); }) });
     await expect(trackUnapprovedSeasonal(d, { paymentId: '888' })).rejects.toThrow('rpc falló');
+  });
+});
+
+describe('reversalReason (FEAT-58, H1)', () => {
+  it.each(['refunded', 'charged_back'])('un pago en %s se revierte con ese motivo', (status) => {
+    expect(reversalReason(status)).toBe(status);
+  });
+
+  it.each(['approved', 'pending', 'in_process', 'in_mediation', 'rejected', 'cancelled', 'unknown', undefined])(
+    '%s no revierte nada', (status) => {
+      expect(reversalReason(status)).toBeNull();
+    },
+  );
+
+  it('el estado de un pago devuelto viene de la consulta a Mercado Pago, no del aviso', async () => {
+    const { d } = deps({ '/v1/payments/555': { ...approvedPayment, status: 'refunded' } });
+    const found = await findApprovedPayment(d, { topic: 'payment', id: '555' });
+    expect(found).toEqual({ ok: false, reason: 'not_approved', status: 'refunded' });
+    expect(reversalReason(found.ok ? undefined : found.status)).toBe('refunded');
   });
 });

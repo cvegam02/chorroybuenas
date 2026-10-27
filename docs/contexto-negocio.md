@@ -115,7 +115,8 @@ Mercado Pago cobra también las loterías temáticas; sus reglas están en §18 
 - Un pago aprobado acredita los tokens **una sola vez**, sin importar cuántas veces lo notifique Mercado Pago. **DEFINIDO** (2026-10-06)
 - No se acredita si el monto pagado es menor al esperado. **DEFINIDO** (2026-10-06). El esperado es el de ese pago, con o sin oferta (2026-10-15, FEAT-49).
 - Los pagos pendientes (efectivo, transferencia) se acreditan cuando Mercado Pago los confirma. _(confirmado el 2026-10-06)_
-- **Reembolsos y contracargos:** cuando un pago se devuelve o el banco lo revierte, se descuentan los tokens de esa compra. Si el usuario ya gastó algunos, su saldo queda en 0, nunca en negativo, y la compra queda marcada como devuelta. **DEFINIDO** (2026-10-06). Hoy el sistema no lo hace: está por construirse.
+- **Reembolsos y contracargos:** cuando un pago se devuelve o el banco lo revierte, se descuentan los tokens de esa compra. Si el usuario ya gastó algunos, su saldo queda en 0, nunca en negativo, y la compra queda marcada como devuelta. **DEFINIDO** (2026-10-06). Construido en FEAT-58 (2026-10-26).
+- **Reembolso parcial:** no se revierte nada automático; el administrador ajusta los tokens a mano si hace falta. **DEFINIDO** (2026-10-26, FEAT-58)
 - **Comprobante:** el sitio no emite ninguno. El comprador tiene el recibo de Mercado Pago y su historial de compras en su panel. **DEFINIDO** (2026-10-06)
 
 ## 9. Promociones
@@ -242,6 +243,7 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-06 | En modo Kids se necesitan al menos 15 cartas para generar tableros. _(Descartadas: 12, porque daba los mismos empates que Clásico con 20, un 52 %; 18, porque es demasiado para un modo pensado como sencillo. Origen: fase 1, historia A1.)_ |
 | 2026-10-06 | El mínimo de compra en cantidad libre es de 5 tokens ($10.00 MXN). _(Descartadas: 1 token, porque Mercado Pago no permite pagar $2.00; 10 tokens, porque duplica al paquete más chico.)_ |
 | 2026-10-06 | Ante un reembolso o contracargo se descuentan los tokens de esa compra, dejando el saldo en 0 como mínimo. _(Descartadas: dejar deuda de tokens y bloquear la IA; no hacer nada automático.)_ |
+| 2026-10-26 | Un reembolso parcial no revierte nada automático; el administrador ajusta los tokens a mano (FEAT-58). _(Descartada: descontar la parte proporcional de tokens.)_ |
 | 2026-10-06 | El sitio no emite comprobante propio de las compras. _(Descartadas: correo de confirmación; factura fiscal.)_ |
 | 2026-10-06 | Un código promocional aplica en cualquier compra. _(Descartada: solo en la primera compra.)_ |
 | 2026-10-06 | Cada usuario puede usar un mismo código una sola vez. _(Descartadas: sin límite mientras esté vigente; número de usos configurable.)_ |
@@ -299,18 +301,16 @@ Ninguno al 2026-10-06. Todas las reglas de este documento están confirmadas o d
 
 ## 17. Reglas definidas que el sitio todavía no cumple
 
-Decididas el 2026-10-06 y pendientes de construir. Los correos son la fase 3 de `plan-fases.md`; el descuento por reembolso quedó apartado el 2026-10-06, sin fecha. Las loterías temáticas son la feature `docs/features/FEAT-17-loterias-de-temporada.md`.
+Decididas el 2026-10-06 y pendientes de construir. Los correos son la fase 3 de `plan-fases.md`. Las loterías temáticas son la feature `docs/features/FEAT-17-loterias-de-temporada.md`.
 
-Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en producción: mínimo de 24 cartas en Clásico, mínimo de 15 en Kids, y mínimo de compra de 5 tokens. Retirada el 2026-10-06, al publicarse la fase 2: registrar cada regalo de tokens.
+Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en producción: mínimo de 24 cartas en Clásico, mínimo de 15 en Kids, y mínimo de compra de 5 tokens. Retirada el 2026-10-06, al publicarse la fase 2: registrar cada regalo de tokens. Retiradas el 2026-10-26, al pasar FEAT-58 a producción: descontar tokens y quitar el acceso a una lotería temática ante reembolso o contracargo.
 
 | Regla | Dónde está | Qué hace hoy el sitio |
 |---|---|---|
-| Descontar tokens ante reembolso o contracargo | §8 | No descuenta nada |
 | Avisar por correo de pago pendiente acreditado | §13 | No avisa |
 | Avisar por correo de tokens regalados | §13 | No avisa |
 | Alertar por correo al administrador de un pago cobrado sin entregar | §13 | No avisa. Anotada el 2026-10-13 (fase 3) |
 | Loterías temáticas: catálogo, compra, descarga y administración | §18 | No existen |
-| Quitar el acceso a una lotería temática ante reembolso o contracargo | §18 | No existe; se construirá junto con el descuento de tokens |
 | Ofertas con descuento y banner | §8, §9 | No existen. Anotada el 2026-10-15; se construye con `docs/features/FEAT-49-ofertas-con-banner.md` |
 | Elegir qué se ve en las cartas (nombre, número, ambos o nada) | §4 | Siempre dibuja nombre y número. Anotada el 2026-10-20; se construye con `docs/features/FEAT-51-nombre-y-numero-en-cartas.md` |
 | Tableros del PDF en tamaño carta | §5 | El PDF sale en hoja A4. Anotada el 2026-10-09; se corrige con `docs/features/FEAT-26-pdf-impresion-y-recorte.md` |
@@ -371,7 +371,7 @@ Definido con Carlos el 2026-10-06 (FEAT-17). Por construir. Hasta el 2026-10-07 
 - Lo comprado se conserva siempre, aunque la lotería se despublique o pasen sus fechas (§14).
 - Si el administrador reemplaza el PDF, los compradores descargan la versión nueva.
 
-**Reembolso o contracargo.** Se quita el acceso a la descarga y la compra queda marcada como devuelta. Lo que ya se descargó no se puede deshacer. Por construir junto con el descuento de tokens por reembolso (§8).
+**Reembolso o contracargo.** Se quita el acceso a la descarga y la compra queda marcada como devuelta. Lo que ya se descargó no se puede deshacer. Construido en FEAT-58 (2026-10-26), junto con el descuento de tokens por reembolso (§8).
 
 **Historial.** El comprador ve estas compras en su historial, mezcladas por fecha con las de tokens y los regalos. El administrador las ve en la lista de compras, distinguidas por tipo, y ve cuántas ventas lleva cada lotería.
 

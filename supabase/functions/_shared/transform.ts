@@ -91,6 +91,7 @@ const PUBLIC_ERRORS: Record<string, { status: number; message: string }> = {
   NSFW_FILTER: { status: 422, message: 'La imagen fue bloqueada por el filtro de contenido.' },
   SENSITIVE_CONTENT_FILTER: { status: 422, message: 'La imagen fue marcada como contenido sensible.' },
   AI_TIMEOUT: { status: 504, message: 'La IA tardó demasiado. Intenta de nuevo.' },
+  AI_BUSY: { status: 503, message: 'La IA está ocupada. Intenta de nuevo en un momento.' },
 };
 
 /**
