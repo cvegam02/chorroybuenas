@@ -23,6 +23,7 @@ import {
   withNewPhoto,
   type CardImageChoice,
 } from '../../utils/cardEditDraft';
+import { CARD_TITLE_MAX_LENGTH } from '../../utils/cardTitle';
 import './CardUploadModal.css';
 import './CardForm.css';
 import './CardEditModal.css';
@@ -299,7 +300,7 @@ export const CardEditModal = ({
                       setDraft((current) => ({ ...current, title }));
                     }}
                     className="card-form__input"
-                    maxLength={100}
+                    maxLength={CARD_TITLE_MAX_LENGTH}
                     disabled={isBusy}
                     aria-invalid={problem !== null}
                   />

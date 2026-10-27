@@ -15,7 +15,7 @@ import { usePageScrollLock } from '../../hooks/usePageScrollLock';
 import { useVisualViewportFit } from '../../hooks/useVisualViewportFit';
 import { nextCardNumber, queueItemState, queuePercent, readingPercent } from '../../utils/uploadQueue';
 import { logger } from '../../utils/logger';
-import { isPrintableCardTitle } from '../../utils/cardTitle';
+import { CARD_TITLE_MAX_LENGTH, isPrintableCardTitle } from '../../utils/cardTitle';
 
 
 interface PendingImage {
@@ -396,7 +396,7 @@ export const BatchUploadModal: FC<BatchUploadModalProps> = ({ isOpen, onClose, o
                     onChange={(e) => setCurrentTitle(e.target.value)}
                     onKeyDown={handleTitleKeyDown}
                     className="card-form__input"
-                    maxLength={100}
+                    maxLength={CARD_TITLE_MAX_LENGTH}
                   />
                   {isDuplicateTitle && <p className="card-form__error">{t('cardUpload.errorDuplicate')}</p>}
                   {isInvalidTitle && (

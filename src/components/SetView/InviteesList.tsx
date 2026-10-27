@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../contexts/AuthContext';
+import { CardRepository } from '../../repositories/CardRepository';
 import { LoteriaInviteRepository, type LoteriaInvitee } from '../../repositories/LoteriaInviteRepository';
 import { logger } from '../../utils/logger';
 
@@ -14,22 +16,100 @@ const initialsOf = (name: string | null): string =>
         .join('')
     : '?';
 
+type RowAction = 'remove' | 'deletePhotos';
+
+interface InviteeRowProps {
+  invitee: LoteriaInvitee;
+  /** La acción que se está confirmando en este renglón, si hay. */
+  confirming: RowAction | null;
+  isBusy: boolean;
+  onAsk: (action: RowAction | null) => void;
+  onConfirm: (action: RowAction) => void;
+}
+
+/** Un invitado: nombre, cuántas fotos subió, «Borrar fotos» (FEAT-58, US A5) y «Quitar», cada uno con su confirmación. */
+const InviteeRow = ({ invitee, confirming, isBusy, onAsk, onConfirm }: InviteeRowProps) => {
+  const { t } = useTranslation();
+  const name = invitee.name ?? t('invite.inviteeNoName');
+  const confirmText = confirming === 'deletePhotos'
+    ? t('invite.deletePhotosConfirm', { name, count: invitee.cardCount })
+    : t('invite.removeConfirm', { name });
+  const confirmLabel = confirming === 'deletePhotos' ? t('invite.deletePhotos') : t('invite.remove');
+
+  return (
+    <li className="invitees-dialog__row">
+      <span className="invitees-list__avatar" aria-hidden="true">
+        {initialsOf(invitee.name)}
+      </span>
+      <div className="invitees-dialog__who">
+        <span className="invitees-dialog__name">{name}</span>
+        <span className="invitees-dialog__count">{t('invite.inviteePhotos', { count: invitee.cardCount })}</span>
+      </div>
+      {confirming ? (
+        <div className="invitees-dialog__confirm">
+          <p>{confirmText}</p>
+          <div className="invite-dialog__manage-buttons">
+            <button
+              type="button"
+              className="invite-dialog__manage-button invitees-dialog__remove"
+              onClick={() => onConfirm(confirming)}
+              disabled={isBusy}
+            >
+              {confirmLabel}
+            </button>
+            <button type="button" className="invite-dialog__manage-button" onClick={() => onAsk(null)} disabled={isBusy}>
+              {t('common.cancel')}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="invitees-list__actions">
+          {invitee.cardCount > 0 && (
+            <button
+              type="button"
+              className="share-dialog__quiet share-dialog__quiet--danger"
+              onClick={() => onAsk('deletePhotos')}
+              disabled={isBusy}
+              aria-label={t('invite.deletePhotosLabel', { name })}
+            >
+              {t('invite.deletePhotos')}
+            </button>
+          )}
+          <button
+            type="button"
+            className="share-dialog__quiet share-dialog__quiet--danger"
+            onClick={() => onAsk('remove')}
+            disabled={isBusy}
+            aria-label={t('invite.removeLabel', { name })}
+          >
+            {t('invite.remove')}
+          </button>
+        </div>
+      )}
+    </li>
+  );
+};
+
 interface InviteesListProps {
   setId: string;
   /** Se quitó a alguien: la ventana y el botón del encabezado se actualizan. */
   onChange: () => void;
-  /** Está quitando a alguien: la ventana no se cierra a medias. */
+  /** Se borraron las fotos de un invitado: las cartas de la lotería se vuelven a leer. */
+  onPhotosDeleted: () => void;
+  /** Está quitando a alguien o borrando sus fotos: la ventana no se cierra a medias. */
   onBusyChange: (isBusy: boolean) => void;
 }
 
 /**
  * «Quiénes participan» dentro de M18 (FEAT-57, US A4; antes la ventana M19 de FEAT-56): cada invitado con
- * cuántas fotos subió y «Quitar», que se confirma en el mismo renglón. Al quitarlo pierde el acceso y sus fotos se quedan.
+ * cuántas fotos subió, «Borrar fotos» (FEAT-58, US A5) y «Quitar», que se confirman en el mismo renglón. Al
+ * quitarlo pierde el acceso y sus fotos se quedan; al borrar sus fotos, sigue participando.
  */
-export const InviteesList = ({ setId, onChange, onBusyChange }: InviteesListProps) => {
+export const InviteesList = ({ setId, onChange, onPhotosDeleted, onBusyChange }: InviteesListProps) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [invitees, setInvitees] = useState<LoteriaInvitee[] | null>(null);
-  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState<{ userId: string; action: RowAction } | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [hasError, setHasError] = useState(false);
 
@@ -48,17 +128,24 @@ export const InviteesList = ({ setId, onChange, onBusyChange }: InviteesListProp
     };
   }, [setId]);
 
-  const remove = async (userId: string) => {
+  const run = async (userId: string, action: RowAction) => {
+    if (!user) return;
     setIsBusy(true);
     onBusyChange(true);
     setHasError(false);
     try {
-      await LoteriaInviteRepository.removeInvitee(setId, userId);
-      setInvitees((prev) => prev?.filter((invitee) => invitee.userId !== userId) ?? null);
-      setConfirmingId(null);
-      onChange();
+      if (action === 'remove') {
+        await LoteriaInviteRepository.removeInvitee(setId, userId);
+        setInvitees((prev) => prev?.filter((invitee) => invitee.userId !== userId) ?? null);
+        onChange();
+      } else {
+        await CardRepository.deleteGuestCards(user.id, setId, userId);
+        setInvitees((prev) => prev?.map((i) => (i.userId === userId ? { ...i, cardCount: 0 } : i)) ?? null);
+        onPhotosDeleted();
+      }
+      setConfirming(null);
     } catch (err) {
-      logger.error('Error removing loteria invitee:', err);
+      logger.error(`Error in loteria invitee action ${action}:`, err);
       setHasError(true);
     } finally {
       setIsBusy(false);
@@ -84,56 +171,16 @@ export const InviteesList = ({ setId, onChange, onBusyChange }: InviteesListProp
 
       {invitees && invitees.length > 0 && (
         <ul className="invitees-dialog__list">
-          {invitees.map((invitee) => {
-            const name = invitee.name ?? t('invite.inviteeNoName');
-            const isConfirming = confirmingId === invitee.userId;
-            return (
-              <li key={invitee.userId} className="invitees-dialog__row">
-                <span className="invitees-list__avatar" aria-hidden="true">
-                  {initialsOf(invitee.name)}
-                </span>
-                <div className="invitees-dialog__who">
-                  <span className="invitees-dialog__name">{name}</span>
-                  <span className="invitees-dialog__count">
-                    {t('invite.inviteePhotos', { count: invitee.cardCount })}
-                  </span>
-                </div>
-                {isConfirming ? (
-                  <div className="invitees-dialog__confirm">
-                    <p>{t('invite.removeConfirm', { name })}</p>
-                    <div className="invite-dialog__manage-buttons">
-                      <button
-                        type="button"
-                        className="invite-dialog__manage-button invitees-dialog__remove"
-                        onClick={() => remove(invitee.userId)}
-                        disabled={isBusy}
-                      >
-                        {t('invite.remove')}
-                      </button>
-                      <button
-                        type="button"
-                        className="invite-dialog__manage-button"
-                        onClick={() => setConfirmingId(null)}
-                        disabled={isBusy}
-                      >
-                        {t('common.cancel')}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    className="share-dialog__quiet share-dialog__quiet--danger"
-                    onClick={() => setConfirmingId(invitee.userId)}
-                    disabled={isBusy}
-                    aria-label={t('invite.removeLabel', { name })}
-                  >
-                    {t('invite.remove')}
-                  </button>
-                )}
-              </li>
-            );
-          })}
+          {invitees.map((invitee) => (
+            <InviteeRow
+              key={invitee.userId}
+              invitee={invitee}
+              confirming={confirming?.userId === invitee.userId ? confirming.action : null}
+              isBusy={isBusy}
+              onAsk={(action) => setConfirming(action ? { userId: invitee.userId, action } : null)}
+              onConfirm={(action) => run(invitee.userId, action)}
+            />
+          ))}
         </ul>
       )}
 

@@ -412,6 +412,10 @@ export const SetView = () => {
             setName={setName}
             onInviteReady={() => setIsCollective(true)}
             onSharingChange={loteriaSharing.refresh}
+            onGuestCardsDeleted={() => {
+              void refreshFromCloud();
+              refreshGuestCards();
+            }}
             onClose={() => setIsInviteOpen(false)}
           />
         )}

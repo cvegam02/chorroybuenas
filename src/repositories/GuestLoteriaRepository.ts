@@ -3,7 +3,9 @@ import type { Card, GridSize } from '../types';
 import type { CardLabels } from '../utils/cardLabels';
 import { base64ToBlob } from '../utils/indexedDB';
 import { withCardNumbers } from '../utils/cardNumbers';
-import { guestCardError, guestImagePath, type GuestCardError, type LoteriaMember } from '../utils/guestCards';
+import {
+  addRetryingWhenRateLimited, guestCardError, guestImagePath, type GuestCardError, type LoteriaMember,
+} from '../utils/guestCards';
 import { CardRepository } from './CardRepository';
 import { newUuid } from '../utils/newUuid';
 
@@ -119,7 +121,8 @@ export class GuestLoteriaRepository {
 
   /**
    * Sube la imagen a la carpeta del invitado y agrega la carta al final de la baraja. Rechaza con
-   * GuestCardRejected si la base no la acepta (título repetido, enlace cerrado…).
+   * GuestCardRejected si la base no la acepta (título repetido, enlace cerrado, tope del invitado…). Si ya subió
+   * 10 en el último minuto, espera y vuelve a intentar.
    */
   static async addCard(loteria: GuestLoteria, guestId: string, image: string, title: string): Promise<void> {
     const body = base64ToBlob(image);
@@ -133,12 +136,18 @@ export class GuestLoteriaRepository {
       // Con el enlace cerrado, la base ya no deja subir la imagen
       throw new GuestCardRejected(reason === 'unknown' && /row-level security/i.test(uploadError.message) ? 'closed' : reason);
     }
-    const { error } = await supabase.rpc('add_guest_card', {
-      p_set_id: loteria.id,
-      p_card_id: cardId,
-      p_title: title,
-      p_image_path: path,
-    });
-    if (error) throw new GuestCardRejected(guestCardError(error.message));
+    const message = await addRetryingWhenRateLimited(
+      async () => {
+        const { error } = await supabase.rpc('add_guest_card', {
+          p_set_id: loteria.id,
+          p_card_id: cardId,
+          p_title: title,
+          p_image_path: path,
+        });
+        return error?.message;
+      },
+      (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+    );
+    if (message !== undefined) throw new GuestCardRejected(guestCardError(message));
   }
 }

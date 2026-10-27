@@ -1,3 +1,6 @@
+/** Largo máximo del nombre de una carta; la base lo exige al crear o renombrar (FEAT-58, decisión 6). */
+export const CARD_TITLE_MAX_LENGTH = 50;
+
 /**
  * Lo que admite el nombre de una carta (contexto-negocio §4): letras con acentos, ñ y ü, números, espacios
  * y signos comunes. Son los caracteres que la tipografía del PDF sabe dibujar; emojis y otros alfabetos, no.

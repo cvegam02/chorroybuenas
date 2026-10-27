@@ -5,11 +5,12 @@ import { logger } from '../utils/logger';
 import { CallerVoiceService } from '../services/CallerVoiceService';
 import { createConcurrencyLimit } from '../utils/concurrencyLimit';
 import { createKeyedSingleFlight } from '../utils/singleFlight';
+import { CARD_TITLE_MAX_LENGTH } from '../utils/cardTitle';
 
 // Zod Schema for Card Validation
 export const CardSchema = z.object({
     id: z.string().uuid().optional(),
-    title: z.string().min(1, 'Title is required').max(50),
+    title: z.string().min(1, 'Title is required').max(CARD_TITLE_MAX_LENGTH),
     image_path: z.string().optional(),
     original_image_path: z.string().optional(),
     is_ai_generated: z.boolean().default(false),
@@ -32,6 +33,9 @@ const CACHE_EXPIRY_MARGIN_MS = 5 * 60 * 1000;
 const MAX_CONCURRENT_IMAGE_DOWNLOADS = 6;
 const limitImageDownloads = createConcurrencyLimit(MAX_CONCURRENT_IMAGE_DOWNLOADS);
 const downloadImageOnce = createKeyedSingleFlight<Blob>();
+
+/** Lo más que Storage borra en una sola llamada. */
+const STORAGE_REMOVE_PAGE = 1000;
 
 /** Cache para getCards: evita 2+ llamadas a la tabla cards al cargar (p. ej. Strict Mode). */
 const cardsCache = new Map<string, { cards: Card[]; expiresAt: number }>();
@@ -298,5 +302,32 @@ export class CardRepository {
         }
         // Su audio con voz de IA del cantador, si tenía (FEAT-55)
         if (card.user_id && card.set_id) await CallerVoiceService.removeAudios(card.user_id, card.set_id, cardId);
+    }
+
+    /**
+     * «Borrar fotos» de un invitado (FEAT-58, US A5): la base borra sus cartas de la lotería (y las saca de los
+     * tableros) y devuelve sus imágenes; luego se borran los archivos y los audios, como al borrar una carta.
+     * Devuelve cuántas cartas se borraron.
+     */
+    static async deleteGuestCards(ownerId: string, setId: string, guestId: string): Promise<number> {
+        const { data, error } = await supabase.rpc('delete_guest_cards', { p_set_id: setId, p_user_id: guestId });
+        if (error) throw error;
+        const rows = (data ?? []) as Array<{ card_id: string; path: string | null }>;
+        this.invalidateCardsCache(ownerId, setId);
+
+        const cardIds = [...new Set(rows.map((row) => row.card_id))];
+        const paths = rows.map((row) => row.path).filter((path): path is string => Boolean(path));
+        try {
+            for (let start = 0; start < paths.length; start += STORAGE_REMOVE_PAGE) {
+                const { error: removeError } = await supabase.storage
+                    .from(this.BUCKET_NAME)
+                    .remove(paths.slice(start, start + STORAGE_REMOVE_PAGE));
+                if (removeError) throw removeError;
+            }
+        } catch (storageErr) {
+            logger.warn('Error removing guest card images from storage (cards already deleted from DB):', storageErr);
+        }
+        if (cardIds.length > 0) await CallerVoiceService.removeAudios(ownerId, setId, cardIds);
+        return cardIds.length;
     }
 }

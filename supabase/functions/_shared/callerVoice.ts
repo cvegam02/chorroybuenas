@@ -97,14 +97,12 @@ export function audioPath(userId: string, setId: string, cardId: string): string
   return `${userId}/${setId}/${cardId}.mp3`;
 }
 
-/** Una carta necesita audio si no tiene o si se renombró después de generarlo (decisión 15). */
-export function needsAudio(audioTitle: string | null, cardTitle: string): boolean {
-  return audioTitle !== cardTitle;
-}
+const RPC_CODES = [
+  'INSUFFICIENT_TOKENS', 'VOICE_ALREADY_CREATED', 'INVALID_VOICE', 'SET_NOT_FOUND', 'AUDIOS_EXIST',
+  'VOICE_NOT_PAID', 'CARD_NOT_FOUND', 'VOICE_LIMIT', 'RATE_LIMITED',
+];
 
-const RPC_CODES = ['INSUFFICIENT_TOKENS', 'VOICE_ALREADY_CREATED', 'INVALID_VOICE', 'SET_NOT_FOUND', 'AUDIOS_EXIST'];
-
-/** Traduce el error de start_caller_voice / refund_caller_voice a un código público, o conserva el detalle. */
+/** Traduce el error de las RPC de la voz (migraciones 060 y 069) a un código público, o conserva el detalle. */
 export function mapCallerVoiceError(message: string): Error {
   const code = RPC_CODES.find((c) => message.includes(c));
   return new Error(code ?? `caller voice rpc: ${message}`);
@@ -118,6 +116,9 @@ const PUBLIC_ERRORS: Record<string, { status: number; message: string }> = {
   SET_NOT_FOUND: { status: 404, message: 'No encontramos esta lotería.' },
   CARD_NOT_FOUND: { status: 404, message: 'No encontramos esta carta.' },
   VOICE_NOT_PAID: { status: 403, message: 'Esta lotería no tiene voz con IA.' },
+  // FEAT-58, decisión 7: pasado el tope, la carta se canta con la voz del navegador
+  VOICE_LIMIT: { status: 403, message: 'Esta lotería ya usó sus audios con IA gratis.' },
+  RATE_LIMITED: { status: 429, message: 'Demasiados audios seguidos. Intenta en un minuto.' },
   AI_BUSY: { status: 503, message: 'La IA está ocupada. Intenta de nuevo en un momento.' },
   AI_TIMEOUT: { status: 504, message: 'La IA tardó demasiado. Intenta de nuevo.' },
 };

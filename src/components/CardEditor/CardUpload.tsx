@@ -8,7 +8,7 @@ import { useMediaQuery } from '../../hooks/useMediaQuery';
 import './CardForm.css';
 import './CardUpload.css';
 import { logger } from '../../utils/logger';
-import { isPrintableCardTitle } from '../../utils/cardTitle';
+import { CARD_TITLE_MAX_LENGTH, isPrintableCardTitle } from '../../utils/cardTitle';
 
 
 interface CardUploadProps {
@@ -267,7 +267,7 @@ export const CardUpload = ({
               onChange={(e) => setTitle(e.target.value)}
               onKeyDown={handleTitleKeyDown}
               className="card-form__input"
-              maxLength={100}
+              maxLength={CARD_TITLE_MAX_LENGTH}
               disabled={!imagePreview}
             />
             {isDuplicateTitle && <p className="card-form__error">{t('cardUpload.errorDuplicate')}</p>}

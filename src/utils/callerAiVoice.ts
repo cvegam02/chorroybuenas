@@ -50,7 +50,10 @@ export function audioUrlFor(
   return audioTitles.get(card.id) === card.title ? urls.get(card.id) : undefined;
 }
 
-/** Si no salió ninguna carta se piden de vuelta los tokens (decisión 11); el servidor lo vuelve a comprobar. */
-export function shouldRefund(cardAudioCount: number): boolean {
-  return cardAudioCount === 0;
+/**
+ * Si no salió ninguna carta ni la frase de arranque se piden de vuelta los tokens (decisión 11; FEAT-58,
+ * decisión 10); el servidor lo vuelve a comprobar.
+ */
+export function shouldRefund(cardAudioCount: number, hasIntro: boolean): boolean {
+  return cardAudioCount === 0 && !hasIntro;
 }

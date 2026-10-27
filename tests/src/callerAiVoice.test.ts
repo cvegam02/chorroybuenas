@@ -71,12 +71,16 @@ describe('audioUrlFor', () => {
   });
 });
 
-describe('shouldRefund (decisión 11)', () => {
-  it('se pide la devolución si no hay ningún audio de carta', () => {
-    expect(shouldRefund(0)).toBe(true);
+describe('shouldRefund (decisión 11; FEAT-58, decisión 10)', () => {
+  it('se pide la devolución si no salió ninguna carta ni la frase de arranque', () => {
+    expect(shouldRefund(0, false)).toBe(true);
   });
 
   it('no se pide si salió alguna carta', () => {
-    expect(shouldRefund(1)).toBe(false);
+    expect(shouldRefund(1, false)).toBe(false);
+  });
+
+  it('no se pide si salió la frase de arranque, aunque no haya cartas', () => {
+    expect(shouldRefund(0, true)).toBe(false);
   });
 });

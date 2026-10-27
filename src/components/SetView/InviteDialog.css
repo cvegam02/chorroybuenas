@@ -266,6 +266,13 @@
   border-bottom: none;
 }
 
+/* «Borrar fotos» y «Quitar» (FEAT-58, US A5) */
+.invitees-list__actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 2px;
+}
+
 .invitees-list__avatar {
   display: flex;
   flex: 0 0 auto;
