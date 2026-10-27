@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import { CallerVoiceService, type CallerVoiceState } from '../../services/CallerVoiceService';
-import { audioUrlFor, INTRO_AUDIO_ID, pendingAudioIds, shouldRefund } from '../../utils/callerAiVoice';
+import {
+  aiVoiceCoverage, aiVoicePrice, audioUrlFor, expandPrice, INTRO_AUDIO_ID, pendingAudioIds, shouldRefund,
+} from '../../utils/callerAiVoice';
 import { logger } from '../../utils/logger';
 import type { Card } from '../../types';
 
@@ -18,8 +20,9 @@ export const useAiVoice = (setId: string | undefined, cards: Card[] | null) => {
   const [status, setStatus] = useState<AiVoiceStatus>('loading');
   const [voice, setVoice] = useState<CallerVoiceState | null>(null);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
-  // Se devolvieron los tokens porque no salió ninguna carta ni la frase (decisiones 11 y 25; FEAT-58, decisión 10)
-  const [refunded, setRefunded] = useState(false);
+  // Tokens devueltos porque no salió ninguna carta ni la frase (decisiones 11 y 25; FEAT-58, decisión 10); null si no
+  const [refunded, setRefunded] = useState<number | null>(null);
+  const paidRef = useRef(0);
   const alive = useRef(true);
   const cardsRef = useRef(cards);
   cardsRef.current = cards;
@@ -36,7 +39,7 @@ export const useAiVoice = (setId: string | undefined, cards: Card[] | null) => {
   const generateMissing = useCallback(
     async (id: string, current: CallerVoiceState) => {
       const deck = cardsRef.current ?? [];
-      const pending = pendingAudioIds(deck, current.audioTitles, current.hasIntro);
+      const pending = pendingAudioIds(deck, current.audioTitles, current.hasIntro, current.coveredCards);
       if (pending.length > 0) {
         setStatus('generating');
         setProgress({ done: 0, total: pending.length });
@@ -60,7 +63,7 @@ export const useAiVoice = (setId: string | undefined, cards: Card[] | null) => {
         await refreshBalance();
         if (!alive.current) return;
         setVoice(null);
-        setRefunded(true);
+        setRefunded(paidRef.current || aiVoicePrice(deck.length));
         setStatus('none');
         return;
       }
@@ -96,13 +99,17 @@ export const useAiVoice = (setId: string | undefined, cards: Card[] | null) => {
   const buy = useCallback(
     async (voiceId: string) => {
       if (!setId) return;
+      const deckSize = cardsRef.current?.length ?? 0;
       await CallerVoiceService.start(setId, voiceId);
+      paidRef.current = aiVoicePrice(deckSize);
       // «Mejorar la voz» desaparece en cuanto se cobra (decisión 13)
       setStatus('generating');
       setProgress({ done: 0, total: 0 });
-      setRefunded(false);
+      setRefunded(null);
       await refreshBalance();
-      const empty: CallerVoiceState = { voiceId, hasIntro: false, audioTitles: new Map(), urls: new Map() };
+      const empty: CallerVoiceState = {
+        voiceId, hasIntro: false, coveredCards: aiVoiceCoverage(deckSize), audioTitles: new Map(), urls: new Map(),
+      };
       generateMissing(setId, empty).catch((err) => {
         logger.error('Caller voice: generation failed:', err);
         if (alive.current) setStatus('unavailable');
@@ -111,11 +118,34 @@ export const useAiVoice = (setId: string | undefined, cards: Card[] | null) => {
     [setId, refreshBalance, generateMissing],
   );
 
+  /** «Ampliar la voz» (FEAT-58, decisión 8): cobra los bloques que faltan y genera esas cartas. Rechaza con el código. */
+  const expand = useCallback(async () => {
+    if (!setId) return;
+    await CallerVoiceService.expand(setId);
+    await refreshBalance();
+    const loaded = await CallerVoiceService.load(setId);
+    if (!loaded || !alive.current) return;
+    generateMissing(setId, loaded).catch((err) => {
+      logger.error('Caller voice: generation after expanding failed:', err);
+      if (alive.current) setStatus('unavailable');
+    });
+  }, [setId, refreshBalance, generateMissing]);
+
+  const deckSize = cards?.length ?? 0;
+  /** Cartas que pasan de lo pagado: se cantan con la voz del navegador hasta ampliar. */
+  const uncovered = voice ? Math.max(0, deckSize - voice.coveredCards) : 0;
+
   const urlFor = useCallback(
     (card: Card): string | undefined => (voice ? audioUrlFor(voice.urls, voice.audioTitles, card) : undefined),
     [voice],
   );
   const introUrl = voice?.urls.get(INTRO_AUDIO_ID);
 
-  return { status, progress, refunded, buy, urlFor, introUrl };
+  return {
+    status, progress, refunded, buy, expand, urlFor, introUrl,
+    price: aiVoicePrice(deckSize),
+    coverage: aiVoiceCoverage(deckSize),
+    uncovered,
+    expandPrice: voice ? expandPrice(deckSize, voice.coveredCards) : 0,
+  };
 };

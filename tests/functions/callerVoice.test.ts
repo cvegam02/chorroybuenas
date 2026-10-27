@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   audioPath, buildSpeechRequest, callText, CALLER_INTRO_TEXT, CALLER_VOICES, mapCallerVoiceError,
-  parseCallerVoiceRequest, toCallerVoiceErrorResponse,
+  parseCallerVoiceRequest, sharedAudioPath, toCallerVoiceErrorResponse,
 } from '../../supabase/functions/_shared/callerVoice.ts';
 
 const SET = '3f2b8c1e-5a4d-4e6f-9b7a-1c2d3e4f5a6b';
@@ -25,6 +25,12 @@ describe('parseCallerVoiceRequest', () => {
     });
     expect(parseCallerVoiceRequest({ action: 'generate', set_id: SET, card_id: 'intro' })).toEqual({
       ok: true, value: { action: 'generate', setId: SET, cardId: 'intro' },
+    });
+  });
+
+  it('acepta ampliar la voz (FEAT-58, decisión 8)', () => {
+    expect(parseCallerVoiceRequest({ action: 'expand', set_id: SET })).toEqual({
+      ok: true, value: { action: 'expand', setId: SET },
     });
   });
 
@@ -108,7 +114,7 @@ describe('audioPath', () => {
 describe('mapCallerVoiceError', () => {
   it.each([
     'INSUFFICIENT_TOKENS', 'VOICE_ALREADY_CREATED', 'INVALID_VOICE', 'SET_NOT_FOUND', 'AUDIOS_EXIST',
-    'VOICE_NOT_PAID', 'CARD_NOT_FOUND', 'VOICE_LIMIT', 'RATE_LIMITED',
+    'VOICE_NOT_PAID', 'CARD_NOT_FOUND', 'VOICE_LIMIT', 'RATE_LIMITED', 'VOICE_NOT_COVERED', 'NOTHING_TO_EXPAND',
   ])(
     'conserva %s',
     (code) => {
@@ -131,6 +137,9 @@ describe('toCallerVoiceErrorResponse', () => {
     ['VOICE_NOT_PAID', 403],
     ['VOICE_LIMIT', 403],
     ['RATE_LIMITED', 429],
+    ['VOICE_NOT_COVERED', 403],
+    ['NOTHING_TO_EXPAND', 409],
+    ['VOICE_UNAVAILABLE', 503],
     ['AI_BUSY', 503],
     ['AI_TIMEOUT', 504],
   ])('%s responde %i', (code, status) => {
@@ -143,5 +152,25 @@ describe('toCallerVoiceErrorResponse', () => {
   it('cualquier otro error es AI_ERROR y se registra', () => {
     const res = toCallerVoiceErrorResponse(new Error('Replicate API (500): x'));
     expect(res).toMatchObject({ status: 502, body: { error: 'AI_ERROR' }, internal: true });
+  });
+});
+
+describe('sharedAudioPath (FEAT-58, decisión 12)', () => {
+  const voice = CALLER_VOICES[0];
+
+  it('el mismo texto con la misma voz va al mismo archivo, sin importar mayúsculas ni espacios', async () => {
+    const a = await sharedAudioPath(voice, 'La Mamá');
+    expect(a).toBe(await sharedAudioPath(voice, '  la   mamá '));
+    expect(a).toMatch(new RegExp(`^shared/${voice}/[0-9a-f]{64}\\.mp3$`));
+  });
+
+  it('otro texto u otra voz, otro archivo', async () => {
+    const a = await sharedAudioPath(voice, 'La Mamá');
+    expect(await sharedAudioPath(voice, 'El Papá')).not.toBe(a);
+    expect(await sharedAudioPath(CALLER_VOICES[1], 'La Mamá')).not.toBe(a);
+  });
+
+  it('nunca cae en la carpeta de un usuario', async () => {
+    expect((await sharedAudioPath(voice, CALLER_INTRO_TEXT)).startsWith('shared/')).toBe(true);
   });
 });
