@@ -251,3 +251,19 @@ export async function trackUnapprovedSeasonal(
   await deps.recordPendingSeasonal(params);
   return { tracked: 'pending', loteriaId: params.p_loteria_id };
 }
+
+/** Motivo por el que se revierte un pago (FEAT-58, H1): devolución o contracargo. */
+export type ReversalReason = 'refunded' | 'charged_back';
+
+/** Resultado de la RPC reverse_payment. */
+export type ReversalStatus = 'tokens_reversed' | 'seasonal_refunded' | 'repeated' | 'not_found';
+
+const REVERSAL_REASONS: ReadonlySet<string> = new Set<ReversalReason>(['refunded', 'charged_back']);
+
+/**
+ * Motivo de reversa para el estado de un pago consultado en MP, o null si ese estado no revierte nada.
+ * Una devolución parcial deja el pago en `approved` (status_detail `partially_refunded`): no se revierte.
+ */
+export function reversalReason(status: string | undefined): ReversalReason | null {
+  return status !== undefined && REVERSAL_REASONS.has(status) ? (status as ReversalReason) : null;
+}

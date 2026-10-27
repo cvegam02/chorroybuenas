@@ -67,7 +67,7 @@ export function buildCreditParams(input: {
 
   // Se compara contra el monto de ESTE pago (con la oferta del momento en que se inició), no contra el precio de hoy.
   const paid = payment.transaction_amount;
-  if (typeof paid === 'number' && Math.round(paid * 100) < amountCents) return null;
+  if (typeof paid !== 'number' || Math.round(paid * 100) < amountCents) return null;
 
   // El bono por código se respeta siempre; el de primera compra se revalida al acreditar
   // (el usuario pudo crear dos preferencias "de primera compra" y pagar ambas).

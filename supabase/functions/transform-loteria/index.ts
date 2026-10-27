@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { buildCorsHeaders, parseAllowedOrigins } from '../_shared/cors.ts';
 import {
-  createPrediction, firstOutput, runCharged, waitForPrediction, type ReplicateDeps,
+  AI_DEADLINE_MS, createPrediction, firstOutput, runCharged, waitForPrediction, type ReplicateDeps,
 } from '../_shared/replicate.ts';
 import {
   assertPredictionSucceeded, buildPredictionBody, mapSpendError, parseTransformRequest, toErrorResponse,
@@ -16,6 +16,7 @@ const replicateDeps: ReplicateDeps = {
 };
 
 Deno.serve(async (req) => {
+  const deadlineAt = replicateDeps.now() + AI_DEADLINE_MS;
   const headers = buildCorsHeaders(req.headers.get('Origin'), parseAllowedOrigins(Deno.env.get('ALLOWED_ORIGINS')));
   const reply = (status: number, body: Record<string, unknown>) =>
     new Response(JSON.stringify(body), { status, headers });
@@ -68,8 +69,10 @@ Deno.serve(async (req) => {
         console.error('transform-loteria: no se pudo reembolsar el uso', usageId, error);
       },
       run: async () => {
-        const created = await createPrediction(replicateDeps, replicateToken, buildPredictionBody(request));
-        const finished = await waitForPrediction(replicateDeps, replicateToken, created);
+        const created = await createPrediction(replicateDeps, replicateToken, buildPredictionBody(request), { deadlineAt });
+        const finished = await waitForPrediction(replicateDeps, replicateToken, created, {
+          timeoutMs: AI_DEADLINE_MS, intervalMs: 3000, deadlineAt,
+        });
         assertPredictionSucceeded(finished);
         return firstOutput(finished);
       },

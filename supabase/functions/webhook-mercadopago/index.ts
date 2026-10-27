@@ -2,7 +2,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { createMpGet } from '../_shared/mpClient.ts';
 import { verifyMpSignature } from '../_shared/mpSignature.ts';
 import {
-  creditPayment, findApprovedPayment, parseNotification, trackUnapprovedSeasonal, type PaymentDeps,
+  creditPayment, findApprovedPayment, parseNotification, reversalReason, trackUnapprovedSeasonal,
+  type PaymentDeps, type ReversalStatus,
 } from '../_shared/paymentFlow.ts';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
@@ -98,9 +99,25 @@ Deno.serve(async (req) => {
       }
       if (found.reason === 'not_approved') {
         console.log(`webhook-mercadopago: ${notification.topic} ${notification.id} sin pago aprobado (${found.status})`);
-        // Efectivo o transferencia: el pago de una lotería de temporada se anota como «en proceso»,
-        // o se quita esa nota si se rechazó o caducó. Los pagos de tokens no se tocan.
-        if (notification.topic === 'payment') {
+        const reason = notification.topic === 'payment' ? reversalReason(found.status) : null;
+        if (reason && notification.id) {
+          // Devolución o contracargo (FEAT-58, H1): se descuentan los tokens de esa compra o se quita la
+          // temática. El estado viene de la consulta a MP, no del aviso; repetirlo no vuelve a descontar.
+          const { data, error } = await supabase.rpc('reverse_payment', {
+            p_payment_provider: 'mercadopago',
+            p_payment_id: notification.id,
+            p_reason: reason,
+          });
+          if (error) throw new Error(`reverse_payment: ${error.message}`);
+          const reversal = data as ReversalStatus;
+          if (reversal === 'not_found') {
+            console.error(`webhook-mercadopago: pago ${reason} ${notification.id} sin compra registrada`);
+          } else {
+            console.log(`webhook-mercadopago: pago ${reason} ${notification.id} ${reversal}`);
+          }
+        } else if (notification.topic === 'payment') {
+          // Efectivo o transferencia: el pago de una lotería de temporada se anota como «en proceso»,
+          // o se quita esa nota si se rechazó o caducó. Los pagos de tokens no se tocan.
           const tracking = await trackUnapprovedSeasonal(deps, { paymentId: notification.id });
           if (tracking.tracked !== 'none') {
             console.log(`webhook-mercadopago: pago de temporada ${notification.id} ${tracking.tracked}`);

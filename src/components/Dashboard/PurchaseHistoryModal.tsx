@@ -41,6 +41,7 @@ const formatStatus = (status: string | null, t: (key: string) => string) => {
   if (status === 'approved') return t('dashboard.purchaseHistory.statusApproved');
   if (status === 'pending') return t('dashboard.purchaseHistory.statusPending');
   if (status === 'rejected') return t('dashboard.purchaseHistory.statusRejected');
+  if (status === 'refunded') return t('dashboard.purchaseHistory.statusRefunded');
   return status;
 };
 

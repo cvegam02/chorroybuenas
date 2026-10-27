@@ -55,9 +55,7 @@ Cada uno entra por `dev`, con tests primero.
 
 ### 3. Reembolsos y contracargos
 
-- **Problema:** si se devuelve un pago en Mercado Pago, o el banco lo revierte, los tokens no se descuentan. Hoy hay que hacerlo a mano.
-- **Propuesta:** que el webhook atienda los pagos en estado `refunded` y `charged_back`: registrar la reversa y descontar los tokens (sin dejar el saldo negativo). Requiere decidir qué pasa si el usuario ya los gastó.
-- **Dónde:** `supabase/functions/_shared/paymentFlow.ts`, una RPC nueva en una migración `026`, y sus tests.
+- **Hecho** en FEAT-58 (US A8, 2026-10-26): el webhook atiende `refunded` y `charged_back` con la RPC `reverse_payment` (migración 068). Un reembolso parcial no revierte nada automático.
 
 ### 4. Bajar el tamaño de dos componentes (opcional)
 

@@ -1,10 +1,10 @@
 // Voz con IA del cantador (FEAT-55, US A6). Tres acciones, porque generar una lotería entera no cabe
 // en el tiempo de una sola llamada:
-//   start    — cobra 5 tokens y guarda la voz escogida (start_caller_voice).
+//   start    — cobra 10 tokens y guarda la voz escogida (start_caller_voice).
 //   generate — genera con ElevenLabs (decisión 29), sin costo, el audio de una carta (o de la frase de arranque)
 //              de una lotería pagada;
 //              si ya existe con el mismo título, no hace nada (decisión 15).
-//   refund   — devuelve los 5 tokens si no salió ninguna carta (refund_caller_voice).
+//   refund   — devuelve los 10 tokens si no salió ninguna carta (refund_caller_voice).
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { buildCorsHeaders, parseAllowedOrigins } from '../_shared/cors.ts';
 import {

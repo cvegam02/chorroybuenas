@@ -131,6 +131,7 @@ describe('toErrorResponse', () => {
     ['NSFW_FILTER', 422],
     ['SENSITIVE_CONTENT_FILTER', 422],
     ['AI_TIMEOUT', 504],
+    ['AI_BUSY', 503],
   ])('%s responde %i con su propio código', (code, status) => {
     const r = toErrorResponse(new Error(code));
     expect(r).toMatchObject({ status, body: { error: code }, internal: false });

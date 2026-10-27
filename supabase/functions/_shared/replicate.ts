@@ -1,6 +1,12 @@
 const REPLICATE_API_BASE = 'https://api.replicate.com/v1';
 const MAX_RETRY_WAIT_MS = 30_000;
 const DEFAULT_RETRY_WAIT_S = 10;
+/**
+ * Plazo total de una llamada a la IA, contado desde que empieza la función (FEAT-58, H3). Supabase corta
+ * la función a los 150 s sin correr el reembolso; el margen alcanza para cancelar, reembolsar o guardar
+ * el resultado y responder.
+ */
+export const AI_DEADLINE_MS = 120_000;
 
 export interface Prediction {
   id: string;
@@ -20,15 +26,16 @@ export interface ReplicateDeps {
 const TERMINAL = new Set(['succeeded', 'failed', 'canceled']);
 
 /**
- * Crea una predicción. Ante 429 reintenta hasta maxRetries veces y luego lanza AI_BUSY.
+ * Crea una predicción. Ante 429 reintenta hasta maxRetries veces y luego lanza AI_BUSY; también lanza
+ * AI_BUSY sin esperar si la espera pasaría `deadlineAt` (hora absoluta de `deps.now()`).
  * `path` permite llamar a un modelo oficial por su nombre (`/models/<dueño>/<modelo>/predictions`).
  */
 export async function createPrediction(
   deps: ReplicateDeps,
   apiKey: string,
   body: Record<string, unknown>,
-  maxRetries = 3,
-  path = '/predictions',
+  { maxRetries = 3, path = '/predictions', deadlineAt = Infinity }:
+    { maxRetries?: number; path?: string; deadlineAt?: number } = {},
 ): Promise<Prediction> {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const res = await deps.fetchFn(`${REPLICATE_API_BASE}${path}`, {
@@ -41,7 +48,9 @@ export async function createPrediction(
       if (attempt === maxRetries) break;
       const err = await res.json().catch(() => ({}));
       const seconds = typeof err.retry_after === 'number' ? err.retry_after : DEFAULT_RETRY_WAIT_S;
-      await deps.sleep(Math.min(seconds * 1000, MAX_RETRY_WAIT_MS));
+      const waitMs = Math.min(seconds * 1000, MAX_RETRY_WAIT_MS);
+      if (deps.now() + waitMs >= deadlineAt) break;
+      await deps.sleep(waitMs);
       continue;
     }
 
@@ -55,18 +64,21 @@ export async function createPrediction(
   throw new Error('AI_BUSY');
 }
 
-/** Espera a que la predicción termine. Al exceder el tope la cancela y lanza AI_TIMEOUT. */
+/**
+ * Espera a que la predicción termine. Al exceder `timeoutMs` (desde que empieza a esperar) o
+ * `deadlineAt` (hora absoluta), lo que llegue antes, la cancela y lanza AI_TIMEOUT.
+ */
 export async function waitForPrediction(
   deps: ReplicateDeps,
   apiKey: string,
   initial: Prediction,
-  opts: { timeoutMs: number; intervalMs: number } = { timeoutMs: 120_000, intervalMs: 3000 },
+  opts: { timeoutMs: number; intervalMs: number; deadlineAt?: number } = { timeoutMs: 120_000, intervalMs: 3000 },
 ): Promise<Prediction> {
-  const startedAt = deps.now();
+  const limitAt = Math.min(deps.now() + opts.timeoutMs, opts.deadlineAt ?? Infinity);
   let prediction = initial;
 
   while (!TERMINAL.has(prediction.status)) {
-    if (deps.now() - startedAt >= opts.timeoutMs) {
+    if (deps.now() >= limitAt) {
       // Cancelar para que Replicate deje de facturar la predicción abandonada.
       await deps.fetchFn(`${REPLICATE_API_BASE}/predictions/${prediction.id}/cancel`, {
         method: 'POST',
@@ -74,7 +86,7 @@ export async function waitForPrediction(
       }).catch(() => undefined);
       throw new Error('AI_TIMEOUT');
     }
-    await deps.sleep(opts.intervalMs);
+    await deps.sleep(Math.min(opts.intervalMs, limitAt - deps.now()));
     const res = await deps.fetchFn(`${REPLICATE_API_BASE}/predictions/${prediction.id}`, {
       headers: { Authorization: `Token ${apiKey}` },
     });

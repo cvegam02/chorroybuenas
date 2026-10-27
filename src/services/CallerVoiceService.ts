@@ -7,6 +7,8 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
 const AUDIO_BUCKET = 'caller-audio';
 /** Lo que duran los enlaces a los audios: una tarde de fiesta. */
 const AUDIO_LINK_SECONDS = 6 * 60 * 60;
+/** Lo más que Storage lista o borra en una sola llamada. */
+const STORAGE_PAGE = 1000;
 
 export interface CallerVoiceState {
   voiceId: string;
@@ -44,6 +46,18 @@ async function call(body: CallerVoiceBody): Promise<void> {
   throw new Error(typeof json.error === 'string' ? json.error : 'AI_ERROR');
 }
 
+/** Todos los archivos de una carpeta del bucket de audios, leídos en páginas. */
+async function listAudioPaths(folder: string): Promise<string[]> {
+  const paths: string[] = [];
+  for (let offset = 0; ; offset += STORAGE_PAGE) {
+    const { data, error } = await supabase.storage.from(AUDIO_BUCKET).list(folder, { limit: STORAGE_PAGE, offset });
+    if (error) throw error;
+    const page = data ?? [];
+    paths.push(...page.map((file) => `${folder}/${file.name}`));
+    if (page.length < STORAGE_PAGE) return paths;
+  }
+}
+
 export const CallerVoiceService = {
   /**
    * Borra los audios con voz de IA de una carta, o de toda la lotería si no se da carta. Las filas de los
@@ -53,15 +67,12 @@ export const CallerVoiceService = {
   async removeAudios(userId: string, setId: string, cardId?: string): Promise<void> {
     const folder = `${userId}/${setId}`;
     try {
-      let paths = cardId ? [`${folder}/${cardId}.mp3`] : [];
-      if (!cardId) {
-        const { data, error } = await supabase.storage.from(AUDIO_BUCKET).list(folder, { limit: 1000 });
+      const paths = cardId ? [`${folder}/${cardId}.mp3`] : await listAudioPaths(folder);
+      // En páginas: una lotería puede tener más audios de los que Storage borra de una vez (FEAT-58, H20).
+      for (let start = 0; start < paths.length; start += STORAGE_PAGE) {
+        const { error } = await supabase.storage.from(AUDIO_BUCKET).remove(paths.slice(start, start + STORAGE_PAGE));
         if (error) throw error;
-        paths = (data ?? []).map((file) => `${folder}/${file.name}`);
       }
-      if (paths.length === 0) return;
-      const { error } = await supabase.storage.from(AUDIO_BUCKET).remove(paths);
-      if (error) throw error;
     } catch (err) {
       logger.warn('Could not remove caller voice audios:', err);
     }

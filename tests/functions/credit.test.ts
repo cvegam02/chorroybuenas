@@ -44,9 +44,11 @@ describe('buildCreditParams', () => {
     expect(r).not.toBe(null);
   });
 
-  it('acepta si el pago no trae transaction_amount (merchant_order resumido)', () => {
-    expect(buildCreditParams(input({ payment: {} }))).not.toBe(null);
-  });
+  it.each([[{}], [{ transaction_amount: '20' }], [{ transaction_amount: null }]])(
+    'rechaza si el pago no trae el monto como número, igual que las temáticas (FEAT-58, H10): %j', (payment) => {
+      expect(buildCreditParams(input({ payment }))).toBe(null);
+    },
+  );
 
   it('guarda el pago completo y el pack en los parámetros', () => {
     const r = buildCreditParams(input({ metadata: meta({ pack_id: 'pack-1' }) }));
@@ -54,7 +56,7 @@ describe('buildCreditParams', () => {
   });
 
   it('trata campos ausentes de la metadata como 0', () => {
-    expect(buildCreditParams(input({ metadata: { base_tokens: 5 }, payment: {} }))).toMatchObject({
+    expect(buildCreditParams(input({ metadata: { base_tokens: 5 }, payment: { transaction_amount: 10 } }))).toMatchObject({
       p_tokens_to_add: 5, p_bonus_tokens: 0, p_amount_cents: 0, p_pack_id: null,
     });
   });
