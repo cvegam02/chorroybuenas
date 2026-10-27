@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { CardLabelsProvider } from '../../contexts/CardLabelsContext';
 import { GuestCardRejected, GuestLoteriaRepository } from '../../repositories/GuestLoteriaRepository';
 import { cardLabelsOrDefault } from '../../utils/cardLabels';
-import type { GuestCardError } from '../../utils/guestCards';
+import { GUEST_CARDS_PER_LOTERIA, guestCardsLeft, type GuestCardError } from '../../utils/guestCards';
 import { logger } from '../../utils/logger';
 import { CardUploadModal } from '../CardEditor/CardUploadModal';
 import { BatchUploadModal } from '../CardEditor/BatchUploadModal';
@@ -73,10 +73,14 @@ export const GuestLoteriaPage = () => {
   const organizer = [...members.values()].find((m) => m.isOwner)?.name ?? null;
   const existingTitles = cards.map((card) => card.title);
   const selectedCard = selectedIndex !== null ? cards[selectedIndex] ?? null : null;
+  // Cada invitado sube hasta 60 cartas por lotería (FEAT-58, decisión 9)
+  const cardsLeft = guestCardsLeft(cards, user.id);
 
   /** Sube las cartas una por una; se detiene si el enlace se cerró. Devuelve cuántas entraron. */
-  const addCards = async (toAdd: Array<{ image: string; title: string }>): Promise<number> => {
-    setUploadError(null);
+  const addCards = async (requested: Array<{ image: string; title: string }>): Promise<number> => {
+    const toAdd = requested.slice(0, cardsLeft);
+    setUploadError(toAdd.length < requested.length ? 'guestLimit' : null);
+    if (toAdd.length === 0) return 0;
     setProgress(0);
     let added = 0;
     try {
@@ -102,7 +106,10 @@ export const GuestLoteriaPage = () => {
   const handleFiles = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
     event.target.value = '';
-    if (files.length > 0) setBatchFiles(files);
+    // No se preparan más fotos de las que todavía caben: las demás no entrarían
+    setUploadError(files.length > cardsLeft ? 'guestLimit' : null);
+    const allowed = files.slice(0, cardsLeft);
+    if (allowed.length > 0) setBatchFiles(allowed);
   };
 
   return (
@@ -159,7 +166,7 @@ export const GuestLoteriaPage = () => {
           )}
           {uploadError && (
             <p className="set-view__error" role="alert">
-              {t(`guest.errors.${uploadError}`)}
+              {t(`guest.errors.${uploadError}`, { count: GUEST_CARDS_PER_LOTERIA })}
             </p>
           )}
           <GuestCardGrid cards={cards} members={members} onOpenCard={setSelectedIndex} />

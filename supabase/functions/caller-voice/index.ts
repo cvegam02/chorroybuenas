@@ -2,13 +2,14 @@
 // en el tiempo de una sola llamada:
 //   start    — cobra 10 tokens y guarda la voz escogida (start_caller_voice).
 //   generate — genera con ElevenLabs (decisión 29), sin costo, el audio de una carta (o de la frase de arranque)
-//              de una lotería pagada;
-//              si ya existe con el mismo título, no hace nada (decisión 15).
-//   refund   — devuelve los 10 tokens si no salió ninguna carta (refund_caller_voice).
+//              de una lotería pagada; si ya existe con el mismo título, no hace nada (decisión 15). Tope: las
+//              cartas de la lotería más 10 audios, y 20 regeneraciones por minuto (FEAT-58, decisión 7).
+//   refund   — devuelve los 10 tokens si no salió ninguna carta ni la frase (refund_caller_voice; FEAT-58,
+//              decisión 10).
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { buildCorsHeaders, parseAllowedOrigins } from '../_shared/cors.ts';
 import {
-  audioPath, buildSpeechRequest, callText, CALLER_INTRO_TEXT, type CallerVoiceId, INTRO_ID, mapCallerVoiceError, needsAudio,
+  audioPath, buildSpeechRequest, callText, CALLER_INTRO_TEXT, type CallerVoiceId, INTRO_ID, mapCallerVoiceError,
   parseCallerVoiceRequest, toCallerVoiceErrorResponse,
 } from '../_shared/callerVoice.ts';
 
@@ -48,6 +49,10 @@ async function speak(apiKey: string, text: string, voiceId: CallerVoiceId): Prom
   throw new Error('AI_BUSY');
 }
 
+/**
+ * Genera el audio de una carta o de la frase de arranque. El de una carta se reserva antes en la base
+ * (reserve_caller_audio: tope de audios y límite por minuto, FEAT-58 decisión 7) y se libera si falla.
+ */
 async function generate(
   admin: SupabaseClient, elevenLabsKey: string, userId: string, setId: string, cardId: string,
 ): Promise<'generated' | 'exists'> {
@@ -56,29 +61,44 @@ async function generate(
   if (voiceError) throw new Error(`caller_voices: ${voiceError.message}`);
   if (!voice) throw new Error('VOICE_NOT_PAID');
 
-  const path = audioPath(userId, setId, cardId);
+  const isIntro = cardId === INTRO_ID;
   let text = CALLER_INTRO_TEXT;
-  if (cardId === INTRO_ID) {
+  if (isIntro) {
     if (voice.intro_path) return 'exists';
   } else {
-    const { data: card, error: cardError } = await admin.from('cards')
-      .select('title').eq('id', cardId).eq('set_id', setId).eq('user_id', userId).maybeSingle();
-    if (cardError) throw new Error(`cards: ${cardError.message}`);
-    if (!card) throw new Error('CARD_NOT_FOUND');
-    const { data: audio } = await admin.from('caller_audios').select('title').eq('card_id', cardId).maybeSingle();
-    if (!needsAudio(audio?.title ?? null, card.title)) return 'exists';
-    text = card.title;
+    const { data: title, error } = await admin.rpc('reserve_caller_audio', {
+      p_user_id: userId, p_set_id: setId, p_card_id: cardId,
+    });
+    if (error) throw mapCallerVoiceError(error.message);
+    if (title === null) return 'exists';
+    text = title as string;
   }
 
-  const mp3 = await speak(elevenLabsKey, callText(text), voice.voice_id as CallerVoiceId);
-  const { error: uploadError } = await admin.storage.from(AUDIO_BUCKET)
-    .upload(path, mp3, { contentType: 'audio/mpeg', upsert: true });
-  if (uploadError) throw new Error(`subida del audio: ${uploadError.message}`);
+  const path = audioPath(userId, setId, cardId);
+  try {
+    const mp3 = await speak(elevenLabsKey, callText(text), voice.voice_id as CallerVoiceId);
+    const { error: uploadError } = await admin.storage.from(AUDIO_BUCKET)
+      .upload(path, mp3, { contentType: 'audio/mpeg', upsert: true });
+    if (uploadError) throw new Error(`subida del audio: ${uploadError.message}`);
+  } catch (err) {
+    if (!isIntro) {
+      const { error } = await admin.rpc('release_caller_audio', { p_set_id: setId });
+      if (error) console.error('caller-voice: no se liberó el audio reservado:', error.message);
+    }
+    throw err;
+  }
 
-  const { error: saveError } = cardId === INTRO_ID
-    ? await admin.from('caller_voices').update({ intro_path: path }).eq('set_id', setId)
-    : await admin.from('caller_audios').upsert({ card_id: cardId, set_id: setId, user_id: userId, title: text, path });
+  // Se registra con la voz bloqueada: si mientras tanto se devolvió la voz o se borró la carta, no se registra
+  // y el archivo se borra (FEAT-58, H17).
+  const { data: saved, error: saveError } = await admin.rpc('save_caller_audio', {
+    p_user_id: userId, p_set_id: setId, p_card_id: isIntro ? null : cardId, p_title: text, p_path: path,
+  });
   if (saveError) throw new Error(`registro del audio: ${saveError.message}`);
+  if (!saved) {
+    const { error } = await admin.storage.from(AUDIO_BUCKET).remove([path]);
+    if (error) console.error('caller-voice: no se borró un audio sin registrar:', error.message);
+    throw new Error('VOICE_NOT_PAID');
+  }
   return 'generated';
 }
 

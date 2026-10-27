@@ -16,6 +16,8 @@ interface InviteDialogProps {
   onInviteReady: (invite: LoteriaInvite) => void;
   /** Cambió el enlace o los invitados: el botón «Compartida · N» se vuelve a leer. */
   onSharingChange: () => void;
+  /** Se borraron las fotos de un invitado (FEAT-58, US A5): las cartas de la lotería se vuelven a leer. */
+  onGuestCardsDeleted: () => void;
   onClose: () => void;
 }
 
@@ -24,7 +26,9 @@ interface InviteDialogProps {
  * lotería que ya es colectiva dice si se está compartiendo e incluye quiénes participan, con «Quitar» (FEAT-57, US A4).
  * Usa el cascarón de las ventanas de cuenta: caja centrada en computadora y hoja desde abajo en celular.
  */
-export const InviteDialog = ({ setId, setName, onInviteReady, onSharingChange, onClose }: InviteDialogProps) => {
+export const InviteDialog = ({
+  setId, setName, onInviteReady, onSharingChange, onGuestCardsDeleted, onClose,
+}: InviteDialogProps) => {
   const { t } = useTranslation();
   const [invite, setInvite] = useState<LoteriaInvite | null>(null);
   const [isBusy, setIsBusy] = useState(true);
@@ -148,7 +152,14 @@ export const InviteDialog = ({ setId, setName, onInviteReady, onSharingChange, o
         </p>
       )}
 
-      {showsSharing && <InviteesList setId={setId} onChange={onSharingChange} onBusyChange={setIsRemoving} />}
+      {showsSharing && (
+        <InviteesList
+          setId={setId}
+          onChange={onSharingChange}
+          onPhotosDeleted={onGuestCardsDeleted}
+          onBusyChange={setIsRemoving}
+        />
+      )}
 
       {invite?.isOpen && (
         <div className="share-dialog__footer">

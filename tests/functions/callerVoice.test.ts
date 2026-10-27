@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  audioPath, buildSpeechRequest, callText, CALLER_INTRO_TEXT, CALLER_VOICES, mapCallerVoiceError, needsAudio,
+  audioPath, buildSpeechRequest, callText, CALLER_INTRO_TEXT, CALLER_VOICES, mapCallerVoiceError,
   parseCallerVoiceRequest, toCallerVoiceErrorResponse,
 } from '../../supabase/functions/_shared/callerVoice.ts';
 
@@ -105,22 +105,11 @@ describe('audioPath', () => {
   });
 });
 
-describe('needsAudio (decisión 15)', () => {
-  it('una carta sin audio lo necesita', () => {
-    expect(needsAudio(null, 'El Tío Beto')).toBe(true);
-  });
-
-  it('una carta renombrada necesita otro', () => {
-    expect(needsAudio('El Tio Beto', 'El Tío Beto')).toBe(true);
-  });
-
-  it('una carta con el audio de su título no lo necesita', () => {
-    expect(needsAudio('El Tío Beto', 'El Tío Beto')).toBe(false);
-  });
-});
-
 describe('mapCallerVoiceError', () => {
-  it.each(['INSUFFICIENT_TOKENS', 'VOICE_ALREADY_CREATED', 'INVALID_VOICE', 'SET_NOT_FOUND', 'AUDIOS_EXIST'])(
+  it.each([
+    'INSUFFICIENT_TOKENS', 'VOICE_ALREADY_CREATED', 'INVALID_VOICE', 'SET_NOT_FOUND', 'AUDIOS_EXIST',
+    'VOICE_NOT_PAID', 'CARD_NOT_FOUND', 'VOICE_LIMIT', 'RATE_LIMITED',
+  ])(
     'conserva %s',
     (code) => {
       expect(mapCallerVoiceError(`ERROR: ${code}`).message).toBe(code);
@@ -140,6 +129,8 @@ describe('toCallerVoiceErrorResponse', () => {
     ['SET_NOT_FOUND', 404],
     ['CARD_NOT_FOUND', 404],
     ['VOICE_NOT_PAID', 403],
+    ['VOICE_LIMIT', 403],
+    ['RATE_LIMITED', 429],
     ['AI_BUSY', 503],
     ['AI_TIMEOUT', 504],
   ])('%s responde %i', (code, status) => {

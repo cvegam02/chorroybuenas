@@ -60,14 +60,16 @@ async function listAudioPaths(folder: string): Promise<string[]> {
 
 export const CallerVoiceService = {
   /**
-   * Borra los audios con voz de IA de una carta, o de toda la lotería si no se da carta. Las filas de los
-   * audios se borran solas con la carta o la lotería; los archivos no, por eso se borran aquí, como las fotos.
-   * No lanza: si falla, la carta o la lotería ya están borradas.
+   * Borra los audios con voz de IA de una carta (o de varias), o de toda la lotería si no se da carta. Las filas
+   * de los audios se borran solas con la carta o la lotería; los archivos no, por eso se borran aquí, como las
+   * fotos. No lanza: si falla, la carta o la lotería ya están borradas.
    */
-  async removeAudios(userId: string, setId: string, cardId?: string): Promise<void> {
+  async removeAudios(userId: string, setId: string, cardIds?: string | readonly string[]): Promise<void> {
     const folder = `${userId}/${setId}`;
     try {
-      const paths = cardId ? [`${folder}/${cardId}.mp3`] : await listAudioPaths(folder);
+      const paths = cardIds === undefined
+        ? await listAudioPaths(folder)
+        : (typeof cardIds === 'string' ? [cardIds] : cardIds).map((id) => `${folder}/${id}.mp3`);
       // En páginas: una lotería puede tener más audios de los que Storage borra de una vez (FEAT-58, H20).
       for (let start = 0; start < paths.length; start += STORAGE_PAGE) {
         const { error } = await supabase.storage.from(AUDIO_BUCKET).remove(paths.slice(start, start + STORAGE_PAGE));

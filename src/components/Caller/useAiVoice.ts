@@ -18,7 +18,7 @@ export const useAiVoice = (setId: string | undefined, cards: Card[] | null) => {
   const [status, setStatus] = useState<AiVoiceStatus>('loading');
   const [voice, setVoice] = useState<CallerVoiceState | null>(null);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
-  // Se devolvieron los tokens porque no salió ninguna carta (decisiones 11 y 25)
+  // Se devolvieron los tokens porque no salió ninguna carta ni la frase (decisiones 11 y 25; FEAT-58, decisión 10)
   const [refunded, setRefunded] = useState(false);
   const alive = useRef(true);
   const cardsRef = useRef(cards);
@@ -45,7 +45,8 @@ export const useAiVoice = (setId: string | undefined, cards: Card[] | null) => {
           try {
             await CallerVoiceService.generate(id, audioId);
           } catch (err) {
-            // La carta que falla se dice con la voz del navegador (decisión 26); se reintenta al volver a abrir
+            // La carta que falla, o que pasó el tope de audios (FEAT-58, decisión 7), se dice con la voz del
+            // navegador (decisión 26); se reintenta al volver a abrir
             logger.warn(`Caller voice: could not generate ${audioId}:`, err);
           }
           if (alive.current) setProgress({ done: index + 1, total: pending.length });
@@ -54,7 +55,7 @@ export const useAiVoice = (setId: string | undefined, cards: Card[] | null) => {
       const loaded = await CallerVoiceService.load(id);
       if (!alive.current) return;
       const cardAudios = loaded ? loaded.audioTitles.size : 0;
-      if (loaded && deck.length > 0 && shouldRefund(cardAudios)) {
+      if (loaded && deck.length > 0 && shouldRefund(cardAudios, loaded.hasIntro)) {
         await CallerVoiceService.refund(id);
         await refreshBalance();
         if (!alive.current) return;

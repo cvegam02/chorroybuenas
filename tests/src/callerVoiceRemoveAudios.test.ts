@@ -44,6 +44,18 @@ describe('CallerVoiceService.removeAudios (FEAT-58, H20)', () => {
     expect(bucket.removeCalls).toEqual([['u1/s1/c1.mp3']]);
   });
 
+  it('varias cartas (las fotos de un invitado, FEAT-58 A5) borran solo sus audios, sin listar la carpeta', async () => {
+    bucket.files = ['c1.mp3', 'c2.mp3', 'c3.mp3'];
+    await CallerVoiceService.removeAudios('u1', 's1', ['c1', 'c3']);
+    expect(bucket.removeCalls).toEqual([['u1/s1/c1.mp3', 'u1/s1/c3.mp3']]);
+  });
+
+  it('una lista vacía de cartas no borra nada', async () => {
+    bucket.files = ['c1.mp3'];
+    await CallerVoiceService.removeAudios('u1', 's1', []);
+    expect(bucket.removeCalls).toEqual([]);
+  });
+
   it('una carpeta vacía no borra nada', async () => {
     await CallerVoiceService.removeAudios('u1', 's1');
     expect(bucket.removeCalls).toEqual([]);
