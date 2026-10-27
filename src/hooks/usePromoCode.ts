@@ -1,33 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { TokenPricingRepository } from '../repositories/TokenPricingRepository';
+import type { PromoCheck } from '../utils/promoCheck';
 
-const DEBOUNCE_MS = 400;
+export type PromoCodeState = { kind: 'idle' } | { kind: 'checking' } | PromoCheck;
 
 /**
- * Porcentaje de bono del código que el usuario está escribiendo, validado en el servidor.
- * Devuelve 0 mientras no haya un código válido (o si `enabled` es false).
+ * El código promocional de Comprar tokens. Se revisa solo al tocar «Aplicar» (o Enter): cada código sin bono cuenta
+ * para el límite de 5 por hora (FEAT-58, decisión 3), así que no se revisa mientras se escribe.
  */
-export function usePromoCode(code: string, enabled: boolean): number {
-  const [percent, setPercent] = useState(0);
-  const trimmed = code.trim();
+export function usePromoCode() {
+  const [state, setState] = useState<PromoCodeState>({ kind: 'idle' });
+  const requestRef = useRef(0);
 
-  useEffect(() => {
-    if (!trimmed || !enabled) {
-      setPercent(0);
-      return;
-    }
-    // Mientras se valida el código nuevo no se muestra el bono del anterior.
-    setPercent(0);
-    let cancelled = false;
-    const timer = setTimeout(async () => {
-      const result = await TokenPricingRepository.checkPromoCode(trimmed);
-      if (!cancelled) setPercent(result);
-    }, DEBOUNCE_MS);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [trimmed, enabled]);
+  const apply = useCallback(async (code: string) => {
+    if (!code.trim()) return;
+    const request = ++requestRef.current;
+    setState({ kind: 'checking' });
+    const result = await TokenPricingRepository.checkPromoCode(code);
+    if (request === requestRef.current) setState(result);
+  }, []);
 
-  return percent;
+  /** Al cambiar el código se quita el bono del anterior hasta volver a aplicarlo. */
+  const clear = useCallback(() => {
+    requestRef.current += 1;
+    setState({ kind: 'idle' });
+  }, []);
+
+  return { state, percent: state.kind === 'valid' ? state.percent : 0, apply, clear };
 }

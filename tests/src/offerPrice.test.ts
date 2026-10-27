@@ -19,7 +19,10 @@ describe('precio con oferta en Comprar tokens (FEAT-49, US A3)', () => {
     for (const price of [150, 199, 200, 250]) {
       for (let tokens = 5; tokens <= 500; tokens += 7) {
         const server = resolvePurchaseItem({ pack: null, customTokens: tokens, pricePerTokenCents: price, offer: { id: 'o', percent: 25 } });
-        expect(customOfferPriceCents(tokens, price, 25)).toBe(server.ok ? server.value.amountCents : NaN);
+        const client = customOfferPriceCents(tokens, price, 25);
+        // Por debajo de $10 el servidor no cobra (FEAT-58, decisión 2); la página no deja elegir esa cantidad
+        if (client < 1000) expect(server.ok).toBe(false);
+        else expect(client).toBe(server.ok ? server.value.amountCents : NaN);
       }
     }
   });

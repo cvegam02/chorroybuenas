@@ -16,7 +16,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 - **Actor(es)**: Visitante.
 - **Precondiciones**: No tener cuenta con ese correo.
 - **Flujo principal**: (1) Elige registrarse con correo y contraseña, o con Google. (2) Con correo, recibe un mensaje para confirmar su cuenta. (3) Al confirmar, queda registrado y recibe sus tokens de bienvenida (§7).
-- **Excepciones**: El correo ya está registrado: se le avisa. Si la cantidad de tokens de bienvenida no está configurada, la cuenta se crea igual, con saldo 0.
+- **Excepciones**: El correo ya está registrado: se le avisa. Si la cantidad de tokens de bienvenida no está configurada, la cuenta se crea igual, con saldo 0. El correo es de un dominio desechable: no se crea la cuenta y se le pide un correo personal (§3; 2026-10-26, FEAT-58).
 - **Resultado**: Existe un usuario registrado con su saldo inicial.
 - **Estados afectados**: Se crean el perfil y el saldo del usuario (§11).
 - **Notificaciones**: Correo de confirmación de cuenta (§13).
@@ -158,7 +158,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 - **Actor(es)**: Usuario registrado.
 - **Precondiciones**: Sesión iniciada.
 - **Flujo principal**: (1) Elige un paquete, o una cantidad libre de 5 a 500 tokens (§8). (2) Si tiene un código promocional, lo escribe y ve el bono (§9). (3) Es enviado al pago de Mercado Pago. (4) Paga. (5) Vuelve al sitio y ve el resultado.
-- **Excepciones**: Sin sesión: se le pide iniciar sesión. Pago cancelado o rechazado: vuelve sin tokens. Pago pendiente (efectivo o transferencia): se le avisa que se acreditará al confirmarse (§8). Cantidad libre menor a 5 tokens: no se permite (§8).
+- **Excepciones**: Sin sesión: se le pide iniciar sesión. Pago cancelado o rechazado: vuelve sin tokens. Pago pendiente (efectivo o transferencia): se le avisa que se acreditará al confirmarse (§8). Cantidad libre menor a 5 tokens, o que con la oferta no llega a $10.00: no se permite; el mínimo de la cantidad libre sube solo (§8; 2026-10-26, FEAT-58).
 - **Resultado**: Un pago iniciado. Los tokens llegan por el caso 15.
 - **Estados afectados**: Ninguno hasta que el pago se aprueba.
 - **Notificaciones**: Ninguna. El sitio no emite comprobante propio (§8, §13).
@@ -177,8 +177,8 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 ### 16. Usar un código promocional
 - **Actor(es)**: Usuario registrado.
 - **Precondiciones**: Existe al menos un código vigente (§9). Sirve en cualquier compra, no solo en la primera.
-- **Flujo principal**: (1) En la página de compra escribe el código. (2) Si es válido, ve el porcentaje de bono y el total de tokens que recibirá. (3) Compra (caso 14). (4) Al acreditarse el pago recibe los tokens del bono.
-- **Excepciones**: Código inexistente, inactivo, vencido o aún no vigente: no se aplica. Código ya usado por ese usuario: no se aplica (§9). Primera compra con código: se aplica solo el código (§9). El bono redondea a 0 tokens: el código no cuenta como usado.
+- **Flujo principal**: (1) En la página de compra escribe el código y toca «Aplicar» (2026-10-26, FEAT-58). (2) Si es válido, ve el porcentaje de bono y el total de tokens que recibirá. (3) Compra (caso 14). (4) Al acreditarse el pago recibe los tokens del bono.
+- **Excepciones**: Código inexistente, inactivo, vencido o aún no vigente: no se aplica y se le dice que ese código no da bono. Más de 5 códigos sin bono en una hora: se le dice que lo intente más tarde (§9; 2026-10-26, FEAT-58). Código ya usado por ese usuario: no se aplica (§9). Primera compra con código: se aplica solo el código (§9). El bono redondea a 0 tokens: el código no cuenta como usado.
 - **Resultado**: La compra lleva el bono del código.
 - **Estados afectados**: Compra (§11).
 - **Notificaciones**: Ninguna.
@@ -212,7 +212,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 - **Actor(es)**: Administrador.
 - **Precondiciones**: Sesión iniciada como administrador.
 - **Flujo principal**: (1) Ve todas las promociones. (2) Crea una de primera compra o de código, con su porcentaje y vigencia opcional. (3) La edita, la activa, la desactiva o la borra (§9).
-- **Excepciones**: Un usuario que no es administrador no puede ver ni cambiar promociones (§12).
+- **Excepciones**: Un usuario que no es administrador no puede ver ni cambiar promociones (§12). Una oferta que deja algún pack activo por debajo de $10.00 no se guarda; el panel dice cuál (§9; 2026-10-26, FEAT-58).
 - **Resultado**: La promoción queda creada, cambiada o eliminada.
 - **Estados afectados**: Promoción (§11).
 - **Notificaciones**: Ninguna.
@@ -222,7 +222,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 - **Actor(es)**: Administrador.
 - **Precondiciones**: Sesión iniciada como administrador.
 - **Flujo principal**: (1) Ve los paquetes. (2) Crea o edita un paquete: tokens, tokens de regalo, precio y si está activo. (3) Cambia el precio por token de la cantidad libre (§8).
-- **Excepciones**: Las compras ya iniciadas conservan el precio con el que se crearon.
+- **Excepciones**: Las compras ya iniciadas conservan el precio con el que se crearon. Un pack con precio menor a $10.00, o que con la oferta vigente o programada queda por debajo, no se guarda (§8, §9; 2026-10-26, FEAT-58).
 - **Resultado**: Los precios nuevos aplican a las compras siguientes.
 - **Estados afectados**: Paquete y precio (§11).
 - **Notificaciones**: Ninguna.

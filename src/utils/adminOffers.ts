@@ -64,6 +64,15 @@ export function offerStatus(offer: OfferDates, now: Date = new Date()): OfferSta
   return 'current';
 }
 
+/** El mayor descuento de las ofertas vigentes o programadas, para revisar los packs (FEAT-58); null si no hay. */
+export function pendingOfferPercent(
+  offers: ReadonlyArray<OfferDates & { discount_percent: number }>,
+  now: Date = new Date(),
+): number | null {
+  const pending = offers.filter((o) => ['scheduled', 'current'].includes(offerStatus(o, now)));
+  return pending.length > 0 ? Math.max(...pending.map((o) => o.discount_percent)) : null;
+}
+
 /** Etiqueta del encabezado de la oferta: «Programada · empieza en 29 días», «Vigente · termina en 2 días 5 h». */
 export function offerHeaderStatus(offer: OfferDates, now: Date = new Date()): string {
   const status = offerStatus(offer, now);

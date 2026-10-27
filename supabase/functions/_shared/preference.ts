@@ -28,6 +28,9 @@ const isPositiveInt = (n: unknown): n is number => typeof n === 'number' && Numb
  * Con una oferta vigente se descuenta del precio del pack, o del precio por token en la cantidad libre
  * (contexto-negocio.md §9); los tokens no cambian.
  */
+/** Lo menos que se cobra: Mercado Pago no deja pagar menos (FEAT-58, decisión 2; contexto-negocio §8). */
+export const MIN_PURCHASE_CENTS = 1000;
+
 export function resolvePurchaseItem(input: {
   pack: PackRow | null;
   customTokens: number | null;
@@ -54,6 +57,8 @@ export function resolvePurchaseItem(input: {
 
   if (!isPositiveInt(item.baseTokens)) return fail('La cantidad de tokens es inválida.');
   if (!isPositiveInt(item.amountCents)) return fail('El monto de la compra debe ser mayor a cero.');
+  // Ya con la oferta: el monto a pagar nunca baja de $10.00
+  if (item.amountCents < MIN_PURCHASE_CENTS) return fail('El monto mínimo de compra es $10.00 MXN.');
   return { ok: true, value: item };
 }
 

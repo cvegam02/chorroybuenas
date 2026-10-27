@@ -3,7 +3,7 @@ import { googleRedirectUrl } from '../utils/authRedirect';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
 import { AVATAR_BUCKET } from '../utils/avatar';
-import { EMAIL_ALREADY_REGISTERED_MESSAGE, isEmailAlreadyRegistered } from '../utils/signUpResult';
+import { DISPOSABLE_EMAIL_MESSAGE, EMAIL_ALREADY_REGISTERED_MESSAGE, isEmailAlreadyRegistered } from '../utils/signUpResult';
 
 interface AuthContextType {
     user: User | null;
@@ -110,6 +110,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             ...(metadata?.full_name && { data: { full_name: metadata.full_name } }),
             ...(confirmReturnPath && { emailRedirectTo: googleRedirectUrl(window.location.origin, confirmReturnPath) }),
         };
+        // Correos desechables: la base no crea la cuenta (migración 073); se revisa antes para avisar claro (FEAT-58)
+        const { data: disposable } = await supabase.rpc('is_disposable_email', { p_email: email });
+        if (disposable === true) throw new Error(DISPOSABLE_EMAIL_MESSAGE);
         const { data, error } = await supabase.auth.signUp({
             email,
             password,

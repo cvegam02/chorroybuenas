@@ -35,6 +35,10 @@ select test.is(public.check_promo_code(' verano '), 15,
 select test.is(public.check_promo_code('NOPE'), 0, 'código inexistente devuelve 0');
 select test.is(public.check_promo_code('VENCIDO'), 0, 'código vencido devuelve 0');
 select test.is(public.check_promo_code('FUTURO'), 0, 'código aún no vigente devuelve 0');
+-- Desde FEAT-58 (migración 072) cada código sin bono cuenta como intento, 5 por hora: se reinicia la cuenta
+select test.as_postgres();
+delete from public.promo_code_attempts;
+select test.as_user('00000000-0000-0000-0000-000000000021');
 select test.is(public.check_promo_code('APAGADO'), 0, 'código inactivo devuelve 0');
 select test.is(public.check_promo_code('ROTO'), 0, 'código con porcentaje inválido devuelve 0');
 select test.is(public.check_promo_code('FIRST_PURCHASE'), 0, 'la promo de primera compra no se canjea como código');
@@ -47,6 +51,7 @@ insert into public.token_purchases
   (user_id, base_tokens, bonus_tokens, total_tokens, amount_cents, payment_provider, payment_id, promotion_ids)
 values ('00000000-0000-0000-0000-000000000021', 10, 1, 11, 2000, 'mercadopago', 'PAY-PROMO',
         array['00000000-0000-0000-0000-0000000000aa']::uuid[]);
+delete from public.promo_code_attempts; -- límite de 5 por hora (FEAT-58)
 
 select test.as_user('00000000-0000-0000-0000-000000000021');
 select test.is(public.check_promo_code('VERANO'), 0, 'un código ya usado por el usuario devuelve 0');

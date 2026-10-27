@@ -33,7 +33,7 @@ El principio habla de la lotería que cada quien hace con sus fotos. Las loterí
 | Actor | Quién es | Qué puede hacer |
 |---|---|---|
 | **Visitante** | Cualquiera sin cuenta | Crear cartas y tableros y descargar el PDF. Su trabajo se guarda solo en su navegador. Puede ver el catálogo de loterías temáticas (§18). No puede usar la IA, comprar tokens ni comprar loterías temáticas. _(confirmado el 2026-10-06)_ |
-| **Usuario registrado** | Tiene cuenta (correo y contraseña, o Google) | Todo lo del visitante, y además: guardar varias loterías en la nube, usar la IA, comprar tokens, comprar y descargar loterías temáticas (§18), ver su historial y editar su perfil. _(confirmado el 2026-10-06)_ |
+| **Usuario registrado** | Tiene cuenta (correo y contraseña, o Google) | Todo lo del visitante, y además: guardar varias loterías en la nube, usar la IA, comprar tokens, comprar y descargar loterías temáticas (§18), ver su historial y editar su perfil. _(confirmado el 2026-10-06)_ No se puede crear con un correo de un dominio desechable (2026-10-26, FEAT-58). |
 | **Administrador** | Usuario incluido en la lista de administradores | Todo lo del usuario, y además el panel de administración (§10). _(confirmado el 2026-10-06)_ |
 | **Invitado de una lotería** | Usuario registrado que entró con el enlace de una lotería colectiva de otra persona | En esa lotería, ver todas sus cartas y agregar cartas con su título. No puede editarlas ni borrarlas, ni usar la IA, los tableros, el PDF o el cantador de esa lotería (§21). _(decidido el 2026-10-23 y el 2026-10-24, FEAT-56)_ |
 
@@ -110,7 +110,7 @@ Mercado Pago cobra también las loterías temáticas; sus reglas están en §18 
   | 50 tokens | 20 | $100.00 MXN |
 
 - **Cantidad libre:** se puede comprar cualquier cantidad entre el mínimo y 500 tokens, a $2.00 MXN por token, sin tokens de regalo. _(confirmado el 2026-10-06)_
-- **Mínimo de compra: 5 tokens ($10.00 MXN). DEFINIDO** (2026-10-06).
+- **Mínimo de compra:** el monto a pagar, ya con la oferta, nunca baja de **$10.00 MXN**; sin oferta son 5 tokens. En la cantidad libre, el mínimo de tokens sube lo necesario para llegar a $10 (con 50 % de oferta, 10 tokens). **DEFINIDO** (2026-10-06; en pesos desde el 2026-10-26, FEAT-58).
 - El precio siempre lo calcula el servidor con los datos de la base. **DEFINIDO** (2026-10-06)
 - Durante una oferta (§9), el precio que calcula el servidor es el de la oferta vigente en el momento de iniciar el pago. Vale el precio del momento en que se inició el pago: si la oferta termina mientras el pago está pendiente (efectivo, transferencia), se respeta el precio con descuento. **DEFINIDO** (2026-10-15, FEAT-49)
 - Un pago aprobado acredita los tokens **una sola vez**, sin importar cuántas veces lo notifique Mercado Pago. **DEFINIDO** (2026-10-06)
@@ -128,12 +128,14 @@ Mercado Pago cobra también las loterías temáticas; sus reglas están en §18 
 - El código aplica en cualquier compra, no solo en la primera. **DEFINIDO** (2026-10-06)
 - Cada usuario puede usar un mismo código una sola vez; usuarios distintos pueden usar el mismo código. **DEFINIDO** (2026-10-06). Limitación conocida: si alguien abre dos pagos con el mismo código y paga los dos, recibe el bono en ambos, porque el uso se registra al acreditarse el pago.
 - Los códigos no son visibles públicamente: solo quien conoce un código puede usarlo. **DEFINIDO** (2026-10-06)
+- El código se revisa al tocar «Aplicar». Cada usuario puede probar como máximo **5 códigos sin bono por hora** (que no existen, vencidos o ya usados, sin distinguirlos); pasado el tope, se le dice que lo intente más tarde. **DEFINIDO** (2026-10-26, FEAT-58)
 - Hoy no hay ninguna promoción activa en producción.
 
 ### Ofertas — DEFINIDO (2026-10-15, FEAT-49)
 
 - Una **oferta** es un descuento con fechas en el precio de los tokens. Tiene nombre interno, porcentaje de descuento y fechas de inicio y fin, obligatorias. Se puede cancelar antes de tiempo.
 - Solo puede haber una oferta vigente a la vez: no se pueden crear dos que se crucen en fechas.
+- Una oferta no se puede guardar si deja algún pack activo por debajo del mínimo de compra ($10.00, §8); tampoco un pack con precio menor a $10, ni que quede por debajo con la oferta vigente o programada. El panel dice cuál pack. _(2026-10-26, FEAT-58)_
 - Mientras está vigente, el porcentaje se descuenta del precio de la cantidad libre y de todos los packs. Aplica solo a tokens, no a loterías temáticas (§18).
 - El precio con descuento se redondea al centavo. En la cantidad libre el descuento se aplica al precio por token (con 25%, $2.00 → $1.50) y se multiplica por los tokens. _(Descartado: bajar solo el precio por token, porque la cantidad libre quedaba más barata que los packs de 10 y 20.)_
 - Las promociones se suman a la oferta, no compiten: el código y la primera compra siguen dando sus tokens extra encima del descuento. Entre ellas sigue valiendo que gana el código.
@@ -161,6 +163,8 @@ El administrador puede: _(confirmado el 2026-10-06)_
 |---|---|---|
 | Lotería (`loteria_sets`) | Nombre y modo de juego | Pertenece a un usuario |
 | Carta (`cards`) | Título, imagen, imagen original, si fue hecha con IA | Pertenece a una lotería |
+| Dominio desechable | Un dominio de correo con el que no se crean cuentas | Lista del servidor, sin relación (2026-10-26, FEAT-58) |
+| Intento de código | Un código sin bono que probó un usuario, y cuándo | Pertenece a un usuario; solo el servidor (2026-10-26, FEAT-58) |
 | Tablero (`boards`, `board_cards`) | Las cartas de un tablero y su posición | Pertenece a una lotería |
 | Saldo (`user_tokens`) | Tokens disponibles | Uno por usuario |
 | Uso (`token_usage`) | Cada token gastado en IA, con su lotería | Pertenece a un usuario |
@@ -302,6 +306,9 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-26 | Voz con IA: los audios de cartas agregadas o renombradas se generan sin costo hasta tantos audios como cartas tenga la lotería más 10, con un máximo de 20 regeneraciones por minuto por usuario; pasado el tope, esa carta se canta con la voz del navegador. Los 10 tokens se devuelven solo si no salió ninguna carta ni la frase de arranque. Reemplaza las decisiones del 2026-10-23 de no aplicar límite y de regenerar siempre sin costo (FEAT-55, decisiones 13, 15 y 25). _(Descartados: tope igual al número de cartas; tope de 20 o 50 regeneraciones; solo límite por minuto; contar solo los renombres; límite por minuto también al primer audio; devolver con solo la frase. Origen: FEAT-58, decisiones 7 y 10.)_ |
 | 2026-10-26 | Loterías colectivas: cada invitado sube como máximo 60 cartas por lotería y 10 por minuto, cada carta con su propia imagen; el dueño puede borrar de una vez las fotos de un invitado, que sigue participando. Reemplaza «sin tope de fotos por invitado» (2026-10-24, FEAT-56, decisión 5). _(Descartados: 30 por lotería; solo límite por minuto; borrar las fotos solo al quitar al invitado. Origen: FEAT-58, decisión 9.)_ |
 | 2026-10-26 | Voz con IA: 10 tokens cubren hasta 60 cartas y cada 10 cartas más cuestan 2; si la lotería crece después de pagar, se ofrece «Ampliar la voz» y solo se cobra si el usuario acepta. Antes de cobrar se revisa el cupo de ElevenLabs y, si no alcanza, no se cobra; alerta al administrador al bajar del 20 % del cupo. La frase de arranque se genera una vez por voz y los títulos repetidos con la misma voz se reutilizan entre cuentas. Se mantiene la indicación de tono. Medido el 2026-10-26: unos 26 créditos por carta, unas 26 loterías de 54 cartas al mes con el plan Starter. Reemplaza «10 tokens tenga las cartas que tenga» (FEAT-55, decisión 11) y la frase por lotería (decisión 23). _(Descartados: +1 token por cada 10 cartas; 10 fijos; cobrar el bloque nuevo sin preguntar; que lo pagado cubra todo; revisar el cupo sin correo o solo la alerta; compartir solo la frase o nada; acortar o quitar la indicación de tono. Origen: FEAT-58, decisiones 8, 11 y 12.)_ |
+| 2026-10-26 | No se crean cuentas con correos de dominios desechables (lista en la base); la ventana lo avisa antes de registrar. Las cuentas anónimas ya estaban apagadas y la confirmación del correo ya era obligatoria. Los tokens de bienvenida no cambian. _(Descartados: captcha de Turnstile o hCaptcha, que piden cuenta externa; dar los tokens al confirmar el correo; no hacer nada. Origen: FEAT-58, decisión 1.)_ |
+| 2026-10-26 | El mínimo de compra se mide en pesos: el monto final, ya con la oferta, nunca baja de $10.00 MXN; la cantidad libre sube su mínimo para llegar a $10; el panel no deja guardar ofertas o packs que dejen un pack por debajo. Precisa la fila del 2026-10-06 («5 tokens»). _(Descartado: dejar guardar todo y ocultar en la tienda los packs que no llegan. Origen: FEAT-58, decisión 2.)_ |
+| 2026-10-26 | Códigos promocionales: como máximo 5 sin bono por usuario por hora, sin distinguir si no existen, vencieron o ya se usaron; el código se revisa al tocar «Aplicar», no mientras se escribe. _(Descartados: 10 o 20 por hora; seguir revisando mientras se escribe, con más espera. Origen: FEAT-58, decisión 3.)_ |
 
 ## 16. Pendientes por definir
 
