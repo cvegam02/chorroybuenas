@@ -1,6 +1,6 @@
 # FEAT-58 — Correcciones de seguridad y de lógica (revisión del 2026-10-25)
 
-**Estado:** hallazgos de la revisión de código hecha por Claude el 2026-10-25 sobre `main` (producción, commit `50d0807`) y `dev` (commit `255ab5d`, con FEAT-55 y FEAT-56). Por definir con Carlos y por construir. Ningún hallazgo se probó en vivo: todos salen de leer el código. Base de conocimiento sin tocar: los cambios propuestos están en cada hallazgo y al final.
+**Estado:** **Publicada en producción el 2026-10-28:** ese día se aplicaron en el Supabase de producción las migraciones 060 a 076 y las 7 funciones nuevas o cambiadas (con `ELEVENLABS_API_KEY` y `ADMIN_ALERT_EMAIL`), y el sitio pasó a `main` con el PR #84. Lo que sigue es el historial. hallazgos de la revisión de código hecha por Claude el 2026-10-25 sobre `main` (producción, commit `50d0807`) y `dev` (commit `255ab5d`, con FEAT-55 y FEAT-56). Por definir con Carlos y por construir. Ningún hallazgo se probó en vivo: todos salen de leer el código. Base de conocimiento sin tocar: los cambios propuestos están en cada hallazgo y al final.
 
 > Nota 2026-10-26: la revisión se escribió como «FEAT-57», pero ese número ya era de «una sola casa» (PR #75, ya en `dev` como `bb88182`); se renumeró a FEAT-58. Desde la revisión, `dev` incluye FEAT-57: las líneas citadas pueden haberse movido.
 

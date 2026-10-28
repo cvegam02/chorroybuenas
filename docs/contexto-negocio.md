@@ -335,13 +335,7 @@ Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en
 | Ofertas con descuento y banner | §8, §9 | No existen. Anotada el 2026-10-15; se construye con `docs/features/FEAT-49-ofertas-con-banner.md` |
 | Elegir qué se ve en las cartas (nombre, número, ambos o nada) | §4 | Siempre dibuja nombre y número. Anotada el 2026-10-20; se construye con `docs/features/FEAT-51-nombre-y-numero-en-cartas.md` |
 | Tableros del PDF en tamaño carta | §5 | El PDF sale en hoja A4. Anotada el 2026-10-09; se corrige con `docs/features/FEAT-26-pdf-impresion-y-recorte.md` |
-| Voz con IA del cantador | §20 | En producción, no existe: el cantador usa la voz del navegador. Construida el 2026-10-24 con la US A6 de `docs/features/FEAT-55-cantador.md` y llevada a dev con el PR #73; se retira de esta lista al publicarse en producción |
 | «Arma tus tableros» | §19 | No existe. Anotada el 2026-10-22; se construye con `docs/features/FEAT-53-tableros-loteria-tradicional.md` |
-| Voz con IA: precio por bloques de cartas y «Ampliar la voz» | §20 | En producción, la voz con IA todavía no existe (renglón «Voz con IA del cantador»). Anotada y construida el 2026-10-26 con la US A4 de `docs/features/FEAT-58-fixes-revision.md`; se retira de esta lista al publicarse en producción |
-| Voz con IA: revisar el cupo de ElevenLabs antes de cobrar y alerta al administrador | §13, §20 | En producción, la voz con IA todavía no existe. Anotada y construida el 2026-10-26 con la US A4 de FEAT-58; se retira al publicarse en producción |
-| Voz con IA: frase de arranque una vez por voz y títulos reutilizados entre cuentas | §11, §12, §20 | En producción, la voz con IA todavía no existe. Anotada y construida el 2026-10-26 con la US A4 de FEAT-58; se retira al publicarse en producción |
-| Loterías colectivas | §3, §12, §21 | En producción, no existen: solo el dueño ve y modifica su lotería. Construidas el 2026-10-24 y el 2026-10-25 con las US B1 a B5 de `docs/features/FEAT-56-loterias-colectivas.md` y llevadas a dev con el PR #74; se retira de esta lista al publicarse en producción |
-| Cantador: ritmo «Personalizado» y modo «Manual» | §20 | En producción, el cantador solo canta en automático con «Tradicional» o una carta cada 4, 6, 8 o 10 s. Anotada y construida el 2026-10-28 con `docs/features/FEAT-59-cantador-manual-y-ritmos.md`; se retira de esta lista al publicarse en producción |
 
 ## 18. Loterías temáticas — DEFINIDO
 
