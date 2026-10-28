@@ -1,15 +1,32 @@
 import { useCallback, useEffect, useState } from 'react';
-import { type AutoRhythm, delayAfterCard, parseRhythm } from '../../utils/callerAuto';
+import {
+  type AutoRhythm,
+  type CustomRhythm,
+  clampCustomRhythm,
+  delayAfterCard,
+  isManual,
+  parseCustomRhythm,
+  parseRhythm,
+} from '../../utils/callerAuto';
 import { type CallerGame, isFinished } from '../../utils/callerGame';
 import { logger } from '../../utils/logger';
 
 const RHYTHM_KEY = 'cantador:ritmo';
+const CUSTOM_RHYTHM_KEY = 'cantador:ritmo-personalizado';
 
 const readRhythm = (): AutoRhythm => {
   try {
     return parseRhythm(localStorage.getItem(RHYTHM_KEY));
   } catch {
     return parseRhythm(null);
+  }
+};
+
+const readCustomRhythm = (): CustomRhythm => {
+  try {
+    return parseCustomRhythm(localStorage.getItem(CUSTOM_RHYTHM_KEY));
+  } catch {
+    return parseCustomRhythm(null);
   }
 };
 
@@ -21,27 +38,36 @@ const readRhythm = (): AutoRhythm => {
  */
 export const useAutoCaller = (game: CallerGame | null, drawAndSay: (onSpoken: () => void) => void) => {
   const [rhythm, setRhythm] = useState<AutoRhythm>(readRhythm);
+  const [custom, setCustom] = useState<CustomRhythm>(readCustomRhythm);
   const [running, setRunning] = useState(false);
   // La carta (por su número de salida) que la voz ya terminó de decir
   const [spokenFor, setSpokenFor] = useState<number | null>(null);
+  // Diciendo la carta que se acaba de sacar: en manual no se saca otra hasta que termine (FEAT-59, decisión 4)
+  const [speaking, setSpeaking] = useState(false);
   const drawn = game?.drawn ?? 0;
   const done = game ? isFinished(game) : true;
 
   const next = useCallback(() => {
+    if (done) return;
     const number = drawn + 1;
-    drawAndSay(() => setSpokenFor(number));
-  }, [drawn, drawAndSay]);
+    setSpeaking(true);
+    drawAndSay(() => {
+      setSpokenFor(number);
+      setSpeaking(false);
+    });
+  }, [done, drawn, drawAndSay]);
 
   useEffect(() => {
     if (!running) return;
-    if (done) {
+    // En manual nada corre solo (FEAT-59, US A2)
+    if (done || isManual(rhythm)) {
       setRunning(false);
       return;
     }
     if (spokenFor !== drawn) return;
-    const timer = window.setTimeout(next, delayAfterCard(rhythm, drawn));
+    const timer = window.setTimeout(next, delayAfterCard(rhythm, drawn, custom));
     return () => window.clearTimeout(timer);
-  }, [running, done, spokenFor, drawn, rhythm, next]);
+  }, [running, done, spokenFor, drawn, rhythm, custom, next]);
 
   useEffect(() => {
     const onVisibilityChange = () => {
@@ -52,10 +78,10 @@ export const useAutoCaller = (game: CallerGame | null, drawAndSay: (onSpoken: ()
   }, []);
 
   const start = useCallback(() => {
-    if (done) return;
+    if (done || isManual(rhythm)) return;
     setRunning(true);
     next();
-  }, [done, next]);
+  }, [done, rhythm, next]);
 
   const stop = useCallback(() => setRunning(false), []);
 
@@ -68,5 +94,16 @@ export const useAutoCaller = (game: CallerGame | null, drawAndSay: (onSpoken: ()
     }
   }, []);
 
-  return { rhythm, changeRhythm, running, start, stop, next };
+  /** Los tiempos del personalizado (FEAT-59, US A3), dentro de sus límites; se recuerdan como el ritmo. */
+  const changeCustom = useCallback((value: CustomRhythm) => {
+    const clamped = clampCustomRhythm(value);
+    setCustom(clamped);
+    try {
+      localStorage.setItem(CUSTOM_RHYTHM_KEY, JSON.stringify(clamped));
+    } catch (err) {
+      logger.warn('Could not save the custom caller rhythm:', err);
+    }
+  }, []);
+
+  return { rhythm, changeRhythm, custom, changeCustom, running, speaking, start, stop, next };
 };
