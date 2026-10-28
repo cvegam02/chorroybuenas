@@ -4,10 +4,13 @@ import {
   AI_DEADLINE_MS, createPrediction, firstOutput, runCharged, waitForPrediction, type ReplicateDeps,
 } from '../_shared/replicate.ts';
 import {
-  assertPredictionSucceeded, buildPredictionBody, mapSpendError, parseTransformRequest, toErrorResponse,
+  applyResultToCard, type ApplyResultDeps, assertPredictionSucceeded, buildPredictionBody, mapSpendError,
+  parseTransformRequest, toErrorResponse,
 } from '../_shared/transform.ts';
 
 const TOKENS_PER_IMAGE = 1;
+/** Donde se guardan las imágenes de las cartas; la carpeta de cada usuario es la que puede leer. */
+const CARD_IMAGES_BUCKET = 'card-images';
 
 const replicateDeps: ReplicateDeps = {
   fetchFn: fetch,
@@ -50,8 +53,52 @@ Deno.serve(async (req) => {
 
   const admin = createClient(supabaseUrl, serviceRoleKey);
 
+  // La carta que se transforma tiene que ser del usuario (y de la lotería, si viene): se revisa antes de cobrar
+  let card: { image_path: string | null; original_image_path: string | null } | null = null;
+  if (request.cardId) {
+    let query = admin.from('cards').select('image_path, original_image_path').eq('id', request.cardId).eq('user_id', user.id);
+    if (request.setId) query = query.eq('set_id', request.setId);
+    const { data, error } = await query.maybeSingle();
+    if (error) {
+      console.error('transform-loteria: cards', error.message);
+      return reply(500, { error: 'AI_ERROR', message: 'No se pudo transformar la imagen.' });
+    }
+    if (!data) return reply(404, { error: 'CARD_NOT_FOUND', message: 'No encontramos esta carta.' });
+    card = data;
+  }
+  const cardId = request.cardId;
+
+  /** Guarda el resultado en la carpeta del usuario y lo aplica a la carta (FEAT-58, US A7). */
+  const applyDeps: ApplyResultDeps = {
+    download: async (url) => {
+      const res = await fetch(url, { signal: AbortSignal.timeout(20_000) });
+      if (!res.ok) throw new Error(`descarga del resultado (${res.status})`);
+      return await res.arrayBuffer();
+    },
+    upload: async (path, image) => {
+      const { error } = await admin.storage.from(CARD_IMAGES_BUCKET)
+        .upload(path, image, { contentType: 'image/webp', upsert: true });
+      if (error) throw new Error(`subida del resultado: ${error.message}`);
+    },
+    applyToCard: async (path) => {
+      const { data, error } = await admin.from('cards')
+        .update({
+          image_path: path,
+          original_image_path: card?.original_image_path ?? card?.image_path ?? null,
+          is_ai_generated: true,
+        })
+        .eq('id', cardId as string).eq('user_id', user.id)
+        .select('id');
+      if (error) throw new Error(`cards: ${error.message}`);
+      return (data ?? []).length > 0;
+    },
+    remove: async (path) => {
+      await admin.storage.from(CARD_IMAGES_BUCKET).remove([path]);
+    },
+  };
+
   try {
-    const output = await runCharged({
+    const result = await runCharged({
       spend: async () => {
         const { data, error } = await admin.rpc('spend_tokens_for_user', {
           p_user_id: user.id,
@@ -74,10 +121,15 @@ Deno.serve(async (req) => {
           timeoutMs: AI_DEADLINE_MS, intervalMs: 3000, deadlineAt,
         });
         assertPredictionSucceeded(finished);
-        return firstOutput(finished);
+        const output = firstOutput(finished);
+        // Dentro del cobro: si no se puede guardar en la carta, el token se devuelve
+        const imagePath = cardId
+          ? await applyResultToCard(applyDeps, { userId: user.id, cardId, outputUrl: output, now: Date.now() })
+          : null;
+        return { output, imagePath };
       },
     });
-    return reply(200, { output });
+    return reply(200, { output: result.output, image_path: result.imagePath });
   } catch (err) {
     const response = toErrorResponse(err);
     if (response.internal) console.error('transform-loteria:', err);

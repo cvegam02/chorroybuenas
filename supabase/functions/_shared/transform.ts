@@ -5,8 +5,9 @@ const GPT_IMAGE_VERSION = '118f53498ea7319519229b2d5bd0d4a69e3d77eb60d6292d5db38
 const DEFAULT_PROMPT_STRENGTH = 0.5;
 const HIGH_FIDELITY_THRESHOLD = 0.4;
 
+// Sin nombrar marcas: solo se describe el estilo (FEAT-58, H12)
 const LOTERIA_PROMPT_TAIL = `
-Style: Traditional Don Clemente Gallo vintage lithograph from the 1940s. 
+Style: classic 1940s Mexican lotería card, vintage lithograph print. 
 Visual details:
 - Bold, thick black ink outlines. Naive folk art drawing style.
 - Vibrant primary colors (Mexican pink, deep teal, sunflower yellow).
@@ -16,7 +17,7 @@ Visual details:
 The output should look like a hand-painted card from a vintage Loteria set.`;
 
 const PROMPTS: Record<0 | 1 | 2, string> = {
-  0: `Authentic Mexican Loteria card illustration. Style: Traditional Don Clemente Gallo vintage lithograph from the 1940s. Visual details: - Subject MUST keep the exact features, pose, and silhouette from the input image. - Bold, thick black ink outlines. Naive folk art drawing style. - Vibrant primary colors (Mexican pink, deep teal, sunflower yellow). - Flat, solid colors with visible ink texture and aged paper grain. - NO 3D, NO photorealism, NO modern digital gradients. - NO text, NO borders inside the image. The output should look like a hand-painted card from a vintage Loteria set.`,
+  0: `Authentic Mexican Loteria card illustration. Style: classic 1940s Mexican lotería card, vintage lithograph print. Visual details: - Subject MUST keep the exact features, pose, and silhouette from the input image. - Bold, thick black ink outlines. Naive folk art drawing style. - Vibrant primary colors (Mexican pink, deep teal, sunflower yellow). - Flat, solid colors with visible ink texture and aged paper grain. - NO 3D, NO photorealism, NO modern digital gradients. - NO text, NO borders inside the image. The output should look like a hand-painted card from a vintage Loteria set.`,
   1: `Create an original 2D folk art illustration inspired by the input image.
 Do NOT preserve exact facial features, body proportions, or identity.
 The result must be an original character.${LOTERIA_PROMPT_TAIL}`,
@@ -28,6 +29,8 @@ export interface TransformRequest {
   promptVariant: 0 | 1 | 2;
   strength: number;
   setId: string | null;
+  /** La carta que se transforma: el servidor guarda el resultado y se lo aplica (FEAT-58, US A7). */
+  cardId: string | null;
 }
 
 /**
@@ -50,6 +53,7 @@ export function parseTransformRequest(body: unknown): ParseResult<TransformReque
       promptVariant: variant === 1 || variant === 2 ? variant : 0,
       strength: typeof strength === 'number' && strength >= 0 && strength <= 1 ? strength : DEFAULT_PROMPT_STRENGTH,
       setId: isUuid(raw.set_id) ? raw.set_id : null,
+      cardId: isUuid(raw.card_id) ? raw.card_id : null,
     },
   };
 }
@@ -92,7 +96,37 @@ const PUBLIC_ERRORS: Record<string, { status: number; message: string }> = {
   SENSITIVE_CONTENT_FILTER: { status: 422, message: 'La imagen fue marcada como contenido sensible.' },
   AI_TIMEOUT: { status: 504, message: 'La IA tardó demasiado. Intenta de nuevo.' },
   AI_BUSY: { status: 503, message: 'La IA está ocupada. Intenta de nuevo en un momento.' },
+  CARD_NOT_FOUND: { status: 404, message: 'No encontramos esta carta.' },
 };
+
+export interface ApplyResultDeps {
+  /** Baja la imagen que entregó Replicate (su enlace caduca). */
+  download: (url: string) => Promise<ArrayBuffer>;
+  /** La sube al espacio de imágenes de las cartas. */
+  upload: (path: string, image: ArrayBuffer) => Promise<void>;
+  /** La pone en la carta, guardando la foto de antes como original; false si la carta ya no existe. */
+  applyToCard: (path: string) => Promise<boolean>;
+  remove: (path: string) => Promise<void>;
+}
+
+/**
+ * Guarda el resultado de la IA en la carpeta del usuario y lo aplica a la carta, para que no se pierda aunque se
+ * cierre la página (FEAT-58, US A7; decisión del 2026-10-27). Devuelve la ruta. Si algo falla, lanza: quien lo
+ * llama está dentro del cobro y devuelve el token.
+ */
+export async function applyResultToCard(
+  deps: ApplyResultDeps,
+  input: { userId: string; cardId: string; outputUrl: string; now: number },
+): Promise<string> {
+  const path = `${input.userId}/ai/${input.cardId}_${input.now}.webp`;
+  const image = await deps.download(input.outputUrl);
+  await deps.upload(path, image);
+  if (!(await deps.applyToCard(path))) {
+    await deps.remove(path).catch(() => {});
+    throw new Error('CARD_NOT_FOUND');
+  }
+  return path;
+}
 
 /**
  * Respuesta HTTP para un error de la transformación. Los códigos conocidos se devuelven tal cual;

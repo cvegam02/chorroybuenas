@@ -58,6 +58,20 @@ export class BoardRepository {
     }
 
     /**
+     * Reemplaza todos los tableros de la lotería en una sola transacción (FEAT-58, US A10; migración 074): si algo
+     * falla, se quedan los de antes. Devuelve los ids de los tableros nuevos, en el mismo orden.
+     */
+    static async replaceBoards(setId: string, gridSize: 9 | 16, boards: Board[]): Promise<string[]> {
+        const { data, error } = await supabase.rpc('replace_set_boards', {
+            p_set_id: setId,
+            p_grid_size: gridSize,
+            p_boards: boards.map((board) => board.cards.map((card) => card.id)),
+        });
+        if (error) throw error;
+        return (data ?? []) as string[];
+    }
+
+    /**
      * Fetch all boards for a user in the given set, including their associated cards.
      */
     static async getBoards(userId: string, setId: string): Promise<Board[]> {

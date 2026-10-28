@@ -45,11 +45,6 @@ export const useBoard = () => {
   const runGeneration = async (count: number, gridSize: 9 | 16): Promise<Board[]> => {
     setIsGenerating(true);
     try {
-      // Borrar tableros anteriores antes de generar nuevos (solo usuarios logueados; invitados se sobrescribe en saveBoards)
-      if (user && currentSetId) {
-        await BoardRepository.deleteAllBoardsForSet(user.id, currentSetId);
-      }
-
       // Small delay to allow UI to update
       await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -78,14 +73,16 @@ export const useBoard = () => {
         gridSize,
       }));
 
-      setBoards(generatedBoards);
-
+      // Con sesión, los tableros nuevos reemplazan a los anteriores en una sola transacción: si algo falla, se
+      // quedan los de antes (FEAT-58, US A10)
       if (user && currentSetId) {
-        for (const board of generatedBoards) {
-          await BoardRepository.saveBoard(user.id, board, currentSetId);
-        }
+        const ids = await BoardRepository.replaceBoards(currentSetId, gridSize, generatedBoards);
+        const savedBoards = generatedBoards.map((board, i) => ({ ...board, id: ids[i] ?? board.id }));
+        setBoards(savedBoards);
+        return savedBoards;
       }
 
+      setBoards(generatedBoards);
       return generatedBoards;
     } finally {
       setIsGenerating(false);

@@ -35,7 +35,10 @@ export const useDeckEditing = (cardsApi: ReturnType<typeof useCards>) => {
   const [showAllTransformedModal, setShowAllTransformedModal] = useState(false);
   const batchInputRef = useRef<HTMLInputElement>(null);
 
-  const ai = useCardAI({ cards, updateCard, userId: user?.id, currentSetId, refreshBalance, t, isAIModalOpen });
+  const ai = useCardAI({
+    cards, updateCard, refreshFromCloud: cardsApi.refreshFromCloud, userId: user?.id, currentSetId, refreshBalance, t,
+    isAIModalOpen,
+  });
   const aiSummary = aiDeckSummary(cards);
   // La carta como está ahora: la ventana de editar ve al momento una versión con IA recién guardada.
   const liveEditingCard = editingCard ? cards.find(card => card.id === editingCard.id) ?? editingCard : null;

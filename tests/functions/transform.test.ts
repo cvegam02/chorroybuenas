@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  assertPredictionSucceeded, buildPredictionBody, mapSpendError, parseTransformRequest, toErrorResponse,
+  applyResultToCard, assertPredictionSucceeded, buildPredictionBody, mapSpendError, parseTransformRequest, toErrorResponse,
+  type ApplyResultDeps,
 } from '../../supabase/functions/_shared/transform.ts';
 import { isUuid, validateImageDataUri } from '../../supabase/functions/_shared/validation.ts';
 
@@ -42,19 +43,19 @@ describe('isUuid', () => {
 describe('parseTransformRequest', () => {
   it('aplica los valores por defecto', () => {
     expect(parseTransformRequest({ image: IMG })).toEqual({
-      ok: true, value: { image: IMG, promptVariant: 0, strength: 0.5, setId: null },
+      ok: true, value: { image: IMG, promptVariant: 0, strength: 0.5, setId: null, cardId: null },
     });
   });
 
   it('respeta parámetros válidos', () => {
     expect(parseTransformRequest({ image: IMG, prompt_variant: 2, prompt_strength: 0.3, set_id: SET })).toEqual({
-      ok: true, value: { image: IMG, promptVariant: 2, strength: 0.3, setId: SET },
+      ok: true, value: { image: IMG, promptVariant: 2, strength: 0.3, setId: SET, cardId: null },
     });
   });
 
   it('normaliza parámetros fuera de rango en vez de fallar', () => {
     const r = parseTransformRequest({ image: IMG, model: 'otro', prompt_variant: 9, prompt_strength: 5, set_id: 'x' });
-    expect(r).toEqual({ ok: true, value: { image: IMG, promptVariant: 0, strength: 0.5, setId: null } });
+    expect(r).toEqual({ ok: true, value: { image: IMG, promptVariant: 0, strength: 0.5, setId: null, cardId: null } });
   });
 
   it('ignora el modelo que pida el navegador: siempre se usa el modelo principal', () => {
@@ -147,5 +148,59 @@ describe('toErrorResponse', () => {
   it('acepta valores que no son Error', () => {
     expect(toErrorResponse('RATE_LIMITED').status).toBe(429);
     expect(toErrorResponse(undefined).status).toBe(502);
+  });
+});
+
+describe('parseTransformRequest con la carta (FEAT-58, US A7)', () => {
+  it('lee el id de la carta que se transforma', () => {
+    const r = parseTransformRequest({ image: IMG, set_id: SET, card_id: SET });
+    expect(r.ok && r.value.cardId).toBe(SET);
+  });
+
+  it('un id que no es uuid se ignora', () => {
+    const r = parseTransformRequest({ image: IMG, card_id: 'x' });
+    expect(r.ok && r.value.cardId).toBeNull();
+  });
+});
+
+describe('applyResultToCard (FEAT-58, US A7)', () => {
+  const deps = (over: Partial<ApplyResultDeps> = {}) => {
+    const calls: string[] = [];
+    const d: ApplyResultDeps = {
+      download: async () => { calls.push('download'); return new Uint8Array([1, 2]).buffer; },
+      upload: async (path) => { calls.push(`upload ${path}`); },
+      applyToCard: async () => { calls.push('apply'); return true; },
+      remove: async (path) => { calls.push(`remove ${path}`); },
+      ...over,
+    };
+    return { d, calls };
+  };
+  const input = { userId: 'u1', cardId: 'c1', outputUrl: 'https://replicate/x.webp', now: 1700 };
+
+  it('guarda la imagen en la carpeta del usuario y la aplica a la carta', async () => {
+    const { d, calls } = deps();
+    await expect(applyResultToCard(d, input)).resolves.toBe('u1/ai/c1_1700.webp');
+    expect(calls).toEqual(['download', 'upload u1/ai/c1_1700.webp', 'apply']);
+  });
+
+  it('si no se pudo bajar o subir, lanza (y el token se devuelve)', async () => {
+    const { d } = deps({ upload: async () => { throw new Error('storage'); } });
+    await expect(applyResultToCard(d, input)).rejects.toThrow('storage');
+  });
+
+  it('si la carta ya no existe, borra el archivo y lanza CARD_NOT_FOUND', async () => {
+    const { d, calls } = deps({ applyToCard: async () => false });
+    await expect(applyResultToCard(d, input)).rejects.toThrow('CARD_NOT_FOUND');
+    expect(calls).toContain('remove u1/ai/c1_1700.webp');
+  });
+});
+
+describe('prompts sin la marca (FEAT-58, H12)', () => {
+  it('ninguno nombra a Don Clemente Gallo', () => {
+    for (const variant of [0, 1, 2] as const) {
+      const body = buildPredictionBody({ image: IMG, promptVariant: variant, strength: 0.3, setId: null, cardId: null });
+      expect(String(body.input.prompt)).not.toMatch(/clemente|gallo/i);
+      expect(String(body.input.prompt)).toMatch(/1940s Mexican loter[ií]a/i);
+    }
   });
 });

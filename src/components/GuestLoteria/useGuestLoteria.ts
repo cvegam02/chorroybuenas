@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   GuestLoteriaRepository,
   type GuestCard,
@@ -53,11 +53,8 @@ export const useGuestLoteria = (setId: string | undefined, userId: string | unde
     load(true);
   }, [load]);
 
-  // Las cartas que se ven ahora, para reconocer los avisos de borrado (llegan sin la lotería)
-  const shownCardIds = useRef<ReadonlySet<string>>(new Set());
-  shownCardIds.current = new Set(state.kind === 'ready' ? state.cards.map((card) => card.id) : []);
 
-  // En vivo: lo que cambia el organizador u otro invitado (cartas nuevas, títulos, IA, borradas) se ve sin
+  // En vivo: lo que cambia el organizador u otro invitado (cartas nuevas, títulos, IA) se ve sin
   // recargar (FEAT-56, US B4, decisión 17; avisos de la migración 065, con las reglas de acceso de `cards`).
   useEffect(() => {
     if (!setId || !userId) return;
@@ -71,11 +68,7 @@ export const useGuestLoteria = (setId: string | undefined, userId: string | unde
       .channel(`guest-loteria-${setId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'cards', filter }, scheduleReload)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'cards', filter }, scheduleReload)
-      // Realtime no filtra los borrados: solo cuentan los de cartas que están en pantalla
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'cards' }, (payload) => {
-        const id = (payload.old as { id?: string }).id;
-        if (id && shownCardIds.current.has(id)) scheduleReload();
-      })
+      // Los borrados ya no se avisan (FEAT-58, H21): una carta borrada desaparece al recargar o con el siguiente cambio
       .subscribe();
     return () => {
       clearTimeout(timer);

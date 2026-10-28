@@ -59,7 +59,7 @@ El principio habla de la lotería que cada quien hace con sus fotos. Las loterí
 - **Tableros:** se generan al azar con las cartas de la lotería. No se generan dos tableros iguales. _(confirmado el 2026-10-06)_
 - **Cantidad sugerida de tableros:** en Clásico, la que hace que cada carta aparezca unas 8 veces en total; en Kids, un tablero por cada 3 cartas. El usuario puede cambiarla. _(confirmado el 2026-10-06)_
 - **Al iniciar sesión**, lo que el visitante tenía guardado en su navegador se pasa a su cuenta: a su primera lotería si está vacía o, si ya tenía cartas, a una lotería nueva, sin mezclarse con lo que había. Al terminar llega a esa lotería. _(decidido el 2026-10-12, FEAT-41; antes iba siempre a la primera lotería de la cuenta, confirmado el 2026-10-06)_
-- No hay límite de cartas por lotería, de loterías por usuario ni de tableros por lotería. **DEFINIDO** (2026-10-06). Se revisa cuando el almacenamiento empiece a pesar. En una lotería colectiva, cada invitado sube como máximo 60 cartas y 10 por minuto (§21; 2026-10-26, FEAT-58; hasta entonces no había límite por invitado, 2026-10-24, FEAT-56).
+- No hay límite de cartas por lotería ni de loterías por usuario. **DEFINIDO** (2026-10-06). Cada lotería tiene como máximo **200 tableros** (2026-10-27, FEAT-58; hasta entonces tampoco había límite de tableros). Se revisa cuando el almacenamiento empiece a pesar. En una lotería colectiva, cada invitado sube como máximo 60 cartas y 10 por minuto (§21; 2026-10-26, FEAT-58; hasta entonces no había límite por invitado, 2026-10-24, FEAT-56).
 - **Lotería colectiva:** una lotería guardada a la que su dueño abrió un enlace para que otras personas suban fotos. Reglas en §21. _(decidido el 2026-10-23 y el 2026-10-24, FEAT-56)_
 
 ## 5. Imágenes y PDF
@@ -76,6 +76,7 @@ El principio habla de la lotería que cada quien hace con sus fotos. Las loterí
 - **Cuesta 1 token por imagen transformada.** _(confirmado el 2026-10-06)_
 - El cobro lo hace el servidor antes de generar. **DEFINIDO** (2026-10-06)
 - Si la imagen no se pudo generar, el token se devuelve: solo se paga por resultados entregados. **DEFINIDO** (2026-10-06)
+- El resultado se guarda y se aplica a la carta en el servidor: si se cierra la página mientras la IA trabaja, la carta queda transformada; si no se pudo guardar, el token se devuelve. _(2026-10-27, FEAT-58)_
 - Requiere cuenta. **DEFINIDO** (2026-10-06) Sin sesión no se ofrece ninguna acción de IA (transformar, otra versión, volver a la foto original): en la pantalla de cartas el visitante tampoco ve una invitación a crear su cuenta. _(decidido el 2026-10-12, FEAT-40; del 2026-10-11 al 2026-10-12 veía ahí la invitación a crear su cuenta, FEAT-34; antes, un aviso de iniciar sesión)_
 - Máximo 10 transformaciones por minuto por usuario. **DEFINIDO** (2026-10-06)
 - Se puede transformar una carta o todas las que falten de una lotería, en lote. Si el filtro de contenido rechaza una foto del lote, esa se omite y el lote continúa. _(confirmado el 2026-10-06)_ Si los tokens no alcanzan para todas, se puede transformar solo las primeras para las que alcancen, en el orden de la baraja, viendo antes cuántos tokens son y cuánto saldo queda. _(decidido el 2026-10-11, FEAT-34)_
@@ -309,6 +310,10 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-26 | No se crean cuentas con correos de dominios desechables (lista en la base); la ventana lo avisa antes de registrar. Las cuentas anónimas ya estaban apagadas y la confirmación del correo ya era obligatoria. Los tokens de bienvenida no cambian. _(Descartados: captcha de Turnstile o hCaptcha, que piden cuenta externa; dar los tokens al confirmar el correo; no hacer nada. Origen: FEAT-58, decisión 1.)_ |
 | 2026-10-26 | El mínimo de compra se mide en pesos: el monto final, ya con la oferta, nunca baja de $10.00 MXN; la cantidad libre sube su mínimo para llegar a $10; el panel no deja guardar ofertas o packs que dejen un pack por debajo. Precisa la fila del 2026-10-06 («5 tokens»). _(Descartado: dejar guardar todo y ocultar en la tienda los packs que no llegan. Origen: FEAT-58, decisión 2.)_ |
 | 2026-10-26 | Códigos promocionales: como máximo 5 sin bono por usuario por hora, sin distinguir si no existen, vencieron o ya se usaron; el código se revisa al tocar «Aplicar», no mientras se escribe. _(Descartados: 10 o 20 por hora; seguir revisando mientras se escribe, con más espera. Origen: FEAT-58, decisión 3.)_ |
+| 2026-10-27 | Cada lotería tiene como máximo 200 tableros, en el selector y en la base. Reabre, con el sí explícito de Carlos, la regla DEFINIDA del 2026-10-06 («no hay límite … de tableros por lotería»); las cartas y las loterías siguen sin límite. _(Descartados: 500; sin tope. Origen: FEAT-58, decisión 4.)_ |
+| 2026-10-27 | Un pago en proceso de una lotería temática sin aviso de Mercado Pago deja de bloquear una nueva compra a los 3 días, sin consultar a Mercado Pago; un pago vencido se libera como uno rechazado. _(Descartados: consultar el pago en Mercado Pago al volver a comprar; 5 o 7 días. Origen: FEAT-58, decisión 5.)_ |
+| 2026-10-27 | El resultado de la IA se guarda y se aplica a la carta en el servidor: cerrar la página no pierde lo pagado. _(Descartado: guardarlo como «resultado pendiente» con un aviso para aplicarlo. Origen: FEAT-58, US A7.)_ |
+| 2026-10-27 | Los avisos en vivo de las loterías colectivas ya no incluyen las cartas borradas: una carta borrada desaparece al recargar o con el siguiente cambio. _(Descartados: seguir mandándolos y aceptar el riesgo; canales privados por lotería. Origen: FEAT-58, H21.)_ |
 
 ## 16. Pendientes por definir
 
@@ -376,7 +381,7 @@ Definido con Carlos el 2026-10-06 (FEAT-17). Por construir. Hasta el 2026-10-07 
 - No se pagan con tokens.
 - En la versión en inglés el precio se muestra además en dólares, solo como referencia.
 - Ver el catálogo no requiere cuenta; comprar sí.
-- Una cuenta compra cada lotería una sola vez: quien ya la tiene, o tiene un pago en proceso por ella, no puede iniciar otro cobro.
+- Una cuenta compra cada lotería una sola vez: quien ya la tiene, o tiene un pago en proceso por ella, no puede iniciar otro cobro. Un pago en proceso sin aviso de Mercado Pago deja de bloquear a los 3 días, y uno vencido se libera como uno rechazado; si después se aprueba y la cuenta ya tenía la lotería, el pago queda para devolverse a mano. _(2026-10-27, FEAT-58)_
 - El precio lo pone el servidor. Un pago aprobado entrega la lotería una sola vez, sin importar cuántas veces lo notifique Mercado Pago, y no se entrega si el monto pagado es menor al precio.
 - Vale el precio del momento en que se inició el pago. Quien pagó recibe su lotería aunque el precio haya cambiado o la lotería se haya despublicado mientras tanto.
 - Los pagos pendientes (efectivo, transferencia) entregan la lotería cuando Mercado Pago los confirma; mientras, el comprador la ve como «pago en proceso».
