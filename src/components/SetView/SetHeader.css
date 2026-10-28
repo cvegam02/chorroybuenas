@@ -181,8 +181,10 @@
   gap: 10px;
 }
 
-/* «Cantar» con su motivo debajo cuando está apagado (FEAT-55) */
+/* «Cantar» con su motivo debajo cuando está apagado (FEAT-55). En computadora el motivo cuelga sin ocupar
+   lugar en la fila, para que «Cantar» quede alineado con los demás botones (FEAT-59, US A4) */
 .set-header__sing {
+  position: relative;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
@@ -190,9 +192,19 @@
 }
 
 .set-header__sing-reason {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 13px;
   font-weight: 600;
   color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* Si los botones bajan a un segundo renglón, el motivo no se encima con ellos */
+.set-header__actions:has(.set-header__sing-reason) {
+  row-gap: 30px;
 }
 
 @media (max-width: 768px) {
@@ -242,5 +254,15 @@
 
   .set-header__sing {
     align-items: stretch;
+  }
+
+  .set-header__actions:has(.set-header__sing-reason) {
+    row-gap: 12px;
+  }
+
+  .set-header__sing-reason {
+    position: static;
+    transform: none;
+    white-space: normal;
   }
 }
