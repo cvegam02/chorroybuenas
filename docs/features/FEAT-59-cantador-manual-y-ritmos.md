@@ -1,6 +1,6 @@
 # FEAT-59 — Cantador: carta grande con las cantadas al lado, modo manual y ritmo personalizado
 
-**Estado:** definida con Carlos el 2026-10-28 y construida el mismo día (US A1 a A3); falta probarla en dev. Sin migraciones ni edge functions: todo es del navegador. Se trabaja en la rama `feature/cantador-manual` (creada el 2026-10-28 desde `dev`).
+**Estado:** definida con Carlos el 2026-10-28 y construida el mismo día (US A1 a A3) y llevada a dev con el PR #81; falta que Carlos la pruebe en dev. Sin migraciones ni edge functions: todo es del navegador. Se trabaja en la rama `feature/cantador-manual` (creada el 2026-10-28 desde `dev`).
 
 **Contexto.** El cantador (U4, FEAT-55) muestra la carta en grande con una tira de las últimas cantadas debajo, y solo canta en automático: «Tradicional» (tres cartas y una pausa) o una carta cada 4, 6, 8 o 10 segundos. Las flechas ← y → solo recorren las cartas ya cantadas. Carlos quiere aprovechar la pantalla de la computadora, poder llevar el juego a mano con el teclado y ajustar los tiempos para jugar más rápido.
 
@@ -17,7 +17,7 @@
 
 ## User Stories
 
-### US A1 — En computadora, la carta grande con las cantadas al lado   ·   Estado: construida, falta probar en dev
+### US A1 — En computadora, la carta grande con las cantadas al lado   ·   Estado: construida, a dev con el PR #81
 
 - **Historia:** Como quien canta en una fiesta con la computadora, quiero ver la carta en grande y todas las que ya salieron al lado, para revisar rápido cuando alguien grita «¡Lotería!».
 - **Entrega demostrable:** En U4, en pantallas de computadora, la carta actual ocupa la izquierda en grande y a la derecha una cuadrícula con todas las cantadas (la más reciente primero, con su número de salida y el conteo «N de M»), que se desplaza si no caben; al tocar una se ve en grande, como hoy. Los controles quedan abajo. En teléfono no cambia nada.
@@ -26,7 +26,7 @@
 - **Escenarios cubiertos:** sin cartas cantadas; pocas; más de las que caben (se desplaza); revisar una vieja; pantalla de teléfono y de tableta.
 - **Construido:** 2026-10-28. Desde 1024 px de ancho (computadora y tableta acostada), `CallerPage` arma dos columnas: la carta, el aviso «Revisando…» y los controles a la izquierda; a la derecha, `CallerCalledPanel` (en `CallerHistory.tsx`) con «Cantadas: N de M», «Ver todas» (sigue dando acceso a las que faltan) y la cuadrícula de todas las cantadas, la más reciente primero (`calledNewestFirst`, con prueba), con su número de salida y un marco en la que se ve en grande; se desplaza si no caben. Tocar una hace lo mismo que la tira de antes. Debajo de 1024 px (teléfono y tableta parada) no cambia nada: tira de las últimas 5 y «Ver todas».
 
-### US A2 — Modo manual con las flechas   ·   Estado: construida, falta probar en dev
+### US A2 — Modo manual con las flechas   ·   Estado: construida, a dev con el PR #81
 
 - **Historia:** Como quien canta, quiero sacar cada carta cuando yo quiera con las flechas del teclado, para llevar el ritmo de la mesa.
 - **Entrega demostrable:** «Ritmo» trae «Manual». En manual, el botón grande dice «Siguiente carta» y → saca y canta la siguiente; ← y «Anterior» regresan por las cantadas; si se está revisando atrás, → avanza hasta la última antes de sacar una nueva. Nada avanza solo. No se saca otra carta mientras suena la anterior (decisión 4).
@@ -35,7 +35,7 @@
 - **Escenarios cubiertos:** manual con voz del navegador y con voz con IA; revisar atrás y volver; última carta de la baraja; recargar a media partida.
 - **Construido:** 2026-10-28. «Ritmo» trae «Manual: tú sacas cada carta» al final de la lista (`AUTO_RHYTHMS`, `isManual`, con prueba) y se recuerda como los demás. En manual, «Empezar a cantar» dice «Se va y se corre con…» y deja la frase en pantalla con el botón «Siguiente carta». Durante la partida, el botón grande es «Siguiente carta» y desaparece el chico «Siguiente», que vuelve al acabar la baraja; el botón, → , el espacio y tocar la carta hacen lo mismo: si se está revisando atrás avanzan hasta la última y, si no, sacan y cantan la siguiente. `useAutoCaller` nunca corre solo en manual. Candado (decisión 4): `useAutoCaller` expone `speaking`, que dura desde que se saca una carta hasta que termina su voz, y en manual no se saca otra mientras dure; el teclado ignora la repetición de espacio y de → aplastadas. Recargar durante la espera de la primera carta regresa a la pantalla de inicio.
 
-### US A3 — Ritmo personalizado   ·   Estado: construida, falta probar en dev
+### US A3 — Ritmo personalizado   ·   Estado: construida, a dev con el PR #81
 
 - **Historia:** Como quien canta, quiero ajustar los segundos entre cartas y las pausas, para jugar más rápido o más lento.
 - **Entrega demostrable:** «Ritmo» trae «Personalizado»; al elegirlo aparecen «Entre cartas» (1 a 15 s), «Pausa cada» (nunca, o 2 a 10 cartas) y «Duración de la pausa» (1 a 20 s), con 3 s, cada 3 cartas y 5 s de inicio. Se recuerda en el navegador. El automático usa esos tiempos, contando desde que termina la voz.
