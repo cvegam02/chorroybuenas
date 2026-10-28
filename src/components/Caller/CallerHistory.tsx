@@ -10,10 +10,12 @@ interface CallerThumbProps {
   /** Su número de salida; sin él, la carta todavía no se canta. */
   callNumber?: number;
   onOpen?: () => void;
+  /** Es la que se ve en grande (panel de computadora). */
+  isShown?: boolean;
 }
 
 /** Una carta chica del historial, como sale impresa. */
-const CallerThumb = ({ card, callNumber, onOpen }: CallerThumbProps) => {
+const CallerThumb = ({ card, callNumber, onOpen, isShown = false }: CallerThumbProps) => {
   const composedUrl = useComposedCard(card);
   const pending = callNumber === undefined;
   const label = pending ? card.title : `${callNumber}. ${card.title}`;
@@ -26,7 +28,13 @@ const CallerThumb = ({ card, callNumber, onOpen }: CallerThumbProps) => {
   // Sin `onOpen` (en «Ver todas», que solo informa) la carta no se puede tocar
   if (!onOpen) return <span className="caller__thumb">{content}</span>;
   return (
-    <button type="button" className="caller__thumb" onClick={onOpen} aria-label={label}>
+    <button
+      type="button"
+      className={`caller__thumb${isShown ? ' caller__thumb--shown' : ''}`}
+      onClick={onOpen}
+      aria-label={label}
+      aria-current={isShown || undefined}
+    >
       {content}
     </button>
   );
@@ -56,6 +64,45 @@ export const CallerHistoryStrip = ({ cards, callNumbers, onOpenCard, onSeeAll }:
         {t('caller.seeAll')}
       </button>
     </div>
+  );
+};
+
+interface CallerCalledPanelProps {
+  /** Todas las cantadas, la más reciente primero. */
+  cards: Card[];
+  callNumbers: Map<string, number>;
+  total: number;
+  /** La que se ve en grande, para marcarla. */
+  shownId: string;
+  onOpenCard: (card: Card) => void;
+  onSeeAll: () => void;
+}
+
+/** En computadora, a la derecha de la carta: todas las cantadas con su número de salida (FEAT-59, US A1). */
+export const CallerCalledPanel = ({ cards, callNumbers, total, shownId, onOpenCard, onSeeAll }: CallerCalledPanelProps) => {
+  const { t } = useTranslation();
+  return (
+    <aside className="caller__panel" aria-labelledby="caller-panel-title">
+      <header className="caller__panel-top">
+        <h2 id="caller-panel-title" className="caller__panel-title">
+          {t('caller.deckTitle', { drawn: cards.length, total })}
+        </h2>
+        <button type="button" className="caller__button caller__history-all" onClick={onSeeAll}>
+          {t('caller.seeAll')}
+        </button>
+      </header>
+      <div className="caller__panel-grid">
+        {cards.map((card) => (
+          <CallerThumb
+            key={card.id}
+            card={card}
+            callNumber={callNumbers.get(card.id)}
+            onOpen={() => onOpenCard(card)}
+            isShown={card.id === shownId}
+          />
+        ))}
+      </div>
+    </aside>
   );
 };
 

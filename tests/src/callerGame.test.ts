@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   browseBack,
   callOrderNumbers,
+  calledNewestFirst,
   recentBeforeCurrent,
   browseForward,
   canSing,
@@ -151,5 +152,10 @@ describe('historial de cartas cantadas (FEAT-55, US A3)', () => {
     expect(numbers.get('a')).toBe(1);
     expect(numbers.get('c')).toBe(3);
     expect(numbers.has('d')).toBe(false);
+  });
+
+  it('el panel de computadora lleva todas las cantadas, la más reciente primero (FEAT-59)', () => {
+    expect(calledNewestFirst({ ...game, drawn: 3 })).toEqual(['c', 'b', 'a']);
+    expect(calledNewestFirst({ ...game, drawn: 0 })).toEqual([]);
   });
 });

@@ -7,16 +7,18 @@ import { CardLabelsProvider } from '../../contexts/CardLabelsContext';
 import { useCallerGame } from '../../hooks/useCallerGame';
 import { useCardVoice } from '../../hooks/useCardVoice';
 import { useKeepScreenOn } from '../../hooks/useKeepScreenOn';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import {
   browseBack,
   browseForward,
   callOrderNumbers,
+  calledNewestFirst,
   canSing,
   currentCardId,
   isFinished,
   recentBeforeCurrent,
 } from '../../utils/callerGame';
-import { CALL_INTRO } from '../../utils/callerAuto';
+import { CALL_INTRO, isManual } from '../../utils/callerAuto';
 import { cardLabelsOrDefault } from '../../utils/cardLabels';
 import { exitFullscreen } from '../../utils/fullscreen';
 import { SetConfirmDialog } from '../SetView/SetConfirmDialog';
@@ -25,7 +27,7 @@ import { useCallerSet } from './useCallerSet';
 import { useAutoCaller } from './useAutoCaller';
 import { CallerRhythmPicker } from './CallerRhythmPicker';
 import { NoVoiceNotice } from './NoVoiceNotice';
-import { CallerDeckSheet, CallerHistoryStrip } from './CallerHistory';
+import { CallerCalledPanel, CallerDeckSheet, CallerHistoryStrip } from './CallerHistory';
 import { CallerVoiceExpand } from './CallerVoiceExpand';
 import { CallerVoicePicker } from './CallerVoicePicker';
 import { useAiVoice } from './useAiVoice';
@@ -34,6 +36,8 @@ import './CallerPage.css';
 
 /** Cuántas cantadas anteriores se ven en la tira bajo la carta (US A3). */
 const HISTORY_STRIP_SIZE = 5;
+/** Desde este ancho, las cantadas van todas a la derecha de la carta en lugar de la tira (FEAT-59, US A1); igual que en CallerPage.css. */
+const WIDE_LAYOUT_QUERY = '(min-width: 1024px)';
 
 /** Cantador (U4, FEAT-55): saca las cartas de la lotería una por una, en grande. */
 export const CallerPage = () => {
@@ -43,11 +47,13 @@ export const CallerPage = () => {
   const { user, isLoading: authLoading } = useAuth();
   const loaded = useCallerSet(setId);
   const [confirmRestart, setConfirmRestart] = useState(false);
-  // Diciendo «Se va y se corre con…» antes de la primera carta
-  const [isIntro, setIsIntro] = useState(false);
+  // «Se va y se corre con…» antes de la primera carta: diciéndolo, o ya dicho y esperando la primera en manual
+  const [intro, setIntro] = useState<'off' | 'speaking' | 'waiting'>('off');
+  const isIntro = intro === 'speaking';
   const [deckOpen, setDeckOpen] = useState(false);
   const [voicePickerOpen, setVoicePickerOpen] = useState(false);
   useKeepScreenOn();
+  const wide = useMediaQuery(WIDE_LAYOUT_QUERY);
 
   // Sin sesión no hay cantador: igual que la página de la lotería, se regresa a Inicio
   useEffect(() => {
@@ -82,6 +88,10 @@ export const CallerPage = () => {
     () => (game ? recentBeforeCurrent(game, HISTORY_STRIP_SIZE).flatMap((id) => cardsById.get(id) ?? []) : []),
     [game, cardsById],
   );
+  const calledCards = useMemo(
+    () => (game && wide ? calledNewestFirst(game).flatMap((id) => cardsById.get(id) ?? []) : []),
+    [game, wide, cardsById],
+  );
 
   /** Saca la siguiente carta y dice su título (US A4). Va dentro del toque, para que Safari de iPhone hable. */
   const drawAndSay = useCallback(
@@ -90,31 +100,57 @@ export const CallerPage = () => {
       const card = cardsById.get(game.order[game.drawn]);
       draw();
       if (card) say(card.title, onSpoken, ai.urlFor(card));
+      else onSpoken();
     },
     [game, cardsById, draw, say, ai],
   );
   const auto = useAutoCaller(game, drawAndSay);
+  const manual = isManual(auto.rhythm);
 
-  /** Empieza la partida: dice la frase de arranque y sigue en automático (US A5). Va dentro del toque. */
+  /**
+   * Empieza la partida: dice la frase de arranque y sigue en automático (US A5); en manual, espera la
+   * primera carta (FEAT-59, US A2). Va dentro del toque.
+   */
   const begin = useCallback(() => {
-    setIsIntro(true);
+    setIntro('speaking');
     say(
       CALL_INTRO,
       () => {
-        setIsIntro(false);
+        if (manual) {
+          setIntro('waiting');
+          return;
+        }
+        setIntro('off');
         auto.start();
       },
       ai.introUrl,
     );
-  }, [say, auto, ai.introUrl]);
+  }, [say, auto, manual, ai.introUrl]);
 
-  /** Barra espaciadora: pausa o sigue; antes de la primera carta, empieza la partida. */
+  /**
+   * Manual (FEAT-59, US A2): «Siguiente carta» y → sacan y cantan la siguiente; si se está revisando atrás,
+   * primero avanzan por las cantadas hasta la última. No saca otra mientras suena la anterior (decisión 4).
+   * Va dentro del toque.
+   */
+  const nextManual = useCallback(() => {
+    if (isIntro || preparingVoice) return;
+    if (view !== null) {
+      setView(browseForward(view, drawnCount));
+      return;
+    }
+    if (finished || auto.speaking || (drawnCount === 0 && intro !== 'waiting')) return;
+    setIntro('off');
+    auto.next();
+  }, [isIntro, preparingVoice, view, drawnCount, finished, intro, auto]);
+
+  /** Barra espaciadora: lo del botón grande. Pausa o sigue, o en manual saca la siguiente; antes de la primera carta, empieza la partida. */
   const togglePlay = useCallback(() => {
     if (isIntro || finished || preparingVoice) return;
-    if (auto.running) auto.stop();
-    else if (drawnCount === 0) begin();
+    if (drawnCount === 0 && intro === 'off') begin();
+    else if (manual) nextManual();
+    else if (auto.running) auto.stop();
     else auto.start();
-  }, [isIntro, finished, preparingVoice, auto, drawnCount, begin]);
+  }, [isIntro, finished, preparingVoice, auto, drawnCount, intro, manual, begin, nextManual]);
 
   /** «Anterior» y ←: pausa el automático y muestra la cantada anterior (decisiones 19 y 20). */
   const showPrevious = useCallback(() => {
@@ -122,7 +158,7 @@ export const CallerPage = () => {
     setView((v) => browseBack(v, drawnCount));
   }, [auto, drawnCount]);
 
-  /** «Siguiente» y →: avanza por las cantadas hasta la última; nunca saca una carta nueva. */
+  /** «Siguiente» y →: avanza por las cantadas hasta la última; nunca saca una carta nueva (en manual, sí: `nextManual`). */
   const showNext = useCallback(() => setView((v) => browseForward(v, drawnCount)), [drawnCount]);
 
   /** Abrir una cantada desde el historial: pausa y la muestra como con «Anterior» (US A3). */
@@ -142,12 +178,18 @@ export const CallerPage = () => {
     setDeckOpen(true);
   }, [auto]);
 
-  // Teclado (decisión 19): espacio pausa o sigue; ← y → recorren las cantadas, sin sacar cartas nuevas
+  // Teclado (decisión 19): espacio pausa o sigue; ← y → recorren las cantadas, sin sacar cartas nuevas.
+  // En manual, → saca la siguiente después de llegar a la última (FEAT-59, US A2)
   useEffect(() => {
     if (!game || confirmRestart || deckOpen || voicePickerOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
       // La lista de ritmo usa sus propias teclas
       if (e.target instanceof HTMLElement && e.target.closest('select, input')) return;
+      // Dejar aplastada la tecla no repite: ni pausa y sigue, ni saca cartas en manual (FEAT-59, decisión 4)
+      if (e.repeat && (e.key === ' ' || (e.key === 'ArrowRight' && manual))) {
+        e.preventDefault();
+        return;
+      }
       if (e.key === ' ') {
         e.preventDefault();
         togglePlay();
@@ -156,12 +198,13 @@ export const CallerPage = () => {
         showPrevious();
       } else if (e.key === 'ArrowRight') {
         e.preventDefault();
-        showNext();
+        if (manual) nextManual();
+        else showNext();
       }
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [game, confirmRestart, deckOpen, voicePickerOpen, togglePlay, showPrevious, showNext]);
+  }, [game, confirmRestart, deckOpen, voicePickerOpen, togglePlay, showPrevious, showNext, manual, nextManual]);
 
   const close = () => {
     exitFullscreen();
@@ -208,9 +251,15 @@ export const CallerPage = () => {
     // Con voz con IA se canta aunque el navegador no tenga voz en español (decisión 24)
     body = <NoVoiceNotice setId={setId ?? ''} />;
   } else if (!current || !shown) {
-    body = isIntro ? (
+    body = intro !== 'off' ? (
       <div className="caller__message" aria-live="polite">
         <p className="caller__intro">{CALL_INTRO}</p>
+        {intro === 'waiting' && (
+          <button type="button" className="caller__button caller__button--primary caller__button--large" onClick={nextManual}>
+            {t('caller.nextCard')}
+            <FaChevronRight aria-hidden="true" />
+          </button>
+        )}
       </div>
     ) : (
       <div className="caller__message">
@@ -218,7 +267,12 @@ export const CallerPage = () => {
         <button type="button" className="caller__button caller__button--primary caller__button--large" onClick={begin}>
           {t('caller.start')}
         </button>
-        <CallerRhythmPicker rhythm={auto.rhythm} onChange={auto.changeRhythm} />
+        <CallerRhythmPicker
+          rhythm={auto.rhythm}
+          onChange={auto.changeRhythm}
+          custom={auto.custom}
+          onCustomChange={auto.changeCustom}
+        />
         {ai.status === 'none' && (
           <>
             {ai.refunded !== null && (
@@ -238,17 +292,19 @@ export const CallerPage = () => {
       </div>
     );
   } else {
-    body = (
+    const playArea = (
       <>
         <div className="caller__stage">
           <CallerCard
             card={shown}
             onTap={finished ? undefined : togglePlay}
-            tapLabel={t(auto.running ? 'caller.pauseHint' : 'caller.resumeHint')}
+            tapLabel={t(manual ? 'caller.nextCardHint' : auto.running ? 'caller.pauseHint' : 'caller.resumeHint')}
           />
           {view !== null && <p className="caller__viewing">{t('caller.viewing', { number: view + 1 })}</p>}
           {nextCard && <CallerCardPreload card={nextCard} />}
-          <CallerHistoryStrip cards={recentCards} callNumbers={callNumbers} onOpenCard={openCalled} onSeeAll={openDeck} />
+          {!wide && (
+            <CallerHistoryStrip cards={recentCards} callNumbers={callNumbers} onOpenCard={openCalled} onSeeAll={openDeck} />
+          )}
           <p className="caller__sr-only" aria-live="polite">
             {shown.title}
           </p>
@@ -269,18 +325,46 @@ export const CallerPage = () => {
               <FaRandom aria-hidden="true" />
               {t('caller.newGame')}
             </button>
+          ) : manual ? (
+            <button
+              type="button"
+              className="caller__button caller__button--primary caller__button--large"
+              onClick={nextManual}
+              disabled={view === null && auto.speaking}
+            >
+              {t('caller.nextCard')}
+              <FaChevronRight aria-hidden="true" />
+            </button>
           ) : (
             <button type="button" className="caller__button caller__button--primary caller__button--large" onClick={togglePlay}>
               {auto.running ? <FaPause aria-hidden="true" /> : <FaPlay aria-hidden="true" />}
               {t(auto.running ? 'caller.pause' : 'caller.resume')}
             </button>
           )}
-          <button type="button" className="caller__button" onClick={showNext} disabled={view === null}>
-            {t('caller.next')}
-            <FaChevronRight aria-hidden="true" />
-          </button>
+          {/* En manual, «Siguiente carta» ya avanza por las cantadas; al acabar la baraja vuelve «Siguiente» */}
+          {(!manual || finished) && (
+            <button type="button" className="caller__button" onClick={showNext} disabled={view === null}>
+              {t('caller.next')}
+              <FaChevronRight aria-hidden="true" />
+            </button>
+          )}
         </div>
       </>
+    );
+    body = wide ? (
+      <div className="caller__play">
+        <div className="caller__main">{playArea}</div>
+        <CallerCalledPanel
+          cards={calledCards}
+          callNumbers={callNumbers}
+          total={game.order.length}
+          shownId={shown.id}
+          onOpenCard={openCalled}
+          onSeeAll={openDeck}
+        />
+      </div>
+    ) : (
+      playArea
     );
   }
 
@@ -346,6 +430,7 @@ export const CallerPage = () => {
             onConfirm={async () => {
               auto.stop();
               restart();
+              setIntro('off');
               setConfirmRestart(false);
             }}
             onClose={() => setConfirmRestart(false)}

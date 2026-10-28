@@ -237,6 +237,37 @@
   font-weight: 600;
 }
 
+/* Ritmo personalizado (FEAT-59, US A3): etiqueta a la izquierda, campo a la derecha */
+.caller__custom {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: var(--spacing-sm) var(--spacing-md);
+  font-size: 15px;
+}
+
+.caller__custom-label {
+  font-weight: 700;
+  text-align: right;
+}
+
+.caller__custom-control {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  justify-self: start;
+}
+
+.caller__custom-input {
+  box-sizing: border-box;
+  width: 80px;
+  text-align: center;
+}
+
+.caller__custom-input:disabled {
+  opacity: 0.4;
+}
+
 .caller__message {
   display: flex;
   flex: 1;
@@ -448,4 +479,75 @@ span.caller__thumb {
 .caller__ai-voice:focus-visible {
   outline: 3px solid var(--color-accent);
   outline-offset: 2px;
+}
+
+/* En computadora (FEAT-59, US A1): la carta grande a la izquierda y todas las cantadas a la derecha. Mismo ancho que WIDE_LAYOUT_QUERY */
+@media (min-width: 1024px) {
+  .caller {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .caller__play {
+    display: flex;
+    flex: 1;
+    gap: var(--spacing-lg);
+    min-height: 0;
+  }
+
+  .caller__main {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .caller__card-image {
+    max-width: min(100%, 560px);
+    max-height: calc(100dvh - 300px);
+  }
+
+  .caller__panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    width: clamp(300px, 32vw, 460px);
+    min-height: 0;
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--color-bg-surface) 8%, transparent);
+  }
+
+  .caller__panel-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+  }
+
+  .caller__panel-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 18px;
+  }
+
+  .caller__panel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    align-content: start;
+    gap: 12px;
+    /* Lugar para el número de salida y el marco de la carta en grande, que sobresalen de cada carta */
+    padding: 6px;
+    overflow-y: auto;
+  }
+
+  .caller__panel-grid .caller__thumb {
+    width: 100%;
+  }
+
+  .caller__thumb--shown {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
 }

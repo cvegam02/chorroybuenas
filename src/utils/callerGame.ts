@@ -102,3 +102,6 @@ export const recentBeforeCurrent = (game: CallerGame, limit: number): string[] =
 /** El número de salida de cada carta cantada (la primera es 1), para «Ver todas». */
 export const callOrderNumbers = (game: CallerGame): Map<string, number> =>
   new Map(drawnIds(game).map((id, index) => [id, index + 1]));
+
+/** El panel de las cantadas en computadora (FEAT-59, US A1): todas, la más reciente primero. */
+export const calledNewestFirst = (game: CallerGame): string[] => drawnIds(game).reverse();
