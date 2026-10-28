@@ -18,7 +18,7 @@ import { CardRepository } from '../../repositories/CardRepository';
 import { logger } from '../../utils/logger';
 import { minCardsForGrid } from '../../utils/gridRules';
 import { withCardNumbers } from '../../utils/cardNumbers';
-import { maxUniqueBoards, suggestedBoardCount } from '../../utils/boardGeneration';
+import { MAX_BOARDS_PER_SET, maxBoardsForSet, maxUniqueBoards, suggestedBoardCount } from '../../utils/boardGeneration';
 import {
   MIN_BOARD_COUNT,
   boardCountShortcuts,
@@ -99,7 +99,7 @@ export const BoardCountSelector = ({
           defaultCount = suggested;
         }
         if (initialCount !== undefined && initialCount > 0) {
-          defaultCount = Math.min(initialCount, maxUniqueBoards(loadedCardCount, gridSize));
+          defaultCount = Math.min(initialCount, maxBoardsForSet(loadedCardCount, gridSize));
         }
 
         setBoardCount(defaultCount);
@@ -122,7 +122,8 @@ export const BoardCountSelector = ({
   const sample = sampleIndexes.flatMap((index) => (deckCards[index] ? [deckCards[index]] : []));
 
   const hasEnoughCards = !isLoadingCards && cardCount >= minCards;
-  const maxBoards = maxUniqueBoards(cardCount, gridSize);
+  // Hasta 200 por lotería (FEAT-58, decisión 4)
+  const maxBoards = maxBoardsForSet(cardCount, gridSize);
   const shortcuts = hasEnoughCards ? boardCountShortcuts(suggestedBoards, maxBoards) : [];
   const modeLabel = gridSize === 16 ? t('cardEditor.deck.modeClassic') : t('cardEditor.deck.modeKids');
 
@@ -188,7 +189,9 @@ export const BoardCountSelector = ({
 
     // Check if requested count exceeds maximum unique boards possible
     if (cardCount >= gridSize && boardCount > maxBoards) {
-      setError(t('boardGenerator.form.errorMaxUnique', { count: cardCount, max: maxBoards }));
+      setError(maxUniqueBoards(cardCount, gridSize) > MAX_BOARDS_PER_SET
+        ? t('boardGenerator.form.errorMaxBoards', { max: MAX_BOARDS_PER_SET })
+        : t('boardGenerator.form.errorMaxUnique', { count: cardCount, max: maxBoards }));
       return;
     }
 

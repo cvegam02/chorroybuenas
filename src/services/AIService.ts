@@ -27,23 +27,16 @@ export interface TransformationCallbacks {
     onSensitiveRetry?: (attempt: number, message: string) => void;
 }
 
-export type AIStyle = {
-    id: string;
-    name: string;
-    prompt: string;
-    previewUrl?: string;
-};
+/**
+ * Lo que responde la transformación: el enlace temporal de Replicate y, si se pidió para una carta, la ruta donde
+ * el servidor ya guardó el resultado y lo aplicó a la carta (FEAT-58, US A7).
+ */
+export interface TransformResult {
+    output: string;
+    imagePath: string | null;
+}
 
 export class AIService {
-    /** Solo estilo lotería tradicional (Don Clemente Gallo). */
-    public static STYLES: AIStyle[] = [
-        {
-            id: 'traditional',
-            name: 'Tradicional',
-            prompt: `Authentic Mexican Loteria card illustration. Style: Traditional Don Clemente Gallo vintage lithograph from the 1940s. Visual details: - Subject MUST keep the exact features, pose, and silhouette from the input image. - Bold, thick black ink outlines. Naive folk art drawing style. - Vibrant primary colors (Mexican pink, deep teal, sunflower yellow). - Flat, solid colors with visible ink texture and aged paper grain. - NO 3D, NO photorealism, NO modern digital gradients. - NO text, NO borders inside the image. The output should look like a hand-painted card from a vintage Loteria set.`
-        }
-    ];
-
     /**
      * Converts a remote URL to a Base64 Data URI
      */
@@ -83,8 +76,8 @@ export class AIService {
     private static async callEdgeFunction(
         accessToken: string,
         imageBase64: string,
-        params: { prompt_variant: 0 | 1 | 2; prompt_strength: number; set_id?: string }
-    ): Promise<string> {
+        params: { prompt_variant: 0 | 1 | 2; prompt_strength: number; set_id?: string; card_id?: string }
+    ): Promise<TransformResult> {
         const res = await fetch(`${SUPABASE_URL}/functions/v1/transform-loteria`, {
             method: 'POST',
             headers: {
@@ -96,7 +89,9 @@ export class AIService {
         });
 
         const body = await res.json().catch(() => ({}));
-        if (res.ok && typeof body.output === 'string' && body.output) return body.output;
+        if (res.ok && typeof body.output === 'string' && body.output) {
+            return { output: body.output, imagePath: typeof body.image_path === 'string' ? body.image_path : null };
+        }
         if (res.status === 401) throw new Error('NOT_LOGGED_IN');
         if (body.error === 'CONFIG_ERROR') throw new Error('AI_NOT_CONFIGURED');
         throw new Error(typeof body.error === 'string' ? body.error : 'AI_ERROR');
@@ -112,8 +107,9 @@ export class AIService {
         request: TransformationRequest,
         userId?: string,
         callbacks?: TransformationCallbacks,
-        setId?: string
-    ): Promise<string> {
+        setId?: string,
+        cardId?: string
+    ): Promise<TransformResult> {
         const { data: { session } } = await supabase.auth.refreshSession();
         if (!session?.access_token) throw new Error('NOT_LOGGED_IN');
         const accessToken = session.access_token;
@@ -127,6 +123,7 @@ export class AIService {
                     ...params,
                     prompt_strength: strength,
                     set_id: setId,
+                    card_id: cardId,
                 }),
                 { onSensitiveRetry: callbacks?.onSensitiveRetry }
             );

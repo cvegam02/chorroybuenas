@@ -59,6 +59,12 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (loteriaError) throw new Error(`seasonal_loterias: ${loteriaError.message}`);
 
+    // Un pago pendiente sin aviso de Mercado Pago deja de bloquear a los 3 días (FEAT-58, decisión 5)
+    const { error: releaseError } = await admin.rpc('release_stale_seasonal_pending', {
+      p_user_id: user.id, p_loteria_id: loteriaId,
+    });
+    if (releaseError) throw new Error(`release_stale_seasonal_pending: ${releaseError.message}`);
+
     const { data: purchases, error: purchasesError } = await admin
       .from('seasonal_purchases')
       .select('status')
