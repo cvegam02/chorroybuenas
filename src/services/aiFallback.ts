@@ -1,5 +1,5 @@
 /** Una llamada a la edge function transform-loteria. Rechaza con un Error cuyo message es un código. */
-export type EdgeCall = (params: { prompt_variant: 0 | 1 | 2 }) => Promise<string>;
+export type EdgeCall<T = string> = (params: { prompt_variant: 0 | 1 | 2 }) => Promise<T>;
 
 export interface FallbackOptions {
   /** Llamado al reintentar con un prompt más permisivo (intento 2 o 3). */
@@ -21,7 +21,7 @@ const defaultDelay = (ms: number) => new Promise<void>((resolve) => setTimeout(r
  * prompt 0 → 1 → 2 ante contenido sensible. Hay un solo modelo: una foto rechazada por el filtro
  * de contenido se rinde con SENSITIVE_PHOTO_NOT_SUPPORTED.
  */
-export async function transformWithFallback(call: EdgeCall, opts: FallbackOptions = {}): Promise<string> {
+export async function transformWithFallback<T = string>(call: EdgeCall<T>, opts: FallbackOptions = {}): Promise<T> {
   const delay = opts.delay ?? defaultDelay;
 
   let variant: 0 | 1 | 2 = 0;

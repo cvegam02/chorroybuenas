@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildPreference, resolvePurchaseItem } from '../../supabase/functions/_shared/preference.ts';
+import { buildPreference, MIN_PURCHASE_CENTS, resolvePurchaseItem } from '../../supabase/functions/_shared/preference.ts';
 
 const pack = { id: 'pack-1', base_tokens: 10, bonus_tokens: 2, price_cents: 2000 };
 
@@ -17,8 +17,8 @@ describe('resolvePurchaseItem', () => {
   });
 
   it('sin precio configurado usa 200 centavos por token', () => {
-    const r = resolvePurchaseItem({ pack: null, customTokens: 3, pricePerTokenCents: null });
-    expect(r.ok && r.value.amountCents).toBe(600);
+    const r = resolvePurchaseItem({ pack: null, customTokens: 6, pricePerTokenCents: null });
+    expect(r.ok && r.value.amountCents).toBe(1200);
   });
 
   it.each([
@@ -151,5 +151,31 @@ describe('buildPreference', () => {
       promotion: { id: 'promo-2', type: 'first_purchase', percent: 10 },
     });
     expect(p.metadata).toMatchObject({ amount_cents: 1500, offer_percent: 25, promotion_bonus: 1, total_tokens: 11 });
+  });
+});
+
+describe('mínimo de compra en pesos (FEAT-58, decisión 2)', () => {
+  it('el mínimo es $10.00 MXN', () => {
+    expect(MIN_PURCHASE_CENTS).toBe(1000);
+  });
+
+  it('con oferta, 5 tokens a $1.00 ($5.00) se rechazan', () => {
+    const r = resolvePurchaseItem({ pack: null, customTokens: 5, pricePerTokenCents: 200, offer: { id: 'o', percent: 50 } });
+    expect(r).toEqual({ ok: false, message: 'El monto mínimo de compra es $10.00 MXN.' });
+  });
+
+  it('con oferta, 10 tokens a $1.00 ($10.00) sí pasan', () => {
+    const r = resolvePurchaseItem({ pack: null, customTokens: 10, pricePerTokenCents: 200, offer: { id: 'o', percent: 50 } });
+    expect(r.ok && r.value.amountCents).toBe(1000);
+  });
+
+  it('un pack que con la oferta queda por debajo se rechaza', () => {
+    const r = resolvePurchaseItem({ pack, customTokens: null, pricePerTokenCents: 200, offer: { id: 'o', percent: 60 } });
+    expect(r.ok).toBe(false);
+  });
+
+  it('sin oferta, 5 tokens a $2.00 siguen pasando', () => {
+    const r = resolvePurchaseItem({ pack: null, customTokens: 5, pricePerTokenCents: 200 });
+    expect(r.ok && r.value.amountCents).toBe(1000);
   });
 });

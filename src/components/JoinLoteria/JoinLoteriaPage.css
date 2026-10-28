@@ -1,0 +1,183 @@
+/* P9 — «Unirse a una lotería» (FEAT-56, US B2). Zona pública: mismo fondo que las páginas informativas. */
+
+.join-loteria {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 70vh;
+  padding: 56px 16px 64px;
+  background: linear-gradient(180deg, var(--color-bg-primary) 0%, var(--color-bg-tertiary) 100%);
+  font-family: var(--font-body);
+}
+
+.join-loteria__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 460px;
+  padding: 36px 32px 32px;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: 0 20px 40px color-mix(in srgb, var(--color-text-main) 12%, transparent);
+  color: var(--color-text-main);
+  text-align: center;
+}
+
+.join-loteria__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--color-secondary) 20%, var(--color-bg-surface));
+  color: var(--color-text-main);
+  font-size: 28px;
+}
+
+.join-loteria__badge--muted {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+}
+
+.join-loteria__eyebrow {
+  margin: 4px 0 0;
+  color: var(--color-primary-dark);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.join-loteria__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 30px;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.join-loteria__facts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.join-loteria__facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-lightest);
+  color: var(--color-primary-dark);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.join-loteria__text {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.join-loteria__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 52px;
+  margin-top: 8px;
+  padding: 14px 22px;
+  border: 1px solid var(--color-primary-lightest);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-primary-dark);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.join-loteria__button--primary {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+
+.join-loteria__button--primary:hover:not(:disabled) {
+  border-color: var(--color-primary-dark);
+  background: var(--color-primary-dark);
+}
+
+.join-loteria__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.join-loteria__button:focus-visible {
+  outline: 2px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
+
+.join-loteria__hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.join-loteria__error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.join-loteria__loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 0;
+  color: var(--color-text-muted);
+}
+
+.join-loteria__spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--color-primary-lightest);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: join-loteria-spin 0.8s linear infinite;
+}
+
+@keyframes join-loteria-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .join-loteria {
+    padding: 28px 16px 48px;
+  }
+
+  .join-loteria__card {
+    padding: 28px 20px 24px;
+  }
+
+  .join-loteria__title {
+    font-size: 26px;
+  }
+}

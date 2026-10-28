@@ -11,12 +11,12 @@ const handlers = readdirSync(functionsDir, { withFileTypes: true })
   .map((entry) => ({ name: entry.name, source: readFileSync(join(functionsDir, entry.name, 'index.ts'), 'utf8') }));
 
 const BROWSER_FUNCTIONS = [
-  'create-payment-preference', 'create-seasonal-preference', 'credit-payment-on-return', 'generate-seasonal-card',
+  'caller-voice', 'create-payment-preference', 'create-seasonal-preference', 'credit-payment-on-return', 'generate-seasonal-card',
   'notify-token-gift', 'transform-loteria',
 ];
 
 describe('edge functions: endurecimiento', () => {
-  it('se revisan las siete funciones', () => {
+  it('se revisan las ocho funciones', () => {
     expect(handlers.map((h) => h.name).sort()).toEqual([...BROWSER_FUNCTIONS, 'webhook-mercadopago'].sort());
   });
 

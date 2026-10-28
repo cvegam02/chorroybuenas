@@ -1,20 +1,22 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FaArrowRight, FaCheck, FaThLarge } from 'react-icons/fa';
-import type { GridSize } from '../../types';
 import { minCardsForGrid } from '../../utils/gridRules';
 import type { SetViewState } from './setViewState';
 import './SetStatusNotice.css';
 
 interface SetStatusNoticeProps {
   state: SetViewState;
-  gridSize: GridSize;
   cardCount: number;
   boardCount: number;
+  /** Abre la ventana para elegir cuántos tableros (FEAT-57). */
+  onBuildBoards: () => void;
+  /** «Agregar fotos» cuando faltan cartas: abre «Subir fotos» (FEAT-57). */
+  onAddPhotos: () => void;
 }
 
 /** El aviso bajo el encabezado: lista para imprimir, faltan los tableros o faltan cartas. */
-export const SetStatusNotice = ({ state, gridSize, cardCount, boardCount }: SetStatusNoticeProps) => {
+export const SetStatusNotice = ({ state, cardCount, boardCount, onBuildBoards, onAddPhotos }: SetStatusNoticeProps) => {
   const { t } = useTranslation();
 
   if (state.kind === 'ready') {
@@ -45,9 +47,9 @@ export const SetStatusNotice = ({ state, gridSize, cardCount, boardCount }: SetS
           <strong className="set-status__title">{t('setView.missingBoardsTitle', { cards: cardCount })}</strong>
           <span>{t('setView.missingBoardsText')}</span>
         </div>
-        <Link to="/board-count" state={{ gridSize }} className="set-button set-button--primary">
+        <button type="button" onClick={onBuildBoards} className="set-button set-button--primary">
           {t('setView.buildBoards')}
-        </Link>
+        </button>
       </div>
     );
   }
@@ -73,9 +75,9 @@ export const SetStatusNotice = ({ state, gridSize, cardCount, boardCount }: SetS
           {t('setView.minCardsHint', { kids: minCardsForGrid(9), classic: minCardsForGrid(16) })}
         </span>
       </div>
-      <Link to="/cards" state={{ gridSize }} className="set-button set-button--primary">
+      <button type="button" onClick={onAddPhotos} className="set-button set-button--primary">
         {t('setView.addPhotos')}
-      </Link>
+      </button>
     </div>
   );
 };

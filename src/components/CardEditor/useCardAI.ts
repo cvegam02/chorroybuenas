@@ -1,7 +1,8 @@
 import { cardsForBatch } from '../../utils/aiBatchPlan';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { TFunction } from 'i18next';
-import { AIService } from '../../services/AIService';
+import { CardRepository } from '../../repositories/CardRepository';
+import { AIService, type TransformResult } from '../../services/AIService';
 import { aiErrorToI18nKey, isSensitiveContentError } from '../../services/aiFallback';
 import { adjustImageToCardAspectRatio } from '../../utils/imageUtils';
 import { logger } from '../../utils/logger';
@@ -10,6 +11,8 @@ import type { Card } from '../../types';
 interface UseCardAIDeps {
   cards: Card[];
   updateCard: (id: string, updates: Partial<Card>) => Promise<unknown>;
+  /** Vuelve a leer las cartas de la base: la IA ya guardó el resultado en la carta (FEAT-58, US A7). */
+  refreshFromCloud: () => Promise<void>;
   userId: string | undefined;
   currentSetId: string | null;
   refreshBalance: () => Promise<void>;
@@ -21,7 +24,9 @@ interface UseCardAIDeps {
 /**
  * Transformación de cartas con IA para CardEditor: una carta o un lote, con su estado de progreso y errores.
  */
-export function useCardAI({ cards, updateCard, userId, currentSetId, refreshBalance, t, isAIModalOpen }: UseCardAIDeps) {
+export function useCardAI({
+  cards, updateCard, refreshFromCloud, userId, currentSetId, refreshBalance, t, isAIModalOpen,
+}: UseCardAIDeps) {
   const batchModalClosedDuringProcessingRef = useRef(false);
   /** Mensaje de error de IA (modal en UI; evita alert() suprimido por el navegador). Fase 3: solo mensaje genérico, sin CTA. */
   const [aiErrorMessage, setAiErrorMessage] = useState<string | null>(null);
@@ -44,6 +49,26 @@ export function useCardAI({ cards, updateCard, userId, currentSetId, refreshBala
   const isAIBatchProcessingRef = useRef(isAIBatchProcessing);
   isAIBatchProcessingRef.current = isAIBatchProcessing;
 
+  /**
+   * El servidor ya guardó el resultado en la carta (FEAT-58, US A7): se vuelven a leer las cartas y se devuelve el
+   * enlace de la imagen nueva. Sin ruta (no debería pasar), se guarda desde aquí como antes.
+   */
+  const applyResult = async (card: Card, result: TransformResult): Promise<string> => {
+    if (result.imagePath) {
+      await refreshFromCloud();
+      const urls = await CardRepository.getImageUrls([result.imagePath]);
+      return urls.get(result.imagePath) ?? result.output;
+    }
+    const normalizedImage = await adjustImageToCardAspectRatio(result.output, 512, 768, 0.9);
+    await updateCard(card.id, {
+      image: normalizedImage,
+      originalImage: card.originalImage || card.image,
+      isAiGenerated: true,
+      isProcessing: false
+    });
+    return normalizedImage;
+  };
+
   /** Transforma una carta y la guarda. Devuelve la imagen nueva, o `null` si no se pudo (FEAT-34, US A8). */
   const handleSingleAI = async (card: Card): Promise<string | null> => {
     const imageToProcess = card.originalImage || card.image || '';
@@ -55,26 +80,20 @@ export function useCardAI({ cards, updateCard, userId, currentSetId, refreshBala
     await updateCard(card.id, { isProcessing: true });
 
     try {
-      const transformedImage = await AIService.transformToLoteria(
+      const result = await AIService.transformToLoteria(
         {
           image: imageToProcess,
           prompt_strength: 0.30
         },
         userId,
         { onSensitiveRetry: () => {} },
-        currentSetId ?? undefined
+        currentSetId ?? undefined,
+        card.id
       );
 
-      const normalizedImage = await adjustImageToCardAspectRatio(transformedImage, 512, 768, 0.9);
-
-      await updateCard(card.id, {
-        image: normalizedImage,
-        originalImage: card.originalImage || card.image,
-        isAiGenerated: true,
-        isProcessing: false
-      });
+      const newImage = await applyResult(card, result);
       refreshBalance();
-      return normalizedImage;
+      return newImage;
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error ?? '');
       logger.error('[CardEditor] fallo transformación individual:', errMsg);
@@ -103,21 +122,15 @@ export function useCardAI({ cards, updateCard, userId, currentSetId, refreshBala
       await updateCard(card.id, { isProcessing: true });
 
       try {
-        const transformedImage = await AIService.transformToLoteria(
+        const result = await AIService.transformToLoteria(
           { image: card.image || '', prompt_strength: strength },
           userId,
           { onSensitiveRetry: () => {} },
-          currentSetId ?? undefined
+          currentSetId ?? undefined,
+          card.id
         );
 
-        const normalizedImage = await adjustImageToCardAspectRatio(transformedImage, 512, 768, 0.9);
-
-        await updateCard(card.id, {
-          image: normalizedImage,
-          originalImage: card.originalImage || card.image,
-          isAiGenerated: true,
-          isProcessing: false
-        });
+        await applyResult(card, result);
       } catch (error: unknown) {
         const errMsg = error instanceof Error ? error.message : String(error ?? '');
         // Una foto rechazada por el filtro de contenido se omite; cualquier otro error detiene el lote.
@@ -169,14 +182,16 @@ export function useCardAI({ cards, updateCard, userId, currentSetId, refreshBala
     }
   }, [isAIModalOpen]);
 
+  // Avisar antes de cerrar la página mientras la IA trabaja, también con una sola carta (FEAT-58, US A7)
+  const isTransforming = isAIBatchProcessing || transformingCardId !== null;
   useEffect(() => {
-    if (!isAIBatchProcessing) return;
+    if (!isTransforming) return;
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [isAIBatchProcessing]);
+  }, [isTransforming]);
 
   return {
     aiErrorMessage,

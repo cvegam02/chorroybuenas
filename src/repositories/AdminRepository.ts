@@ -154,7 +154,7 @@ export interface AdminTokenPricing {
   updated_at: string;
 }
 
-/** Fila de admin_get_dashboard_summary (migraciones 035 y 036). */
+/** Fila de admin_get_dashboard_summary (migraciones 035, 036 y 061). */
 interface DashboardSummaryRow {
   tokens_revenue_cents: number;
   seasonal_revenue_cents: number;
@@ -170,6 +170,7 @@ interface DashboardSummaryRow {
   top_pack_sales: number;
   top_loteria_name: string | null;
   top_loteria_sales: number;
+  ai_voices: number;
 }
 
 /** Ventas por consulta al exportar: el máximo que acepta admin_get_sales (migración 039). */
@@ -260,6 +261,7 @@ export class AdminRepository {
       tokensRevenueCents: count(row?.tokens_revenue_cents),
       seasonalRevenueCents: count(row?.seasonal_revenue_cents),
       aiImages: count(row?.ai_images),
+      aiVoices: count(row?.ai_voices),
       newUsers: count(row?.new_users),
       buyers: count(row?.buyers),
       firstTimeBuyers: count(row?.first_time_buyers),
@@ -286,10 +288,12 @@ export class AdminRepository {
       logger.error('AdminRepository.getDashboardDaily:', error.message);
       return null;
     }
-    return ((data ?? []) as { day: string; revenue_cents: number; ai_images: number }[]).map((row) => ({
+    type DailyRow = { day: string; revenue_cents: number; ai_images: number; ai_voices: number };
+    return ((data ?? []) as DailyRow[]).map((row) => ({
       day: row.day,
       revenueCents: Number(row.revenue_cents ?? 0),
       aiImages: Number(row.ai_images ?? 0),
+      aiVoices: Number(row.ai_voices ?? 0),
     }));
   }
 
@@ -628,6 +632,27 @@ export class AdminRepository {
     const cost = Number(data);
     if (error || data == null || !(cost > 0)) {
       logger.error('AdminRepository.setAiCostPerImage:', error?.message ?? 'respuesta inesperada');
+      return null;
+    }
+    return cost;
+  }
+
+  /** Costo en USD de la voz con IA del cantador por lotería (FEAT-55, decisión 28). null si falla. */
+  static async getAiCostPerVoice(): Promise<number | null> {
+    const { data, error } = await supabase.rpc('admin_get_ai_cost_per_voice');
+    const cost = Number(data);
+    if (error || data == null || !(cost > 0)) {
+      logger.error('AdminRepository.getAiCostPerVoice:', error?.message ?? 'respuesta inesperada');
+      return null;
+    }
+    return cost;
+  }
+
+  static async setAiCostPerVoice(costUsd: number): Promise<number | null> {
+    const { data, error } = await supabase.rpc('admin_set_ai_cost_per_voice', { p_cost_usd: costUsd });
+    const cost = Number(data);
+    if (error || data == null || !(cost > 0)) {
+      logger.error('AdminRepository.setAiCostPerVoice:', error?.message ?? 'respuesta inesperada');
       return null;
     }
     return cost;

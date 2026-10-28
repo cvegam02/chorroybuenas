@@ -172,7 +172,8 @@ export function buildSeasonalPending(input: SeasonalPaymentInput): SeasonalDeliv
 }
 
 const PENDING_STATUSES: readonly unknown[] = ['pending', 'in_process', 'authorized'];
-const RELEASED_STATUSES: readonly unknown[] = ['rejected', 'cancelled'];
+// `expired`: FEAT-58, H9 (decisión 5)
+const RELEASED_STATUSES: readonly unknown[] = ['rejected', 'cancelled', 'expired'];
 
 /**
  * Qué hacer con un pago que no está aprobado: `pending` si sigue en proceso, `released` si ya no va

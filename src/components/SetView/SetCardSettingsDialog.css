@@ -1,0 +1,47 @@
+/* «Ajustes» de la sección Cartas de U2 (FEAT-57), sobre el cascarón de las ventanas de cuenta */
+
+.card-settings__lead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 32px;
+  margin-bottom: 8px;
+}
+
+.card-settings__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--color-secondary) 20%, var(--color-bg-surface));
+  color: var(--color-text-main);
+  font-size: 18px;
+}
+
+.card-settings__lead h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.card-settings__note,
+.card-settings__error {
+  margin: -4px 0 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.card-settings__error {
+  color: var(--color-danger);
+}
+
+.card-settings__done {
+  justify-content: center;
+  width: 100%;
+  margin-top: 8px;
+}

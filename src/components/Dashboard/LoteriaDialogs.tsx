@@ -10,10 +10,13 @@ interface RenameLoteriaDialogProps {
   /** Guarda el nombre nuevo; si lanza, la ventana se queda abierta y avisa. */
   onSave: (name: string) => Promise<void>;
   onClose: () => void;
+  /** `create`: «Nueva lotería», que pide el nombre antes de crearla (FEAT-57); guarda aunque no se cambie. */
+  mode?: 'rename' | 'create';
 }
 
-/** Ventana para cambiar el nombre de una lotería desde Mi cuenta. */
-export const RenameLoteriaDialog = ({ currentName, onSave, onClose }: RenameLoteriaDialogProps) => {
+/** Ventana para el nombre de una lotería: cambiarlo desde Mi cuenta, o ponerlo al crearla. */
+export const RenameLoteriaDialog = ({ currentName, onSave, onClose, mode = 'rename' }: RenameLoteriaDialogProps) => {
+  const isCreate = mode === 'create';
   const { t } = useTranslation();
   const [value, setValue] = useState(currentName);
   const [isSaving, setIsSaving] = useState(false);
@@ -27,7 +30,7 @@ export const RenameLoteriaDialog = ({ currentName, onSave, onClose }: RenameLote
 
   const save = async () => {
     if (!name || isSaving) return;
-    if (name === currentName) {
+    if (!isCreate && name === currentName) {
       onClose();
       return;
     }
@@ -36,7 +39,7 @@ export const RenameLoteriaDialog = ({ currentName, onSave, onClose }: RenameLote
     try {
       await onSave(name);
     } catch (error) {
-      logger.error('Error renaming set:', error);
+      logger.error(isCreate ? 'Error creating set:' : 'Error renaming set:', error);
       setHasFailed(true);
       setIsSaving(false);
     }
@@ -61,7 +64,7 @@ export const RenameLoteriaDialog = ({ currentName, onSave, onClose }: RenameLote
         }}
       >
         <h2 className="loteria-dialog__title" id="rename-loteria-title">
-          {t('dashboard.renameLoteria')}
+          {t(isCreate ? 'dashboard.newLoteria.title' : 'dashboard.renameLoteria')}
         </h2>
         <label className="loteria-dialog__label">
           {t('setView.renamePlaceholder')}
@@ -75,10 +78,12 @@ export const RenameLoteriaDialog = ({ currentName, onSave, onClose }: RenameLote
             autoFocus
           />
         </label>
-        <span className="loteria-dialog__hint">{t('dashboard.loterias.renameHint')}</span>
+        <span className="loteria-dialog__hint">
+          {t(isCreate ? 'dashboard.newLoteria.hint' : 'dashboard.loterias.renameHint')}
+        </span>
         {hasFailed && (
           <p className="loteria-dialog__error" role="alert">
-            {t('dashboard.nameUpdateError')}
+            {t(isCreate ? 'dashboard.newLoteria.error' : 'dashboard.nameUpdateError')}
           </p>
         )}
         <div className="loteria-dialog__actions">
@@ -86,7 +91,7 @@ export const RenameLoteriaDialog = ({ currentName, onSave, onClose }: RenameLote
             {t('common.cancel')}
           </button>
           <button type="submit" className="loteria-dialog__button loteria-dialog__button--primary" disabled={isSaving || !name}>
-            {isSaving ? t('common.loading') : t('common.save')}
+            {isSaving ? t('common.loading') : t(isCreate ? 'dashboard.newLoteria.create' : 'common.save')}
           </button>
         </div>
       </form>

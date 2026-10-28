@@ -159,7 +159,7 @@ describe('classifyUnapprovedStatus', () => {
     expect(classifyUnapprovedStatus(status)).toBe('pending');
   });
 
-  it.each(['rejected', 'cancelled'])('%s: el pago ya no va a completarse', (status) => {
+  it.each(['rejected', 'cancelled', 'expired'])('%s: el pago ya no va a completarse', (status) => {
     expect(classifyUnapprovedStatus(status)).toBe('released');
   });
 

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { generateUniqueBoards, maxUniqueBoards, suggestedBoardCount } from '../../src/utils/boardGeneration';
+import {
+  generateUniqueBoards, MAX_BOARDS_PER_SET, maxBoardsForSet, maxUniqueBoards, suggestedBoardCount,
+} from '../../src/utils/boardGeneration';
 
 const makeCards = (count: number) => Array.from({ length: count }, (_, i) => ({ id: `carta-${i + 1}` }));
 const boardKey = (board: readonly { id: string }[]) => board.map((card) => card.id).sort().join('|');
@@ -59,5 +61,21 @@ describe('cantidad sugerida y máxima de tableros (contexto-negocio §4)', () =>
     expect(maxUniqueBoards(17, 16)).toBe(8);
     expect(suggestedBoardCount(17, 16)).toBe(8);
     expect(suggestedBoardCount(18, 16)).toBeLessThanOrEqual(maxUniqueBoards(18, 16));
+  });
+});
+
+describe('tope de tableros por lotería (FEAT-58, decisión 4)', () => {
+  it('son 200', () => {
+    expect(MAX_BOARDS_PER_SET).toBe(200);
+  });
+
+  it('con muchas cartas, el máximo es el tope', () => {
+    expect(maxUniqueBoards(24, 16)).toBeGreaterThan(200);
+    expect(maxBoardsForSet(24, 16)).toBe(200);
+  });
+
+  it('con pocas cartas, el máximo sigue siendo el de tableros distintos', () => {
+    expect(maxBoardsForSet(10, 9)).toBe(maxUniqueBoards(10, 9));
+    expect(maxBoardsForSet(5, 9)).toBe(0);
   });
 });

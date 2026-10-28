@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { computePromotionBonus, selectPromotion, type PromotionRow } from '../../supabase/functions/_shared/promotions.ts';
+import {
+  computePromotionBonus, isFailedPromoCode, selectPromotion, type PromotionRow,
+} from '../../supabase/functions/_shared/promotions.ts';
 
 const now = new Date('2026-10-06T12:00:00Z');
 const promo = (over: Partial<PromotionRow>): PromotionRow => ({
@@ -75,5 +77,18 @@ describe('computePromotionBonus', () => {
     expect(computePromotionBonus(10, 15)).toBe(1);
     expect(computePromotionBonus(50, 20)).toBe(10);
     expect(computePromotionBonus(10, 0)).toBe(0);
+  });
+});
+
+describe('isFailedPromoCode (FEAT-58, decisión 3)', () => {
+  it('un código escrito que no dio bono de código cuenta como intento', () => {
+    expect(isFailedPromoCode('NOPE', null)).toBe(true);
+    expect(isFailedPromoCode('NOPE', { id: 'p', type: 'first_purchase', percent: 10 })).toBe(true);
+  });
+
+  it('un código que sí dio su bono, o ningún código, no cuenta', () => {
+    expect(isFailedPromoCode('VERANO', { id: 'p', type: 'code', percent: 15 })).toBe(false);
+    expect(isFailedPromoCode(null, null)).toBe(false);
+    expect(isFailedPromoCode('   ', null)).toBe(false);
   });
 });

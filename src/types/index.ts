@@ -13,6 +13,8 @@ export interface Card {
   isProcessing?: boolean;
   /** Lugar de la carta en el orden de subida (1, 2, 3…). Se calcula al cargar la lista; no se guarda. */
   number?: number;
+  /** Invitado que la subió a una lotería colectiva (FEAT-56); sin valor o null si la subió el dueño. */
+  uploadedBy?: string | null;
 }
 
 // Board can have either full cards or just card IDs (for storage optimization)

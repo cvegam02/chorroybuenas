@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import es from '../../src/locales/es/translation.json';
 import en from '../../src/locales/en/translation.json';
 import { authErrorKind } from '../../src/components/Auth/authErrors';
-import { EMAIL_ALREADY_REGISTERED_MESSAGE } from '../../src/utils/signUpResult';
+import { DISPOSABLE_EMAIL_MESSAGE, EMAIL_ALREADY_REGISTERED_MESSAGE } from '../../src/utils/signUpResult';
 
 type Texts = { [key: string]: string | Texts };
 
@@ -60,6 +60,10 @@ describe('ventanas de cuenta: qué error fue (FEAT-38, US A3)', () => {
   it('reconoce el correo que ya tiene cuenta', () => {
     expect(authErrorKind(new Error(EMAIL_ALREADY_REGISTERED_MESSAGE))).toBe('emailTaken');
     expect(authErrorKind({ code: 'user_already_exists', message: 'x' })).toBe('emailTaken');
+  });
+
+  it('reconoce el correo desechable (FEAT-58, decisión 1)', () => {
+    expect(authErrorKind(new Error(DISPOSABLE_EMAIL_MESSAGE))).toBe('disposable');
   });
 
   it('lo demás es un error cualquiera', () => {

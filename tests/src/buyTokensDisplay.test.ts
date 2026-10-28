@@ -47,6 +47,8 @@ describe('lo que muestran los paquetes y Comprar tokens (FEAT-33, US A2 y A4)', 
       expect(clampCustomTokens(1)).toBe(MIN_CUSTOM_TOKENS);
       expect(clampCustomTokens(9999)).toBe(MAX_CUSTOM_TOKENS);
       expect(clampCustomTokens(15)).toBe(15);
+      expect(clampCustomTokens(5, 10)).toBe(10); // con oferta el mínimo sube (FEAT-58)
+      expect(stepCustomTokens(10, -1, 10)).toBe(10);
     });
 
     it('los botones − y + suben y bajan de uno en uno, sin salirse de los límites', () => {

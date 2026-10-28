@@ -1,4 +1,5 @@
 import { supabase } from '../utils/supabaseClient';
+import { promoCheckFromRpc, type PromoCheck } from '../utils/promoCheck';
 import { logger } from '../utils/logger';
 import { CurrentOfferRepository } from './CurrentOfferRepository';
 import type { TokenGift } from '../utils/tokenHistory';
@@ -128,12 +129,11 @@ export class TokenPricingRepository {
    * Porcentaje de bono de un código para el usuario actual; 0 si no existe, no está vigente o ya lo usó.
    * Se valida en el servidor: el navegador nunca recibe la lista de códigos.
    */
-  static async checkPromoCode(code: string): Promise<number> {
+  static async checkPromoCode(code: string): Promise<PromoCheck> {
     const trimmed = code.trim();
-    if (!trimmed) return 0;
+    if (!trimmed) return { kind: 'invalid' };
     const { data, error } = await supabase.rpc('check_promo_code', { p_code: trimmed });
-    if (error || typeof data !== 'number') return 0;
-    return data;
+    return promoCheckFromRpc(data, error);
   }
 
   /**

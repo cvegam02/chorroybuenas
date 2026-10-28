@@ -22,6 +22,10 @@ interface MyLoteriasProps {
   hasError: boolean;
   onRetry: () => void;
   tokensSpentBySet: Readonly<Record<string, number>>;
+  /** Las loterías con enlace para invitar a subir fotos (FEAT-56). */
+  collectiveSetIds: ReadonlySet<string>;
+  /** «N fotos nuevas» de invitados por lotería (FEAT-56). */
+  newGuestCardCounts: ReadonlyMap<string, number>;
   /** Tokens de regalo por crear la cuenta; con 0 no se promete nada. */
   giftTokens: number;
   isCreating: boolean;
@@ -47,6 +51,8 @@ export const MyLoterias = ({
   hasError,
   onRetry,
   tokensSpentBySet,
+  collectiveSetIds,
+  newGuestCardCounts,
   giftTokens,
   isCreating,
   onCreate,
@@ -153,6 +159,8 @@ export const MyLoterias = ({
             set={set}
             summary={summaries?.get(set.id)}
             tokensSpent={tokensSpentBySet[set.id] ?? 0}
+            isCollective={collectiveSetIds.has(set.id)}
+            newPhotoCount={newGuestCardCounts.get(set.id) ?? 0}
             onEditCards={() => onEditCards(set)}
             onMakeBoards={() => onMakeBoards(set)}
             isDownloading={downloadingSet?.id === set.id}

@@ -1,5 +1,5 @@
-import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { Routes, Route, useNavigate, useLocation, Navigate, matchPath } from 'react-router-dom';
+import { useState, useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LandingPage } from './components/LandingPage/LandingPage';
 import { CardEditor } from './components/CardEditor/CardEditor';
@@ -10,9 +10,12 @@ import { WarningModal } from './components/ConfirmationModal/WarningModal';
 import { HowToPlay } from './components/HowToPlay/HowToPlay';
 import { AboutLoteria } from './components/AboutLoteria/AboutLoteria';
 import { TraditionalBoardsPage } from './components/TraditionalBoards/TraditionalBoardsPage';
+import { JoinLoteriaPage } from './components/JoinLoteria/JoinLoteriaPage';
+import { GuestLoteriaPage } from './components/GuestLoteria/GuestLoteriaPage';
 import { PrivacyNotice } from './components/PrivacyNotice/PrivacyNotice';
 import BenefitsPage from './components/BenefitsPage/BenefitsPage';
 import { SetView } from './components/SetView/SetView';
+import { CallerPage } from './components/Caller/CallerPage';
 import { BuyTokensPage } from './components/BuyTokens/BuyTokensPage';
 import { SeasonalCatalog } from './components/Seasonal/SeasonalCatalog';
 import { SeasonalDetail } from './components/Seasonal/SeasonalDetail';
@@ -55,10 +58,20 @@ function LegacySeasonalRedirect() {
 function AppContent() {
   const { t } = useTranslation();
   const { user, recoverySession, isLoading: authLoading } = useAuth();
-  const { currentSetId, sets, setSets, setCurrentSetId, refreshSets } = useSetContext();
+  /**
+   * Crear (C1 → C2 → C3) es solo para visitantes: con sesión, cada lotería se trabaja en su página (U2) y estas
+   * direcciones llevan a «Mis loterías» (FEAT-57).
+   */
+  const visitorOnly = (element: ReactNode) => {
+    if (authLoading) return null;
+    return user ? <Navigate to={{ pathname: '/dashboard', hash: '#mis-loterias' }} replace /> : element;
+  };
+  const { currentSetId, sets, setSets } = useSetContext();
   const { cards } = useCards();
   const navigate = useNavigate();
   const location = useLocation();
+  // El cantador ocupa toda la pantalla: sin la barra del sitio ni el pie (FEAT-55)
+  const isCallerPage = matchPath('/loteria/:setId/cantar', location.pathname) !== null;
   const [currentStep, setCurrentStep] = useState<AppStep | null>(null);
   const [boards, setBoards] = useState<Board[]>([]);
   const [, setBoardCount] = useState<number>(8);
@@ -69,7 +82,6 @@ function AppContent() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   // El estado tarda un render en llegar: la referencia frena una segunda pulsación inmediata.
   const isGeneratingPDFRef = useRef(false);
-  const isCreatingSetRef = useRef(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const { generateBoards, isGenerating } = useBoard();
   const visitorTransfer = useVisitorTransfer();
@@ -264,44 +276,6 @@ function AppContent() {
     window.location.reload();
   };
 
-  /** «PDF descargado», con sesión: lo guardado en la cuenta no se toca; solo se limpia lo de este navegador. */
-  const handleGoToLoterias = async () => {
-    await clearAllData();
-    setCurrentStep(null);
-    setBoards([]);
-    setBoardCount(8);
-    setGridSize(16);
-    setShowConfirmation(false);
-    navigate('/dashboard#mis-loterias');
-    // Igual que «Terminar»: se recarga para soltar lo que quedó en memoria de la lotería anterior.
-    window.location.reload();
-  };
-
-  /** «+ Crear otra lotería»: lo mismo que «Nueva lotería» en Mi cuenta, con su mismo nombre por defecto. */
-  const handleCreateAnother = async () => {
-    if (!user || isCreatingSetRef.current) return;
-    isCreatingSetRef.current = true;
-    try {
-      await clearAllData();
-      const name = sets.length === 0
-        ? t('navbar.newLoteriaName')
-        : `${t('navbar.newLoteriaName')} ${sets.length + 1}`;
-      const newSet = await SetRepository.createSet(user.id, name);
-      setSets(prev => [...prev, newSet]);
-      setCurrentSetId(newSet.id);
-      await refreshSets();
-      setBoards([]);
-      setShowConfirmation(false);
-      setCurrentStep('cards');
-      navigate('/cards');
-    } catch (error) {
-      logger.error('Error creating set:', error);
-      alert(t('common.error'));
-    } finally {
-      isCreatingSetRef.current = false;
-    }
-  };
-
   const handleLandingStart = () => {
     setCurrentStep('cards');
     navigate('/cards');
@@ -331,8 +305,8 @@ function AppContent() {
   return (
     <>
       <PageMeta />
-      <Navbar />
-      <CreateSteps />
+      {!isCallerPage && <Navbar />}
+      {!isCallerPage && <CreateSteps />}
       <UploadProgressModal
         isOpen={visitorTransfer.isSaving}
         progress={visitorTransfer.progress}
@@ -390,6 +364,10 @@ function AppContent() {
           element={<TraditionalBoardsPage />}
         />
         <Route
+          path="/unirse/:codigo"
+          element={<JoinLoteriaPage />}
+        />
+        <Route
           path="/tematicas"
           element={<SeasonalCatalog />}
         />
@@ -410,12 +388,20 @@ function AppContent() {
           element={<SetView />}
         />
         <Route
+          path="/participo/:setId"
+          element={<GuestLoteriaPage />}
+        />
+        <Route
+          path="/loteria/:setId/cantar"
+          element={<CallerPage />}
+        />
+        <Route
           path="/comprar-tokens"
           element={<BuyTokensPage />}
         />
         <Route
           path="/cards"
-          element={
+          element={visitorOnly(
             <CardLabelsProvider value={cardLabels}>
               <CardEditor
                 onNext={handleCardsNext}
@@ -426,11 +412,11 @@ function AppContent() {
                 onCardLabelsChange={changeCardLabels}
               />
             </CardLabelsProvider>
-          }
+          )}
         />
         <Route
           path="/board-count"
-          element={
+          element={visitorOnly(
             <CardLabelsProvider value={cardLabels}>
               <BoardCountSelector
                 onGenerate={handleBoardCountGenerate}
@@ -438,11 +424,11 @@ function AppContent() {
                 gridSize={gridSize}
               />
             </CardLabelsProvider>
-          }
+          )}
         />
         <Route
           path="/preview"
-          element={
+          element={visitorOnly(
             boards.length > 0 ? (
               <CardLabelsProvider value={cardLabels}>
                 <BoardPreview
@@ -461,11 +447,11 @@ function AppContent() {
                 </button>
               </div>
             )
-          }
+          )}
         />
       </Routes>
 
-      <Footer />
+      {!isCallerPage && <Footer />}
 
       {isGenerating && (
         <div className="app__loading" role="status" aria-live="polite">
@@ -484,13 +470,9 @@ function AppContent() {
       {showConfirmation && (
         <ConfirmationModal
           boardCount={boards.length}
-          isLoggedIn={!!user}
-          setName={user && currentSetId ? sets.find(s => s.id === currentSetId)?.name : undefined}
           onClose={() => setShowConfirmation(false)}
           onComplete={handleConfirmationComplete}
           onModify={handleConfirmationModify}
-          onGoToLoterias={handleGoToLoterias}
-          onCreateAnother={handleCreateAnother}
         />
       )}
 

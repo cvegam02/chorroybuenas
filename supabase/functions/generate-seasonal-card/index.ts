@@ -5,7 +5,9 @@
 // descuenta tokens (decisión del 2026-10-17): el costo lo paga la cuenta de Replicate.
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { buildCorsHeaders, parseAllowedOrigins } from '../_shared/cors.ts';
-import { createPrediction, firstOutput, waitForPrediction, type ReplicateDeps } from '../_shared/replicate.ts';
+import {
+  AI_DEADLINE_MS, createPrediction, firstOutput, waitForPrediction, type ReplicateDeps,
+} from '../_shared/replicate.ts';
 import { assertPredictionSucceeded } from '../_shared/transform.ts';
 import {
   attemptPath,
@@ -22,8 +24,6 @@ const ATTEMPTS_BUCKET = 'seasonal-ai';
 const BASE_DECK_BUCKET = 'base-deck';
 /** Lo que Replicate tiene para bajar la imagen de entrada. */
 const INPUT_LINK_SECONDS = 10 * 60;
-/** Por debajo del tope de tiempo de una función de Supabase (150 s). */
-const WAIT = { timeoutMs: 140_000, intervalMs: 3000 };
 
 const replicateDeps: ReplicateDeps = {
   fetchFn: fetch,
@@ -142,6 +142,7 @@ async function pruneAttempts(admin: SupabaseClient, card: CardRow, newAttemptId:
 }
 
 Deno.serve(async (req) => {
+  const deadlineAt = replicateDeps.now() + AI_DEADLINE_MS;
   const headers = buildCorsHeaders(req.headers.get('Origin'), parseAllowedOrigins(Deno.env.get('ALLOWED_ORIGINS')));
   const reply = (status: number, body: Record<string, unknown>) => new Response(JSON.stringify(body), { status, headers });
 
@@ -173,8 +174,10 @@ Deno.serve(async (req) => {
     const prompt = buildSeasonalCardPrompt(build.general_prompt, card);
     const inputImage = await resolveInputImage(admin, card, build);
     const body = buildSeasonalCardPrediction(prompt, build.quality, inputImage);
-    const created = await createPrediction(replicateDeps, replicateToken, body, 3, SEASONAL_CARD_MODEL_PATH);
-    const finished = await waitForPrediction(replicateDeps, replicateToken, created, WAIT);
+    const created = await createPrediction(replicateDeps, replicateToken, body, { path: SEASONAL_CARD_MODEL_PATH, deadlineAt });
+    const finished = await waitForPrediction(replicateDeps, replicateToken, created, {
+      timeoutMs: AI_DEADLINE_MS, intervalMs: 3000, deadlineAt,
+    });
     assertPredictionSucceeded(finished);
     const stored = await storeAttempt(admin, card, firstOutput(finished), build.quality, prompt);
     return reply(200, stored);

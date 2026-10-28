@@ -1,0 +1,116 @@
+import { describe, expect, it } from 'vitest';
+import {
+  AI_VOICES,
+  INTRO_AUDIO_ID,
+  aiVoiceCoverage,
+  aiVoicePrice,
+  audioUrlFor,
+  expandPrice,
+  pendingAudioIds,
+  shouldRefund,
+} from '../../src/utils/callerAiVoice';
+
+const cards = [
+  { id: 'a', title: 'El Tío Beto' },
+  { id: 'b', title: 'La Abuela Chela' },
+  { id: 'c', title: 'Doce' },
+];
+
+describe('las voces con IA', () => {
+  it('son las 8 voces mexicanas de la decisión 29, con su nombre y su muestra', () => {
+    expect(AI_VOICES.map((v) => [v.id, v.name])).toEqual([
+      ['y2ijeTfmnXjzheHO6zeN', 'jose'],
+      ['qRUgOhnxGASxirG4fKjv', 'david'],
+      ['gbTn1bmCvNgk0QEAVyfM', 'enriqueNieto'],
+      ['iDEmt5MnqUotdwCIVplo', 'enriqueMondragon'],
+      ['hHjbwzYZW17oh0p05AKv', 'gabriela'],
+      ['twZzvyYIl5ntDHC1Vatv', 'angelica'],
+      ['ay4iqk10DLwc8KGSrf2t', 'azucena'],
+      ['JYyJjNPfmNJdaby8LdZs', 'marlene'],
+    ]);
+    expect(AI_VOICES[0].sample).toBe('/audio/voces/y2ijeTfmnXjzheHO6zeN.mp3');
+  });
+
+  it('las 4 primeras son de hombre y las 4 últimas de mujer, para agruparlas en la ventana', () => {
+    expect(AI_VOICES.map((v) => v.group)).toEqual(['men', 'men', 'men', 'men', 'women', 'women', 'women', 'women']);
+  });
+
+});
+
+describe('pendingAudioIds', () => {
+  it('recién pagada, falta la frase de arranque y todas las cartas', () => {
+    expect(pendingAudioIds(cards, new Map(), false)).toEqual([INTRO_AUDIO_ID, 'a', 'b', 'c']);
+  });
+
+  it('con todo generado, no falta nada', () => {
+    const audios = new Map(cards.map((c) => [c.id, c.title]));
+    expect(pendingAudioIds(cards, audios, true)).toEqual([]);
+  });
+
+  it('faltan las cartas agregadas y las renombradas (decisión 15)', () => {
+    const audios = new Map([['a', 'El Tío Beto'], ['b', 'La Abuela']]);
+    expect(pendingAudioIds(cards, audios, true)).toEqual(['b', 'c']);
+  });
+
+  it('las cartas sin audio solo hasta las cubiertas por lo pagado (FEAT-58, decisión 8)', () => {
+    expect(pendingAudioIds(cards, new Map(), false, 2)).toEqual([INTRO_AUDIO_ID, 'a', 'b']);
+  });
+
+  it('una carta cubierta que se renombra se regenera aunque ya no quepan cartas nuevas', () => {
+    const audios = new Map([['a', 'El Tío']]);
+    expect(pendingAudioIds(cards, audios, true, 1)).toEqual(['a']);
+  });
+});
+
+describe('precio de la voz por bloques (FEAT-58, decisión 8)', () => {
+  it('10 tokens hasta 60 cartas y 2 por cada 10 más', () => {
+    expect(aiVoicePrice(0)).toBe(10);
+    expect(aiVoicePrice(54)).toBe(10);
+    expect(aiVoicePrice(60)).toBe(10);
+    expect(aiVoicePrice(61)).toBe(12);
+    expect(aiVoicePrice(72)).toBe(14);
+    expect(aiVoicePrice(100)).toBe(18);
+  });
+
+  it('lo pagado cubre 60 cartas, más 10 por bloque', () => {
+    expect(aiVoiceCoverage(54)).toBe(60);
+    expect(aiVoiceCoverage(72)).toBe(80);
+  });
+
+  it('ampliar cobra 2 tokens por cada 10 cartas sin cubrir', () => {
+    expect(expandPrice(75, 70)).toBe(2);
+    expect(expandPrice(97, 80)).toBe(4);
+    expect(expandPrice(60, 70)).toBe(0);
+  });
+});
+
+describe('audioUrlFor', () => {
+  const urls = new Map([['a', 'https://x/a.mp3'], [INTRO_AUDIO_ID, 'https://x/intro.mp3']]);
+  const titles = new Map([['a', 'El Tío Beto']]);
+
+  it('da el audio de una carta con su título', () => {
+    expect(audioUrlFor(urls, titles, cards[0])).toBe('https://x/a.mp3');
+  });
+
+  it('no da el audio de una carta renombrada', () => {
+    expect(audioUrlFor(urls, titles, { id: 'a', title: 'Beto' })).toBeUndefined();
+  });
+
+  it('no da nada a una carta sin audio', () => {
+    expect(audioUrlFor(urls, titles, cards[1])).toBeUndefined();
+  });
+});
+
+describe('shouldRefund (decisión 11; FEAT-58, decisión 10)', () => {
+  it('se pide la devolución si no salió ninguna carta ni la frase de arranque', () => {
+    expect(shouldRefund(0, false)).toBe(true);
+  });
+
+  it('no se pide si salió alguna carta', () => {
+    expect(shouldRefund(1, false)).toBe(false);
+  });
+
+  it('no se pide si salió la frase de arranque, aunque no haya cartas', () => {
+    expect(shouldRefund(0, true)).toBe(false);
+  });
+});

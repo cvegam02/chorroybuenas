@@ -21,12 +21,14 @@ export type AuthAlertState =
 interface EmailAuthFormOptions {
   initialView: AuthTab;
   googleReturnPath?: string;
+  /** Ruta a la que regresa el correo de confirmación de una cuenta nueva; sin ella, la de Supabase. */
+  confirmReturnPath?: string;
   /** Se llama cuando la persona ya entró con correo y contraseña. */
   onSignedIn: () => void;
 }
 
 /** Estado y envíos de la ventana de cuenta. El flujo con Supabase es el de `AuthContext`, sin cambios. */
-export const useEmailAuthForm = ({ initialView, googleReturnPath, onSignedIn }: EmailAuthFormOptions) => {
+export const useEmailAuthForm = ({ initialView, googleReturnPath, confirmReturnPath, onSignedIn }: EmailAuthFormOptions) => {
   const { t } = useTranslation();
   const { signInWithEmail, signUpWithEmail, signInWithGoogle, resetPasswordForEmail } = useAuth();
   const [view, setView] = useState<AuthView>(initialView);
@@ -44,6 +46,7 @@ export const useEmailAuthForm = ({ initialView, googleReturnPath, onSignedIn }: 
 
   const alertFor = (err: unknown): AuthAlertState => {
     const kind = authErrorKind(err);
+    if (kind === 'disposable') return { kind: 'message', text: t('common.auth.errors.disposableEmail'), field: 'email' };
     if (kind !== 'other') return { kind };
     return { kind: 'message', text: getErrorMessage(err) || t('common.auth.errors.authFailed') };
   };
@@ -75,7 +78,7 @@ export const useEmailAuthForm = ({ initialView, googleReturnPath, onSignedIn }: 
       setAlert({ kind: 'message', text: t('common.auth.errors.passwordMismatch'), field: 'confirm' });
       return;
     }
-    const signedUp = await attempt(() => signUpWithEmail(email, password, { full_name: fullName.trim() || undefined }));
+    const signedUp = await attempt(() => signUpWithEmail(email, password, { full_name: fullName.trim() || undefined }, confirmReturnPath));
     if (signedUp) setView('signupSent');
   };
 

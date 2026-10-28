@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaArrowLeft, FaDownload, FaPencilAlt, FaPlus } from 'react-icons/fa';
+import { FaArrowLeft, FaBullhorn, FaDownload, FaLock, FaPencilAlt, FaPlus, FaUsers } from 'react-icons/fa';
 import type { Card, GridSize } from '../../types';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { logger } from '../../utils/logger';
+import { canSing } from '../../utils/callerGame';
+import { minCardsForGrid } from '../../utils/gridRules';
 import { SetMenu } from './SetMenu';
+import type { LoteriaSharing } from '../../hooks/useLoteriaSharing';
 import type { SetViewState } from './setViewState';
 import './SetHeader.css';
 
@@ -16,6 +19,12 @@ export interface SetHeaderDetails {
   /** Tokens gastados en esta lotería; null si no se sabe. */
   tokensSpent: number | null;
   state: SetViewState;
+  /** Tiene enlace para invitar a subir fotos (FEAT-56). */
+  isCollective: boolean;
+  /** Fotos de invitados que llegaron desde la última visita (FEAT-56). */
+  newPhotoCount: number;
+  /** Cómo se comparte, para «Compartida · N»; null si no es colectiva o aún no carga (FEAT-57, US A4). */
+  sharing: LoteriaSharing | null;
 }
 
 interface SetHeaderProps {
@@ -31,6 +40,12 @@ interface SetHeaderProps {
   /** Guarda el nombre nuevo; si lanza, el campo se queda abierto y avisa. */
   onRename: (name: string) => Promise<void>;
   onDownload: () => void;
+  /** Abre el cantador (FEAT-55). */
+  onSing: () => void;
+  /** Abre «Invitar a subir fotos» (FEAT-56, M18). */
+  onInvite: () => void;
+  /** «Agregar fotos» cuando faltan cartas: abre «Subir fotos» aquí mismo (FEAT-57). */
+  onAddPhotos: () => void;
   onShuffleBoards: () => void;
   onClearBoards: () => void;
   onDelete: () => void;
@@ -45,6 +60,9 @@ export const SetHeader = ({
   isDownloading,
   onRename,
   onDownload,
+  onSing,
+  onInvite,
+  onAddPhotos,
   onShuffleBoards,
   onClearBoards,
   onDelete,
@@ -81,7 +99,28 @@ export const SetHeader = ({
     }
   };
 
-  const cardsLink = details ? { to: '/cards', state: { gridSize: details.gridSize } } : null;
+  // «Cantar» sale con el mínimo de cartas, tenga tableros o no; sin él, apagado con el motivo (FEAT-55)
+  const singReady = details ? canSing(details.cardCount, details.gridSize) : false;
+  const singButton = details && (
+    <span className="set-header__sing">
+      <button
+        type="button"
+        className="set-button set-button--secondary"
+        onClick={onSing}
+        disabled={!singReady}
+        aria-describedby={singReady ? undefined : 'set-header-sing-reason'}
+      >
+        <FaBullhorn aria-hidden="true" />
+        {t('setView.sing')}
+      </button>
+      {!singReady && (
+        <span id="set-header-sing-reason" className="set-header__sing-reason">
+          {t('setView.singNeedsCards', { count: minCardsForGrid(details.gridSize) - details.cardCount })}
+        </span>
+      )}
+    </span>
+  );
+
   const tokensSpent = details?.tokensSpent ?? 0;
 
   // El «⋮» va junto a los botones en computadora y arriba, frente al regreso, en celular
@@ -173,6 +212,17 @@ export const SetHeader = ({
                 {details.boardCount > 0 && (
                   <li className="set-header__tag">{t('setView.boards', { count: details.boardCount })}</li>
                 )}
+                {details.isCollective && (
+                  <li className="set-header__tag set-header__tag--collective">
+                    <FaUsers aria-hidden="true" />
+                    {t('invite.collective')}
+                  </li>
+                )}
+                {details.newPhotoCount > 0 && (
+                  <li className="set-header__tag set-header__tag--new">
+                    {t('invite.newPhotos', { count: details.newPhotoCount })}
+                  </li>
+                )}
                 {tokensSpent > 0 && (
                   <li className="set-header__tag set-header__tag--tokens">
                     {t('dashboard.loterias.tokensUsed', { count: tokensSpent })}
@@ -182,7 +232,7 @@ export const SetHeader = ({
             )}
           </div>
 
-          {details && cardsLink && (
+          {details && (
             <div className="set-header__actions">
               {details.state.kind === 'ready' && (
                 <button
@@ -195,16 +245,20 @@ export const SetHeader = ({
                   {t('setView.downloadPDF')}
                 </button>
               )}
-              {details.state.kind === 'missingCards' ? (
-                <Link {...cardsLink} className="set-button set-button--primary set-button--large">
+              {singButton}
+              <button type="button" className="set-button set-button--secondary" onClick={onInvite}>
+                {details.sharing && !details.sharing.isOpen ? <FaLock aria-hidden="true" /> : <FaUsers aria-hidden="true" />}
+                {!details.sharing
+                  ? t('invite.open')
+                  : details.sharing.isOpen
+                    ? t('invite.sharedButton', { count: details.sharing.inviteeCount })
+                    : t('invite.sharedClosed')}
+              </button>
+              {details.state.kind === 'missingCards' && (
+                <button type="button" onClick={onAddPhotos} className="set-button set-button--primary set-button--large">
                   <FaPlus aria-hidden="true" />
                   {t('setView.addPhotos')}
-                </Link>
-              ) : (
-                <Link {...cardsLink} className="set-button set-button--secondary">
-                  <FaPencilAlt aria-hidden="true" />
-                  {t('setView.editCards')}
-                </Link>
+                </button>
               )}
               {!isMobile && menu}
             </div>

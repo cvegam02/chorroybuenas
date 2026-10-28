@@ -67,11 +67,12 @@ export function highlightedPackIndex(packCount: number): number | null {
   return packCount >= 3 ? Math.floor(packCount / 2) : null;
 }
 
-export function clampCustomTokens(tokens: number): number {
-  return Math.max(MIN_CUSTOM_TOKENS, Math.min(MAX_CUSTOM_TOKENS, tokens));
+/** `min`: el mínimo vigente, que con oferta puede subir para llegar a $10 (`minCustomTokens`, FEAT-58). */
+export function clampCustomTokens(tokens: number, min = MIN_CUSTOM_TOKENS): number {
+  return Math.max(min, Math.min(MAX_CUSTOM_TOKENS, tokens));
 }
 
 /** Botones − y + de «¿Otra cantidad?» en Comprar tokens. */
-export function stepCustomTokens(tokens: number, delta: number): number {
-  return clampCustomTokens(tokens + delta);
+export function stepCustomTokens(tokens: number, delta: number, min = MIN_CUSTOM_TOKENS): number {
+  return clampCustomTokens(tokens + delta, min);
 }

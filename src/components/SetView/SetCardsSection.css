@@ -9,6 +9,7 @@
 .set-cards__card {
   position: relative;
   display: block;
+  min-width: 0;
   padding: 0;
   border: none;
   border-radius: var(--radius-sm);
@@ -87,6 +88,34 @@
   line-height: 1.4;
 }
 
+/* Carta de un invitado que llegó desde la última visita (FEAT-56) */
+.set-cards__new {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--color-card-ink) 25%, transparent);
+  color: var(--color-text-inverted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* Quién subió la carta, en las de invitados (FEAT-56) */
+.set-cards__uploader {
+  display: block;
+  overflow: hidden;
+  padding: 4px 6px 6px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* El nombre bajo la foto: solo mientras la carta todavía no se ve como sale impresa */
 .set-cards__name {
   display: block;
@@ -129,7 +158,8 @@
 
 @media (max-width: 768px) {
   .set-cards__grid {
-    grid-template-columns: repeat(4, 1fr);
+    /* minmax(0, …): un texto largo («Subida por …») no ensancha la columna, se recorta */
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
   }
 
@@ -145,7 +175,99 @@
     font-size: 10px;
   }
 
+  .set-cards__new {
+    top: 4px;
+    left: 4px;
+    padding: 1px 5px;
+    font-size: 10px;
+  }
+
+  .set-cards__uploader {
+    padding: 3px 4px 4px;
+    font-size: 10px;
+  }
+
   .set-cards__slot svg {
     font-size: 15px;
+  }
+}
+
+/* Edición de cartas en U2 (FEAT-57): botones, saldo, recuadro para soltar fotos y la casilla «Agregar» */
+
+.set-cards__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.set-cards__balance {
+  margin: -8px 0 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.set-cards__balance a {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
+button.set-cards__slot {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.set-section--dropping {
+  outline: 3px dashed var(--color-primary);
+  outline-offset: 8px;
+  border-radius: var(--radius-md);
+}
+
+.set-cards__dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 48px 20px;
+  border: 2px dashed var(--color-primary-lighter);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.set-cards__dropzone:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: var(--color-primary-lightest);
+}
+
+.set-cards__dropzone svg {
+  color: var(--color-primary);
+  font-size: 28px;
+}
+
+.set-cards__dropzone strong {
+  color: var(--color-text-main);
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.set-cards__wide-only {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .set-cards__add-tile,
+  .set-cards__narrow-only {
+    display: none;
+  }
+
+  .set-cards__wide-only {
+    display: inline;
   }
 }

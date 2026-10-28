@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FaCheck, FaPlus, FaTimes } from 'react-icons/fa';
 import { AdminRepository, type AdminTokenPack } from '../../repositories/AdminRepository';
+import { packMinimumError } from '../../utils/purchaseRules';
 
 const parsePesos = (text: string) => {
   const pesos = parseFloat(text.replace(',', '.'));
@@ -10,13 +11,15 @@ const parsePesos = (text: string) => {
 interface AdminPackFormProps {
   /** El pack que se edita; sin él, se crea uno nuevo al final de la lista. */
   pack?: AdminTokenPack;
+  /** El mayor descuento de las ofertas vigentes o programadas: el pack no puede quedar por debajo de $10 con él. */
+  offerPercent: number | null;
   sortOrder: number;
   onSaved: (pack: AdminTokenPack) => void;
   onCancel: () => void;
 }
 
 /** Crear o editar un pack: tokens, de regalo y precio (FEAT-46, US A3). Mostrar u ocultar va en el interruptor. */
-export const AdminPackForm = ({ pack, sortOrder, onSaved, onCancel }: AdminPackFormProps) => {
+export const AdminPackForm = ({ pack, offerPercent, sortOrder, onSaved, onCancel }: AdminPackFormProps) => {
   const [base, setBase] = useState(pack?.base_tokens ?? 10);
   const [bonus, setBonus] = useState(pack?.bonus_tokens ?? 2);
   const [price, setPrice] = useState(pack ? (pack.price_cents / 100).toFixed(2) : '20');
@@ -33,6 +36,12 @@ export const AdminPackForm = ({ pack, sortOrder, onSaved, onCancel }: AdminPackF
     }
     if (base < 1 || bonus < 0) {
       setError('Los tokens deben ser 1 o más, y los de regalo 0 o más.');
+      return;
+    }
+    // Mínimo de compra de $10, también con la oferta (FEAT-58, decisión 2)
+    const belowMinimum = packMinimumError(priceCents, offerPercent);
+    if (belowMinimum) {
+      setError(belowMinimum);
       return;
     }
     setIsSaving(true);

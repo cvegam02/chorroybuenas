@@ -54,6 +54,11 @@ export function selectPromotion(input: {
   return null;
 }
 
+/** Se escribió un código y no dio su bono: cuenta para el límite de 5 por hora (FEAT-58, decisión 3). */
+export function isFailedPromoCode(promoCode: string | null, promotion: SelectedPromotion | null): boolean {
+  return Boolean(promoCode?.trim()) && promotion?.type !== 'code';
+}
+
 export function computePromotionBonus(baseTokens: number, percent: number): number {
   return percent > 0 ? Math.floor(baseTokens * (percent / 100)) : 0;
 }

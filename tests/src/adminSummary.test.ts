@@ -74,11 +74,12 @@ describe('rango de fechas elegido a mano', () => {
 });
 
 describe('dinero del Resumen', () => {
-  const totals = { tokensRevenueCents: 20000, seasonalRevenueCents: 9800, aiImages: 100 };
+  const totals = { tokensRevenueCents: 20000, seasonalRevenueCents: 9800, aiImages: 100, aiVoices: 0 };
+  const costs = { perImageUsd: 0.013, perVoiceUsd: 0.1 };
 
   it('ingresos suma tokens y temáticas; el gasto en IA es imágenes × costo por imagen en pesos', () => {
     // 100 imágenes × 0.013 USD = 1.3 USD; con 0.05 USD por peso son $26.00.
-    expect(summaryMoney(totals, 0.013, 0.05)).toEqual({
+    expect(summaryMoney(totals, costs, 0.05)).toEqual({
       revenueCents: 29800,
       aiCostCents: 2600,
       profitCents: 27200,
@@ -87,15 +88,20 @@ describe('dinero del Resumen', () => {
 
   it('el gasto en IA se redondea al centavo', () => {
     // 7 × 0.013 = 0.091 USD; / 0.0545 = 1.66972… pesos → 167 centavos.
-    expect(summaryMoney({ ...totals, aiImages: 7 }, 0.013, 0.0545).aiCostCents).toBe(167);
+    expect(summaryMoney({ ...totals, aiImages: 7 }, costs, 0.0545).aiCostCents).toBe(167);
   });
 
   it('la ganancia puede ser negativa si la IA costó más de lo que entró', () => {
-    expect(summaryMoney({ tokensRevenueCents: 0, seasonalRevenueCents: 0, aiImages: 100 }, 0.013, 0.05).profitCents).toBe(-2600);
+    expect(summaryMoney({ tokensRevenueCents: 0, seasonalRevenueCents: 0, aiImages: 100, aiVoices: 0 }, costs, 0.05).profitCents).toBe(-2600);
+  });
+
+  it('el gasto en IA suma las voces del cantador con su propio costo (FEAT-55, decisión 28)', () => {
+    // 100 × 0.013 + 3 × 0.1 = 1.6 USD; con 0.05 USD por peso son $32.00.
+    expect(summaryMoney({ ...totals, aiVoices: 3 }, costs, 0.05).aiCostCents).toBe(3200);
   });
 
   it('sin tipo de cambio válido no inventa el gasto ni la ganancia', () => {
-    expect(summaryMoney(totals, 0.013, 0)).toEqual({ revenueCents: 29800, aiCostCents: null, profitCents: null });
+    expect(summaryMoney(totals, costs, 0)).toEqual({ revenueCents: 29800, aiCostCents: null, profitCents: null });
   });
 });
 
@@ -161,26 +167,32 @@ describe('cambio contra el periodo anterior (US A3)', () => {
 
 describe('serie por día de la gráfica (US A4)', () => {
   const rows = [
-    { day: '2026-10-01', revenueCents: 5500, aiImages: 100 },
-    { day: '2026-10-02', revenueCents: 0, aiImages: 0 },
-    { day: '2026-10-03', revenueCents: 4900, aiImages: 7 },
+    { day: '2026-10-01', revenueCents: 5500, aiImages: 100, aiVoices: 0 },
+    { day: '2026-10-02', revenueCents: 0, aiImages: 0, aiVoices: 0 },
+    { day: '2026-10-03', revenueCents: 4900, aiImages: 7, aiVoices: 0 },
   ];
 
   it('pasa los ingresos a pesos y el gasto en IA con el mismo cálculo que las tarjetas', () => {
-    expect(dailyMoney(rows, 0.013, 0.05)).toEqual([
+    expect(dailyMoney(rows, { perImageUsd: 0.013, perVoiceUsd: 0.1 }, 0.05)).toEqual([
       { day: '2026-10-01', revenue: 55, aiCost: 26 },
       { day: '2026-10-02', revenue: 0, aiCost: 0 },
       { day: '2026-10-03', revenue: 49, aiCost: 1.82 },
     ]);
   });
 
+  it('la gráfica también suma las voces con su costo', () => {
+    const day = [{ day: '2026-10-04', revenueCents: 0, aiImages: 0, aiVoices: 2 }];
+    // 2 × 0.1 USD = 0.2 USD; con 0.05 USD por peso son $4.00.
+    expect(dailyMoney(day, { perImageUsd: 0.013, perVoiceUsd: 0.1 }, 0.05)[0].aiCost).toBe(4);
+  });
+
   it('la suma de los días coincide con la tarjeta de Ingresos', () => {
-    const total = dailyMoney(rows, 0.013, 0.05).reduce((sum, d) => sum + d.revenue, 0);
+    const total = dailyMoney(rows, { perImageUsd: 0.013, perVoiceUsd: 0.1 }, 0.05).reduce((sum, d) => sum + d.revenue, 0);
     expect(total * 100).toBe(5500 + 4900);
   });
 
   it('sin tipo de cambio válido, el gasto en IA queda en cero en lugar de inventarse', () => {
-    expect(dailyMoney(rows, 0.013, 0).map((d) => d.aiCost)).toEqual([0, 0, 0]);
+    expect(dailyMoney(rows, { perImageUsd: 0.013, perVoiceUsd: 0.1 }, 0).map((d) => d.aiCost)).toEqual([0, 0, 0]);
   });
 });
 

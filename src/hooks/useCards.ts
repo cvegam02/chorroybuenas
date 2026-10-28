@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Card } from '../types';
 import { saveCards, loadCards } from '../utils/storage';
 import { saveImage as saveImageToIndexedDB, cacheImageBlob, getImage } from '../utils/indexedDB';
@@ -95,6 +95,21 @@ export const useCards = () => {
     return () => {
       cancelled = true;
     };
+  }, [user, currentSetId]);
+
+  /** Vuelve a pedir las cartas a la cuenta sin mostrar la carga: para las que suben los invitados (FEAT-56). */
+  const refreshFromCloud = useCallback(async () => {
+    if (!user || !currentSetId) return;
+    try {
+      const cloudCards = await CardRepository.getCards(user.id, currentSetId);
+      // Las que ya estaban conservan su imagen cargada (no parpadean); solo las nuevas la piden
+      setCards(prev => {
+        const shownImages = new Map(prev.map(card => [`${card.id}:${card.imagePath}`, card.image]));
+        return cloudCards.map(card => ({ ...card, image: shownImages.get(`${card.id}:${card.imagePath}`) ?? card.image }));
+      });
+    } catch (error) {
+      logger.error('Error refreshing cards:', error);
+    }
   }, [user, currentSetId]);
 
   const addCard = async (card: Card) => {
@@ -547,6 +562,7 @@ export const useCards = () => {
     updateCard,
     updateCards,
     clearCards,
+    refreshFromCloud,
     cardCount: cards.length,
     isCardRecentlySynced,
     sets,

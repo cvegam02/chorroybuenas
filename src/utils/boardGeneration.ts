@@ -47,6 +47,13 @@ export const maxUniqueBoards = (availableCards: number, gridSize: GridSize): num
   return Math.floor(binomialCoefficient(availableCards, gridSize) * 0.5);
 };
 
+/** Tableros por lotería como máximo (FEAT-58, decisión 4; la base lo exige, migración 074). */
+export const MAX_BOARDS_PER_SET = 200;
+
+/** Lo más que se puede pedir para una lotería: los tableros distintos posibles, hasta el tope. */
+export const maxBoardsForSet = (availableCards: number, gridSize: GridSize): number =>
+  Math.min(maxUniqueBoards(availableCards, gridSize), MAX_BOARDS_PER_SET);
+
 /**
  * Clásico (4×4): la cantidad que hace que cada carta aparezca unas 8 veces.
  * Kids (3×3): un tablero por cada 3 cartas.

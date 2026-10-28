@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
 import { TokenPricingRepository, TokenPack, type PromoSummary } from '../../repositories/TokenPricingRepository';
 import { usePromoCode } from '../../hooks/usePromoCode';
-import { MAX_CUSTOM_TOKENS, MIN_CUSTOM_TOKENS } from '../../utils/purchaseRules';
+import { MAX_CUSTOM_TOKENS, MIN_CUSTOM_TOKENS, minCustomTokens } from '../../utils/purchaseRules';
 import { createPaymentPreference, creditPaymentOnReturn } from '../../services/PurchaseService';
 import { TokenRepository } from '../../repositories/TokenRepository';
 import { readReturnedPaymentId } from '../../services/creditOnReturn';
@@ -49,12 +49,12 @@ export const BuyTokensPage: React.FC = () => {
   const [customTokens, setCustomTokens] = useState<number>(15);
   const [promoCode, setPromoCode] = useState('');
   const [promoSummary, setPromoSummary] = useState<PromoSummary>({ firstPurchasePercent: 0, hasCodePromos: false });
-  const codePromoPercent = usePromoCode(promoCode, !!user);
+  const promo = usePromoCode();
+  const codePromoPercent = promo.percent;
   const [buyLoading, setBuyLoading] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'crediting' | 'success' | 'cancel' | 'pending' | null>(null);
   const handledPaymentRef = useRef<string | null>(null);
 
-  const CUSTOM_MIN = MIN_CUSTOM_TOKENS;
   const CUSTOM_MAX = MAX_CUSTOM_TOKENS;
 
   const showUsd = i18n.language?.startsWith('en') ?? false;
@@ -140,6 +140,8 @@ export const BuyTokensPage: React.FC = () => {
   // Con centavos solo si los hay: con oferta, el token puede costar $1.50 (FEAT-49).
   const formatPriceMxn = formatMxn;
   const withOffer = (cents: number) => (offerPercent ? offerDiscountCents(cents, offerPercent) : cents);
+  // Con oferta, el mínimo de la cantidad libre sube lo necesario para pagar al menos $10 (FEAT-58, decisión 2)
+  const CUSTOM_MIN = pricePerTokenCents ? minCustomTokens(withOffer(pricePerTokenCents)) : MIN_CUSTOM_TOKENS;
 
   const formatPriceUsdRef = (cents: number): string => {
     if (usdRate == null) return '';
@@ -170,7 +172,7 @@ export const BuyTokensPage: React.FC = () => {
     try {
       const result = await createPaymentPreference({
         packId: pack.id,
-        promoCode: promoCodeTrimmed || undefined,
+        promoCode: codePromoPercent > 0 ? promoCodeTrimmed : undefined,
       });
       setBuyLoading(false);
       if (!result.success && result.error === 'NOT_LOGGED_IN') {
@@ -204,7 +206,7 @@ export const BuyTokensPage: React.FC = () => {
     try {
       const result = await createPaymentPreference({
         customTokens: customTokensClamped,
-        promoCode: promoCodeTrimmed || undefined,
+        promoCode: codePromoPercent > 0 ? promoCodeTrimmed : undefined,
       });
       setBuyLoading(false);
       if (!result.success && result.error === 'NOT_LOGGED_IN') {
@@ -228,7 +230,7 @@ export const BuyTokensPage: React.FC = () => {
     }
   };
 
-  const customTokensClamped = clampCustomTokens(customTokens);
+  const customTokensClamped = clampCustomTokens(customTokens, CUSTOM_MIN);
   const customPriceCents = customOfferPriceCents(customTokensClamped, pricePerTokenCents ?? 0, offerPercent);
   const customValid = customTokens >= CUSTOM_MIN && customTokens <= CUSTOM_MAX;
 
@@ -421,7 +423,7 @@ export const BuyTokensPage: React.FC = () => {
                 type="button"
                 className="buy-tokens__step"
                 aria-label={t('buyTokens.less')}
-                onClick={() => setCustomTokens((current) => stepCustomTokens(current, -1))}
+                onClick={() => setCustomTokens((current) => stepCustomTokens(current, -1, CUSTOM_MIN))}
                 disabled={customTokensClamped <= CUSTOM_MIN}
               >
                 −
@@ -437,7 +439,7 @@ export const BuyTokensPage: React.FC = () => {
                     if (!Number.isNaN(v)) setCustomTokens(v);
                     else if (e.target.value === '') setCustomTokens(0);
                   }}
-                  onBlur={() => setCustomTokens((prev) => clampCustomTokens(prev))}
+                  onBlur={() => setCustomTokens((prev) => clampCustomTokens(prev, CUSTOM_MIN))}
                   className="buy-tokens__amount-input"
                   aria-label={t('buyTokens.customTitle')}
                 />
@@ -447,7 +449,7 @@ export const BuyTokensPage: React.FC = () => {
                 type="button"
                 className="buy-tokens__step"
                 aria-label={t('buyTokens.more')}
-                onClick={() => setCustomTokens((current) => stepCustomTokens(current, 1))}
+                onClick={() => setCustomTokens((current) => stepCustomTokens(current, 1, CUSTOM_MIN))}
                 disabled={customTokensClamped >= CUSTOM_MAX}
               >
                 +
@@ -460,7 +462,7 @@ export const BuyTokensPage: React.FC = () => {
                   type="button"
                   className={`buy-tokens__shortcut ${customTokens === amount ? 'buy-tokens__shortcut--current' : ''}`}
                   aria-pressed={customTokens === amount}
-                  onClick={() => setCustomTokens(clampCustomTokens(amount))}
+                  onClick={() => setCustomTokens(clampCustomTokens(amount, CUSTOM_MIN))}
                 >
                   {amount}
                 </button>
@@ -509,18 +511,41 @@ export const BuyTokensPage: React.FC = () => {
           {promoSummary.hasCodePromos && isLoggedIn && (
             <details className="buy-tokens__promo" open>
               <summary className="buy-tokens__promo-title">{t('buyTokens.promoCodeLabel')}</summary>
-              <input
-                type="text"
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                placeholder={t('buyTokens.promoCodePlaceholder')}
-                className="buy-tokens__promo-input"
-                maxLength={32}
-                aria-label={t('buyTokens.promoCodeLabel')}
-              />
-              {codePromoPercent > 0 && (
+              <form
+                className="buy-tokens__promo-form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  promo.apply(promoCode);
+                }}
+              >
+                <input
+                  type="text"
+                  value={promoCode}
+                  onChange={(e) => {
+                    setPromoCode(e.target.value.toUpperCase());
+                    promo.clear();
+                  }}
+                  placeholder={t('buyTokens.promoCodePlaceholder')}
+                  className="buy-tokens__promo-input"
+                  maxLength={32}
+                  aria-label={t('buyTokens.promoCodeLabel')}
+                />
+                <button
+                  type="submit"
+                  className="buy-tokens__promo-apply"
+                  disabled={!promoCode.trim() || promo.state.kind === 'checking'}
+                >
+                  {t('buyTokens.promoCodeApply')}
+                </button>
+              </form>
+              {promo.state.kind === 'valid' && (
                 <span className="buy-tokens__promo-applied" role="status">
                   ✓ {t('buyTokens.promoCodeApplied', { percent: codePromoPercent })}
+                </span>
+              )}
+              {(promo.state.kind === 'invalid' || promo.state.kind === 'limited' || promo.state.kind === 'error') && (
+                <span className="buy-tokens__promo-error" role="alert">
+                  {t(`buyTokens.promoCode_${promo.state.kind}`)}
                 </span>
               )}
             </details>

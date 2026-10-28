@@ -91,6 +91,13 @@ describe('activityItem', () => {
     });
   });
 
+  it('la voz con IA del cantador es su propio renglón, con su lotería y sus tokens (FEAT-55, decisión 28)', () => {
+    expect(
+      activityItem(event({ kind: 'voice', total_tokens: 10, loteria_name: 'Cumple de Sofi', occurred_at: '2026-10-15T06:30:00Z' }), now),
+    ).toEqual({ tone: 'ai', icon: 'IA', title: 'Pagó la voz con IA del cantador', detail: 'Ayer · lotería «Cumple de Sofi»', value: '−10' });
+    expect(activityItem(event({ kind: 'voice', total_tokens: 10 }), now)).toMatchObject({ detail: 'Hoy · lotería borrada' });
+  });
+
   it('el registro dice cuándo creó su cuenta, sin los tokens de bienvenida', () => {
     expect(activityItem(event({ kind: 'signup', occurred_at: '2026-09-03T06:00:00Z' }), now)).toEqual({
       tone: 'signup',

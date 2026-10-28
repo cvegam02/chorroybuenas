@@ -4,7 +4,7 @@ Lista de trabajo abierta después de la remediación del code review y del paso 
 
 ## Cómo está todo hoy
 
-- **Producción:** `chorroybuenas.com.mx` lo sirve Vercel (rama `main`) contra el proyecto de Supabase PROD (`bdruzgjboxalpywljemk`). Backend desplegado el 2026-10-06: migraciones 022–025 y las 4 edge functions.
+- **Producción:** `chorroybuenas.com.mx` lo sirve Vercel (rama `main`) contra el proyecto de Supabase PROD (`bdruzgjboxalpywljemk`). Backend al día con dev desde el 2026-10-28: migraciones hasta la 076 y 8 edge functions (ese día se aplicaron la 060 a la 076 y las 7 funciones de FEAT-55 a FEAT-58; el sitio pasó a `main` con el PR #84). Antes de migrar se copiaron las tablas tocadas al esquema privado `respaldo_20261028` de esa base; se puede borrar cuando producción se vea bien.
 - **Dev:** `dev.chorroybuenas.com.mx` lo sirve Vercel (rama `dev`, entorno Preview) contra Supabase DEV (`vjglrfofyzvyvaetakpu`). Mismo backend.
 - **Validado con servicios reales:** en PROD, una transformación de IA (1 token cobrado) y una compra real de $10.00 MXN (5 tokens, una sola acreditación con 4 notificaciones). En DEV, lo mismo con credenciales de prueba.
 - **Documentos de referencia:**
@@ -55,9 +55,7 @@ Cada uno entra por `dev`, con tests primero.
 
 ### 3. Reembolsos y contracargos
 
-- **Problema:** si se devuelve un pago en Mercado Pago, o el banco lo revierte, los tokens no se descuentan. Hoy hay que hacerlo a mano.
-- **Propuesta:** que el webhook atienda los pagos en estado `refunded` y `charged_back`: registrar la reversa y descontar los tokens (sin dejar el saldo negativo). Requiere decidir qué pasa si el usuario ya los gastó.
-- **Dónde:** `supabase/functions/_shared/paymentFlow.ts`, una RPC nueva en una migración `026`, y sus tests.
+- **Hecho** en FEAT-58 (US A8, 2026-10-26): el webhook atiende `refunded` y `charged_back` con la RPC `reverse_payment` (migración 068). Un reembolso parcial no revierte nada automático.
 
 ### 4. Bajar el tamaño de dos componentes (opcional)
 

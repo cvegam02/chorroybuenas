@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useAvatarUrl } from '../../hooks/useAvatarUrl';
 import { useSetContext } from '../../contexts/SetContext';
 import { useTokenBalance } from '../../contexts/TokenContext';
-import { SetRepository } from '../../repositories/SetRepository';
+import { NewLoteriaDialog } from '../Dashboard/NewLoteriaDialog';
 import logoImage from '../../img/logo-barra.png';
 import { EmailAuthModal } from '../Auth/EmailAuthModal';
 import { logger } from '../../utils/logger';
@@ -31,11 +31,11 @@ export const Navbar = () => {
   const { t } = useTranslation();
   const { user, signOut, signInWithGoogle, isLoading, isAdmin } = useAuth();
   const avatarUrl = useAvatarUrl(user);
-  const { sets, currentSetId, setCurrentSetId, setSets } = useSetContext();
+  const { sets, currentSetId, setCurrentSetId } = useSetContext();
   const { balance } = useTokenBalance();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isCreatingSet, setIsCreatingSet] = useState(false);
+  const [isNewLoteriaOpen, setIsNewLoteriaOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode | null>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -84,32 +84,10 @@ export const Navbar = () => {
     }
   };
 
-  const getNextNewLoteriaName = () => {
-    const baseName = (t('navbar.newLoteriaName') || 'Nueva lotería').trim();
-    const numbers = sets
-      .filter((set) => set.name.startsWith(baseName))
-      .map((set) => {
-        const number = parseInt(set.name.slice(baseName.length).trim(), 10);
-        return Number.isInteger(number) && number >= 1 ? number : null;
-      })
-      .filter((number): number is number => number !== null);
-    return `${baseName} ${numbers.length > 0 ? Math.max(...numbers) + 1 : 1}`;
-  };
-
-  const handleCreateNewLoteria = async () => {
-    if (!user || isCreatingSet) return;
-    setIsCreatingSet(true);
-    try {
-      const newSet = await SetRepository.createSet(user.id, getNextNewLoteriaName());
-      setSets((previous) => [...previous, newSet]);
-      setCurrentSetId(newSet.id);
-      setIsUserMenuOpen(false);
-      navigate('/cards');
-    } catch (error) {
-      logger.error('Error creating set:', error);
-    } finally {
-      setIsCreatingSet(false);
-    }
+  // «Crear nueva lotería» pide el nombre antes de crearla (FEAT-57)
+  const handleCreateNewLoteria = () => {
+    setIsUserMenuOpen(false);
+    setIsNewLoteriaOpen(true);
   };
 
   const goTo = (path: string) => {
@@ -211,7 +189,7 @@ export const Navbar = () => {
                     sets={sets}
                     currentSetId={currentSetId}
                     isAdmin={isAdmin}
-                    isCreatingSet={isCreatingSet}
+                    isCreatingSet={isNewLoteriaOpen}
                     onGoTo={goTo}
                     onCreateSet={handleCreateNewLoteria}
                     onSelectSet={(setId) => {
@@ -257,6 +235,8 @@ export const Navbar = () => {
       )}
 
       <EmailAuthModal isOpen={authMode !== null} onClose={() => setAuthMode(null)} initialMode={authMode ?? 'login'} />
+
+      {isNewLoteriaOpen && <NewLoteriaDialog onClose={() => setIsNewLoteriaOpen(false)} />}
     </header>
   );
 };

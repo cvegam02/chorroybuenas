@@ -3,7 +3,7 @@ import { googleRedirectUrl } from '../utils/authRedirect';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
 import { AVATAR_BUCKET } from '../utils/avatar';
-import { EMAIL_ALREADY_REGISTERED_MESSAGE, isEmailAlreadyRegistered } from '../utils/signUpResult';
+import { DISPOSABLE_EMAIL_MESSAGE, EMAIL_ALREADY_REGISTERED_MESSAGE, isEmailAlreadyRegistered } from '../utils/signUpResult';
 
 interface AuthContextType {
     user: User | null;
@@ -16,7 +16,8 @@ interface AuthContextType {
     /** `returnPath`: ruta del sitio a la que se regresa; sin ella, Mi cuenta. */
     signInWithGoogle: (returnPath?: string) => Promise<void>;
     signInWithEmail: (email: string, password: string) => Promise<void>;
-    signUpWithEmail: (email: string, password: string, metadata?: { full_name?: string }) => Promise<void>;
+    /** Con `confirmReturnPath`, el correo de confirmación regresa a esa ruta del sitio (FEAT-56). */
+    signUpWithEmail: (email: string, password: string, metadata?: { full_name?: string }, confirmReturnPath?: string) => Promise<void>;
     signOut: () => Promise<void>;
     resetPasswordForEmail: (email: string) => Promise<void>;
     updatePassword: (newPassword: string) => Promise<void>;
@@ -99,11 +100,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (error) throw error;
     };
 
-    const signUpWithEmail = async (email: string, password: string, metadata?: { full_name?: string }) => {
+    const signUpWithEmail = async (
+        email: string,
+        password: string,
+        metadata?: { full_name?: string },
+        confirmReturnPath?: string
+    ) => {
+        const options = {
+            ...(metadata?.full_name && { data: { full_name: metadata.full_name } }),
+            ...(confirmReturnPath && { emailRedirectTo: googleRedirectUrl(window.location.origin, confirmReturnPath) }),
+        };
+        // Correos desechables: la base no crea la cuenta (migración 073); se revisa antes para avisar claro (FEAT-58)
+        const { data: disposable } = await supabase.rpc('is_disposable_email', { p_email: email });
+        if (disposable === true) throw new Error(DISPOSABLE_EMAIL_MESSAGE);
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
-            options: metadata?.full_name ? { data: { full_name: metadata.full_name } } : undefined
+            options: Object.keys(options).length > 0 ? options : undefined
         });
         if (error) throw error;
         if (isEmailAlreadyRegistered(data.user)) throw new Error(EMAIL_ALREADY_REGISTERED_MESSAGE);

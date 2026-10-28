@@ -4,9 +4,9 @@ Complementa a [`contexto-negocio.md`](contexto-negocio.md) sin introducir reglas
 
 Los casos marcados con 🔧 describen una regla ya definida que el sitio todavía no cumple (ver §17 del contexto): el caso dice cómo debe funcionar, no cómo funciona hoy.
 
-Son 29 casos en 7 bloques. Formato de cada caso: actor, precondiciones, flujo principal, excepciones, resultado, estados afectados, notificaciones y auditoría. No se usa "Tareas generadas": el producto no tiene tablero de tareas.
+Son 33 casos en 9 bloques. Formato de cada caso: actor, precondiciones, flujo principal, excepciones, resultado, estados afectados, notificaciones y auditoría. No se usa "Tareas generadas": el producto no tiene tablero de tareas.
 
-Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo día (FEAT-17); hasta el 2026-10-07 se llamaron «loterías de temporada» (renombradas con FEAT-24, sin cambiar ningún flujo). El bloque 7 («Arma tus tableros») se agregó el 2026-10-22 (FEAT-53).
+Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo día (FEAT-17); hasta el 2026-10-07 se llamaron «loterías de temporada» (renombradas con FEAT-24, sin cambiar ningún flujo). El bloque 7 («Arma tus tableros») se agregó el 2026-10-22 (FEAT-53). El bloque 8 (cantador) se agregó el 2026-10-24 (FEAT-55). El bloque 9 (loterías colectivas) se agregó el 2026-10-24 (FEAT-56).
 
 ---
 
@@ -16,7 +16,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 - **Actor(es)**: Visitante.
 - **Precondiciones**: No tener cuenta con ese correo.
 - **Flujo principal**: (1) Elige registrarse con correo y contraseña, o con Google. (2) Con correo, recibe un mensaje para confirmar su cuenta. (3) Al confirmar, queda registrado y recibe sus tokens de bienvenida (§7).
-- **Excepciones**: El correo ya está registrado: se le avisa. Si la cantidad de tokens de bienvenida no está configurada, la cuenta se crea igual, con saldo 0.
+- **Excepciones**: El correo ya está registrado: se le avisa. Si la cantidad de tokens de bienvenida no está configurada, la cuenta se crea igual, con saldo 0. El correo es de un dominio desechable: no se crea la cuenta y se le pide un correo personal (§3; 2026-10-26, FEAT-58).
 - **Resultado**: Existe un usuario registrado con su saldo inicial.
 - **Estados afectados**: Se crean el perfil y el saldo del usuario (§11).
 - **Notificaciones**: Correo de confirmación de cuenta (§13).
@@ -99,8 +99,8 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 ### 9. Generar tableros
 - **Actor(es)**: Visitante o usuario registrado.
 - **Precondiciones**: La lotería tiene al menos el mínimo de cartas de su modo (§4).
-- **Flujo principal**: (1) Ve la cantidad de tableros sugerida y puede cambiarla (§4). (2) Genera los tableros. (3) Los revisa uno por uno. (4) Desde la vista previa puede revolverlos: se genera otra vez la misma cantidad, en el mismo modo; con sesión se le pide confirmar, porque reemplaza los tableros guardados (2026-10-11, FEAT-34).
-- **Excepciones**: Faltan cartas para el mínimo (24 en Clásico, 15 en Kids): no puede generar y se le dice cuántas faltan. Si pide más tableros distintos de los que sus cartas permiten, no todos saldrán diferentes.
+- **Flujo principal**: (1) Ve la cantidad de tableros sugerida y puede cambiarla (§4). (2) Genera los tableros. (3) Los revisa uno por uno. (4) Desde la vista previa puede revolverlos: se genera otra vez la misma cantidad, en el mismo modo; con sesión se le pide confirmar, porque reemplaza los tableros guardados (2026-10-11, FEAT-34). Con sesión, desde el 2026-10-25 (FEAT-57), los tableros se arman y se revuelven desde la página de la lotería, en una ventana donde elige cuántos; los de antes se reemplazan solo al confirmar la cantidad.
+- **Excepciones**: Faltan cartas para el mínimo (24 en Clásico, 15 en Kids): no puede generar y se le dice cuántas faltan. Si pide más tableros distintos de los que sus cartas permiten, no todos saldrán diferentes. Más de 200 tableros: no se permite; se le dice que el máximo es 200 por lotería (§4; 2026-10-27, FEAT-58). Si algo falla al guardar los tableros nuevos, se quedan los de antes.
 - **Resultado**: La lotería tiene sus tableros, armados al azar y sin repetidos (§4).
 - **Estados afectados**: Tableros (§11).
 - **Notificaciones**: Ninguna.
@@ -124,7 +124,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 - **Actor(es)**: Usuario registrado con al menos 1 token.
 - **Precondiciones**: Sesión iniciada; la carta tiene imagen.
 - **Flujo principal**: (1) Pide transformar la carta. (2) El servidor descuenta 1 token (§6). (3) Se genera la imagen en estilo de lotería tradicional. (4) La carta muestra la imagen nueva y conserva la original. (5) El saldo en pantalla se actualiza. Desde «Editar carta» (2026-10-11, FEAT-34) la ventana sigue abierta mientras se genera; al pedir otra versión, la nueva queda guardada en la carta al momento y, hasta cerrar la ventana, puede elegir quedarse con la anterior o con la foto original.
-- **Excepciones**: La carta ya estaba transformada: se transforma de nuevo y cuesta otro token (§6). Sin sesión: no se le ofrece transformar (2026-10-11, FEAT-34) ni ve, en la pantalla de cartas, una invitación a crear su cuenta (2026-10-12, FEAT-40). Sin tokens: se le avisa y se le invita a comprar. La imagen no se pudo generar, o tardó demasiado: se le devuelve el token y se le avisa (§6). El filtro de contenido rechaza la foto: se le avisa y no se le cobra. Más de 10 transformaciones en un minuto: se le pide esperar (§6).
+- **Excepciones**: La carta ya estaba transformada: se transforma de nuevo y cuesta otro token (§6). Sin sesión: no se le ofrece transformar (2026-10-11, FEAT-34) ni ve, en la pantalla de cartas, una invitación a crear su cuenta (2026-10-12, FEAT-40). Sin tokens: se le avisa y se le invita a comprar. La imagen no se pudo generar, o tardó demasiado: se le devuelve el token y se le avisa (§6). El filtro de contenido rechaza la foto: se le avisa y no se le cobra. Más de 10 transformaciones en un minuto: se le pide esperar (§6). Cierra la página mientras la IA trabaja: la carta queda transformada igual, porque el servidor guarda y aplica el resultado (§6; 2026-10-27, FEAT-58).
 - **Resultado**: Carta transformada y 1 token menos; o carta sin cambios y saldo intacto.
 - **Estados afectados**: Carta, saldo y uso (§11).
 - **Notificaciones**: Ninguna.
@@ -134,7 +134,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 - **Actor(es)**: Usuario registrado con al menos 1 token.
 - **Precondiciones**: La lotería tiene cartas sin transformar.
 - **Flujo principal**: (1) Ve cuántas cartas se transformarán y cuántos tokens costará. (2) Inicia el lote. (3) Las cartas se transforman una por una, con el avance a la vista. (4) Al terminar ve cuántas se transformaron y cuántas se omitieron.
-- **Excepciones**: Todas las cartas ya están transformadas: se le avisa. Los tokens no alcanzan para todas (2026-10-11, FEAT-34): se le dice cuántos faltan y puede comprar más o transformar solo las primeras para las que alcancen, en el orden de la baraja, viendo antes la cuenta de esas cartas; sin ningún token, solo puede comprar. El filtro de contenido rechaza una foto: esa se omite y el lote continúa (§6). Cualquier otro fallo (sin tokens, demasiadas solicitudes, error del servicio): el lote se detiene con su aviso; lo ya transformado se conserva.
+- **Excepciones**: Todas las cartas ya están transformadas: se le avisa. Los tokens no alcanzan para todas (2026-10-11, FEAT-34): se le dice cuántos faltan y puede comprar más o transformar solo las primeras para las que alcancen, en el orden de la baraja, viendo antes la cuenta de esas cartas; sin ningún token, solo puede comprar. El filtro de contenido rechaza una foto: esa se omite y el lote continúa (§6). Cualquier otro fallo (sin tokens, demasiadas solicitudes, error del servicio): el lote se detiene con su aviso; lo ya transformado se conserva. Cierra la página a mitad del lote: las cartas que ya terminó la IA quedan transformadas (§6; 2026-10-27, FEAT-58).
 - **Resultado**: Las cartas transformadas con éxito quedan cobradas a 1 token cada una; las demás, sin cobro.
 - **Estados afectados**: Cartas, saldo y uso (§11).
 - **Notificaciones**: Ninguna.
@@ -158,7 +158,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 - **Actor(es)**: Usuario registrado.
 - **Precondiciones**: Sesión iniciada.
 - **Flujo principal**: (1) Elige un paquete, o una cantidad libre de 5 a 500 tokens (§8). (2) Si tiene un código promocional, lo escribe y ve el bono (§9). (3) Es enviado al pago de Mercado Pago. (4) Paga. (5) Vuelve al sitio y ve el resultado.
-- **Excepciones**: Sin sesión: se le pide iniciar sesión. Pago cancelado o rechazado: vuelve sin tokens. Pago pendiente (efectivo o transferencia): se le avisa que se acreditará al confirmarse (§8). Cantidad libre menor a 5 tokens: no se permite (§8).
+- **Excepciones**: Sin sesión: se le pide iniciar sesión. Pago cancelado o rechazado: vuelve sin tokens. Pago pendiente (efectivo o transferencia): se le avisa que se acreditará al confirmarse (§8). Cantidad libre menor a 5 tokens, o que con la oferta no llega a $10.00: no se permite; el mínimo de la cantidad libre sube solo (§8; 2026-10-26, FEAT-58).
 - **Resultado**: Un pago iniciado. Los tokens llegan por el caso 15.
 - **Estados afectados**: Ninguno hasta que el pago se aprueba.
 - **Notificaciones**: Ninguna. El sitio no emite comprobante propio (§8, §13).
@@ -177,8 +177,8 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 ### 16. Usar un código promocional
 - **Actor(es)**: Usuario registrado.
 - **Precondiciones**: Existe al menos un código vigente (§9). Sirve en cualquier compra, no solo en la primera.
-- **Flujo principal**: (1) En la página de compra escribe el código. (2) Si es válido, ve el porcentaje de bono y el total de tokens que recibirá. (3) Compra (caso 14). (4) Al acreditarse el pago recibe los tokens del bono.
-- **Excepciones**: Código inexistente, inactivo, vencido o aún no vigente: no se aplica. Código ya usado por ese usuario: no se aplica (§9). Primera compra con código: se aplica solo el código (§9). El bono redondea a 0 tokens: el código no cuenta como usado.
+- **Flujo principal**: (1) En la página de compra escribe el código y toca «Aplicar» (2026-10-26, FEAT-58). (2) Si es válido, ve el porcentaje de bono y el total de tokens que recibirá. (3) Compra (caso 14). (4) Al acreditarse el pago recibe los tokens del bono.
+- **Excepciones**: Código inexistente, inactivo, vencido o aún no vigente: no se aplica y se le dice que ese código no da bono. Más de 5 códigos sin bono en una hora: se le dice que lo intente más tarde (§9; 2026-10-26, FEAT-58). Código ya usado por ese usuario: no se aplica (§9). Primera compra con código: se aplica solo el código (§9). El bono redondea a 0 tokens: el código no cuenta como usado.
 - **Resultado**: La compra lleva el bono del código.
 - **Estados afectados**: Compra (§11).
 - **Notificaciones**: Ninguna.
@@ -212,7 +212,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 - **Actor(es)**: Administrador.
 - **Precondiciones**: Sesión iniciada como administrador.
 - **Flujo principal**: (1) Ve todas las promociones. (2) Crea una de primera compra o de código, con su porcentaje y vigencia opcional. (3) La edita, la activa, la desactiva o la borra (§9).
-- **Excepciones**: Un usuario que no es administrador no puede ver ni cambiar promociones (§12).
+- **Excepciones**: Un usuario que no es administrador no puede ver ni cambiar promociones (§12). Una oferta que deja algún pack activo por debajo de $10.00 no se guarda; el panel dice cuál (§9; 2026-10-26, FEAT-58).
 - **Resultado**: La promoción queda creada, cambiada o eliminada.
 - **Estados afectados**: Promoción (§11).
 - **Notificaciones**: Ninguna.
@@ -222,7 +222,7 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 - **Actor(es)**: Administrador.
 - **Precondiciones**: Sesión iniciada como administrador.
 - **Flujo principal**: (1) Ve los paquetes. (2) Crea o edita un paquete: tokens, tokens de regalo, precio y si está activo. (3) Cambia el precio por token de la cantidad libre (§8).
-- **Excepciones**: Las compras ya iniciadas conservan el precio con el que se crearon.
+- **Excepciones**: Las compras ya iniciadas conservan el precio con el que se crearon. Un pack con precio menor a $10.00, o que con la oferta vigente o programada queda por debajo, no se guarda (§8, §9; 2026-10-26, FEAT-58).
 - **Resultado**: Los precios nuevos aplican a las compras siguientes.
 - **Estados afectados**: Paquete y precio (§11).
 - **Notificaciones**: Ninguna.
@@ -278,7 +278,7 @@ Todos los casos de este bloque están por construir (§17, §18).
 - **Actor(es)**: Usuario registrado.
 - **Precondiciones**: Sesión iniciada; la lotería es visible; la cuenta no la tiene ni tiene un pago en proceso por ella.
 - **Flujo principal**: (1) En el detalle de la lotería pulsa «Comprar». (2) Es enviado al pago de Mercado Pago, con el precio que pone el servidor. (3) Paga. (4) Vuelve al sitio y ve el resultado. (5) Con el pago aprobado, la lotería queda en su cuenta (§18).
-- **Excepciones**: Sin sesión: se le pide iniciar sesión y vuelve a la misma lotería. Pago cancelado o rechazado: no recibe nada y puede intentarlo de nuevo. Pago pendiente: la lotería aparece como «pago en proceso» y se entrega al confirmarse. Monto pagado menor al precio: no se entrega. Notificación repetida de Mercado Pago: no se registra dos veces.
+- **Excepciones**: Sin sesión: se le pide iniciar sesión y vuelve a la misma lotería. Pago cancelado o rechazado: no recibe nada y puede intentarlo de nuevo. Pago pendiente: la lotería aparece como «pago en proceso» y se entrega al confirmarse. Monto pagado menor al precio: no se entrega. Notificación repetida de Mercado Pago: no se registra dos veces. Tiene un pago en proceso de más de 3 días sin aviso: ya no bloquea y puede volver a comprar (§18; 2026-10-27, FEAT-58).
 - **Resultado**: La cuenta tiene una compra aprobada de esa lotería.
 - **Estados afectados**: Compra de lotería temática (§11).
 - **Notificaciones**: Al usuario, ninguna (§13). Si el pago se cobró pero la lotería no se pudo entregar, alerta por correo al administrador (§13; por construir; agregado el 2026-10-13, fase 3).
@@ -328,3 +328,55 @@ Todos los casos de este bloque están por construir (§17, §18).
 - **Estados afectados**: Juego de «Arma tus tableros», solo con sesión.
 - **Notificaciones**: Ninguna.
 - **Auditoría**: No.
+
+## Bloque 8 — Cantador
+
+### 30. Cantar una partida
+- **Actor(es)**: Usuario registrado.
+- **Precondiciones**: Tener una lotería con fotos con el mínimo de cartas de su modo (§4, §20). Usar un navegador con voz en español, salvo que la lotería tenga voz con IA.
+- **Flujo principal**: (1) En su lotería guardada pulsa «Cantar»; el cantador se abre a pantalla completa (donde el navegador lo permite) y mantiene la pantalla encendida. (2) Elige el ritmo, si no quiere el tradicional (otro automático, «Personalizado» con sus tiempos o «Manual», §20), y pulsa «Empezar a cantar». (3) El cantador dice «Se va y se corre con…» y saca las cartas solas, al ritmo elegido, diciendo el título de cada una. (4) Cuando alguien grita «¡Lotería!», pausa y revisa las cartas cantadas: la tira de las últimas (en computadora, todas las cantadas a la derecha de la carta; 2026-10-28, FEAT-59), «Anterior» y «Siguiente», o «Ver todas». (5) Sigue cantando, o empieza una partida nueva.
+- **Flujo alterno — cantar a mano** 🔧: eligió «Manual»; tras «Se va y se corre con…» nada corre solo: con «Siguiente carta» o → saca y canta cada carta, y con «Anterior» o ← regresa por las cantadas. No puede sacar otra mientras suena la anterior (§20; 2026-10-28, FEAT-59).
+- **Flujo alterno — voz con IA** 🔧: en el cantador pulsa «Mejorar la voz», escucha y escoge una de las voces (8 mexicanas, §20), ve el costo (10 tokens hasta 60 cartas y 2 más por cada 10 cartas extra, §20) y su saldo, y confirma; la voz escogida ya no se puede cambiar; se espera a que termine de prepararse la voz (no se puede empezar antes) y desde ese momento la lotería se canta con la voz con IA (§20). Sin saldo suficiente, se le lleva a comprar tokens.
+- **Flujo alterno — ampliar la voz** 🔧: la lotería creció después de pagar la voz y pasa de las cartas cubiertas; las de más se dicen con la voz del navegador y el cantador ofrece «Ampliar la voz» con su costo; solo se cobra si acepta (§20; 2026-10-26, FEAT-58).
+- **Excepciones**: Faltan cartas: el botón «Cantar» sale apagado con el motivo. El navegador no tiene voz en español: no se puede cantar y se le dice en qué navegadores sí; si la lotería tiene voz con IA, sí se canta con sus audios y las cartas cuyo audio falló salen sin voz. La lotería no es suya o no existe: se le dice que no se encontró. Se acaba la baraja: se le avisa y se le ofrece una partida nueva. La lotería ya usó sus audios gratis (cartas + 10) o se pidieron más de 20 regeneraciones en un minuto: esa carta se dice con la voz del navegador (§20; 2026-10-26, FEAT-58). El servicio de voz no tiene cupo para la lotería: no se cobra y se avisa que la voz con IA no está disponible por ahora 🔧 (§20; 2026-10-26, FEAT-58).
+- **Resultado**: La partida se juega sin recortar la baraja.
+- **Estados afectados**: Ninguno en la cuenta; la partida en curso se guarda en el navegador. Con voz con IA: el saldo, el uso de tokens y los audios de las cartas (§11).
+- **Notificaciones**: Ninguna.
+- **Auditoría**: Solo el cobro de la voz con IA, como todo uso de tokens.
+
+
+## Bloque 9 — Loterías colectivas
+
+### 31. Invitar a subir fotos 🔧
+- **Actor(es)**: Usuario registrado, dueño de la lotería (organizador).
+- **Precondiciones**: Tener una lotería guardada en su cuenta.
+- **Flujo principal**: (1) En su lotería (U2) pulsa «Invitar a subir fotos». (2) Ve el enlace y lo copia o lo comparte por WhatsApp con un mensaje ya escrito. (3) La lotería queda como «Colectiva» en Mi cuenta y en la lotería (§21).
+- **Flujo alterno — dejar de compartir o cambiar el enlace**: en la misma ventana pulsa «Dejar de compartir» (antes «Cerrar enlace»; 2026-10-25, FEAT-57) y nadie más puede unirse ni subir, aunque quienes ya participan siguen viendo las cartas; o «Generar enlace nuevo», y el anterior deja de servir. Con el enlace cerrado, «Volver a compartir» abre uno nuevo. Ya colectiva, el botón de la lotería dice «Compartida · N» o «Compartida · cerrada».
+- **Excepciones**: Alguien abre un enlace cerrado, reemplazado o inventado: se le dice que ya no sirve.
+- **Resultado**: La lotería tiene un enlace abierto para que otras personas suban fotos.
+- **Estados afectados**: Invitación de lotería (§11).
+- **Notificaciones**: Ninguna.
+- **Auditoría**: No.
+
+### 32. Unirse a una lotería y subir fotos 🔧
+- **Actor(es)**: Visitante o usuario registrado que recibió el enlace (invitado).
+- **Precondiciones**: El enlace está abierto.
+- **Flujo principal**: (1) Abre el enlace y ve el nombre de la lotería, quién la organiza (si su cuenta tiene nombre; nunca el correo) y cuántas cartas lleva. (2) Pulsa «Entrar para subir fotos»; si no tiene sesión, crea su cuenta (recibe sus tokens de bienvenida) o entra; si la crea con correo, al confirmarlo regresa al enlace y pulsa «Entrar» otra vez. (3) Queda como invitado y llega a la lotería, donde ve todas las cartas y quién subió cada una. (4) Pulsa «Subir fotos», lee el aviso de contenido permitido, elige sus fotos y les pone título. (5) Las fotos entran al final de la baraja con su número (§4, §21).
+- **Flujo alterno — volver después**: en Mi cuenta abre la lotería desde «Loterías donde participo» y sube más fotos.
+- **Excepciones**: Enlace cerrado o inventado: se le dice y se le ofrece ir a Inicio. Ya era invitado: entra directo, sin duplicarse. Es el organizador: llega a su lotería. Título repetido o con emojis: se rechaza con el mensaje de siempre. El organizador cierra el enlace mientras sube: lo ya subido se queda y ya no se aceptan más; sigue viendo la lotería sin «Subir fotos». Lo quitaron: ya no puede abrir la lotería, y si abre el enlace se le dice que ya no puede unirse, aunque el enlace siga abierto (§21). Ya subió 60 fotos a esa lotería: no se le dejan preparar más y se le dice que llegó al máximo por invitado; si sube muchas seguidas, las que pasan de 10 por minuto esperan solas y entran después (§21; 2026-10-26, FEAT-58).
+- **Resultado**: Las fotos del invitado son cartas de la lotería del organizador.
+- **Estados afectados**: Invitado de lotería y cartas (§11); con cuenta nueva, también su saldo de bienvenida.
+- **Notificaciones**: Ninguna; el organizador ve el contador «N fotos nuevas».
+- **Auditoría**: No.
+
+### 33. Administrar lo que subieron los invitados 🔧
+- **Actor(es)**: Usuario registrado, dueño de la lotería (organizador).
+- **Precondiciones**: Tener una lotería colectiva con fotos de invitados.
+- **Flujo principal**: (1) En Mi cuenta ve «N fotos nuevas» en la lotería y la abre; el contador se borra. (2) Ve en cada carta quién la subió. (3) Cambia títulos, borra cartas (los números se recorren, §4) o las transforma con IA con sus propios tokens.
+- **Flujo alterno — quitar a un invitado**: abre la ventana de compartir («Compartida · N»; hasta el 2026-10-25 era una ventana «Invitados» aparte, FEAT-57), ve cuántas fotos subió cada uno y pulsa «Quitar»; el invitado pierde el acceso y sus fotos se quedan (§21).
+- **Flujo alterno — borrar las fotos de un invitado**: en la misma ventana pulsa «Borrar fotos» en el renglón del invitado y confirma; sus cartas salen de la lotería y de los tableros, y el invitado sigue participando (§21; 2026-10-26, FEAT-58).
+- **Excepciones**: Sin tokens para la IA: igual que en sus propias cartas (§6). El invitado borró su cuenta: sus fotos se quedan.
+- **Resultado**: La lotería queda como el organizador la quiere.
+- **Estados afectados**: Cartas, invitado de lotería (§11); con IA, el saldo y el uso de tokens.
+- **Notificaciones**: Ninguna.
+- **Auditoría**: Solo el cobro de la IA, como todo uso de tokens.

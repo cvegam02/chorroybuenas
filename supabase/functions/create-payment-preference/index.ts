@@ -3,7 +3,7 @@ import { pickInitPoint, resolveAppUrl, resolveCheckoutMode } from '../_shared/ch
 import { buildCorsHeaders, parseAllowedOrigins } from '../_shared/cors.ts';
 import { selectCurrentOffer, type OfferRow } from '../_shared/offers.ts';
 import { buildPreference, resolvePurchaseItem, type PackRow } from '../_shared/preference.ts';
-import { selectPromotion, type PromotionRow } from '../_shared/promotions.ts';
+import { isFailedPromoCode, selectPromotion, type PromotionRow } from '../_shared/promotions.ts';
 import { parsePreferenceRequest } from '../_shared/validation.ts';
 
 const MERCADOPAGO_API_BASE = 'https://api.mercadopago.com';
@@ -97,6 +97,15 @@ Deno.serve(async (req) => {
       .select('id, code, type, config, valid_from, valid_until, is_active');
     if (promosError) throw new Error(`promotions: ${promosError.message}`);
 
+    // Códigos: como máximo 5 sin bono por hora; pasado el tope no se inicia el pago con código (FEAT-58, decisión 3)
+    if (promoCode?.trim()) {
+      const { error: limitError } = await admin.rpc('assert_promo_code_attempts', { p_user_id: user.id });
+      if (limitError?.message.includes('RATE_LIMITED')) {
+        return reply(429, { error: 'RATE_LIMITED', message: 'Demasiados intentos con códigos. Prueba de nuevo en un rato.' });
+      }
+      if (limitError) throw new Error(`assert_promo_code_attempts: ${limitError.message}`);
+    }
+
     const promotion = selectPromotion({
       promos: (promos ?? []) as PromotionRow[],
       promoCode,
@@ -104,6 +113,10 @@ Deno.serve(async (req) => {
       usedPromotionIds: (purchases ?? []).flatMap((p) => (p.promotion_ids ?? []) as string[]),
       now,
     });
+    if (isFailedPromoCode(promoCode, promotion)) {
+      const { error: recordError } = await admin.rpc('record_failed_promo_code', { p_user_id: user.id });
+      if (recordError) console.error('create-payment-preference: no se registró el intento de código', recordError.message);
+    }
 
     const mode = resolveCheckoutMode(Deno.env.get('MP_USE_SANDBOX_CHECKOUT'), mpAccessToken);
     console.log(`create-payment-preference: checkout ${mode}`);
