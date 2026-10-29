@@ -1,6 +1,7 @@
 import { supabase } from '../utils/supabaseClient';
 import { Board } from '../types';
 import { CardRepository } from './CardRepository';
+import { hasIncompleteBoard } from '../utils/boardIntegrity';
 
 export interface BoardDB {
     id?: string;
@@ -100,7 +101,7 @@ export class BoardRepository {
             ? await CardRepository.getImageUrls([...new Set(allPaths)])
             : new Map<string, string>();
 
-        return data.map((board) => {
+        const boards: Board[] = data.map((board) => {
             const rows = board.board_cards as unknown as BoardCardRow[];
             // Una fila sin carta (carta borrada) se omite en lugar de romper el listado.
             const cards = [...rows]
@@ -121,6 +122,35 @@ export class BoardRepository {
                 gridSize: (board.grid_size === 9 ? 9 : 16) as 9 | 16
             };
         });
+
+        // Un tablero al que se le borró una carta ya no sirve: se borran los de la lotería (FEAT-60, §4). Así se
+        // reparan también los que quedaron incompletos antes de esta regla.
+        if (hasIncompleteBoard(boards.map((board) => ({ gridSize: board.gridSize ?? 16, cardCount: board.cards.length })))) {
+            await this.deleteAllBoardsForSet(userId, setId);
+            return [];
+        }
+        return boards;
+    }
+
+    /**
+     * Después de borrar cartas (FEAT-60, §4): si algún tablero de la lotería quedó con menos cartas que casillas,
+     * se borran todos los tableros de la lotería. Devuelve si se borraron.
+     */
+    static async deleteIncompleteBoards(userId: string, setId: string): Promise<boolean> {
+        const { data, error } = await supabase
+            .from('boards')
+            .select('grid_size, board_cards(count)')
+            .eq('user_id', userId)
+            .eq('set_id', setId);
+
+        if (error) throw error;
+        const boards = (data ?? []).map((board) => ({
+            gridSize: board.grid_size === 9 ? 9 : 16,
+            cardCount: (board.board_cards as unknown as { count: number }[])[0]?.count ?? 0,
+        }));
+        if (!hasIncompleteBoard(boards)) return false;
+        await this.deleteAllBoardsForSet(userId, setId);
+        return true;
     }
 
     /**

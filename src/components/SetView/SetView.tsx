@@ -35,7 +35,7 @@ import './SetView.css';
 import { logger } from '../../utils/logger';
 import { pdfErrorMessage } from '../../utils/pdfErrorMessage';
 import { enterFullscreen } from '../../utils/fullscreen';
-import { withNumbersFrom } from '../../utils/cardNumbers';
+import { boardsHaveMissingCards, withLiveCards } from '../../utils/boardIntegrity';
 import { cardLabelsOrDefault, type CardLabels } from '../../utils/cardLabels';
 import { CardLabelsProvider } from '../../contexts/CardLabelsContext';
 
@@ -52,7 +52,7 @@ export const SetView = () => {
   const { labels: cardLabels, changeLabels } = useCardLabelsChoice();
   const [showSettings, setShowSettings] = useState(false);
   const [labelsError, setLabelsError] = useState(false);
-  const { boards, clearBoards, isBoardsLoading, generateBoards, isGenerating } = useBoard();
+  const { boards, clearBoards, forgetBoards, isBoardsLoading, generateBoards, isGenerating } = useBoard();
   const [selectedBoardIndex, setSelectedBoardIndex] = useState<number | null>(null);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -146,21 +146,15 @@ export const SetView = () => {
 
   const selectedCard = selectedCardIndex !== null ? cards[selectedCardIndex] ?? null : null;
   const viewState = setViewStateOf({ cardCount: cards.length, boardCount: boards.length, gridSize });
+  const boardCardIds = useMemo(() => boards.map((board) => board.cards.map((card) => card.id)), [boards]);
 
-  /** Tableros con cartas que usan las imágenes ya hidratadas (IndexedDB) para que se vean al instante. */
-  const boardsWithHydratedImages = useMemo(() => {
-    return boards.map((board) => ({
-      ...board,
-      // Las cartas de un tablero son copias: toman de la lista su número y su imagen ya hidratada.
-      cards: withNumbersFrom(board.cards, cards).map((boardCard) => {
-        const hydratedCard = cards.find((c) => c.id === boardCard.id);
-        return {
-          ...boardCard,
-          image: hydratedCard?.image ?? boardCard.image,
-        };
-      }),
-    }));
-  }, [boards, cards]);
+  // Al borrar una carta que está en tableros, la base ya borró los tableros (FEAT-60): la página los suelta.
+  useEffect(() => {
+    if (isLoaded && boardsHaveMissingCards(boardCardIds, cards.map((card) => card.id))) forgetBoards();
+  }, [isLoaded, boardCardIds, cards, forgetBoards]);
+
+  // Las cartas de un tablero son copias: cada casilla muestra la carta como está ahora en la lotería (FEAT-60, US A3).
+  const boardsWithHydratedImages = useMemo(() => withLiveCards(boards, cards), [boards, cards]);
 
   const renameSet = async (name: string) => {
     if (!setId || !user) return;
@@ -191,7 +185,7 @@ export const SetView = () => {
     setPdfError(null);
     setIsGeneratingPDF(true);
     try {
-      const blob = await generatePDF(boards, {
+      const blob = await generatePDF(boardsWithHydratedImages, {
         allCards: cards,
         title: set?.name,
         cardLabels: cardLabelsOrDefault(set?.card_labels),
@@ -321,6 +315,7 @@ export const SetView = () => {
               newCardIds={guestCards.newCardIds}
               onOpenCard={setSelectedCardIndex}
               onOpenSettings={() => setShowSettings(true)}
+              boardCardIds={boardCardIds}
             />
 
             <SetBoardsSection

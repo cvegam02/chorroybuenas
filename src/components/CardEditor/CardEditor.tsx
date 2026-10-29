@@ -24,6 +24,8 @@ import './CardEditor.css';
 import './CardEditorDeck.css';
 import { logger } from '../../utils/logger';
 import { minCardsForGrid } from '../../utils/gridRules';
+import { loadBoardsCollection } from '../../utils/storage';
+import { boardsWithCard } from '../../utils/boardIntegrity';
 import type { CardLabels } from '../../utils/cardLabels';
 
 interface CardEditorProps {
@@ -52,6 +54,8 @@ export const CardEditor = ({
   const deck = useDeckEditing(cardsApi);
   const { cards, removeCard, isCardRecentlySynced, waitingForSet, tokenBalance, ai, aiSummary, noTokensForSingle } = deck;
   const { transformingCardId, cardsToTransformIds, isAIBatchProcessing } = ai;
+  // Los tableros que el visitante ya armó, guardados en el navegador: borrar una carta que está en ellos los borra (FEAT-60).
+  const savedBoardCardIds = loadBoardsCollection()?.boards.map((board) => board.cardIds) ?? [];
   const [cardLabelsError, setCardLabelsError] = useState(false);
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const location = useLocation();
@@ -252,6 +256,7 @@ export const CardEditor = ({
                 onClick={deck.handleEditCard}
                 disabledDuringBatch={isAIBatchProcessing && cardsToTransformIds.has(card.id)}
                 isTransforming={transformingCardId === card.id}
+                boardsWithCard={boardsWithCard(savedBoardCardIds, card.id)}
               />
             ))}
           </div>
