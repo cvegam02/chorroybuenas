@@ -6,6 +6,7 @@ import type { Card } from '../../types';
 import { uploaderName, type LoteriaMember } from '../../utils/guestCards';
 import { CardPreview } from '../CardEditor/CardPreview';
 import { CardUploadThumb } from '../CardEditor/CardUploadThumb';
+import { boardsWithCard } from '../../utils/boardIntegrity';
 import type { DeckEditing } from '../CardEditor/useDeckEditing';
 import { missingCardNumbers, type SetViewState } from './setViewState';
 import './SetCardsSection.css';
@@ -22,13 +23,15 @@ interface SetCardsSectionProps {
   onOpenCard: (index: number) => void;
   /** Abre «Ajustes»: tipo de lotería y qué se ve en las cartas. */
   onOpenSettings: () => void;
+  /** Los ids de las cartas de cada tablero guardado, para avisar al borrar una que está en ellos (FEAT-60). */
+  boardCardIds: readonly (readonly string[])[];
 }
 
 /**
  * Las cartas de una lotería guardada, que se editan aquí mismo (FEAT-57): subir fotos, editar, borrar,
  * IA y ajustes. Un espacio punteado por cada carta que falta para el mínimo.
  */
-export const SetCardsSection = ({ state, deck, members, newCardIds, onOpenCard, onOpenSettings }: SetCardsSectionProps) => {
+export const SetCardsSection = ({ state, deck, members, newCardIds, onOpenCard, onOpenSettings, boardCardIds }: SetCardsSectionProps) => {
   const { t } = useTranslation();
   const { cards, ai, aiSummary, tokenBalance } = deck;
   const [isDraggingFiles, setIsDraggingFiles] = useState(false);
@@ -121,6 +124,7 @@ export const SetCardsSection = ({ state, deck, members, newCardIds, onOpenCard, 
               isTransforming={ai.transformingCardId === card.id}
               uploaderLabel={uploaderLabel(card)}
               isNew={newCardIds.has(card.id)}
+              boardsWithCard={boardsWithCard(boardCardIds, card.id)}
             />
           ))}
           {missingCardNumbers(state, cards.length).map((number) => (

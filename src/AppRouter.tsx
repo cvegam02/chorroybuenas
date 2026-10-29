@@ -34,6 +34,7 @@ import { useBoard } from './hooks/useBoard';
 import { CardRepository } from './repositories/CardRepository';
 import { useCards } from './hooks/useCards';
 import { generatePDF, downloadPDF, pdfFileName } from './services/PDFService';
+import { withLiveCards } from './utils/boardIntegrity';
 import { saveBoards, saveBoardCount, loadBoards, clearAllData } from './utils/storage';
 import { useVisitorTransfer } from './hooks/useVisitorTransfer';
 import { UploadProgressModal } from './components/CardEditor/UploadProgressModal';
@@ -41,7 +42,6 @@ import { BoardRepository } from './repositories/BoardRepository';
 import { Board, GridSize } from './types';
 import { logger } from './utils/logger';
 import { pdfErrorMessage } from './utils/pdfErrorMessage';
-import { withNumbersFrom } from './utils/cardNumbers';
 import { CardLabelsProvider } from './contexts/CardLabelsContext';
 import { useCardLabelsChoice } from './hooks/useCardLabelsChoice';
 
@@ -121,6 +121,12 @@ function AppContent() {
       setGridSize(location.state.gridSize as GridSize);
     }
   }, [location.pathname, location.state]);
+
+  // Sin sesión, en «Cartas» se sueltan los tableros de la vista previa: si se borra una carta que está en ellos, se
+  // borran (FEAT-60); al volver a la vista previa se cargan otra vez del navegador, si siguen ahí.
+  useEffect(() => {
+    if (location.pathname === '/cards' && !user) setBoards([]);
+  }, [location.pathname, user]);
 
   // Cargar tableros al refrescar en /preview (evita quedarse en "Redirigiendo...")
   useEffect(() => {
@@ -222,20 +228,8 @@ function AppContent() {
     shuffleBoards();
   };
 
-  /** Tableros con cartas que usan imágenes desde IndexedDB (hidratadas) para vista previa al instante (usuario logueado). */
-  const boardsWithHydratedImages = useMemo(() => {
-    return boards.map((board) => ({
-      ...board,
-      // Las cartas de un tablero son copias: toman de la lista su número y su imagen ya hidratada.
-      cards: withNumbersFrom(board.cards, cards).map((boardCard) => {
-        const hydratedCard = cards.find((c) => c.id === boardCard.id);
-        return {
-          ...boardCard,
-          image: hydratedCard?.image ?? boardCard.image,
-        };
-      }),
-    }));
-  }, [boards, cards]);
+  // Las cartas de un tablero son copias: cada casilla muestra la carta como está ahora en la lotería (FEAT-60, US A3).
+  const boardsWithHydratedImages = useMemo(() => withLiveCards(boards, cards), [boards, cards]);
 
   const handlePreviewConfirm = async () => {
     if (isGeneratingPDFRef.current) return;

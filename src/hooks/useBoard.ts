@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Board, Card } from '../types';
 import { loadCards } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
@@ -106,8 +106,12 @@ export const useBoard = () => {
     }
   };
 
+  /** Suelta los tableros de la pantalla sin tocar la base: ya se borraron al borrar una carta (FEAT-60). */
+  const forgetBoards = useCallback(() => setBoards([]), []);
+
   return {
     boards,
+    forgetBoards,
     generateBoards: generateBoardsAsync,
     clearBoards: clearBoardsAsync,
     isGenerating,
