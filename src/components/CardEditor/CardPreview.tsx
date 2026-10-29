@@ -28,9 +28,11 @@ interface CardPreviewProps {
   uploaderLabel?: string;
   /** Llegó de un invitado desde la última visita (FEAT-56). */
   isNew?: boolean;
+  /** En cuántos tableros guardados está: la confirmación de borrar avisa que se borran los tableros (FEAT-60). */
+  boardsWithCard?: number;
 }
 
-export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTransformButton, onClick, disabledDuringBatch, isTransforming, onOpen, uploaderLabel, isNew = false }: CardPreviewProps) => {
+export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTransformButton, onClick, disabledDuringBatch, isTransforming, onOpen, uploaderLabel, isNew = false, boardsWithCard = 0 }: CardPreviewProps) => {
   const { t } = useTranslation();
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -248,6 +250,7 @@ export const CardPreview = ({ card, onRemove, onRevert, onTransform, disableTran
         <CardActionConfirm
           action={pendingAction}
           isAiGenerated={card.isAiGenerated === true}
+          boardsWithCard={boardsWithCard}
           onConfirm={() => {
             if (pendingAction === 'regenerate') onTransform?.(card);
             if (pendingAction === 'revert') onRevert?.(card.id);

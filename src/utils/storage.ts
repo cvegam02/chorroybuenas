@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { Card, Board, BoardStorage, BoardsCollection } from '../types';
+import { boardsHaveMissingCards } from './boardIntegrity';
 import type { TransferPending } from '../services/visitorTransfer';
 import { saveImage as saveImageToIndexedDB } from './indexedDB';
 import { logger } from './logger';
@@ -293,6 +294,17 @@ export const loadBoards = async (): Promise<Board[] | null> => {
 /**
  * Loads boards collection with just IDs (for metadata)
  */
+/**
+ * Sin sesión, al borrar cartas (FEAT-60, §4): si algún tablero guardado en el navegador lleva una carta que ya
+ * no está, se borran los tableros guardados. Devuelve si se borraron.
+ */
+export const forgetBoardsWithMissingCards = (cardIds: readonly string[]): boolean => {
+  const collection = loadBoardsCollection();
+  if (!collection || !boardsHaveMissingCards(collection.boards.map((board) => board.cardIds), cardIds)) return false;
+  localStorage.removeItem(BOARDS_KEY);
+  return true;
+};
+
 export const loadBoardsCollection = (): BoardsCollection | null => {
   try {
     const stored = localStorage.getItem(BOARDS_KEY);

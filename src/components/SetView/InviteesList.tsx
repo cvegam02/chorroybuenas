@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
+import { BoardRepository } from '../../repositories/BoardRepository';
 import { CardRepository } from '../../repositories/CardRepository';
 import { LoteriaInviteRepository, type LoteriaInvitee } from '../../repositories/LoteriaInviteRepository';
 import { logger } from '../../utils/logger';
@@ -140,6 +141,9 @@ export const InviteesList = ({ setId, onChange, onPhotosDeleted, onBusyChange }:
         onChange();
       } else {
         await CardRepository.deleteGuestCards(user.id, setId, userId);
+        // Si alguna estaba en un tablero, se borran los tableros de la lotería (FEAT-60, §21)
+        await BoardRepository.deleteIncompleteBoards(user.id, setId).catch((err) =>
+          logger.error('Error deleting boards after deleting guest photos:', err));
         setInvitees((prev) => prev?.map((i) => (i.userId === userId ? { ...i, cardCount: 0 } : i)) ?? null);
         onPhotosDeleted();
       }

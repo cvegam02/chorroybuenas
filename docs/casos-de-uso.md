@@ -80,9 +80,9 @@ Creado el 2026-10-06. El bloque 6 (loterías temáticas) se agregó ese mismo d�
 - **Actor(es)**: Visitante o usuario registrado, sobre sus propias cartas.
 - **Precondiciones**: La carta existe.
 - **Flujo principal**: (1) Cambia el título o la imagen de una carta, o la borra. (2) Puede vaciar la lotería completa, confirmando antes.
-- **Excepciones**: Título repetido: se rechaza (§4). Título con emojis o letras de otros alfabetos: se rechaza (§4; 2026-10-09, FEAT-25). No se puede vaciar la lotería mientras hay una transformación en lote en curso.
-- **Resultado**: La carta cambió o dejó de existir.
-- **Estados afectados**: Cartas (§11).
+- **Excepciones**: Título repetido: se rechaza (§4). Título con emojis o letras de otros alfabetos: se rechaza (§4; 2026-10-09, FEAT-25). No se puede vaciar la lotería mientras hay una transformación en lote en curso. Si la carta que se borra está en algún tablero guardado, la confirmación avisa que se borrarán los tableros de la lotería (§4; 2026-10-29, FEAT-60).
+- **Resultado**: La carta cambió o dejó de existir. Si estaba en algún tablero, la lotería se queda sin tableros y hay que volver a armarlos.
+- **Estados afectados**: Cartas y Tableros (§11).
 - **Notificaciones**: Ninguna.
 - **Auditoría**: No.
 

@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Card } from '../types';
-import { saveCards, loadCards } from '../utils/storage';
+import { saveCards, loadCards, forgetBoardsWithMissingCards } from '../utils/storage';
 import { saveImage as saveImageToIndexedDB, cacheImageBlob, getImage } from '../utils/indexedDB';
 import { useAuth } from '../contexts/AuthContext';
 import { useSetContext } from '../contexts/SetContext';
 import { CardRepository } from '../repositories/CardRepository';
+import { BoardRepository } from '../repositories/BoardRepository';
 import { logger } from '../utils/logger';
 import { withCardNumbers } from '../utils/cardNumbers';
 import { cardAfterSave } from '../utils/savedCard';
@@ -260,6 +261,22 @@ export const useCards = () => {
     }
   };
 
+  /**
+   * Si la carta borrada estaba en algún tablero, se borran los tableros de la lotería (FEAT-60, §4). Si falla, los
+   * tableros incompletos se borran la próxima vez que se cargan.
+   */
+  const forgetBrokenBoards = async (remainingCardIds: string[]) => {
+    try {
+      if (user && currentSetId) {
+        await BoardRepository.deleteIncompleteBoards(user.id, currentSetId);
+      } else if (!user) {
+        forgetBoardsWithMissingCards(remainingCardIds);
+      }
+    } catch (error) {
+      logger.error('Error deleting boards after removing cards:', error);
+    }
+  };
+
   const removeCard = async (cardId: string) => {
     try {
       if (user) {
@@ -272,6 +289,7 @@ export const useCards = () => {
       logger.error('Error removing card:', error);
       return;
     }
+    await forgetBrokenBoards(cards.filter((card) => card.id !== cardId).map((card) => card.id));
     // Actualizar la UI siempre tras un delete exitoso (o tras delete en DB aunque falle storage)
     setCards((prevCards: Card[]) => {
       const newCards = prevCards.filter(card => card.id !== cardId);
@@ -288,10 +306,12 @@ export const useCards = () => {
         for (const card of cards) {
           await CardRepository.deleteCard(card.id);
         }
+        await forgetBrokenBoards([]);
         setCards([]);
       } else {
         const { clearAllImages } = await import('../utils/indexedDB');
         await clearAllImages();
+        await forgetBrokenBoards([]);
         setCards([]);
         await saveCards([]);
       }
