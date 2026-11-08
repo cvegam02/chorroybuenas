@@ -8,6 +8,7 @@ import { BoardPreview } from './components/BoardGenerator/BoardPreview';
 import { ConfirmationModal } from './components/ConfirmationModal/ConfirmationModal';
 import { WarningModal } from './components/ConfirmationModal/WarningModal';
 import { HowToPlay } from './components/HowToPlay/HowToPlay';
+import { useScrollToTopOnNavigate } from './hooks/useScrollToTopOnNavigate';
 import { AboutLoteria } from './components/AboutLoteria/AboutLoteria';
 import { TraditionalBoardsPage } from './components/TraditionalBoards/TraditionalBoardsPage';
 import { JoinLoteriaPage } from './components/JoinLoteria/JoinLoteriaPage';
@@ -70,6 +71,7 @@ function AppContent() {
   const { cards } = useCards();
   const navigate = useNavigate();
   const location = useLocation();
+  useScrollToTopOnNavigate();
   // El cantador ocupa toda la pantalla: sin la barra del sitio ni el pie (FEAT-55)
   const isCallerPage = matchPath('/loteria/:setId/cantar', location.pathname) !== null;
   const [currentStep, setCurrentStep] = useState<AppStep | null>(null);

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { googleRedirectUrl } from '../utils/authRedirect';
+import { nextAuthUser } from '../utils/authUser';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
 import { AVATAR_BUCKET } from '../utils/avatar';
@@ -55,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             setSession(session);
-            setUser(session?.user ?? null);
+            setUser(prev => nextAuthUser(prev, session?.user ?? null, event));
 
             if (event === 'PASSWORD_RECOVERY' && session) {
                 setRecoverySession(session);

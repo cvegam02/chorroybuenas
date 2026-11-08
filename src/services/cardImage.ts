@@ -10,13 +10,13 @@ import { urlToBase64 } from './pdf/images';
  */
 export const readStoredCardImage = async (card: Card): Promise<string | null> => {
   try {
-    const blob = await getImageBlob(card.id);
+    const blob = await getImageBlob(card.id, card.imagePath);
     if (blob) return await blobToBase64(blob);
 
     if (card.imagePath) {
       const downloaded = await CardRepository.downloadImage(card.imagePath);
       try {
-        await cacheImageBlob(card.id, downloaded);
+        await cacheImageBlob(card.id, downloaded, card.imagePath);
       } catch (_) {
         // La caché local es opcional: si falla, se sigue con la imagen descargada.
       }
