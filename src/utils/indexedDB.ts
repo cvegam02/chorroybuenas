@@ -227,17 +227,24 @@ export const saveImage = async (cardId: string, imageData: string | Blob): Promi
 const blobURLsMap = new Map<string, { url: string; timestamp: number }>();
 
 /**
+ * La copia local vale para la carta si es del mismo archivo de Storage. Sin ruta (sin sesión) vale cualquiera.
+ * Así, cuando la IA guarda la imagen nueva en el servidor (FEAT-58), la copia de la foto anterior no la tapa.
+ */
+export const isCachedFor = (record: { path?: string } | null | undefined, path?: string): boolean =>
+  !!record && (path === undefined || record.path === path);
+
+/**
  * Guarda solo el blob en IndexedDB sin revocar ni crear blob URLs.
- * Si ya existe un registro para esta carta, no se sobrescribe (evita cambiar el timestamp
+ * Si ya existe un registro para esta carta y es del mismo archivo, no se sobrescribe (evita cambiar el timestamp
  * y que getImage revoque las URLs que la UI sigue usando al re-ejecutarse el prefetch).
  */
-export const cacheImageBlob = async (cardId: string, blob: Blob): Promise<void> => {
+export const cacheImageBlob = async (cardId: string, blob: Blob, path?: string): Promise<void> => {
   try {
     const db = await initDB();
     const exists = await new Promise<boolean>((resolve, reject) => {
       const tx = db.transaction([STORE_NAME], 'readonly');
       const req = tx.objectStore(STORE_NAME).get(cardId);
-      req.onsuccess = () => resolve(!!req.result);
+      req.onsuccess = () => resolve(isCachedFor(req.result, path));
       req.onerror = () => reject(new Error('Error al leer IndexedDB'));
     });
     if (exists) return;
@@ -250,6 +257,7 @@ export const cacheImageBlob = async (cardId: string, blob: Blob): Promise<void> 
         id: cardId,
         image: blob,
         timestamp: ts,
+        ...(path !== undefined ? { path } : {}),
       });
       request.onsuccess = () => resolve();
       request.onerror = () => reject(new Error('Error al guardar imagen en IndexedDB'));
@@ -263,7 +271,7 @@ export const cacheImageBlob = async (cardId: string, blob: Blob): Promise<void> 
 /**
  * Obtiene una imagen de IndexedDB como Blob (for PDF generation, avoids blob URL revocation issues)
  */
-export const getImageBlob = async (cardId: string): Promise<Blob | null> => {
+export const getImageBlob = async (cardId: string, path?: string): Promise<Blob | null> => {
   try {
     const db = await initDB();
 
@@ -274,7 +282,7 @@ export const getImageBlob = async (cardId: string): Promise<Blob | null> => {
 
       request.onsuccess = () => {
         const result = request.result;
-        if (result && result.image instanceof Blob) {
+        if (isCachedFor(result, path) && result.image instanceof Blob) {
           resolve(result.image);
         } else {
           resolve(null);
@@ -294,7 +302,7 @@ export const getImageBlob = async (cardId: string): Promise<Blob | null> => {
 /**
  * Obtiene una imagen de IndexedDB
  */
-export const getImage = async (cardId: string): Promise<string | null> => {
+export const getImage = async (cardId: string, path?: string): Promise<string | null> => {
   try {
     const db = await initDB();
 
@@ -305,7 +313,7 @@ export const getImage = async (cardId: string): Promise<string | null> => {
 
       request.onsuccess = () => {
         const result = request.result;
-        if (result && result.image instanceof Blob) {
+        if (isCachedFor(result, path) && result.image instanceof Blob) {
           const storedTimestamp = result.timestamp as number | undefined;
           const existing = blobURLsMap.get(cardId);
           if (existing && storedTimestamp != null && existing.timestamp === storedTimestamp) {
