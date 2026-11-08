@@ -67,3 +67,16 @@ describe('datos de cada página para buscadores (FEAT-21, US A1)', () => {
     },
   );
 });
+
+describe('nombre de la marca en los títulos (FEAT-63, US B1)', () => {
+  it('cada página pública termina su título en «| Lotería Chorro y Buenas»', async () => {
+    const es = (await import('../../src/locales/es/translation.json')).default as Record<string, unknown>;
+    const lookup = (key: string) =>
+      key.split('.').reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], es);
+    const realT = (key: string) => String(lookup(key));
+    for (const path of PUBLIC_PATHS) {
+      expect(resolvePageMeta(path, realT).title).toMatch(/\| Lotería Chorro y Buenas$/);
+    }
+    expect(seasonalDetailMeta('abc', 'Lotería de Navidad', '', realT).title).toBe('Lotería de Navidad | Lotería Chorro y Buenas');
+  });
+});

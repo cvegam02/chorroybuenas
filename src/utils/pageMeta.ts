@@ -1,7 +1,7 @@
 import { PRIVACY_INTRO } from '../components/PrivacyNotice/privacyNoticeContent';
 
 export const SITE_URL = 'https://chorroybuenas.com.mx';
-const SITE_NAME = 'chorroybuenas.com.mx';
+const SITE_NAME = 'Lotería Chorro y Buenas';
 const PRIVACY_TITLE = 'Aviso de privacidad';
 
 type Translate = (key: string) => string;

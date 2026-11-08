@@ -6,7 +6,7 @@ import { buildPrerenderedHtml, prerenderedFile, shouldHydrate } from '../../src/
 const TEMPLATE = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
 
 const META: PageMeta = {
-  title: '¿Cómo se juega? | chorroybuenas.com.mx',
+  title: '¿Cómo se juega? | Lotería Chorro y Buenas',
   description: 'Reglas de la "lotería" & más',
   canonicalUrl: 'https://chorroybuenas.com.mx/como-se-juega',
   indexable: true,

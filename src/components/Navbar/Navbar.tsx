@@ -105,7 +105,7 @@ export const Navbar = () => {
     <header className={`navbar ${user ? '' : 'navbar--guest'}`}>
       <nav className="navbar__container" aria-label={t('navbar.mainLabel')}>
         <Link to="/" className="navbar__logo">
-          <img src={logoImage} alt="chorroybuenas.com.mx" className="navbar__logo-image" />
+          <img src={logoImage} alt="Lotería Chorro y Buenas" className="navbar__logo-image" />
         </Link>
 
         <ul className="navbar__links navbar__wide-only">
