@@ -74,7 +74,7 @@ export const useCards = () => {
             if (isCancelled()) return;
             try {
               const blob = await CardRepository.downloadImage(card.imagePath!);
-              if (!isCancelled()) await cacheImageBlob(card.id, blob);
+              if (!isCancelled()) await cacheImageBlob(card.id, blob, card.imagePath);
             } catch (_) {
               // La carta conserva signed URL
             }
@@ -86,7 +86,7 @@ export const useCards = () => {
     async function hydrateCards(cardList: Card[]): Promise<Card[]> {
       return Promise.all(
         cardList.map(async (card) => {
-          const url = await getImage(card.id);
+          const url = await getImage(card.id, card.imagePath);
           return { ...card, image: url ?? card.image };
         })
       );
