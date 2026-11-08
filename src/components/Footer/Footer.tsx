@@ -17,7 +17,7 @@ export const Footer = () => {
         <footer className="footer">
             <div className="footer__inner footer__main">
                 <div className="footer__brand">
-                    <strong className="footer__name">chorroybuenas.com.mx</strong>
+                    <strong className="footer__name">Lotería Chorro y Buenas</strong>
                     <span>
                         {t('footer.madeWith')} <FaHeart className="footer__heart" aria-hidden="true" />{' '}
                         {t('footer.tradition')}
