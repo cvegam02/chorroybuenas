@@ -105,12 +105,6 @@
   line-height: 1.5;
 }
 
-.deck__add {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .deck__button {
   display: flex;
   align-items: center;
@@ -292,6 +286,7 @@
 }
 
 .deck__dropzone {
+  display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
@@ -367,10 +362,6 @@
 
   .deck__wide-only {
     display: revert;
-  }
-
-  .deck__dropzone.deck__wide-only {
-    display: flex;
   }
 
   .deck__columns {

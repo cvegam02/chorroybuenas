@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaArrowLeft, FaBullhorn, FaDownload, FaLock, FaPencilAlt, FaPlus, FaUsers } from 'react-icons/fa';
+import { FaArrowLeft, FaBullhorn, FaDownload, FaLock, FaPencilAlt, FaUsers } from 'react-icons/fa';
 import type { Card, GridSize } from '../../types';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { logger } from '../../utils/logger';
@@ -44,8 +44,6 @@ interface SetHeaderProps {
   onSing: () => void;
   /** Abre «Invitar a subir fotos» (FEAT-56, M18). */
   onInvite: () => void;
-  /** «Agregar fotos» cuando faltan cartas: abre «Subir fotos» aquí mismo (FEAT-57). */
-  onAddPhotos: () => void;
   onShuffleBoards: () => void;
   onClearBoards: () => void;
   onDelete: () => void;
@@ -62,7 +60,6 @@ export const SetHeader = ({
   onDownload,
   onSing,
   onInvite,
-  onAddPhotos,
   onShuffleBoards,
   onClearBoards,
   onDelete,
@@ -254,12 +251,6 @@ export const SetHeader = ({
                     ? t('invite.sharedButton', { count: details.sharing.inviteeCount })
                     : t('invite.sharedClosed')}
               </button>
-              {details.state.kind === 'missingCards' && (
-                <button type="button" onClick={onAddPhotos} className="set-button set-button--primary set-button--large">
-                  <FaPlus aria-hidden="true" />
-                  {t('setView.addPhotos')}
-                </button>
-              )}
               {!isMobile && menu}
             </div>
           )}

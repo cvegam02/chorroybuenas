@@ -23,10 +23,3 @@ export const setViewStateOf = ({ cardCount, boardCount, gridSize }: SetViewState
   if (cardCount >= min) return { kind: 'missingBoards' };
   return { kind: 'missingCards', missing: min - cardCount, min };
 };
-
-/**
- * Los números de las cartas que faltan para el mínimo, a partir de la siguiente a la última que ya hay:
- * cada uno es un espacio punteado en la sección Cartas. Si no faltan cartas, ninguno.
- */
-export const missingCardNumbers = (state: SetViewState, cardCount: number): number[] =>
-  state.kind === 'missingCards' ? Array.from({ length: state.missing }, (_, index) => cardCount + index + 1) : [];
