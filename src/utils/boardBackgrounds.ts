@@ -266,3 +266,15 @@ export function boardImageFileError(file: { type: string; size: number }): 'type
   if (file.size > BOARD_IMAGE_MAX_BYTES) return 'size';
   return null;
 }
+
+const IMAGE_EXTENSIONS: Record<string, string> = {
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/jpg': 'jpg',
+  'image/webp': 'webp',
+};
+
+/** Ruta de la imagen de fondo de una lotería: en la carpeta de la dueña, con un nombre nuevo cada vez. */
+export function boardBackgroundImagePath(userId: string, setId: string, contentType: string, now: number): string {
+  return `${userId}/board-bg-${setId}_${now}.${IMAGE_EXTENSIONS[contentType] ?? 'png'}`;
+}

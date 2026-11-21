@@ -6,13 +6,13 @@ vi.mock('../../src/utils/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn
 import {
   BOARD_IMAGE_MAX_BYTES,
   OWN_IMAGE_VEIL_OPACITY,
+  boardBackgroundImagePath,
   boardImageFileError,
   ownImageBackground,
 } from '../../src/utils/boardBackgrounds';
 import { drawBoardBackground } from '../../src/services/pdf/background';
 import { boardBackgroundArea } from '../../src/services/pdf/layout';
 import { saveBoardLook, type BoardLookUpdate } from '../../src/services/boardLook';
-import { boardBackgroundImagePath } from '../../src/repositories/BoardBackgroundRepository';
 
 describe('imagen propia de fondo (FEAT-67, US A2)', () => {
   it('acepta lo mismo que las cartas: PNG, JPEG o WebP de hasta 5 MB', () => {
