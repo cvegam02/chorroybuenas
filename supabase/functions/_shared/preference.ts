@@ -1,6 +1,7 @@
 import type { PreferenceMetadata } from './credit.ts';
 import { applyOfferDiscount, type AppliedOffer } from './offers.ts';
 import { computePromotionBonus, type SelectedPromotion } from './promotions.ts';
+import { ITEM_CATEGORY, STATEMENT_DESCRIPTOR, type Payer } from './mpBuyer.ts';
 import { fail, type ParseResult } from './validation.ts';
 
 const DEFAULT_PRICE_PER_TOKEN_CENTS = 200;
@@ -69,6 +70,8 @@ export function buildPreference(input: {
   userId: string;
   appUrl: string;
   notificationUrl: string;
+  /** Solo en producción (FEAT-66); sin él la preferencia no lleva comprador. */
+  payer?: Payer;
 }) {
   const { item, userId, appUrl } = input;
   const promotionBonus = input.promotion ? computePromotionBonus(item.baseTokens, input.promotion.percent) : 0;
@@ -93,6 +96,8 @@ export function buildPreference(input: {
   return {
     items: [
       {
+        id: item.packId ?? 'tokens-libre',
+        category_id: ITEM_CATEGORY,
         title: `Tokens de IA - ${totalTokens} tokens`,
         description:
           `Pack de ${item.baseTokens} tokens` +
@@ -104,8 +109,9 @@ export function buildPreference(input: {
         currency_id: 'MXN',
       },
     ],
-    // No se envía payer: con credenciales de prueba MP rechaza el checkout si el correo es de una
-    // cuenta real, y en producción el comprador se identifica en el propio checkout.
+    // El comprador ayuda al antifraude de MP a aprobar tarjetas (FEAT-66); solo llega en producción.
+    ...(input.payer ? { payer: input.payer } : {}),
+    statement_descriptor: STATEMENT_DESCRIPTOR,
     back_urls: {
       success: `${appUrl}/comprar-tokens?success=1&payment_id={payment_id}`,
       failure: `${appUrl}/comprar-tokens?cancel=1`,

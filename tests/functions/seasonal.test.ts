@@ -113,6 +113,26 @@ describe('buildSeasonalPreference', () => {
     expect(preference.auto_return).toBe('approved');
     expect(preference.notification_url).toBe('https://x.supabase.co/functions/v1/webhook-mercadopago');
   });
+
+  // FEAT-66, US P2
+  it('lleva código y categoría del producto y el nombre del estado de cuenta', () => {
+    expect(preference.items[0]).toMatchObject({ id: LOTERIA, category_id: 'virtual_goods' });
+    expect(preference.statement_descriptor).toBe('CHORROYBUENAS');
+  });
+
+  it('sin comprador (en pruebas) no envía payer; con comprador sí', () => {
+    expect('payer' in preference).toBe(false);
+    const payer = { email: 'ana@correo.mx', first_name: 'Ana', last_name: 'López' };
+    const withPayer = buildSeasonalPreference({
+      item: { loteriaId: LOTERIA, name: 'Día de Muertos', amountCents: 4900 },
+      userId: USER,
+      appUrl: 'https://chorroybuenas.com.mx',
+      notificationUrl: 'https://x.supabase.co/functions/v1/webhook-mercadopago',
+      payer,
+    });
+    expect(withPayer.payer).toEqual(payer);
+    expect(withPayer.metadata).toEqual(preference.metadata);
+  });
 });
 
 describe('buildSeasonalDelivery', () => {

@@ -49,7 +49,8 @@ export type SkipReason =
   | 'missing_reference'
   | 'invalid_metadata';
 
-export type Outcome<T> = { ok: true; value: T } | { ok: false; reason: SkipReason; status?: string };
+/** status: estado de MP (o de cada intento, en una orden). detail: motivo del pago (`status_detail`), «-» si MP no lo da. */
+export type Outcome<T> = { ok: true; value: T } | { ok: false; reason: SkipReason; status?: string; detail?: string };
 
 interface MerchantOrder {
   payments?: Array<{ id: number | string; status?: string; status_detail?: string }>;
@@ -151,7 +152,10 @@ export async function findApprovedPayment(
     const found = await deps.mpGet<Record<string, unknown>>(`/v1/payments/${id}`);
     if (!found) return { ok: false, reason: 'payment_not_found' };
     if (found.status !== 'approved') {
-      return { ok: false, reason: 'not_approved', status: asString(found.status) ?? 'unknown' };
+      return {
+        ok: false, reason: 'not_approved', status: asString(found.status) ?? 'unknown',
+        detail: asString(found.status_detail) ?? '-',
+      };
     }
     paymentId = id;
     payment = found;
@@ -259,6 +263,12 @@ export type ReversalReason = 'refunded' | 'charged_back';
 export type ReversalStatus = 'tokens_reversed' | 'seasonal_refunded' | 'repeated' | 'not_found';
 
 const REVERSAL_REASONS: ReadonlySet<string> = new Set<ReversalReason>(['refunded', 'charged_back']);
+
+/** Texto para el log de un pago no aprobado: «estado/motivo» (FEAT-66, US P1). */
+export function unapprovedLabel(found: { status?: string; detail?: string }): string {
+  const status = found.status ?? 'unknown';
+  return found.detail ? `${status}/${found.detail}` : status;
+}
 
 /**
  * Motivo de reversa para el estado de un pago consultado en MP, o null si ese estado no revierte nada.

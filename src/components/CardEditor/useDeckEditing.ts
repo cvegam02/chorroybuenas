@@ -21,11 +21,10 @@ export const useDeckEditing = (cardsApi: ReturnType<typeof useCards>) => {
   const { user } = useAuth();
   const { currentSetId } = useSetContext();
   const { balance: tokenBalance, refreshBalance } = useTokenBalance();
-  const { cards, addCard, addCards, removeCard, updateCard, isCardRecentlySynced } = cardsApi;
+  const { cards, addCards, removeCard, updateCard, isCardRecentlySynced } = cardsApi;
   /** Usuario logueado sin lotería seleccionada: esperar a que SetContext cargue o crear una. */
   const waitingForSet = Boolean(user && !currentSetId);
 
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [batchFiles, setBatchFiles] = useState<File[]>([]);
@@ -45,23 +44,6 @@ export const useDeckEditing = (cardsApi: ReturnType<typeof useCards>) => {
   const noTokensForSingle = Boolean(user && tokenBalance !== null && tokenBalance < 1);
 
   const existingTitleSet = useMemo(() => new Set(cards.map(card => normalizeTitle(card.title))), [cards]);
-
-  const handleCardAdd = async (image: string, title: string) => {
-    if (existingTitleSet.has(normalizeTitle(title))) {
-      alert(t('cardEditor.errors.duplicateTitle'));
-      return false;
-    }
-    setShowUploadProgress(true);
-    setUploadProgress(-1);
-    try {
-      await addCard({ id: newUuid(), title, image });
-      setUploadProgress(100);
-      await new Promise(r => setTimeout(r, 300));
-      return true;
-    } finally {
-      setShowUploadProgress(false);
-    }
-  };
 
   const handleBatchCardsAdd = async (cardsToAdd: Array<{ image: string; title: string }>) => {
     const seenTitles = new Set(existingTitleSet);
@@ -117,10 +99,6 @@ export const useDeckEditing = (cardsApi: ReturnType<typeof useCards>) => {
     if (!waitingForSet) openBatchWith(pickImageFiles(files));
   };
 
-  const openSingleUpload = () => {
-    if (!waitingForSet) setIsUploadModalOpen(true);
-  };
-
   const handleEditCard = (card: Card) => {
     // Mientras la IA pinta la carta no se abre: al terminar, la carta ya trae su versión nueva.
     if (card.isProcessing || ai.transformingCardId === card.id) return;
@@ -145,7 +123,6 @@ export const useDeckEditing = (cardsApi: ReturnType<typeof useCards>) => {
 
   /** Cierra las ventanas de subir, para cuando se vacía la lotería. */
   const closeUploads = () => {
-    setIsUploadModalOpen(false);
     setIsBatchModalOpen(false);
     setBatchFiles([]);
   };
@@ -162,8 +139,6 @@ export const useDeckEditing = (cardsApi: ReturnType<typeof useCards>) => {
     noTokensForSingle,
     batchInputRef,
     batchFiles,
-    isUploadModalOpen,
-    setIsUploadModalOpen,
     isBatchModalOpen,
     isAIModalOpen,
     setIsAIModalOpen,
@@ -173,12 +148,10 @@ export const useDeckEditing = (cardsApi: ReturnType<typeof useCards>) => {
     uploadProgress,
     showAllTransformedModal,
     setShowAllTransformedModal,
-    handleCardAdd,
     handleBatchCardsAdd,
     handleBatchFileSelect,
     handleFilesDropped,
     openFilePicker,
-    openSingleUpload,
     handleEditCard,
     handleRevertCard,
     handleAIBulkClick,

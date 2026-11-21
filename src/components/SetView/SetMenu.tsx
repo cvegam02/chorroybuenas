@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { FaEllipsisV, FaPencilAlt, FaRandom, FaRegTrashAlt, FaRegWindowClose } from 'react-icons/fa';
+import { FaEllipsisV, FaPencilAlt, FaRegTrashAlt } from 'react-icons/fa';
 import type { Card } from '../../types';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
@@ -16,23 +16,16 @@ interface SetMenuProps {
   details: string;
   /** La carta que ilustra la hoja. */
   thumbnailCard: Card | undefined;
-  /** Sin tableros no se ofrece revolverlos ni borrarlos. */
-  hasBoards: boolean;
   onRename: () => void;
-  onShuffle: () => void;
-  onClearBoards: () => void;
   onDelete: () => void;
 }
 
-/** El «⋮» de la página de una lotería: lo que se usa poco o borra cosas. Desplegable en computadora, hoja inferior en celular. */
+/** El «⋮» de la página de una lotería: cambiarle el nombre o eliminarla; lo de tableros va en su sección (FEAT-65). Desplegable en computadora, hoja inferior en celular. */
 export const SetMenu = ({
   name,
   details,
   thumbnailCard,
-  hasBoards,
   onRename,
-  onShuffle,
-  onClearBoards,
   onDelete,
 }: SetMenuProps) => {
   const { t } = useTranslation();
@@ -68,18 +61,6 @@ export const SetMenu = ({
         <FaPencilAlt aria-hidden="true" />
         {t('dashboard.renameLoteria')}
       </button>
-      {hasBoards && (
-        <>
-          <button type="button" role="menuitem" className={itemClass} onClick={choose(onShuffle)}>
-            <FaRandom aria-hidden="true" />
-            {t('setView.shuffleBoards')}
-          </button>
-          <button type="button" role="menuitem" className={itemClass} onClick={choose(onClearBoards)}>
-            <FaRegWindowClose aria-hidden="true" />
-            {t('setView.clearBoards')}
-          </button>
-        </>
-      )}
       <span className="loteria-menu__divider" aria-hidden="true" />
       <button type="button" role="menuitem" className={`${itemClass} loteria-menu__item--danger`} onClick={choose(onDelete)}>
         <FaRegTrashAlt aria-hidden="true" />

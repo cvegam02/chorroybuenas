@@ -1,3 +1,4 @@
+import { ITEM_CATEGORY, STATEMENT_DESCRIPTOR, type Payer } from './mpBuyer.ts';
 import { fail, isUuid, type ParseResult } from './validation.ts';
 
 /** Precio mínimo de una lotería de temporada: $10.00 MXN (el mismo tope que impone la base). */
@@ -87,6 +88,8 @@ export function buildSeasonalPreference(input: {
   userId: string;
   appUrl: string;
   notificationUrl: string;
+  /** Solo en producción (FEAT-66); sin él la preferencia no lleva comprador. */
+  payer?: Payer;
 }) {
   const { item, userId, appUrl } = input;
   const metadata: SeasonalMetadata = {
@@ -100,6 +103,8 @@ export function buildSeasonalPreference(input: {
   return {
     items: [
       {
+        id: item.loteriaId,
+        category_id: ITEM_CATEGORY,
         title: `Lotería temática - ${item.name}`,
         description: 'Descarga digital en PDF',
         quantity: 1,
@@ -112,6 +117,8 @@ export function buildSeasonalPreference(input: {
       failure: `${returnUrl}?cancel=1`,
       pending: `${returnUrl}?pending=1&payment_id={payment_id}`,
     },
+    ...(input.payer ? { payer: input.payer } : {}),
+    statement_descriptor: STATEMENT_DESCRIPTOR,
     auto_return: 'approved',
     external_reference: userId,
     notification_url: input.notificationUrl,
