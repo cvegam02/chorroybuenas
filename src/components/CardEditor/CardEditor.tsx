@@ -9,7 +9,6 @@ import {
 } from 'react-icons/fa';
 import { useCards } from '../../hooks/useCards';
 import { CardPreview } from './CardPreview';
-import { CardUploadThumb } from './CardUploadThumb';
 import { GridModeSelector } from '../BoardGenerator/GridModeSelector';
 import { CardLabelsSelector } from './CardLabelsSelector';
 import { SetRepository } from '../../repositories/SetRepository';
@@ -160,13 +159,6 @@ export const CardEditor = ({
             </button>
           </div>
 
-          <div className="deck__add">
-            <button type="button" onClick={deck.openFilePicker} className="deck__button deck__button--primary" disabled={Boolean(waitingForSet)}>
-              <FaUpload aria-hidden="true" />
-              {t('cardEditor.deck.uploadPhotos')}
-            </button>
-          </div>
-
           {user && cardCount > 0 && (
             <div className="deck__ai deck__ai--panel">
               <div className="deck__ai-text">
@@ -240,11 +232,25 @@ export const CardEditor = ({
             )}
           </div>
 
+          {/* La única forma de subir fotos, en computadora y en celular (FEAT-64) */}
+          <button
+            type="button"
+            className={`deck__dropzone ${isDraggingFiles ? 'deck__dropzone--over' : ''}`}
+            onClick={deck.openFilePicker}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setIsDraggingFiles(true);
+            }}
+            onDragLeave={() => setIsDraggingFiles(false)}
+            onDrop={handleFilesDrop}
+            disabled={Boolean(waitingForSet)}
+          >
+            <FaUpload aria-hidden="true" />
+            <strong>{t('cardEditor.deck.dropTitle')}</strong>
+            <span>{t('cardEditor.deck.dropText')}</span>
+          </button>
+
           <div className="deck__grid">
-            {/* En celular la cuadrícula empieza con la casilla «Agregar»; en computadora está el recuadro de abajo. */}
-            <div className="deck__add-tile deck__narrow-only">
-              <CardUploadThumb onSingleClick={deck.openSingleUpload} />
-            </div>
             {cards.map((card) => (
               <CardPreview
                 key={card.id}
@@ -260,23 +266,6 @@ export const CardEditor = ({
               />
             ))}
           </div>
-
-          <button
-            type="button"
-            className={`deck__dropzone deck__wide-only ${isDraggingFiles ? 'deck__dropzone--over' : ''}`}
-            onClick={deck.openFilePicker}
-            onDragOver={(event) => {
-              event.preventDefault();
-              setIsDraggingFiles(true);
-            }}
-            onDragLeave={() => setIsDraggingFiles(false)}
-            onDrop={handleFilesDrop}
-            disabled={Boolean(waitingForSet)}
-          >
-            <FaUpload aria-hidden="true" />
-            <strong>{t('cardEditor.deck.dropTitle')}</strong>
-            <span>{t('cardEditor.deck.dropText')}</span>
-          </button>
         </section>
       </div>
 

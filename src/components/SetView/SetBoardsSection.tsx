@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { FaRandom } from 'react-icons/fa';
+import { FaRandom, FaRegWindowClose } from 'react-icons/fa';
 import type { Board, GridSize } from '../../types';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { BoardThumbnail } from '../BoardGenerator/BoardThumbnail';
@@ -13,6 +13,8 @@ interface SetBoardsSectionProps {
   /** Abre el tablero grande; recibe su lugar en la lista, empezando en 0. */
   onOpenBoard: (index: number) => void;
   onShuffle: () => void;
+  /** Pide confirmar y borra los tableros (FEAT-65: antes estaba en el «⋮»). */
+  onClear: () => void;
   /** Abre la ventana para elegir cuántos tableros (FEAT-57). */
   onBuild: () => void;
 }
@@ -30,7 +32,7 @@ const BlankBoard = ({ gridSize }: { gridSize: GridSize }) => (
  * Los tableros de una lotería guardada. Sin tableros muestra un bloque punteado: con el botón para armarlos
  * si las cartas ya alcanzan, o bloqueado mientras falten cartas.
  */
-export const SetBoardsSection = ({ boards, state, gridSize, onOpenBoard, onShuffle, onBuild }: SetBoardsSectionProps) => {
+export const SetBoardsSection = ({ boards, state, gridSize, onOpenBoard, onShuffle, onClear, onBuild }: SetBoardsSectionProps) => {
   const { t } = useTranslation();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const hasBoards = boards.length > 0;
@@ -43,10 +45,16 @@ export const SetBoardsSection = ({ boards, state, gridSize, onOpenBoard, onShuff
           <span className="set-section__count">{hasBoards ? boards.length : t('setView.boardsNotYet')}</span>
         </div>
         {hasBoards && (
-          <button type="button" className="set-button set-button--secondary set-button--small" onClick={onShuffle}>
-            <FaRandom aria-hidden="true" />
-            {t('setView.shuffleBoards')}
-          </button>
+          <div className="set-boards__actions">
+            <button type="button" className="set-button set-button--secondary set-button--small" onClick={onShuffle}>
+              <FaRandom aria-hidden="true" />
+              {t('setView.shuffleBoards')}
+            </button>
+            <button type="button" className="set-button set-button--secondary set-button--small" onClick={onClear}>
+              <FaRegWindowClose aria-hidden="true" />
+              {t('setView.clearBoards')}
+            </button>
+          </div>
         )}
       </div>
 

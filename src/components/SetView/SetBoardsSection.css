@@ -113,3 +113,10 @@
     width: 100%;
   }
 }
+
+/* «Revolver tableros» y «Borrar tableros», juntos a la derecha del título (FEAT-65) */
+.set-boards__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
