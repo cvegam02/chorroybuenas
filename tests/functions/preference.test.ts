@@ -113,8 +113,25 @@ describe('buildPreference', () => {
     });
   });
 
-  it('no envía datos del comprador: Mercado Pago los pide en su checkout', () => {
+  it('sin comprador (en pruebas) no envía payer', () => {
     expect('payer' in buildPreference(base)).toBe(false);
+  });
+
+  // FEAT-64, US P2
+  it('con comprador (en producción) envía payer', () => {
+    const payer = { email: 'ana@correo.mx', first_name: 'Ana' };
+    expect(buildPreference({ ...base, payer }).payer).toEqual(payer);
+  });
+
+  it('lleva código y categoría del producto y el nombre del estado de cuenta', () => {
+    const p = buildPreference(base);
+    expect(p.items[0]).toMatchObject({ id: 'pack-1', category_id: 'virtual_goods' });
+    expect(p.statement_descriptor).toBe('CHORROYBUENAS');
+  });
+
+  it('en cantidad libre el código del producto es «tokens-libre»', () => {
+    const p = buildPreference({ ...base, item: { ...base.item, packId: null } });
+    expect(p.items[0].id).toBe('tokens-libre');
   });
 
   it('convierte centavos a pesos sin perder decimales', () => {

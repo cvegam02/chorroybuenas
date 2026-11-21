@@ -1,6 +1,6 @@
 # FEAT-64 — Que Mercado Pago apruebe más pagos con tarjeta
 
-**Estado: ⚪ definida con Carlos el 2026-11-21, en la rama `feature/pagos-tarjeta`; por construir.**
+**Estado: 🟡 en construcción — definida con Carlos el 2026-11-21, en la rama `feature/pagos-tarjeta`. P1 y P2 construidas; falta P3 y desplegar las funciones en dev.**
 
 **Contexto.** Carlos notó que las compras de tokens con tarjeta («Mercado Pago Standard» en su actividad) salen rechazadas y las que pasan son con Wallet. Al revisar los dos rechazos en la app de Mercado Pago:
 
@@ -31,32 +31,32 @@ Todas las ventas aprobadas que se ven en la actividad de Carlos son con Wallet; 
 - El producto lleva `id` (el id del paquete, `tokens-libre` en cantidad libre, o el id de la lotería temática) y `category_id: "virtual_goods"`. La preferencia lleva `statement_descriptor: "CHORROYBUENAS"` en los dos modos.
 - No cambia el monto, los tokens, la metadata ni cómo se acredita el pago.
 
-## US P1 — Saber por qué Mercado Pago rechazó un pago   ·   Estado: ⚪ por hacer
+## US P1 — Saber por qué Mercado Pago rechazó un pago   ·   Estado: 🟡 construida, por probar en dev
 
 - **Historia** — Como dueño del sitio, quiero que el registro del servidor diga el motivo exacto de cada pago no aprobado, para no tener que buscarlo en la app de Mercado Pago.
 - **Entrega demostrable** — Cuando Mercado Pago avisa de un pago no aprobado (de tokens o de lotería temática), el registro de `webhook-mercadopago` muestra estado y motivo, por ejemplo `rejected/cc_rejected_high_risk`.
-- **Construido** — _(pendiente)_
+- **Construido** — 2026-11-21, en la rama `feature/pagos-tarjeta`. `findApprovedPayment` (`_shared/paymentFlow.ts`) devuelve también `detail` con el `status_detail` del pago («-» si no viene); `unapprovedLabel` arma «estado/motivo» y `webhook-mercadopago` lo usa en su log. El estado sigue igual, así que las devoluciones y contracargos no cambian. Las órdenes (`merchant_order`) ya anotaban el motivo. Pruebas en `tests/functions/paymentFlow.test.ts`. Falta desplegar `webhook-mercadopago` en dev.
 - **Depende de** — nada.
 - **Cómo se prueba (guion de demo)** — En dev, compra tokens con una tarjeta de prueba de Mercado Pago a nombre de titular «OTHE» (la que Mercado Pago usa para simular un rechazo) → el cobro sale rechazado → abre los registros de la función `webhook-mercadopago` en Supabase (proyecto dev) → la línea del aviso debería decir `rejected/cc_rejected_other_reason`, no solo `rejected`.
 - **Escenarios cubiertos**:
-  - [ ] Un pago rechazado de tokens anota estado y motivo. (Prueba automática.)
-  - [ ] Un pago rechazado de lotería temática anota estado y motivo. (Prueba automática.)
-  - [ ] Si Mercado Pago no manda motivo, se anota `-` en su lugar y nada falla. (Prueba automática.)
+  - [x] Un pago rechazado de tokens anota estado y motivo. (Prueba automática.)
+  - [x] Un pago rechazado de lotería temática anota estado y motivo. (Misma consulta que los tokens: el webhook no distingue la compra antes de anotar.)
+  - [x] Si Mercado Pago no manda motivo, se anota `-` en su lugar y nada falla. (Prueba automática.)
 
-## US P2 — Mandar a Mercado Pago los datos que pide para aprobar tarjetas   ·   Estado: ⚪ por hacer
+## US P2 — Mandar a Mercado Pago los datos que pide para aprobar tarjetas   ·   Estado: 🟡 construida, por probar en dev y producción
 
 - **Historia** — Como comprador que paga con tarjeta, quiero que mi pago no se rechace como sospechoso, para comprar tokens o una lotería temática sin tener que usar Wallet.
 - **Entrega demostrable** — En producción, la preferencia de las dos compras lleva el correo y el nombre del comprador, el código y la categoría del producto y «CHORROYBUENAS» para el estado de cuenta. En pruebas lleva todo menos el comprador.
-- **Construido** — _(pendiente)_
+- **Construido** — 2026-11-21, en la rama `feature/pagos-tarjeta`. Módulo nuevo `_shared/mpBuyer.ts` (`buildPayer`, `STATEMENT_DESCRIPTOR`, `ITEM_CATEGORY`). `buildPreference` y `buildSeasonalPreference` aceptan `payer` opcional y agregan `id` y `category_id` al producto y `statement_descriptor`. `create-payment-preference` y `create-seasonal-preference` leen `profiles.full_name` solo en producción y pasan el correo de la sesión. Pruebas en `tests/functions/mpBuyer.test.ts`, `preference.test.ts` y `seasonal.test.ts`. Falta desplegar las dos funciones en dev.
 - **Depende de** — nada (puede ir en paralelo con P1).
-- **Cómo se prueba (guion de demo)** — En dev (credenciales de prueba): compra tokens con una tarjeta de prueba → el cobro debería funcionar igual que hoy. En producción, después de publicar: compra $10 de tokens con una tarjeta tuya real desde el celular, sin entrar a tu cuenta de Mercado Pago → el pago debería aprobarse y los tokens llegar → en tu estado de cuenta el cargo debería decir «CHORROYBUENAS» → en tu actividad de Mercado Pago la venta debería mostrar el correo del comprador.
+- **Cómo se prueba (guion de demo)** — En dev (credenciales de prueba): compra tokens con una tarjeta de prueba → el cobro debería funcionar igual que hoy. En producción, después de publicar: compra $10 de tokens con una tarjeta tuya real desde el celular, sin entrar a tu cuenta de Mercado Pago y con una cuenta del sitio cuyo correo **no** sea el de tu cuenta vendedora de Mercado Pago (Mercado Pago no deja que el vendedor se pague a sí mismo) → el pago debería aprobarse y los tokens llegar → en tu estado de cuenta el cargo debería decir «CHORROYBUENAS» → en tu actividad de Mercado Pago la venta debería mostrar el correo del comprador.
 - **Escenarios cubiertos**:
-  - [ ] En producción, la preferencia de tokens lleva correo y nombre del comprador. (Prueba automática.)
-  - [ ] En producción, sin nombre en el perfil, lleva solo el correo. (Prueba automática.)
-  - [ ] En pruebas no lleva comprador. (Prueba automática.)
-  - [ ] Las dos compras llevan código y categoría del producto y «CHORROYBUENAS». (Prueba automática.)
-  - [ ] La lotería temática se comporta igual que los tokens en los casos anteriores. (Prueba automática.)
-  - [ ] Monto, tokens y metadata no cambian. (Pruebas existentes siguen pasando.)
+  - [x] En producción, la preferencia de tokens lleva correo y nombre del comprador. (Prueba automática.)
+  - [x] En producción, sin nombre en el perfil, lleva solo el correo. (Prueba automática.)
+  - [x] En pruebas no lleva comprador. (Prueba automática.)
+  - [x] Las dos compras llevan código y categoría del producto y «CHORROYBUENAS». (Prueba automática.)
+  - [x] La lotería temática se comporta igual que los tokens en los casos anteriores. (Prueba automática.)
+  - [x] Monto, tokens y metadata no cambian. (Pruebas existentes siguen pasando.)
 
 ## US P3 — El aviso de privacidad dice qué datos recibe Mercado Pago   ·   Estado: ⚪ por hacer
 
