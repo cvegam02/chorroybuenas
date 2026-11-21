@@ -1,6 +1,6 @@
 # FEAT-67 — Fondo de los tableros (U2)
 
-**Estado:** US A1, A2, A4 y A5 construidas y probadas por Carlos en local (contra la base de dev, en computadora y teléfono) el 2026-11-21, y llevadas a `dev` con el PR de `feature/fondo-tableros` a `dev` del 2026-11-21; falta que Carlos las pruebe en `dev.chorroybuenas.com.mx`. A3 por hacer. Rama `feature/fondo-tableros` (creada el 2026-11-21 desde `dev`). Migraciones 077 a 080 aplicadas en Supabase dev el 2026-11-21; producción todavía no.
+**Estado:** ✅ US A1, A2, A4 y A5 en producción. Construidas y probadas por Carlos en local (contra la base de dev, en computadora y teléfono) el 2026-11-21; llevadas a `dev` con el PR #97 y probadas por Carlos en `dev.chorroybuenas.com.mx` ese día; llevadas a `main` con el PR de `dev` a `main` del 2026-11-21. Migraciones 077 a 080 aplicadas en Supabase dev y en producción el 2026-11-21 (en producción, registradas en su historial; antes se copió `loteria_sets` al esquema privado `respaldo_20261121`). A3 por hacer. Rama `feature/fondo-tableros` (creada el 2026-11-21 desde `dev`).
 
 **Contexto.** Hoy todos los tableros del PDF llevan el mismo fondo crema detrás del encabezado (logo y «TABLERO N») y de las cartas (`CUT_AREA_BLEED_PT` en `src/services/pdf/constants.ts`). Carlos propuso que se pueda elegir el fondo.
 
@@ -29,7 +29,7 @@ Todas el 2026-11-21, con Carlos.
 17. **M22 en cuatro pestañas, en computadora y en teléfono:** «Catálogo», «Color», «Imagen» y «Logo», una a la vez; abre en la del fondo guardado. «Tu color» sale del catálogo a su pestaña. Pedido por Carlos el 2026-11-21, porque en teléfono se amontonaba todo y con imagen sobraban los colores; se descartaron las secciones que se abren y se cierran, y las pestañas solo en teléfono. Aplicado en `diseno-mockups.md` (M22) ese día, con su confirmación. Ese día también se arregló «Aclarar la imagen», que en teléfono no respondía al tocarlo: la casilla ahora cubre todo el renglón.
 18. **«TABLERO N» también se mueve, por su lado (cambia la decisión 12).** Izquierda, centro o derecha, aparte del logo; empieza en centro. A los lados se alinea con la orilla de las cartas y lleva una sola línea, del lado libre. La pestaña «Logo» de M22 pasa a «Encabezado», con una barra para el logo y otra para el título. Pedido por Carlos el 2026-11-21; se descartó que logo y título se movieran juntos con un solo control. Columna `board_title_position` (migración 080). Aplicado en `contexto-negocio.md` (§4, §11 y §15) y en `diseno-mockups.md` (M22) el 2026-11-21, con su confirmación.
 
-## US A1 — Elegir un fondo del catálogo fijo   ·   Estado: hecha, probada en local (2026-11-21); en `dev`
+## US A1 — Elegir un fondo del catálogo fijo   ·   Estado: ✅ probada en dev (2026-11-21), en producción
 
 - **Historia** — Como dueño de una lotería, quiero elegir el fondo de mis tableros entre varios ya hechos, para que mi lotería se vea a mi gusto.
 - **Entrega demostrable** — En U2, «Tableros» trae «Fondo»; abre una ventana con el catálogo fijo (crema y otros 5 a 7, entre colores de la paleta y patrones mexicanos claros) y la vista previa del tablero 1 de la lotería tal cual se imprime, que cambia al momento con cada fondo que se toca (decisión 11); al guardar, las miniaturas y el PDF lo llevan. Cerrar sin guardar deja el fondo anterior.
@@ -47,7 +47,7 @@ Todas el 2026-11-21, con Carlos.
   - [x] «Arma tus tableros» y las temáticas no cambian. (Revisión: no pasan fondo y salen con el crema.)
   - [x] Se ve bien en computadora y en teléfono. (Probado por Carlos el 2026-11-21.)
 
-## US A2 — Usar una imagen propia de fondo   ·   Estado: hecha, probada en local (2026-11-21); en `dev`
+## US A2 — Usar una imagen propia de fondo   ·   Estado: ✅ probada en dev (2026-11-21), en producción
 
 - **Historia** — Como dueño de una lotería, quiero usar una imagen mía como fondo de los tableros, para personalizarlos todavía más.
 - **Entrega demostrable** — En la ventana «Fondo», «Subir imagen» con el interruptor «Aclarar la imagen» (encendido de entrada); la imagen se ve en la vista previa, en las miniaturas y en el PDF.
@@ -74,7 +74,7 @@ Todas el 2026-11-21, con Carlos.
   - [ ] Un fondo quitado deja de ofrecerse, pero las loterías que lo tenían lo conservan.
   - [ ] Los fondos fijos no se pueden quitar desde Administración.
 
-## US A4 — Elegir la posición del logo y del título   ·   Estado: hecha, probada en local (2026-11-21); en `dev`
+## US A4 — Elegir la posición del logo y del título   ·   Estado: ✅ probada en dev (2026-11-21), en producción
 
 - **Historia** — Como dueño de una lotería, quiero poner el logo y «TABLERO N» del tablero a la izquierda, al centro o a la derecha, cada uno por su lado, para que combinen con el fondo que elegí.
 - **Entrega demostrable** — En la ventana «Fondo», pestaña «Encabezado», una barra para el logo y otra para el título, con tres opciones cada una (izquierda, centro, derecha), empezando en centro; la vista previa y el PDF las respetan, y las miniaturas el título (no llevan logo).
@@ -87,7 +87,7 @@ Todas el 2026-11-21, con Carlos.
   - [x] La posición se guarda con la lotería y vale para todos sus tableros. (Prueba de base 078; el PDF usa una para todas las páginas.)
   - [x] «TABLERO N» se mueve por su lado: a los lados se alinea con las cartas, lleva una sola línea y no cambia de altura. (Prueba automática y de base 080.)
 
-## US A5 — Elegir un color propio   ·   Estado: hecha, probada en local (2026-11-21); en `dev`
+## US A5 — Elegir un color propio   ·   Estado: ✅ probada en dev (2026-11-21), en producción
 
 - **Historia** — Como dueño de una lotería, quiero escoger cualquier color de fondo con un selector, para no quedarme solo con los del catálogo.
 - **Entrega demostrable** — En M22, «Tu color» al final del catálogo abre el selector; la vista previa cambia mientras se mueve; con un color oscuro sale el aviso; al guardar, las miniaturas y el PDF lo llevan.
