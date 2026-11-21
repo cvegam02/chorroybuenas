@@ -4,7 +4,7 @@ Lista de trabajo abierta después de la remediación del code review y del paso 
 
 ## Cómo está todo hoy
 
-- **Producción:** `chorroybuenas.com.mx` lo sirve Vercel (rama `main`) contra el proyecto de Supabase PROD (`bdruzgjboxalpywljemk`). Backend al día con dev desde el 2026-10-28: migraciones hasta la 076 y 8 edge functions (ese día se aplicaron la 060 a la 076 y las 7 funciones de FEAT-55 a FEAT-58; el sitio pasó a `main` con el PR #84). Antes de migrar se copiaron las tablas tocadas al esquema privado `respaldo_20261028` de esa base; se puede borrar cuando producción se vea bien.
+- **Producción:** `chorroybuenas.com.mx` lo sirve Vercel (rama `main`) contra el proyecto de Supabase PROD (`bdruzgjboxalpywljemk`). Backend al día con dev desde el 2026-10-28: migraciones hasta la 076 y 8 edge functions (ese día se aplicaron la 060 a la 076 y las 7 funciones de FEAT-55 a FEAT-58; el sitio pasó a `main` con el PR #84). Antes de migrar se copiaron las tablas tocadas al esquema privado `respaldo_20261028` de esa base; se puede borrar cuando producción se vea bien. El 2026-11-21 se aplicaron la 077 a la 080 (FEAT-67, fondo de los tableros), registradas en el historial; antes se copió `loteria_sets` a `respaldo_20261121`, que también se puede borrar cuando producción se vea bien. Migraciones hasta la 080.
 - **Dev:** `dev.chorroybuenas.com.mx` lo sirve Vercel (rama `dev`, entorno Preview) contra Supabase DEV (`vjglrfofyzvyvaetakpu`). Mismo backend.
 - **Validado con servicios reales:** en PROD, una transformación de IA (1 token cobrado) y una compra real de $10.00 MXN (5 tokens, una sola acreditación con 4 notificaciones). En DEV, lo mismo con credenciales de prueba.
 - **Documentos de referencia:**

@@ -9,6 +9,11 @@ import { useCardLabelsChoice } from '../../hooks/useCardLabelsChoice';
 import { useDeckEditing } from '../CardEditor/useDeckEditing';
 import { DeckDialogs } from '../CardEditor/DeckDialogs';
 import { SetCardSettingsDialog } from './SetCardSettingsDialog';
+import { SetBoardBackgroundDialog, type BoardLookChoice } from './SetBoardBackgroundDialog';
+import { saveBoardLook as persistBoardLook } from '../../services/boardLook';
+import { BoardBackgroundRepository } from '../../repositories/BoardBackgroundRepository';
+import { useBoardBackground } from '../../hooks/useBoardBackground';
+import { boardLogoPositionOrDefault } from '../../utils/boardBackgrounds';
 import { useBoard } from '../../hooks/useBoard';
 import { useGuestCardsLive } from '../../hooks/useGuestCardsLive';
 import { useOwnerGuestCards } from '../../hooks/useOwnerGuestCards';
@@ -51,6 +56,8 @@ export const SetView = () => {
   const deck = useDeckEditing(cardsApi);
   const { labels: cardLabels, changeLabels } = useCardLabelsChoice();
   const [showSettings, setShowSettings] = useState(false);
+  // M22: el fondo de los tableros (FEAT-67)
+  const [showBackground, setShowBackground] = useState(false);
   const [labelsError, setLabelsError] = useState(false);
   const { boards, clearBoards, forgetBoards, isBoardsLoading, generateBoards, isGenerating } = useBoard();
   const [selectedBoardIndex, setSelectedBoardIndex] = useState<number | null>(null);
@@ -155,11 +162,41 @@ export const SetView = () => {
 
   // Las cartas de un tablero son copias: cada casilla muestra la carta como está ahora en la lotería (FEAT-60, US A3).
   const boardsWithHydratedImages = useMemo(() => withLiveCards(boards, cards), [boards, cards]);
+  const { background: boardBackground, imageUrl: boardImageUrl } = useBoardBackground(set);
 
   const renameSet = async (name: string) => {
     if (!setId || !user) return;
     const updated = await SetRepository.updateSet(setId, user.id, { name });
     setSets(prev => prev.map(s => (s.id === setId ? { ...s, name: updated.name } : s)));
+  };
+
+  /** Fondo y posición del logo de los tableros desde M22 (FEAT-67). Devuelve si se pudo guardar. */
+  const saveBoardLook = async (look: BoardLookChoice): Promise<boolean> => {
+    if (!setId || !user) return false;
+    const userId = user.id;
+    try {
+      const updated = await persistBoardLook(
+        { ...look, previousImagePath: set?.board_background_image_path ?? null },
+        {
+          uploadImage: (file) => BoardBackgroundRepository.uploadImage(userId, setId, file),
+          removeImage: (path) => BoardBackgroundRepository.removeImage(path),
+          updateSet: (update) => SetRepository.updateSet(setId, userId, update),
+        }
+      );
+      const applied = {
+        board_background: updated.board_background,
+        board_logo_position: updated.board_logo_position,
+        board_title_position: updated.board_title_position,
+        board_background_lighten: updated.board_background_lighten,
+        board_background_image_path: updated.board_background_image_path,
+      };
+      setSets(prev => prev.map(s => (s.id === setId ? { ...s, ...applied } : s)));
+      setFetchedSet(prev => (prev ? { ...prev, ...applied } : prev));
+      return true;
+    } catch (err) {
+      logger.error('Error saving board background:', err);
+      return false;
+    }
   };
 
   /** Tipo de lotería desde «Ajustes»; solo sin tableros, que son de un tipo. */
@@ -189,6 +226,12 @@ export const SetView = () => {
         allCards: cards,
         title: set?.name,
         cardLabels: cardLabelsOrDefault(set?.card_labels),
+        boardBackground: set?.board_background,
+        boardLogoPosition: set?.board_logo_position,
+        boardTitlePosition: set?.board_title_position,
+        boardBackgroundImage: boardImageUrl
+          ? { url: boardImageUrl, lighten: set?.board_background_lighten ?? true }
+          : null,
       });
       downloadPDF(blob, pdfFileName(set?.name));
     } catch (err) {
@@ -322,6 +365,9 @@ export const SetView = () => {
               onShuffle={() => setBoardsDialog('shuffle')}
               onClear={() => setShowClearBoardsModal(true)}
               onBuild={() => setBoardsDialog('build')}
+              background={boardBackground}
+              titlePosition={boardLogoPositionOrDefault(set?.board_title_position)}
+              onOpenBackground={() => setShowBackground(true)}
             />
 
             {selectedCard && selectedCardIndex !== null && (
@@ -344,12 +390,26 @@ export const SetView = () => {
                 isOpen={true}
                 onClose={() => setSelectedBoardIndex(null)}
                 onChangeIndex={setSelectedBoardIndex}
+                background={boardBackground}
               />
             )}
           </div>
         )}
 
         <DeckDialogs deck={deck} />
+
+        {showBackground && boardsWithHydratedImages[0] && (
+          <SetBoardBackgroundDialog
+            board={boardsWithHydratedImages[0]}
+            current={set?.board_background}
+            currentLogoPosition={set?.board_logo_position}
+            currentTitlePosition={set?.board_title_position}
+            savedImageUrl={boardImageUrl}
+            currentLighten={set?.board_background_lighten ?? true}
+            onSave={saveBoardLook}
+            onClose={() => setShowBackground(false)}
+          />
+        )}
 
         {showSettings && (
           <SetCardSettingsDialog

@@ -8,7 +8,7 @@ import './AuthDialog.css';
  * Acomodo de la caja: `tall` ocupa casi toda la pantalla en celular (Crear cuenta); `back` deja lugar a la
  * barra de «Volver»; `notice` y `done` van centrados (avisos); `even` lleva el mismo margen en los cuatro lados.
  */
-export type AuthDialogVariant = 'default' | 'tall' | 'back' | 'even' | 'notice' | 'done';
+export type AuthDialogVariant = 'default' | 'tall' | 'back' | 'even' | 'notice' | 'done' | 'wide';
 
 interface AuthDialogProps {
   /** `id` del título de la vista; es el nombre de la ventana para lectores de pantalla. */

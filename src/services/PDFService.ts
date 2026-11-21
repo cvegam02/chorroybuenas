@@ -2,7 +2,7 @@ import { PDFDocument } from 'pdf-lib';
 import { Board, Card } from '../types';
 import { loadCards } from '../utils/storage';
 import { PAGE_HEIGHT_PT, PAGE_WIDTH_PT } from './pdf/constants';
-import { EmbedResult } from './pdf/images';
+import { EmbedResult, embedImageInPDF } from './pdf/images';
 import { drawBoardOnPage, drawDeckPages } from './pdf/draw';
 import { createOnceLoader } from './pdf/loadOnce';
 import { PdfCardsFailedError, uniqueFailedCards } from './pdf/failedCards';
@@ -12,6 +12,14 @@ import type { CardComposer } from './cardCompose/input';
 import { readStoredCardImage } from './cardImage';
 import { withCardNumbers, withNumbersFrom } from '../utils/cardNumbers';
 import type { CardLabels } from '../utils/cardLabels';
+import {
+  OWN_IMAGE_BACKGROUND_ID,
+  boardBackgroundOrDefault,
+  boardLogoPositionOrDefault,
+  ownImageBackground,
+  type BoardBackground,
+} from '../utils/boardBackgrounds';
+import { logger } from '../utils/logger';
 
 export { downloadPDF } from './pdf/download';
 export { pdfFileName } from './pdf/fileName';
@@ -29,7 +37,36 @@ export interface GeneratePDFOptions {
   cardLabels?: CardLabels;
   /** Si va la baraja para recortar después de los tableros. Por defecto sí; la lotería tradicional no (FEAT-53). */
   includeDeck?: boolean;
+  /** Fondo de los tableros (FEAT-67), por su id. Sin él o si no se reconoce, el crema de siempre. */
+  boardBackground?: string | null;
+  /** Dónde va el logo en los tableros (FEAT-67, US A4). Sin ella, al centro. */
+  boardLogoPosition?: string | null;
+  /** Dónde va «TABLERO N» (FEAT-67, US A4). Sin ella, al centro. */
+  boardTitlePosition?: string | null;
+  /** Imagen propia de fondo (US A2): su dirección y si se aclara. Solo cuenta si el fondo es 'imagen'. */
+  boardBackgroundImage?: { url: string; lighten: boolean } | null;
 }
+
+/**
+ * El fondo de los tableros y, si es la imagen propia, la imagen ya metida en el PDF. Si la imagen no
+ * carga, el PDF sale con el crema de siempre en lugar de no salir; queda anotado.
+ */
+const resolveBoardBackground = async (
+  pdfDoc: PDFDocument,
+  options: GeneratePDFOptions | undefined
+): Promise<{ background: BoardBackground; ownImage?: EmbedResult }> => {
+  const image = options?.boardBackgroundImage;
+  if (options?.boardBackground !== OWN_IMAGE_BACKGROUND_ID) {
+    return { background: boardBackgroundOrDefault(options?.boardBackground) };
+  }
+  if (!image) return { background: boardBackgroundOrDefault(null) };
+  try {
+    return { background: ownImageBackground(image.url, image.lighten), ownImage: await embedImageInPDF(pdfDoc, image.url) };
+  } catch (error) {
+    logger.error('Could not load the board background image; using the default background:', error);
+    return { background: boardBackgroundOrDefault(null) };
+  }
+};
 
 /**
  * Arma el PDF de tableros y baraja. Si alguna carta no se puede dibujar, no devuelve un PDF incompleto:
@@ -67,11 +104,16 @@ export const generatePDF = async (boards: Board[], options?: GeneratePDFOptions)
   const embedCache = new Map<string, EmbedResult>();
   const failedCards: Card[] = [];
 
+  const look = {
+    ...(await resolveBoardBackground(pdfDoc, options)),
+    logoPosition: boardLogoPositionOrDefault(options?.boardLogoPosition),
+    titlePosition: boardLogoPositionOrDefault(options?.boardTitlePosition),
+  };
   for (let i = 0; i < refreshedBoards.length; i++) {
     const board = refreshedBoards[i];
     const page = pdfDoc.addPage([PAGE_WIDTH_PT, PAGE_HEIGHT_PT]);
 
-    failedCards.push(...(await drawBoardOnPage(page, board, i + 1, pdfDoc, embedCache, finishedCards)));
+    failedCards.push(...(await drawBoardOnPage(page, board, i + 1, pdfDoc, embedCache, finishedCards, look)));
   }
 
   // Páginas con todas las cartas (baraja completa)

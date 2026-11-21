@@ -49,6 +49,11 @@
   padding: 28px;
 }
 
+.auth-dialog__box--wide {
+  max-width: 860px;
+  padding: 28px;
+}
+
 .auth-dialog__box--notice,
 .auth-dialog__box--done {
   align-items: center;
