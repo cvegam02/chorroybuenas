@@ -279,9 +279,6 @@ export const SetView = () => {
             navigate(`/loteria/${setId}/cantar`);
           }}
           onInvite={() => setIsInviteOpen(true)}
-          onAddPhotos={deck.openFilePicker}
-          onShuffleBoards={() => setBoardsDialog('shuffle')}
-          onClearBoards={() => setShowClearBoardsModal(true)}
           onDelete={() => setShowDeleteDialog(true)}
         />
 
@@ -300,7 +297,6 @@ export const SetView = () => {
               cardCount={cards.length}
               boardCount={boards.length}
               onBuildBoards={() => setBoardsDialog('build')}
-              onAddPhotos={deck.openFilePicker}
             />
             {pdfError && (
               <p className="set-view__error" role="alert">
@@ -324,6 +320,7 @@ export const SetView = () => {
               gridSize={gridSize}
               onOpenBoard={setSelectedBoardIndex}
               onShuffle={() => setBoardsDialog('shuffle')}
+              onClear={() => setShowClearBoardsModal(true)}
               onBuild={() => setBoardsDialog('build')}
             />
 

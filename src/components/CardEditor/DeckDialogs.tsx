@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
-import { CardUploadModal } from './CardUploadModal';
 import { CardEditModal } from './CardEditModal';
 import { BatchUploadModal } from './BatchUploadModal';
 import { UploadProgressModal } from './UploadProgressModal';
@@ -23,13 +22,6 @@ export const DeckDialogs = ({ deck }: DeckDialogsProps) => {
 
   return (
     <>
-      <CardUploadModal
-        isOpen={deck.isUploadModalOpen}
-        onClose={() => deck.setIsUploadModalOpen(false)}
-        onCardAdd={deck.handleCardAdd}
-        existingTitles={titles}
-      />
-
       <UploadProgressModal isOpen={deck.showUploadProgress} progress={deck.uploadProgress} />
 
       {liveEditingCard && (

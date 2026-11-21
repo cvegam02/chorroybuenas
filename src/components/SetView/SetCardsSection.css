@@ -128,34 +128,6 @@
   white-space: nowrap;
 }
 
-.set-cards__slot,
-.set-cards__slot:hover {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  box-sizing: border-box;
-  aspect-ratio: 2 / 3;
-  border: 2px dashed var(--color-primary-lighter);
-  border-radius: var(--radius-sm);
-  background: var(--color-bg-subtle);
-  color: var(--color-primary-dark);
-  font-size: 13px;
-  font-weight: 700;
-  text-decoration: none;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-.set-cards__slot:hover {
-  border-color: var(--color-primary);
-  background: var(--color-primary-lightest);
-}
-
-.set-cards__slot svg {
-  font-size: 18px;
-}
-
 @media (max-width: 768px) {
   .set-cards__grid {
     /* minmax(0, …): un texto largo («Subida por …») no ensancha la columna, se recorta */
@@ -187,12 +159,9 @@
     font-size: 10px;
   }
 
-  .set-cards__slot svg {
-    font-size: 15px;
-  }
 }
 
-/* Edición de cartas en U2 (FEAT-57): botones, saldo, recuadro para soltar fotos y la casilla «Agregar» */
+/* Edición de cartas en U2 (FEAT-57): botones, saldo y el recuadro para subir fotos */
 
 .set-cards__actions {
   display: flex;
@@ -209,11 +178,6 @@
 .set-cards__balance a {
   color: var(--color-primary-dark);
   font-weight: 700;
-}
-
-button.set-cards__slot {
-  font-family: inherit;
-  cursor: pointer;
 }
 
 .set-section--dropping {
@@ -241,6 +205,14 @@ button.set-cards__slot {
   transition: background 0.2s, border-color 0.2s;
 }
 
+.set-cards__dropzone--compact {
+  padding: 20px 16px;
+}
+
+.set-cards__dropzone--compact strong {
+  font-size: 17px;
+}
+
 .set-cards__dropzone:hover:not(:disabled) {
   border-color: var(--color-primary);
   background: var(--color-primary-lightest);
@@ -262,7 +234,6 @@ button.set-cards__slot {
 }
 
 @media (min-width: 769px) {
-  .set-cards__add-tile,
   .set-cards__narrow-only {
     display: none;
   }
