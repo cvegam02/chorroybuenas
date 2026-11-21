@@ -117,7 +117,7 @@ describe('buildPreference', () => {
     expect('payer' in buildPreference(base)).toBe(false);
   });
 
-  // FEAT-64, US P2
+  // FEAT-66, US P2
   it('con comprador (en producción) envía payer', () => {
     const payer = { email: 'ana@correo.mx', first_name: 'Ana' };
     expect(buildPreference({ ...base, payer }).payer).toEqual(payer);

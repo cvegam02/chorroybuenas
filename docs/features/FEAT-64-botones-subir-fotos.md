@@ -1,6 +1,6 @@
 # FEAT-64 — Una sola forma de subir fotos: el recuadro «Sube las fotos de tu lotería» (U2 y C1)
 
-**Estado:** construida el 2026-11-16 (US A1 a A3). Rama `feature/subir-fotos-u2` (creada el 2026-11-16 desde `dev`); llevada a `dev` junto con FEAT-65 con el PR #93 (2026-11-21); falta probar en dev. Sin migraciones ni edge functions: todo es del navegador.
+**Estado:** construida el 2026-11-16 (US A1 a A3). Rama `feature/subir-fotos-u2` (creada el 2026-11-16 desde `dev`); llevada a `dev` junto con FEAT-65 con el PR #93 (2026-11-21); probada por Carlos en dev el 2026-11-21. Sin migraciones ni edge functions: todo es del navegador.
 
 **Contexto.** En la página de una lotería (U2), mientras faltan cartas había hasta cuatro botones que hacían lo mismo (abrir el selector de fotos que lleva a M6): «Agregar fotos» en el encabezado, «Agregar fotos» en el aviso ámbar, «Subir fotos» en «Cartas» y, sin cartas, el recuadro grande; además un espacio punteado por cada carta que falta. En teléfono quedaban apilados uno tras otro, y la casilla «Agregar» de la cuadrícula subía una sola foto (M4) mientras los espacios punteados de al lado suben varias. C1 (sin sesión) tenía lo mismo: «Subir fotos», el recuadro para arrastrar (solo en computadora) y la casilla «Agregar imagen» (solo en teléfono, M4).
 
@@ -15,7 +15,7 @@
 
 ## User Stories
 
-### US A1 — En U2, el recuadro es la única forma de subir fotos   ·   Estado: hecha, sin probar en dev
+### US A1 — En U2, el recuadro es la única forma de subir fotos   ·   Estado: hecha, probada en dev (2026-11-21)
 
 - **Historia:** Como dueño de una lotería, quiero un solo lugar para subir fotos, para no dudar cuál usar.
 - **Entrega demostrable:** En la página de una lotería, el encabezado y el aviso ámbar ya no tienen botón para subir; «Cartas» solo tiene «Transformar con IA» y «Ajustes». Sin cartas, el recuadro grande «Sube las fotos de tu lotería»; con cartas, el mismo recuadro más bajito arriba de la cuadrícula, sin espacios punteados.
@@ -24,7 +24,7 @@
 - **Escenarios cubiertos:** sin cartas; con algunas cartas; con cartas suficientes y con tableros (el recuadro sigue arriba); arrastrar fotos; computadora y teléfono; español e inglés.
 - **Construido:** 2026-11-16. `SetHeader` y `SetStatusNotice` ya no reciben `onAddPhotos`. `SetCardsSection` muestra siempre el recuadro (`set-cards__dropzone--compact` con cartas) y ya no tiene el botón, la casilla ni los espacios punteados; se quitaron `missingCardNumbers` (y sus pruebas) y los textos `setView.addPhotos` y `setView.addCardSlot`.
 
-### US A2 — En C1, lo mismo   ·   Estado: hecha, sin probar en dev
+### US A2 — En C1, lo mismo   ·   Estado: hecha, probada en dev (2026-11-21)
 
 - **Historia:** Como visitante sin cuenta, quiero subir mis fotos igual que en una lotería guardada, para no aprender dos formas.
 - **Entrega demostrable:** En «Crea tu lotería» sin sesión, la columna izquierda ya no tiene «Subir fotos»; arriba de las cartas está el recuadro «Sube las fotos de tu lotería», también en teléfono, donde ya no sale la casilla «Agregar imagen».

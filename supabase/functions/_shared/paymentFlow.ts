@@ -264,16 +264,16 @@ export type ReversalStatus = 'tokens_reversed' | 'seasonal_refunded' | 'repeated
 
 const REVERSAL_REASONS: ReadonlySet<string> = new Set<ReversalReason>(['refunded', 'charged_back']);
 
-/**
- * Motivo de reversa para el estado de un pago consultado en MP, o null si ese estado no revierte nada.
- * Una devolución parcial deja el pago en `approved` (status_detail `partially_refunded`): no se revierte.
- */
-/** Texto para el log de un pago no aprobado: «estado/motivo» (FEAT-64, US P1). */
+/** Texto para el log de un pago no aprobado: «estado/motivo» (FEAT-66, US P1). */
 export function unapprovedLabel(found: { status?: string; detail?: string }): string {
   const status = found.status ?? 'unknown';
   return found.detail ? `${status}/${found.detail}` : status;
 }
 
+/**
+ * Motivo de reversa para el estado de un pago consultado en MP, o null si ese estado no revierte nada.
+ * Una devolución parcial deja el pago en `approved` (status_detail `partially_refunded`): no se revierte.
+ */
 export function reversalReason(status: string | undefined): ReversalReason | null {
   return status !== undefined && REVERSAL_REASONS.has(status) ? (status as ReversalReason) : null;
 }

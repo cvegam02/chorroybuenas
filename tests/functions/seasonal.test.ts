@@ -114,7 +114,7 @@ describe('buildSeasonalPreference', () => {
     expect(preference.notification_url).toBe('https://x.supabase.co/functions/v1/webhook-mercadopago');
   });
 
-  // FEAT-64, US P2
+  // FEAT-66, US P2
   it('lleva código y categoría del producto y el nombre del estado de cuenta', () => {
     expect(preference.items[0]).toMatchObject({ id: LOTERIA, category_id: 'virtual_goods' });
     expect(preference.statement_descriptor).toBe('CHORROYBUENAS');

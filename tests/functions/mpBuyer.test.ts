@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildPayer, ITEM_CATEGORY, STATEMENT_DESCRIPTOR } from '../../supabase/functions/_shared/mpBuyer.ts';
 
-// FEAT-64, US P2: datos que Mercado Pago pide para aprobar pagos con tarjeta.
+// FEAT-66, US P2: datos que Mercado Pago pide para aprobar pagos con tarjeta.
 describe('buildPayer', () => {
   it('en producción manda correo, nombre y apellido', () => {
     expect(buildPayer('production', { email: 'ana@correo.mx', fullName: 'Ana María López Pérez' }))

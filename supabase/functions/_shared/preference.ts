@@ -70,7 +70,7 @@ export function buildPreference(input: {
   userId: string;
   appUrl: string;
   notificationUrl: string;
-  /** Solo en producción (FEAT-64); sin él la preferencia no lleva comprador. */
+  /** Solo en producción (FEAT-66); sin él la preferencia no lleva comprador. */
   payer?: Payer;
 }) {
   const { item, userId, appUrl } = input;
@@ -109,7 +109,7 @@ export function buildPreference(input: {
         currency_id: 'MXN',
       },
     ],
-    // El comprador ayuda al antifraude de MP a aprobar tarjetas (FEAT-64); solo llega en producción.
+    // El comprador ayuda al antifraude de MP a aprobar tarjetas (FEAT-66); solo llega en producción.
     ...(input.payer ? { payer: input.payer } : {}),
     statement_descriptor: STATEMENT_DESCRIPTOR,
     back_urls: {

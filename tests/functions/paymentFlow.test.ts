@@ -131,7 +131,7 @@ describe('findApprovedPayment', () => {
       .toEqual({ ok: false, reason: 'not_approved', status: 'pending', detail: '-' });
   });
 
-  // FEAT-64, US P1: el log del webhook dice por qué Mercado Pago no aprobó el pago.
+  // FEAT-66, US P1: el log del webhook dice por qué Mercado Pago no aprobó el pago.
   it('pago rechazado: trae el motivo que da Mercado Pago', async () => {
     const { d } = deps({ '/v1/payments/555': { ...approvedPayment, status: 'rejected', status_detail: 'cc_rejected_high_risk' } });
     const found = await findApprovedPayment(d, { topic: 'payment', id: '555' });

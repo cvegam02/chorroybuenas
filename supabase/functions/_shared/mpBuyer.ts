@@ -1,6 +1,6 @@
 import type { CheckoutMode } from './checkout.ts';
 
-/** Nombre que ve el comprador en su estado de cuenta (FEAT-64, decisión 5). */
+/** Nombre que ve el comprador en su estado de cuenta (FEAT-66, decisión 5). */
 export const STATEMENT_DESCRIPTOR = 'CHORROYBUENAS';
 
 /** Categoría de Mercado Pago para tokens y PDFs: bienes digitales. */
@@ -13,7 +13,7 @@ export interface Payer {
 }
 
 /**
- * Comprador para la preferencia (FEAT-64, decisión 2): solo en producción, porque con credenciales de
+ * Comprador para la preferencia (FEAT-66, decisión 2): solo en producción, porque con credenciales de
  * prueba Mercado Pago rechaza el checkout si el correo es de una cuenta real. El correo sale de la sesión
  * y el nombre del perfil; sin nombre va solo el correo. El nombre se parte en el primer espacio.
  */

@@ -88,7 +88,7 @@ export function buildSeasonalPreference(input: {
   userId: string;
   appUrl: string;
   notificationUrl: string;
-  /** Solo en producción (FEAT-64); sin él la preferencia no lleva comprador. */
+  /** Solo en producción (FEAT-66); sin él la preferencia no lleva comprador. */
   payer?: Payer;
 }) {
   const { item, userId, appUrl } = input;

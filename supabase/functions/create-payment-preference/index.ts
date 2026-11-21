@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
 
     const mode = resolveCheckoutMode(Deno.env.get('MP_USE_SANDBOX_CHECKOUT'), mpAccessToken);
     console.log(`create-payment-preference: checkout ${mode}`);
-    // Correo y nombre del comprador para el antifraude de MP, solo en producción (FEAT-64).
+    // Correo y nombre del comprador para el antifraude de MP, solo en producción (FEAT-66).
     let fullName: string | null = null;
     if (mode === 'production') {
       const { data: profile, error: profileError } = await admin

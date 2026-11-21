@@ -1,4 +1,4 @@
-# FEAT-64 — Que Mercado Pago apruebe más pagos con tarjeta
+# FEAT-66 — Que Mercado Pago apruebe más pagos con tarjeta
 
 **Estado: 🟡 en construcción — definida con Carlos el 2026-11-21, en la rama `feature/pagos-tarjeta`. P1, P2 y P3 construidas; falta desplegar las funciones en dev.**
 
