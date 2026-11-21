@@ -1,6 +1,6 @@
 # FEAT-66 — Que Mercado Pago apruebe más pagos con tarjeta
 
-**Estado: 🟡 en construcción — definida con Carlos el 2026-11-21, en la rama `feature/pagos-tarjeta`. P1, P2 y P3 construidas; funciones desplegadas en Supabase dev el 2026-11-21 y llevadas a `dev` con el PR #94. Falta probar en dev y desplegarlas en producción antes de fusionar a `main`. Se numeró FEAT-64 al crearla; se cambió a FEAT-66 porque FEAT-64 ya era «subir fotos».**
+**Estado: ✅ en producción — definida con Carlos el 2026-11-21, en la rama `feature/pagos-tarjeta`. P1, P2 y P3 construidas, llevadas a `dev` con el PR #94 y probadas por Carlos en dev el 2026-11-21. Funciones (`create-payment-preference`, `create-seasonal-preference`, `webhook-mercadopago` y `credit-payment-on-return`) desplegadas en Supabase dev y en producción el 2026-11-21; llevada a `main` con el PR de `dev` a `main` del 2026-11-21. Falta la compra real con tarjeta en producción (guion de P2). Se numeró FEAT-64 al crearla; se cambió a FEAT-66 porque FEAT-64 ya era «subir fotos».**
 
 **Contexto.** Carlos notó que las compras de tokens con tarjeta («Mercado Pago Standard» en su actividad) salen rechazadas y las que pasan son con Wallet. Al revisar los dos rechazos en la app de Mercado Pago:
 
@@ -31,7 +31,7 @@ Todas las ventas aprobadas que se ven en la actividad de Carlos son con Wallet; 
 - El producto lleva `id` (el id del paquete, `tokens-libre` en cantidad libre, o el id de la lotería temática) y `category_id: "virtual_goods"`. La preferencia lleva `statement_descriptor: "CHORROYBUENAS"` en los dos modos.
 - No cambia el monto, los tokens, la metadata ni cómo se acredita el pago.
 
-## US P1 — Saber por qué Mercado Pago rechazó un pago   ·   Estado: 🟡 construida, por probar en dev
+## US P1 — Saber por qué Mercado Pago rechazó un pago   ·   Estado: ✅ probada en dev (2026-11-21), en producción
 
 - **Historia** — Como dueño del sitio, quiero que el registro del servidor diga el motivo exacto de cada pago no aprobado, para no tener que buscarlo en la app de Mercado Pago.
 - **Entrega demostrable** — Cuando Mercado Pago avisa de un pago no aprobado (de tokens o de lotería temática), el registro de `webhook-mercadopago` muestra estado y motivo, por ejemplo `rejected/cc_rejected_high_risk`.
@@ -43,7 +43,7 @@ Todas las ventas aprobadas que se ven en la actividad de Carlos son con Wallet; 
   - [x] Un pago rechazado de lotería temática anota estado y motivo. (Misma consulta que los tokens: el webhook no distingue la compra antes de anotar.)
   - [x] Si Mercado Pago no manda motivo, se anota `-` en su lugar y nada falla. (Prueba automática.)
 
-## US P2 — Mandar a Mercado Pago los datos que pide para aprobar tarjetas   ·   Estado: 🟡 construida, por probar en dev y producción
+## US P2 — Mandar a Mercado Pago los datos que pide para aprobar tarjetas   ·   Estado: 🟡 probada en dev (2026-11-21), en producción; falta la compra real con tarjeta
 
 - **Historia** — Como comprador que paga con tarjeta, quiero que mi pago no se rechace como sospechoso, para comprar tokens o una lotería temática sin tener que usar Wallet.
 - **Entrega demostrable** — En producción, la preferencia de las dos compras lleva el correo y el nombre del comprador, el código y la categoría del producto y «CHORROYBUENAS» para el estado de cuenta. En pruebas lleva todo menos el comprador.
@@ -58,7 +58,7 @@ Todas las ventas aprobadas que se ven en la actividad de Carlos son con Wallet; 
   - [x] La lotería temática se comporta igual que los tokens en los casos anteriores. (Prueba automática.)
   - [x] Monto, tokens y metadata no cambian. (Pruebas existentes siguen pasando.)
 
-## US P3 — El aviso de privacidad dice qué datos recibe Mercado Pago   ·   Estado: 🟡 construida, por probar en dev
+## US P3 — El aviso de privacidad dice qué datos recibe Mercado Pago   ·   Estado: ✅ probada en dev (2026-11-21), en producción
 
 - **Historia** — Como usuario, quiero que el aviso de privacidad diga que mi correo y mi nombre se le envían a Mercado Pago al comprar, para saber qué pasa con mis datos.
 - **Entrega demostrable** — La viñeta de Mercado Pago en «5. Con quién se comparten» dice el texto de la decisión 4, y la fecha de última actualización es la del cambio.
