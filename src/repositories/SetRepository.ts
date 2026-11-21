@@ -19,6 +19,15 @@ export interface LoteriaSet {
   grid_size?: GridSize;
   /** Qué se ve en las cartas (FEAT-51). Falta en las bases sin la migración 058: se toma nombre y número. */
   card_labels?: CardLabels;
+  /** Fondo de los tableros (FEAT-67), por su id. Falta en las bases sin la migración 077: se toma el crema. */
+  board_background?: string;
+  /** Dónde va el logo en los tableros (FEAT-67, US A4). Falta sin la migración 078: va al centro. */
+  board_logo_position?: string;
+  /** Dónde va «TABLERO N» (FEAT-67, US A4). Falta sin la migración 080: va al centro. */
+  board_title_position?: string;
+  /** Ruta de la imagen propia de fondo (FEAT-67, US A2), y si se aclara. Faltan sin la migración 079. */
+  board_background_image_path?: string | null;
+  board_background_lighten?: boolean;
 }
 
 function invalidateSetsCache(userId: string): void {
@@ -136,7 +145,7 @@ export class SetRepository {
     return data;
   }
 
-  static async updateSet(setId: string, userId: string, updates: { name?: string; grid_size?: GridSize; card_labels?: CardLabels }): Promise<LoteriaSet> {
+  static async updateSet(setId: string, userId: string, updates: { name?: string; grid_size?: GridSize; card_labels?: CardLabels; board_background?: string; board_logo_position?: string; board_title_position?: string; board_background_image_path?: string | null; board_background_lighten?: boolean }): Promise<LoteriaSet> {
     invalidateSetsCache(userId);
     const { data, error } = await supabase
       .from('loteria_sets')
@@ -173,9 +182,19 @@ export class SetRepository {
 
     if (fetchError) throw fetchError;
 
-    const paths = (cards ?? []).flatMap((c) =>
-      [c.image_path, c.original_image_path].filter(Boolean)
-    ) as string[];
+    // La imagen de fondo de los tableros (FEAT-67, US A2) se borra con la lotería.
+    const { data: setRow, error: setError } = await supabase
+      .from('loteria_sets')
+      .select('board_background_image_path')
+      .eq('id', setId)
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (setError) logger.warn('Error reading set background image before deleting:', setError);
+
+    const paths = [
+      ...(cards ?? []).flatMap((c) => [c.image_path, c.original_image_path]),
+      setRow?.board_background_image_path,
+    ].filter(Boolean) as string[];
     const uniquePaths = [...new Set(paths)];
 
     if (uniquePaths.length > 0) {

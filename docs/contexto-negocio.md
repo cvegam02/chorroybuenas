@@ -61,6 +61,7 @@ El principio habla de la lotería que cada quien hace con sus fotos. Las loterí
 - **Cantidad sugerida de tableros:** en Clásico, la que hace que cada carta aparezca unas 8 veces en total; en Kids, un tablero por cada 3 cartas. El usuario puede cambiarla. _(confirmado el 2026-10-06)_
 - **Al iniciar sesión**, lo que el visitante tenía guardado en su navegador se pasa a su cuenta: a su primera lotería si está vacía o, si ya tenía cartas, a una lotería nueva, sin mezclarse con lo que había. Al terminar llega a esa lotería. _(decidido el 2026-10-12, FEAT-41; antes iba siempre a la primera lotería de la cuenta, confirmado el 2026-10-06)_
 - No hay límite de cartas por lotería ni de loterías por usuario. **DEFINIDO** (2026-10-06). Cada lotería tiene como máximo **200 tableros** (2026-10-27, FEAT-58; hasta entonces tampoco había límite de tableros). Se revisa cuando el almacenamiento empiece a pesar. En una lotería colectiva, cada invitado sube como máximo 60 cartas y 10 por minuto (§21; 2026-10-26, FEAT-58; hasta entonces no había límite por invitado, 2026-10-24, FEAT-56).
+- **Fondo de los tableros:** en sus loterías propias, el usuario con sesión elige un fondo para todos los tableros de la lotería, en lugar del crema de siempre (que sigue siendo el de entrada). Puede ser uno del catálogo —fondos fijos del sitio más los que agregue el administrador—, un color propio elegido con un selector (se usa tal cual; si es oscuro, se avisa que el logo y el título pueden no leerse y que gasta más tinta, sin impedir guardarlo; 2026-11-21) o una imagen propia, con el interruptor «Aclarar la imagen» (encendido de entrada), que le pone un velo blanco para que el logo y «TABLERO N» se lean. También elige dónde van el logo y «TABLERO N», cada uno por su lado: izquierda, centro o derecha (empiezan en centro; 2026-11-21, antes el título iba siempre centrado). Las dos opciones son gratis. Las cartas no cambian de tamaño: el fondo ocupa el lugar del crema (encabezado, orillas y la separación entre cartas). Se ve en el PDF y en los tableros en pantalla, y al elegirlo se ve antes de guardar el tablero 1 tal cual se imprimiría. La imagen propia es de la lotería: a lo más una, la nueva reemplaza a la anterior y se borra con la lotería; es privada como las demás imágenes (§5). Si el administrador quita un fondo del catálogo, ya no se ofrece, pero las loterías que lo tenían lo conservan. No aplica a «Arma tus tableros» (§19), a las loterías temáticas ni al visitante sin cuenta. **DEFINIDO** (2026-11-21, FEAT-67)
 - **Lotería colectiva:** una lotería guardada a la que su dueño abrió un enlace para que otras personas suban fotos. Reglas en §21. _(decidido el 2026-10-23 y el 2026-10-24, FEAT-56)_
 
 ## 5. Imágenes y PDF
@@ -158,12 +159,14 @@ El administrador puede: _(confirmado el 2026-10-06)_
 - ver el gasto en IA del periodo (Resumen) y el uso de cada usuario (su ficha), y ajustar el costo por imagen que se usa para estimarlo, y el costo de la voz con IA del cantador por lotería, que se cuenta aparte de las fotos _(la voz, 2026-10-24, FEAT-55)_ _(cambiado el 2026-10-15, FEAT-47; antes: ver el uso de la IA por día, por usuario y por lotería y su costo estimado)_;
 - cambiar la cantidad de tokens de bienvenida;
 - administrar las loterías temáticas (§18): crear temáticas, dar de alta loterías con su precio y sus archivos, publicarlas y retirarlas. Sus ventas se ven junto a las compras de tokens, distinguidas por tipo. **DEFINIDO** (2026-10-06, FEAT-17)
+- administrar los fondos del catálogo de los tableros (§4) en la pestaña «Fondos»: agregarlos, ordenarlos y retirarlos; los fijos del sitio no se retiran. **DEFINIDO** (2026-11-21, FEAT-67; por construir)
 
 ## 11. Modelo de entidades
 
 | Entidad | Qué guarda | Relaciones |
 |---|---|---|
-| Lotería (`loteria_sets`) | Nombre y modo de juego | Pertenece a un usuario |
+| Lotería (`loteria_sets`) | Nombre y modo de juego; desde FEAT-67, su fondo de tableros, su imagen de fondo propia, si se aclara y la posición del logo y del título | Pertenece a un usuario |
+| Fondo del catálogo — por construir | Nombre, imagen, orden y si se sigue ofreciendo | Los agrega el administrador; las loterías apuntan a él (2026-11-21, FEAT-67) |
 | Carta (`cards`) | Título, imagen, imagen original, si fue hecha con IA | Pertenece a una lotería |
 | Dominio desechable | Un dominio de correo con el que no se crean cuentas | Lista del servidor, sin relación (2026-10-26, FEAT-58) |
 | Intento de código | Un código sin bono que probó un usuario, y cuándo | Pertenece a un usuario; solo el servidor (2026-10-26, FEAT-58) |
@@ -317,6 +320,7 @@ Decisiones ya tomadas. No se reabren sin que Carlos lo pida explícitamente.
 | 2026-10-27 | Los avisos en vivo de las loterías colectivas ya no incluyen las cartas borradas: una carta borrada desaparece al recargar o con el siguiente cambio. _(Descartados: seguir mandándolos y aceptar el riesgo; canales privados por lotería. Origen: FEAT-58, H21.)_ |
 | 2026-10-28 | El cantador suma dos ritmos: «Personalizado» (segundos entre cartas de 1 a 15, pausa nunca o cada 2 a 10 cartas, de 1 a 20 s; empieza en 3 s, cada 3 cartas y 5 s; se recuerda en el navegador) y «Manual» (→ o «Siguiente carta» saca la siguiente, ← regresa; no se saca otra mientras suena la anterior). Se eligen antes de empezar, como los demás. Reglas en §20. _(Descartados: un interruptor «Automático / Manual» durante la partida; los campos del personalizado sin límites, desde 0; en manual, bloquear también revisar las anteriores mientras suena la voz. Origen: FEAT-59.)_ |
 | 2026-10-29 | Al borrar una carta que está en algún tablero guardado (una sola, al vaciar la lotería o las fotos de un invitado), se borran todos los tableros de la lotería; la confirmación lo avisa antes. Reemplaza, para ese caso, la decisión 22 de FEAT-36 («Lista para imprimir» aunque se quiten cartas). _(Descartados: rehacer los tableros solos; rellenar el hueco con otra carta; no dejar borrar la carta hasta borrar los tableros. Antes la carta solo salía de los tableros y estos quedaban incompletos. Origen: FEAT-60.)_ |
+| 2026-11-21 | Fondo de los tableros de las loterías propias, con sesión: uno por lotería, del catálogo (fijos más los del administrador) color propio con aviso si es oscuro, o imagen propia con «Aclarar la imagen»; logo y «TABLERO N» a la izquierda, al centro o a la derecha, cada uno por su lado; gratis; las cartas no cambian de tamaño; un fondo retirado se conserva donde ya estaba (§4, FEAT-67). |
 
 ## 16. Pendientes por definir
 
@@ -337,6 +341,7 @@ Ya cumplidas y retiradas de esta lista el 2026-10-06, al publicarse la fase 1 en
 | Ofertas con descuento y banner | §8, §9 | No existen. Anotada el 2026-10-15; se construye con `docs/features/FEAT-49-ofertas-con-banner.md` |
 | Elegir qué se ve en las cartas (nombre, número, ambos o nada) | §4 | Siempre dibuja nombre y número. Anotada el 2026-10-20; se construye con `docs/features/FEAT-51-nombre-y-numero-en-cartas.md` |
 | Tableros del PDF en tamaño carta | §5 | El PDF sale en hoja A4. Anotada el 2026-10-09; se corrige con `docs/features/FEAT-26-pdf-impresion-y-recorte.md` |
+| Fondos del catálogo que agrega el administrador | §4, §10 | Solo están los fondos fijos del sitio. El resto del fondo de los tableros (catálogo fijo, color e imagen propios, posición del logo y del título) se cumple desde el 2026-11-21. Anotada el 2026-11-21; se construye con `docs/features/FEAT-67-fondo-de-tableros.md` (US A3) |
 | «Arma tus tableros» | §19 | No existe. Anotada el 2026-10-22; se construye con `docs/features/FEAT-53-tableros-loteria-tradicional.md` |
 
 ## 18. Loterías temáticas — DEFINIDO

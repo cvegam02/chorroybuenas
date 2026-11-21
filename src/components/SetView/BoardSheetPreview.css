@@ -1,0 +1,72 @@
+/* Un tablero con las medidas de su página del PDF (FEAT-67): todo se mide en puntos (`--pt`). */
+
+.board-sheet {
+  container-type: inline-size;
+  position: relative;
+  width: 100%;
+  margin: 0;
+  box-shadow: var(--shadow-md);
+}
+
+.board-sheet__page {
+  --pt: calc(100cqw / var(--sheet-width));
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.board-sheet__background {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.board-sheet__cut,
+.board-sheet__logo,
+.board-sheet__title,
+.board-sheet__card {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.board-sheet__cut {
+  border: max(1px, calc(var(--pt) * 0.5)) dashed color-mix(in srgb, var(--color-card-ink) 60%, transparent);
+}
+
+.board-sheet__logo {
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.board-sheet__title {
+  display: flex;
+  align-items: center;
+  transform: translateY(-50%);
+  font-family: 'ArvoCarta', serif;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--color-card-ink);
+}
+
+.board-sheet__rule {
+  flex: 1;
+  height: var(--line);
+  background: var(--color-card-ink);
+}
+
+/* El borde negro va centrado sobre la orilla de la carta, como en el PDF. */
+.board-sheet__card {
+  overflow: visible;
+  background: var(--color-primary-lightest);
+  outline: var(--card-border) solid var(--color-card-ink);
+  outline-offset: calc(var(--card-border) / -2);
+}
+
+.board-sheet__card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

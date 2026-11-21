@@ -5,8 +5,17 @@ import { logger } from '../utils/logger';
 import { pdfErrorMessage } from '../utils/pdfErrorMessage';
 import type { CardLabels } from '../utils/cardLabels';
 
-/** La lotería a descargar, con lo que se ve en sus cartas (FEAT-51). */
-type DownloadableSet = { id: string; name: string; card_labels?: CardLabels };
+/** La lotería a descargar, con lo que se ve en sus cartas (FEAT-51) y el fondo de sus tableros (FEAT-67). */
+type DownloadableSet = {
+  id: string;
+  name: string;
+  card_labels?: CardLabels;
+  board_background?: string;
+  board_logo_position?: string;
+  board_title_position?: string;
+  board_background_image_path?: string | null;
+  board_background_lighten?: boolean;
+};
 
 interface SetPdfDownload {
   /** La lotería cuyo PDF se está armando; null si no hay ninguno en curso. */

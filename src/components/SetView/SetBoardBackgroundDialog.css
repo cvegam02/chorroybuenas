@@ -1,0 +1,395 @@
+/* M22 — Fondo de los tableros (FEAT-67). Computadora: vista previa a la izquierda y opciones a la derecha.
+   Teléfono: vista previa arriba, el catálogo en una fila que se desliza y «Guardar» fijo abajo. */
+
+.board-bg__lead h2 {
+  margin: 0 40px 4px 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.board-bg__lead p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+.board-bg__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.board-bg__preview {
+  width: 100%;
+}
+
+.board-bg__heading {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.board-bg__heading--spaced {
+  margin-top: 20px;
+}
+
+/* Pestañas: Catálogo, Color, Imagen y Logo; se ve una a la vez (2026-11-21). */
+.board-bg__tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.board-bg__tab {
+  padding: 10px 4px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.board-bg__tab:hover {
+  color: var(--color-text-main);
+}
+
+.board-bg__tab--active {
+  border-bottom-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}
+
+.board-bg__tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+/* La pestaña guarda su alto para que la ventana no brinque al cambiar. */
+.board-bg__panel {
+  min-height: 180px;
+}
+
+/* «Color»: el cuadro del selector, más grande que los del catálogo. */
+.board-bg__panel > .board-bg__swatch--custom {
+  width: 140px;
+}
+
+.board-bg__hint {
+  margin: 8px 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+
+/* «Logo»: izquierda, centro o derecha, en una sola barra (US A4). */
+.board-bg__position + .board-bg__position {
+  margin-top: 16px;
+}
+
+.board-bg__position-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.board-bg__segmented {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+}
+
+.board-bg__segment {
+  padding: 8px 6px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.board-bg__segment:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.board-bg__segment--selected {
+  background: var(--color-bg-surface);
+  color: var(--color-primary-dark);
+  box-shadow: var(--shadow-sm);
+}
+
+.board-bg__swatches {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.board-bg__swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-main);
+  font: inherit;
+  cursor: pointer;
+}
+
+.board-bg__swatch:hover {
+  background: var(--color-bg-subtle);
+}
+
+.board-bg__swatch:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.board-bg__swatch--selected {
+  border-color: var(--color-primary);
+  background: var(--color-bg-subtle);
+}
+
+.board-bg__sample {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.board-bg__sample-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.board-bg__check {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  font-size: 11px;
+}
+
+.board-bg__swatch--custom {
+  position: relative;
+}
+
+/* El selector del navegador cubre el cuadrito entero: tocarlo en cualquier parte lo abre. */
+.board-bg__color-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.board-bg__swatch--custom:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.board-bg__sample--rainbow {
+  background: conic-gradient(
+    var(--color-card-pink),
+    var(--color-accent),
+    var(--color-secondary-light),
+    var(--color-card-blue),
+    var(--color-card-lilac),
+    var(--color-card-pink)
+  );
+}
+
+.board-bg__dropper {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--color-text-main);
+  font-size: 18px;
+}
+
+.board-bg__warning {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+
+.board-bg__name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.board-bg__own-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.board-bg__swatch--own {
+  flex: 0 0 96px;
+}
+
+.board-bg__swatch--own .board-bg__sample {
+  background-size: cover;
+  background-position: center;
+}
+
+.board-bg__file {
+  display: none;
+}
+
+/* «Aclarar la imagen»: interruptor (US A2). */
+.board-bg__switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* La casilla, invisible, cubre todo el renglón: tocar en cualquier parte la cambia (en teléfono, antes no). */
+.board-bg__switch input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.board-bg__switch-track {
+  position: relative;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--color-border-dark);
+  transition: background 0.2s ease;
+}
+
+.board-bg__switch-track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease;
+}
+
+.board-bg__switch input:checked + .board-bg__switch-track {
+  background: var(--color-primary);
+}
+
+.board-bg__switch input:checked + .board-bg__switch-track::after {
+  transform: translateX(18px);
+}
+
+.board-bg__switch input:focus-visible + .board-bg__switch-track {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.board-bg__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.board-bg__error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 0.9rem;
+}
+
+.board-bg__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .board-bg__panel {
+    min-height: 120px;
+  }
+
+  .board-bg__layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  /* La vista previa cabe a lo alto de la pantalla, para ver el catálogo y «Guardar» sin bajar. */
+  .board-bg__preview {
+    width: min(100%, calc((100dvh - 330px) * 0.6));
+    min-width: 160px;
+    margin: 0 auto;
+  }
+
+  .board-bg__swatches {
+    display: flex;
+    gap: 8px;
+    margin: 0 -20px;
+    padding: 0 20px 4px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+  }
+
+  .board-bg__swatch {
+    flex: 0 0 84px;
+    scroll-snap-align: start;
+  }
+
+  .board-bg__footer {
+    position: sticky;
+    bottom: calc(-28px - env(safe-area-inset-bottom));
+    margin: 0 -20px calc(-28px - env(safe-area-inset-bottom));
+    padding: 12px 20px calc(16px + env(safe-area-inset-bottom));
+    background: var(--color-bg-surface);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .board-bg__actions .set-button {
+    flex: 1;
+  }
+}

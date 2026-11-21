@@ -6,11 +6,17 @@ import { getImage } from '../../utils/indexedDB';
 import './BoardThumbnail.css';
 import { logger } from '../../utils/logger';
 import { useComposedCard } from '../../hooks/useComposedCard';
+import type { BoardBackground, BoardTitlePosition } from '../../utils/boardBackgrounds';
+import { BoardBackgroundLayer } from './BoardBackgroundLayer';
 
 interface BoardThumbnailProps {
   board: Board;
   index: number;
   onClick: () => void;
+  /** Fondo elegido para los tableros de la lotería (FEAT-67). Sin él, el papel crema de siempre. */
+  background?: BoardBackground;
+  /** Dónde va «TABLERO N» (FEAT-67, US A4): a los lados lleva una sola línea. Sin ella, al centro. */
+  titlePosition?: BoardTitlePosition;
 }
 
 interface CardWithImage extends Card {
@@ -52,7 +58,7 @@ const ThumbnailCard = ({ card, onImageError }: ThumbnailCardProps) => {
   );
 };
 
-export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) => {
+export const BoardThumbnail = ({ board, index, onClick, background, titlePosition = 'center' }: BoardThumbnailProps) => {
   const { t } = useTranslation();
   // Initialize with null images, will be refreshed from IndexedDB
   const [cardsWithImages, setCardsWithImages] = useState<CardWithImage[]>(
@@ -145,10 +151,11 @@ export const BoardThumbnail = ({ board, index, onClick }: BoardThumbnailProps) =
     <div className="board-thumbnail">
       {/* Con mouse se abre tocando la hoja; con teclado, con el botón de la lupa. */}
       <div className="board-thumbnail__sheet" onClick={onClick}>
+        {background && <BoardBackgroundLayer background={background} className="board-thumbnail__background" />}
         <div className="board-thumbnail__title">
-          <span className="board-thumbnail__rule" />
+          {titlePosition !== 'left' && <span className="board-thumbnail__rule" />}
           <h3 className="board-thumbnail__name">{t('boardGenerator.sheetTitle', { number: index + 1 })}</h3>
-          <span className="board-thumbnail__rule" />
+          {titlePosition !== 'right' && <span className="board-thumbnail__rule" />}
         </div>
         <div className="board-thumbnail__grid" style={{ '--cols': cols } as React.CSSProperties}>
           {grid.map((row, rowIndex) =>

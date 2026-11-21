@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Board } from '../../types';
 import { BoardCell } from './BoardCell';
+import type { BoardBackground } from '../../utils/boardBackgrounds';
+import { BoardBackgroundLayer } from './BoardBackgroundLayer';
 import './BoardModal.css';
 
 interface BoardModalProps {
@@ -11,9 +13,11 @@ interface BoardModalProps {
   isOpen: boolean;
   onClose: () => void;
   onChangeIndex: (nextIndex: number) => void;
+  /** Fondo elegido para los tableros de la lotería (FEAT-67): va detrás de las cartas. */
+  background?: BoardBackground;
 }
 
-export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeIndex }: BoardModalProps) => {
+export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeIndex, background }: BoardModalProps) => {
   const { t } = useTranslation();
 
   const total = boards.length;
@@ -155,20 +159,23 @@ export const BoardModal = ({ boards, selectedIndex, isOpen, onClose, onChangeInd
           </div>
         </div>
 
-        <div
-          className="board-modal__grid"
-          style={{
-            '--cols': cols,
-            '--rows': rows
-          } as React.CSSProperties}
-        >
-          {grid.map((row, rowIndex) =>
-            row.map((card, colIndex) => (
-              <div key={`${selectedIndex}-${rowIndex}-${colIndex}-${card?.id ?? 'empty'}`} className="board-modal__cell">
-                {card ? <BoardCell card={card} /> : null}
-              </div>
-            ))
-          )}
+        <div className={background ? 'board-modal__sheet' : undefined}>
+          {background && <BoardBackgroundLayer background={background} className="board-modal__background" />}
+          <div
+            className="board-modal__grid"
+            style={{
+              '--cols': cols,
+              '--rows': rows
+            } as React.CSSProperties}
+          >
+            {grid.map((row, rowIndex) =>
+              row.map((card, colIndex) => (
+                <div key={`${selectedIndex}-${rowIndex}-${colIndex}-${card?.id ?? 'empty'}`} className="board-modal__cell">
+                  {card ? <BoardCell card={card} /> : null}
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
