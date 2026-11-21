@@ -1,6 +1,6 @@
 # FEAT-65 — Las opciones de los tableros van en su sección (U2)
 
-**Estado:** construida el 2026-11-21 (US A1). Rama `feature/menu-tableros` (creada el 2026-11-21 desde `dev`); llevada a `dev` junto con FEAT-64 con el PR #93 (2026-11-21); probada por Carlos en dev el 2026-11-21. Sin migraciones ni edge functions: todo es del navegador.
+**Estado:** construida el 2026-11-21 (US A1). Rama `feature/menu-tableros` (creada el 2026-11-21 desde `dev`); llevada a `dev` junto con FEAT-64 con el PR #93 (2026-11-21); probada por Carlos en dev el 2026-11-21 y llevada a `main` con el PR de `dev` a `main` del 2026-11-21. Sin migraciones ni edge functions: todo es del navegador.
 
 **Contexto.** En la página de una lotería (U2), el menú «⋮» traía «Cambiar nombre», «Revolver tableros», «Borrar tableros» y «Eliminar lotería». Las dos de en medio son de los tableros y la sección «Tableros» ya tenía su propio «Revolver tableros». Carlos pidió que las opciones de tableros estén en su sección.
 
