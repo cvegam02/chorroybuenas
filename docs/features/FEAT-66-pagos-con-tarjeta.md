@@ -1,6 +1,6 @@
 # FEAT-66 — Que Mercado Pago apruebe más pagos con tarjeta
 
-**Estado: 🟡 en construcción — definida con Carlos el 2026-11-21, en la rama `feature/pagos-tarjeta`. P1, P2 y P3 construidas; falta desplegar las funciones en dev.**
+**Estado: 🟡 en construcción — definida con Carlos el 2026-11-21, en la rama `feature/pagos-tarjeta`. P1, P2 y P3 construidas; funciones desplegadas en Supabase dev el 2026-11-21 y llevadas a `dev` con el PR #94. Falta probar en dev y desplegarlas en producción antes de fusionar a `main`. Se numeró FEAT-64 al crearla; se cambió a FEAT-66 porque FEAT-64 ya era «subir fotos».**
 
 **Contexto.** Carlos notó que las compras de tokens con tarjeta («Mercado Pago Standard» en su actividad) salen rechazadas y las que pasan son con Wallet. Al revisar los dos rechazos en la app de Mercado Pago:
 
@@ -35,7 +35,7 @@ Todas las ventas aprobadas que se ven en la actividad de Carlos son con Wallet; 
 
 - **Historia** — Como dueño del sitio, quiero que el registro del servidor diga el motivo exacto de cada pago no aprobado, para no tener que buscarlo en la app de Mercado Pago.
 - **Entrega demostrable** — Cuando Mercado Pago avisa de un pago no aprobado (de tokens o de lotería temática), el registro de `webhook-mercadopago` muestra estado y motivo, por ejemplo `rejected/cc_rejected_high_risk`.
-- **Construido** — 2026-11-21, en la rama `feature/pagos-tarjeta`. `findApprovedPayment` (`_shared/paymentFlow.ts`) devuelve también `detail` con el `status_detail` del pago («-» si no viene); `unapprovedLabel` arma «estado/motivo» y `webhook-mercadopago` lo usa en su log. El estado sigue igual, así que las devoluciones y contracargos no cambian. Las órdenes (`merchant_order`) ya anotaban el motivo. Pruebas en `tests/functions/paymentFlow.test.ts`. Falta desplegar `webhook-mercadopago` en dev.
+- **Construido** — 2026-11-21, en la rama `feature/pagos-tarjeta`. `findApprovedPayment` (`_shared/paymentFlow.ts`) devuelve también `detail` con el `status_detail` del pago («-» si no viene); `unapprovedLabel` arma «estado/motivo» y `webhook-mercadopago` lo usa en su log. El estado sigue igual, así que las devoluciones y contracargos no cambian. Las órdenes (`merchant_order`) ya anotaban el motivo. Pruebas en `tests/functions/paymentFlow.test.ts`. Desplegada en Supabase dev el 2026-11-21 (PR #94).
 - **Depende de** — nada.
 - **Cómo se prueba (guion de demo)** — En dev, compra tokens con una tarjeta de prueba de Mercado Pago a nombre de titular «OTHE» (la que Mercado Pago usa para simular un rechazo) → el cobro sale rechazado → abre los registros de la función `webhook-mercadopago` en Supabase (proyecto dev) → la línea del aviso debería decir `rejected/cc_rejected_other_reason`, no solo `rejected`.
 - **Escenarios cubiertos**:
@@ -47,7 +47,7 @@ Todas las ventas aprobadas que se ven en la actividad de Carlos son con Wallet; 
 
 - **Historia** — Como comprador que paga con tarjeta, quiero que mi pago no se rechace como sospechoso, para comprar tokens o una lotería temática sin tener que usar Wallet.
 - **Entrega demostrable** — En producción, la preferencia de las dos compras lleva el correo y el nombre del comprador, el código y la categoría del producto y «CHORROYBUENAS» para el estado de cuenta. En pruebas lleva todo menos el comprador.
-- **Construido** — 2026-11-21, en la rama `feature/pagos-tarjeta`. Módulo nuevo `_shared/mpBuyer.ts` (`buildPayer`, `STATEMENT_DESCRIPTOR`, `ITEM_CATEGORY`). `buildPreference` y `buildSeasonalPreference` aceptan `payer` opcional y agregan `id` y `category_id` al producto y `statement_descriptor`. `create-payment-preference` y `create-seasonal-preference` leen `profiles.full_name` solo en producción y pasan el correo de la sesión. Pruebas en `tests/functions/mpBuyer.test.ts`, `preference.test.ts` y `seasonal.test.ts`. Falta desplegar las dos funciones en dev.
+- **Construido** — 2026-11-21, en la rama `feature/pagos-tarjeta`. Módulo nuevo `_shared/mpBuyer.ts` (`buildPayer`, `STATEMENT_DESCRIPTOR`, `ITEM_CATEGORY`). `buildPreference` y `buildSeasonalPreference` aceptan `payer` opcional y agregan `id` y `category_id` al producto y `statement_descriptor`. `create-payment-preference` y `create-seasonal-preference` leen `profiles.full_name` solo en producción y pasan el correo de la sesión. Pruebas en `tests/functions/mpBuyer.test.ts`, `preference.test.ts` y `seasonal.test.ts`. Desplegadas en Supabase dev el 2026-11-21 (PR #94).
 - **Depende de** — nada (puede ir en paralelo con P1).
 - **Cómo se prueba (guion de demo)** — En dev (credenciales de prueba): compra tokens con una tarjeta de prueba → el cobro debería funcionar igual que hoy. En producción, después de publicar: compra $10 de tokens con una tarjeta tuya real desde el celular, sin entrar a tu cuenta de Mercado Pago y con una cuenta del sitio cuyo correo **no** sea el de tu cuenta vendedora de Mercado Pago (Mercado Pago no deja que el vendedor se pague a sí mismo) → el pago debería aprobarse y los tokens llegar → en tu estado de cuenta el cargo debería decir «CHORROYBUENAS» → en tu actividad de Mercado Pago la venta debería mostrar el correo del comprador.
 - **Escenarios cubiertos**:
