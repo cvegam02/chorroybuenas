@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import { FaRandom, FaRegWindowClose } from 'react-icons/fa';
+import { FaPalette, FaRandom, FaRegWindowClose } from 'react-icons/fa';
 import type { Board, GridSize } from '../../types';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { BoardThumbnail } from '../BoardGenerator/BoardThumbnail';
 import type { SetViewState } from './setViewState';
+import type { BoardBackground, BoardTitlePosition } from '../../utils/boardBackgrounds';
 import './SetBoardsSection.css';
 
 interface SetBoardsSectionProps {
@@ -17,6 +18,11 @@ interface SetBoardsSectionProps {
   onClear: () => void;
   /** Abre la ventana para elegir cuántos tableros (FEAT-57). */
   onBuild: () => void;
+  /** Fondo de los tableros de la lotería (FEAT-67). */
+  background: BoardBackground;
+  titlePosition: BoardTitlePosition;
+  /** Abre la ventana «Fondo» (M22). */
+  onOpenBackground: () => void;
 }
 
 /** Tablerito dibujado, sin cartas: adorna el bloque de «todavía no hay tableros». */
@@ -32,7 +38,18 @@ const BlankBoard = ({ gridSize }: { gridSize: GridSize }) => (
  * Los tableros de una lotería guardada. Sin tableros muestra un bloque punteado: con el botón para armarlos
  * si las cartas ya alcanzan, o bloqueado mientras falten cartas.
  */
-export const SetBoardsSection = ({ boards, state, gridSize, onOpenBoard, onShuffle, onClear, onBuild }: SetBoardsSectionProps) => {
+export const SetBoardsSection = ({
+  boards,
+  state,
+  gridSize,
+  onOpenBoard,
+  onShuffle,
+  onClear,
+  onBuild,
+  background,
+  titlePosition,
+  onOpenBackground,
+}: SetBoardsSectionProps) => {
   const { t } = useTranslation();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const hasBoards = boards.length > 0;
@@ -46,6 +63,10 @@ export const SetBoardsSection = ({ boards, state, gridSize, onOpenBoard, onShuff
         </div>
         {hasBoards && (
           <div className="set-boards__actions">
+            <button type="button" className="set-button set-button--secondary set-button--small" onClick={onOpenBackground}>
+              <FaPalette aria-hidden="true" />
+              {t('setView.boardBackground.button')}
+            </button>
             <button type="button" className="set-button set-button--secondary set-button--small" onClick={onShuffle}>
               <FaRandom aria-hidden="true" />
               {t('setView.shuffleBoards')}
@@ -63,7 +84,7 @@ export const SetBoardsSection = ({ boards, state, gridSize, onOpenBoard, onShuff
           <div className="set-boards__grid">
             {boards.map((board, index) => (
               <div key={board.id} className="set-boards__item">
-                <BoardThumbnail board={board} index={index} onClick={() => onOpenBoard(index)} />
+                <BoardThumbnail board={board} index={index} onClick={() => onOpenBoard(index)} background={background} titlePosition={titlePosition} />
               </div>
             ))}
           </div>

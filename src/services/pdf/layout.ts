@@ -250,39 +250,81 @@ export interface BoardTitleLayout {
   lines: CutMark[];
 }
 
-/** Título de un tablero: centrado sobre la cuadrícula, entre dos líneas a media altura de las letras. */
-export function boardTitleLayout(titleWidth: number): BoardTitleLayout {
-  const x = CUT_AREA_X_PT + (CUT_AREA_WIDTH_PT - titleWidth) / 2;
-  const y = CUT_AREA_Y_PT + BOARD_HEIGHT_PT + BOARD_TITLE_GAP_PT;
-  const lineY = y + BOARD_TITLE_CAP_HEIGHT_PT / 2;
+/**
+ * Título de un tablero, sobre la cuadrícula, con líneas a media altura de las letras. Centrado lleva una
+ * línea a cada lado; a la izquierda o a la derecha (FEAT-67, US A4) se alinea con la orilla de las cartas
+ * y lleva una sola línea, del lado libre.
+ */
+export function boardTitleLayout(
+  titleWidth: number,
+  position: 'left' | 'center' | 'right' = 'center'
+): BoardTitleLayout {
   // Las líneas llegan a la orilla de fuera del borde negro de las cartas.
   const gridLeft = CUT_AREA_X_PT - CARD_BORDER_PT / 2;
   const gridRight = CUT_AREA_X_PT + CUT_AREA_WIDTH_PT + CARD_BORDER_PT / 2;
+  const x =
+    position === 'left'
+      ? gridLeft
+      : position === 'right'
+        ? gridRight - titleWidth
+        : CUT_AREA_X_PT + (CUT_AREA_WIDTH_PT - titleWidth) / 2;
+  const y = CUT_AREA_Y_PT + BOARD_HEIGHT_PT + BOARD_TITLE_GAP_PT;
+  const lineY = y + BOARD_TITLE_CAP_HEIGHT_PT / 2;
+  const before = { start: { x: gridLeft, y: lineY }, end: { x: x - BOARD_TITLE_LINE_GAP_PT, y: lineY } };
+  const after = { start: { x: x + titleWidth + BOARD_TITLE_LINE_GAP_PT, y: lineY }, end: { x: gridRight, y: lineY } };
 
   return {
     text: { x, y },
-    lines: [
-      { start: { x: gridLeft, y: lineY }, end: { x: x - BOARD_TITLE_LINE_GAP_PT, y: lineY } },
-      { start: { x: x + titleWidth + BOARD_TITLE_LINE_GAP_PT, y: lineY }, end: { x: gridRight, y: lineY } },
-    ],
+    lines: position === 'left' ? [after] : position === 'right' ? [before] : [before, after],
   };
 }
 
 /**
  * Caja donde se dibuja la imagen del logo, con todo y sus orillas transparentes, para que su parte
- * visible quede centrada, justo arriba del título. `logoAspect` es el ancho de la imagen entre su alto.
+ * visible quede justo arriba del título: centrada, o alineada con la orilla de fuera de las cartas a la
+ * izquierda o a la derecha (FEAT-67, US A4). `logoAspect` es el ancho de la imagen entre su alto.
  */
-export function boardLogoBox(logoAspect: number): { x: number; y: number; width: number; height: number } {
+export function boardLogoBox(
+  logoAspect: number,
+  position: 'left' | 'center' | 'right' = 'center'
+): { x: number; y: number; width: number; height: number } {
   const { left, right, top, bottom } = LOGO_VISIBLE_BOX;
   const height = BOARD_LOGO_HEIGHT_PT / (bottom - top);
   const width = height * logoAspect;
   const visibleBottomY =
     CUT_AREA_Y_PT + BOARD_HEIGHT_PT + BOARD_TITLE_GAP_PT + BOARD_TITLE_CAP_HEIGHT_PT + BOARD_LOGO_GAP_PT;
 
+  const gridLeft = CUT_AREA_X_PT - CARD_BORDER_PT / 2;
+  const gridRight = CUT_AREA_X_PT + CUT_AREA_WIDTH_PT + CARD_BORDER_PT / 2;
+  const x =
+    position === 'left'
+      ? gridLeft - width * left
+      : position === 'right'
+        ? gridRight - width * right
+        : CUT_AREA_X_PT + CUT_AREA_WIDTH_PT / 2 - (width * (left + right)) / 2;
+
   return {
-    x: CUT_AREA_X_PT + CUT_AREA_WIDTH_PT / 2 - (width * (left + right)) / 2,
+    x,
     y: visibleBottomY - height * (1 - bottom),
     width,
     height,
+  };
+}
+
+export interface BoardBackgroundArea {
+  /** Esquina de abajo a la izquierda, como cuenta el PDF. */
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/** Área del fondo de un tablero (FEAT-67): el tablero y su encabezado, más lo que sobresale para el corte. */
+export function boardBackgroundArea(): BoardBackgroundArea {
+  return {
+    x: CUT_AREA_X_PT - CUT_AREA_BLEED_PT,
+    y: CUT_AREA_Y_PT - CUT_AREA_BLEED_PT,
+    width: CUT_AREA_WIDTH_PT + CUT_AREA_BLEED_PT * 2,
+    height: CUT_AREA_HEIGHT_PT + CUT_AREA_BLEED_PT * 2,
   };
 }

@@ -2,10 +2,26 @@ import { PDFDocument, rgb, pushGraphicsState, popGraphicsState, rectangle, clip,
 import { Board, Card } from '../../types';
 import { logger } from '../../utils/logger';
 import logoImage from '../../img/logo.png';
-import { BOARD_HEIGHT_PT, BOARD_TITLE_LINE_THICKNESS_PT, BOARD_TITLE_SIZE_PT, BOARD_WIDTH_PT, CARD_BORDER_PT, CARD_GAP_PT, CUT_AREA_BLEED_PT, CUT_AREA_HEIGHT_PT, CUT_AREA_WIDTH_PT, CUT_AREA_X_PT, CUT_AREA_Y_PT, DECK_TITLE_SIZE_PT } from './constants';
+import { BOARD_HEIGHT_PT, BOARD_TITLE_LINE_THICKNESS_PT, BOARD_TITLE_SIZE_PT, BOARD_WIDTH_PT, CARD_BORDER_PT, CARD_GAP_PT, CUT_AREA_X_PT, CUT_AREA_Y_PT, DECK_TITLE_SIZE_PT } from './constants';
 import { EmbedResult, embedImageInPDF } from './images';
 import { boardLogoBox, boardPageTitle, boardTitleLayout, cutGuides, deckCardPosition, deckCutGuides, deckGridLayout, deckPages, deckPageTitle, placeImageInCard, type CardImageFit, type DeckGridLayout } from './layout';
 import { getBoardTitleFont } from './titleFont';
+import { drawBoardBackground } from './background';
+import {
+  boardBackgroundOrDefault,
+  type BoardBackground,
+  type BoardLogoPosition,
+  type BoardTitlePosition,
+} from '../../utils/boardBackgrounds';
+
+/** Cómo se ve un tablero de una lotería (FEAT-67): su fondo y dónde va el logo. */
+export interface BoardLook {
+  background?: BoardBackground;
+  logoPosition?: BoardLogoPosition;
+  titlePosition?: BoardTitlePosition;
+  /** La imagen propia ya metida en el PDF, cuando el fondo es la imagen (US A2). */
+  ownImage?: EmbedResult;
+}
 
 /**
  * Dibuja una carta: su imagen ya trae el nombre dentro. Devuelve `false` si no se pudo (no tiene imagen
@@ -192,7 +208,9 @@ export const drawBoardOnPage = async (
   pdfDoc: PDFDocument,
   embedCache?: Map<string, EmbedResult>,
   /** Cartas de una lotería de temporada, que ya traen su nombre dibujado: van enteras. */
-  finishedCards: boolean = false
+  finishedCards: boolean = false,
+  /** Fondo y posición del logo (FEAT-67). Sin ellos, el crema y el logo al centro de siempre. */
+  look: BoardLook = {}
 ): Promise<Card[]> => {
   const failedCards: Card[] = [];
 
@@ -213,25 +231,14 @@ export const drawBoardOnPage = async (
   const boardY = CUT_AREA_Y_PT;
   const boardX = CUT_AREA_X_PT; // Same X as cut area
 
-  // Draw semi-transparent background for the entire cut area (including header)
-  // This creates a subtle, diffused background that doesn't overpower the white background
-  // Using very light orange/coral tint that matches the app's color scheme (#fef3e7, #fed7aa)
-  page.drawRectangle({
-    x: boardX - CUT_AREA_BLEED_PT, // Extra padding around the cut area
-    y: boardY - CUT_AREA_BLEED_PT,
-    width: CUT_AREA_WIDTH_PT + CUT_AREA_BLEED_PT * 2,
-    height: CUT_AREA_HEIGHT_PT + CUT_AREA_BLEED_PT * 2,
-    color: rgb(0.995, 0.953, 0.906), // Very light orange-tinted background (similar to #fef3e7)
-    borderColor: rgb(0.98, 0.92, 0.87), // Slightly darker border (similar to #fed7aa but lighter)
-    borderWidth: 1,
-  });
+  drawBoardBackground(page, look.background ?? boardBackgroundOrDefault(null), look.ownImage);
 
   drawCutGuides(page);
 
   // Logo centrado arriba del título
   try {
     const { image: logoImageEmbed, width: logoWidth, height: logoHeight } = await getLogoImage(pdfDoc);
-    page.drawImage(logoImageEmbed, boardLogoBox(logoWidth / logoHeight));
+    page.drawImage(logoImageEmbed, boardLogoBox(logoWidth / logoHeight, look.logoPosition));
   } catch (error) {
     logger.warn('Could not draw logo on board:', error);
     // Continue without logo if there's an error
@@ -240,7 +247,7 @@ export const drawBoardOnPage = async (
   // Título centrado sobre la cuadrícula, con una línea a cada lado
   const titleText = boardPageTitle(boardNumber);
   const titleFont = await getBoardTitleFont(pdfDoc);
-  const title = boardTitleLayout(titleFont.widthOfTextAtSize(titleText, BOARD_TITLE_SIZE_PT));
+  const title = boardTitleLayout(titleFont.widthOfTextAtSize(titleText, BOARD_TITLE_SIZE_PT), look.titlePosition);
 
   page.drawText(titleText, {
     ...title.text,
