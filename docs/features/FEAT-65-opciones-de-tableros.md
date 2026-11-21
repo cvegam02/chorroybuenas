@@ -1,6 +1,6 @@
 # FEAT-65 — Las opciones de los tableros van en su sección (U2)
 
-**Estado:** construida el 2026-11-21 (US A1). Rama `feature/menu-tableros` (creada el 2026-11-21 desde `dev`); llevada a `dev` junto con FEAT-64 con el PR #93 (2026-11-21); falta probar en dev. Sin migraciones ni edge functions: todo es del navegador.
+**Estado:** construida el 2026-11-21 (US A1). Rama `feature/menu-tableros` (creada el 2026-11-21 desde `dev`); llevada a `dev` junto con FEAT-64 con el PR #93 (2026-11-21); probada por Carlos en dev el 2026-11-21. Sin migraciones ni edge functions: todo es del navegador.
 
 **Contexto.** En la página de una lotería (U2), el menú «⋮» traía «Cambiar nombre», «Revolver tableros», «Borrar tableros» y «Eliminar lotería». Las dos de en medio son de los tableros y la sección «Tableros» ya tenía su propio «Revolver tableros». Carlos pidió que las opciones de tableros estén en su sección.
 
@@ -10,7 +10,7 @@
 
 1. **El «⋮» se queda con «Cambiar nombre» y «Eliminar lotería»; «Borrar tableros» pasa a «Tableros», junto a «Revolver tableros».** Carlos aceptó la propuesta el 2026-11-21. Borrar tableros sigue pidiendo confirmación; sin tableros no sale ninguno de los dos botones. El «⋮» de cada lotería en Mi cuenta (U1) no cambia: no tiene opciones de tableros.
 
-## US A1 — Las opciones de tableros, en «Tableros»   ·   Estado: hecha, sin probar en dev
+## US A1 — Las opciones de tableros, en «Tableros»   ·   Estado: hecha, probada en dev (2026-11-21)
 
 - **Historia** — Como dueño de una lotería, quiero encontrar lo que se hace con los tableros en la sección «Tableros», para no buscarlo en el menú de la lotería.
 - **Entrega demostrable** — En U2, el «⋮» solo trae «Cambiar nombre» y «Eliminar lotería»; la sección «Tableros» trae «Revolver tableros» y «Borrar tableros».
@@ -21,4 +21,4 @@
   - [x] El «⋮» ya no trae opciones de tableros, con tableros o sin ellos. (Revisión.)
   - [x] «Borrar tableros» en «Tableros» pide confirmación y borra. (Revisión: usa la misma confirmación de antes.)
   - [x] Sin tableros, «Tableros» no muestra «Revolver» ni «Borrar». (Revisión.)
-  - [ ] Se ve bien en computadora y en teléfono. (Demo de Carlos en dev.)
+  - [x] Se ve bien en computadora y en teléfono. (Probado por Carlos en dev el 2026-11-21.)

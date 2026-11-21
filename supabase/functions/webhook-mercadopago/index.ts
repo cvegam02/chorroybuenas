@@ -2,7 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { createMpGet } from '../_shared/mpClient.ts';
 import { verifyMpSignature } from '../_shared/mpSignature.ts';
 import {
-  creditPayment, findApprovedPayment, parseNotification, reversalReason, trackUnapprovedSeasonal,
+  creditPayment, findApprovedPayment, parseNotification, reversalReason, trackUnapprovedSeasonal, unapprovedLabel,
   type PaymentDeps, type ReversalStatus,
 } from '../_shared/paymentFlow.ts';
 
@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
         console.error('webhook-mercadopago: pago aprobado sin external_reference o preference_id', notification.id);
       }
       if (found.reason === 'not_approved') {
-        console.log(`webhook-mercadopago: ${notification.topic} ${notification.id} sin pago aprobado (${found.status})`);
+        console.log(`webhook-mercadopago: ${notification.topic} ${notification.id} sin pago aprobado (${unapprovedLabel(found)})`);
         const reason = notification.topic === 'payment' ? reversalReason(found.status) : null;
         if (reason && notification.id) {
           // Devolución o contracargo (FEAT-58, H1): se descuentan los tokens de esa compra o se quita la

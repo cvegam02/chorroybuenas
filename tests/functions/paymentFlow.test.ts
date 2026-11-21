@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
-  creditPayment, findApprovedPayment, parseNotification, reversalReason, trackUnapprovedSeasonal, type PaymentDeps,
+  creditPayment, findApprovedPayment, parseNotification, reversalReason, trackUnapprovedSeasonal, unapprovedLabel,
+  type PaymentDeps,
 } from '../../supabase/functions/_shared/paymentFlow.ts';
 
 const USER = 'user-1';
@@ -126,7 +127,23 @@ describe('findApprovedPayment', () => {
 
   it('pago pendiente: no hay nada que acreditar', async () => {
     const { d } = deps({ '/v1/payments/555': { ...approvedPayment, status: 'pending' } });
-    expect(await findApprovedPayment(d, { topic: 'payment', id: '555' })).toEqual({ ok: false, reason: 'not_approved', status: 'pending' });
+    expect(await findApprovedPayment(d, { topic: 'payment', id: '555' }))
+      .toEqual({ ok: false, reason: 'not_approved', status: 'pending', detail: '-' });
+  });
+
+  // FEAT-66, US P1: el log del webhook dice por qué Mercado Pago no aprobó el pago.
+  it('pago rechazado: trae el motivo que da Mercado Pago', async () => {
+    const { d } = deps({ '/v1/payments/555': { ...approvedPayment, status: 'rejected', status_detail: 'cc_rejected_high_risk' } });
+    const found = await findApprovedPayment(d, { topic: 'payment', id: '555' });
+    expect(found).toEqual({ ok: false, reason: 'not_approved', status: 'rejected', detail: 'cc_rejected_high_risk' });
+    expect(found.ok ? null : unapprovedLabel(found)).toBe('rejected/cc_rejected_high_risk');
+  });
+
+  it('el texto del log: estado y motivo, «-» sin motivo, y el de la orden tal cual', () => {
+    expect(unapprovedLabel({ status: 'rejected', detail: 'cc_rejected_bad_filled_other' })).toBe('rejected/cc_rejected_bad_filled_other');
+    expect(unapprovedLabel({ status: 'pending', detail: '-' })).toBe('pending/-');
+    expect(unapprovedLabel({ status: 'rejected/cc_rejected_high_risk, in_process/-' })).toBe('rejected/cc_rejected_high_risk, in_process/-');
+    expect(unapprovedLabel({})).toBe('unknown');
   });
 
   it('pago inexistente', async () => {
@@ -412,7 +429,7 @@ describe('reversalReason (FEAT-58, H1)', () => {
   it('el estado de un pago devuelto viene de la consulta a Mercado Pago, no del aviso', async () => {
     const { d } = deps({ '/v1/payments/555': { ...approvedPayment, status: 'refunded' } });
     const found = await findApprovedPayment(d, { topic: 'payment', id: '555' });
-    expect(found).toEqual({ ok: false, reason: 'not_approved', status: 'refunded' });
+    expect(found).toEqual({ ok: false, reason: 'not_approved', status: 'refunded', detail: '-' });
     expect(reversalReason(found.ok ? undefined : found.status)).toBe('refunded');
   });
 });

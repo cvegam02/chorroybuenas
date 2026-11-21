@@ -1,6 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { pickInitPoint, resolveAppUrl, resolveCheckoutMode } from '../_shared/checkout.ts';
 import { buildCorsHeaders, parseAllowedOrigins } from '../_shared/cors.ts';
+import { buildPayer } from '../_shared/mpBuyer.ts';
 import { selectCurrentOffer, type OfferRow } from '../_shared/offers.ts';
 import { buildPreference, resolvePurchaseItem, type PackRow } from '../_shared/preference.ts';
 import { isFailedPromoCode, selectPromotion, type PromotionRow } from '../_shared/promotions.ts';
@@ -120,7 +121,16 @@ Deno.serve(async (req) => {
 
     const mode = resolveCheckoutMode(Deno.env.get('MP_USE_SANDBOX_CHECKOUT'), mpAccessToken);
     console.log(`create-payment-preference: checkout ${mode}`);
+    // Correo y nombre del comprador para el antifraude de MP, solo en producción (FEAT-66).
+    let fullName: string | null = null;
+    if (mode === 'production') {
+      const { data: profile, error: profileError } = await admin
+        .from('profiles').select('full_name').eq('id', user.id).maybeSingle();
+      if (profileError) console.error('create-payment-preference: no se leyó el perfil', profileError.message);
+      fullName = (profile?.full_name as string | null | undefined) ?? null;
+    }
     const preference = buildPreference({
+      payer: buildPayer(mode, { email: user.email, fullName }),
       item: item.value,
       promotion,
       userId: user.id,

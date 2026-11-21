@@ -4,7 +4,7 @@
  */
 
 export const PRIVACY_CONTACT_EMAIL = 'carlos.tests01@gmail.com';
-export const PRIVACY_LAST_UPDATED = '6 de octubre de 2026';
+export const PRIVACY_LAST_UPDATED = '21 de noviembre de 2026';
 
 export interface PrivacySection {
   title: string;
@@ -68,7 +68,7 @@ export const PRIVACY_SECTIONS: PrivacySection[] = [
       'Vercel: aloja y entrega el sitio web.',
       'Google: solo si eliges entrar con tu cuenta de Google.',
       'Replicate: recibe las fotos que tú decides transformar con inteligencia artificial, para generar la imagen resultante.',
-      'Mercado Pago: procesa los pagos. Los datos de tu tarjeta o de tu medio de pago los capturas directamente con Mercado Pago; el sitio nunca los ve ni los guarda.',
+      'Mercado Pago: procesa los pagos. Para validar tu compra, el sitio le envía tu correo y tu nombre. Los datos de tu tarjeta o de tu medio de pago los capturas directamente con Mercado Pago; el sitio nunca los ve ni los guarda.',
     ],
     closing:
       'Fuera de estos casos, tus datos no se transfieren a terceros, salvo que una autoridad competente lo requiera conforme a la ley.',
