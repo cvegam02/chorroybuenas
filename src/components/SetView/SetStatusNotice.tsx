@@ -11,12 +11,10 @@ interface SetStatusNoticeProps {
   boardCount: number;
   /** Abre la ventana para elegir cuántos tableros (FEAT-57). */
   onBuildBoards: () => void;
-  /** «Agregar fotos» cuando faltan cartas: abre «Subir fotos» (FEAT-57). */
-  onAddPhotos: () => void;
 }
 
 /** El aviso bajo el encabezado: lista para imprimir, faltan los tableros o faltan cartas. */
-export const SetStatusNotice = ({ state, cardCount, boardCount, onBuildBoards, onAddPhotos }: SetStatusNoticeProps) => {
+export const SetStatusNotice = ({ state, cardCount, boardCount, onBuildBoards }: SetStatusNoticeProps) => {
   const { t } = useTranslation();
 
   if (state.kind === 'ready') {
@@ -75,9 +73,6 @@ export const SetStatusNotice = ({ state, cardCount, boardCount, onBuildBoards, o
           {t('setView.minCardsHint', { kids: minCardsForGrid(9), classic: minCardsForGrid(16) })}
         </span>
       </div>
-      <button type="button" onClick={onAddPhotos} className="set-button set-button--primary">
-        {t('setView.addPhotos')}
-      </button>
     </div>
   );
 };

@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaMagic, FaPlus, FaSlidersH, FaUpload } from 'react-icons/fa';
+import { FaMagic, FaSlidersH, FaUpload } from 'react-icons/fa';
 import type { Card } from '../../types';
 import { uploaderName, type LoteriaMember } from '../../utils/guestCards';
 import { CardPreview } from '../CardEditor/CardPreview';
-import { CardUploadThumb } from '../CardEditor/CardUploadThumb';
 import { boardsWithCard } from '../../utils/boardIntegrity';
 import type { DeckEditing } from '../CardEditor/useDeckEditing';
-import { missingCardNumbers, type SetViewState } from './setViewState';
+import type { SetViewState } from './setViewState';
 import './SetCardsSection.css';
 
 interface SetCardsSectionProps {
@@ -29,7 +28,7 @@ interface SetCardsSectionProps {
 
 /**
  * Las cartas de una lotería guardada, que se editan aquí mismo (FEAT-57): subir fotos, editar, borrar,
- * IA y ajustes. Un espacio punteado por cada carta que falta para el mínimo.
+ * IA y ajustes. Las fotos se suben solo con el recuadro «Sube las fotos de tu lotería» (FEAT-64).
  */
 export const SetCardsSection = ({ state, deck, members, newCardIds, onOpenCard, onOpenSettings, boardCardIds }: SetCardsSectionProps) => {
   const { t } = useTranslation();
@@ -72,10 +71,6 @@ export const SetCardsSection = ({ state, deck, members, newCardIds, onOpenCard, 
           </span>
         </div>
         <div className="set-cards__actions">
-          <button type="button" className="set-button set-button--primary set-button--small" onClick={deck.openFilePicker} disabled={deck.waitingForSet}>
-            <FaUpload aria-hidden="true" />
-            {t('cardEditor.deck.uploadPhotos')}
-          </button>
           {cards.length > 0 && (
             <button type="button" className="set-button set-button--ai set-button--small" onClick={deck.handleAIBulkClick}>
               <FaMagic aria-hidden="true" />
@@ -98,18 +93,20 @@ export const SetCardsSection = ({ state, deck, members, newCardIds, onOpenCard, 
         </p>
       )}
 
-      {cards.length === 0 ? (
-        <button type="button" className="set-cards__dropzone set-cards__dropzone--empty" onClick={deck.openFilePicker} disabled={deck.waitingForSet}>
-          <FaUpload aria-hidden="true" />
-          <strong>{t('setView.emptyCardsTitle')}</strong>
-          <span>{t('cardEditor.deck.dropText')}</span>
-        </button>
-      ) : (
+      {/* La única forma de subir fotos, con cartas o sin ellas (FEAT-64); con cartas, más bajito */}
+      <button
+        type="button"
+        className={`set-cards__dropzone ${cards.length > 0 ? 'set-cards__dropzone--compact' : ''}`}
+        onClick={deck.openFilePicker}
+        disabled={deck.waitingForSet}
+      >
+        <FaUpload aria-hidden="true" />
+        <strong>{t('setView.emptyCardsTitle')}</strong>
+        <span>{t('cardEditor.deck.dropText')}</span>
+      </button>
+
+      {cards.length > 0 && (
         <div className="set-cards__grid">
-          {/* En celular la cuadrícula empieza con la casilla «Agregar», como en C1 */}
-          <div className="set-cards__add-tile">
-            <CardUploadThumb onSingleClick={deck.openSingleUpload} />
-          </div>
           {cards.map((card, index) => (
             <CardPreview
               key={card.id}
@@ -126,18 +123,6 @@ export const SetCardsSection = ({ state, deck, members, newCardIds, onOpenCard, 
               isNew={newCardIds.has(card.id)}
               boardsWithCard={boardsWithCard(boardCardIds, card.id)}
             />
-          ))}
-          {missingCardNumbers(state, cards.length).map((number) => (
-            <button
-              key={number}
-              type="button"
-              onClick={deck.openFilePicker}
-              className="set-cards__slot"
-              aria-label={t('setView.addCardSlot', { number })}
-            >
-              <FaPlus aria-hidden="true" />
-              <span aria-hidden="true">{number}</span>
-            </button>
           ))}
         </div>
       )}

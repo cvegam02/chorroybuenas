@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import es from '../../src/locales/es/translation.json';
 import en from '../../src/locales/en/translation.json';
 import { minCardsForGrid } from '../../src/utils/gridRules';
-import { missingCardNumbers, setViewStateOf } from '../../src/components/SetView/setViewState';
+import { setViewStateOf } from '../../src/components/SetView/setViewState';
 
 describe('estado de la página de una lotería (FEAT-36, US A1)', () => {
   it('con tableros, está lista para imprimir', () => {
@@ -48,7 +48,6 @@ describe('estado de la página de una lotería (FEAT-36, US A1)', () => {
 describe('textos del encabezado y del aviso de estado (FEAT-36, US A1)', () => {
   const keys = [
     'backToLoterias',
-    'addPhotos',
     'boards_one',
     'boards_other',
     'howToPlay',
@@ -79,29 +78,8 @@ describe('textos del encabezado y del aviso de estado (FEAT-36, US A1)', () => {
   });
 });
 
-describe('espacios de las cartas que faltan (FEAT-36, US A2)', () => {
-  it('hay uno por cada carta que falta, numerados desde la siguiente', () => {
-    const state = setViewStateOf({ cardCount: 6, boardCount: 0, gridSize: 9 });
-    const numbers = missingCardNumbers(state, 6);
-    expect(numbers).toHaveLength(minCardsForGrid(9) - 6);
-    expect(numbers[0]).toBe(7);
-    expect(numbers[numbers.length - 1]).toBe(minCardsForGrid(9));
-  });
-
-  it('sin ninguna carta, van del 1 al mínimo', () => {
-    const state = setViewStateOf({ cardCount: 0, boardCount: 0, gridSize: 16 });
-    const numbers = missingCardNumbers(state, 0);
-    expect(numbers[0]).toBe(1);
-    expect(numbers).toHaveLength(minCardsForGrid(16));
-  });
-
-  it('con cartas suficientes o con tableros no hay espacios', () => {
-    const enough = minCardsForGrid(16);
-    expect(missingCardNumbers(setViewStateOf({ cardCount: enough, boardCount: 0, gridSize: 16 }), enough)).toEqual([]);
-    expect(missingCardNumbers(setViewStateOf({ cardCount: 3, boardCount: 2, gridSize: 16 }), 3)).toEqual([]);
-  });
-
-  it.each(['cardsCountWithAi', 'aiBadge', 'cardsNoteEdit', 'cardsNoteEditTouch', 'transformAi', 'aiStatus', 'emptyCardsTitle', 'missingCardsNote', 'addCardSlot'])(
+describe('textos de la sección Cartas (FEAT-36, US A2)', () => {
+  it.each(['cardsCountWithAi', 'aiBadge', 'cardsNoteEdit', 'cardsNoteEditTouch', 'transformAi', 'aiStatus', 'emptyCardsTitle', 'missingCardsNote'])(
     '«%s» existe en español y en inglés',
     (key) => {
       expect((es.setView as Record<string, string>)[key]).toBeTruthy();
