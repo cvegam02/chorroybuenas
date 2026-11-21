@@ -46,8 +46,6 @@ interface SetHeaderProps {
   onInvite: () => void;
   /** «Agregar fotos» cuando faltan cartas: abre «Subir fotos» aquí mismo (FEAT-57). */
   onAddPhotos: () => void;
-  onShuffleBoards: () => void;
-  onClearBoards: () => void;
   onDelete: () => void;
 }
 
@@ -63,8 +61,6 @@ export const SetHeader = ({
   onSing,
   onInvite,
   onAddPhotos,
-  onShuffleBoards,
-  onClearBoards,
   onDelete,
 }: SetHeaderProps) => {
   const { t } = useTranslation();
@@ -132,10 +128,7 @@ export const SetHeader = ({
         ...(tokensSpent > 0 ? [t('dashboard.loterias.tokensUsed', { count: tokensSpent })] : []),
       ].join(' · ')}
       thumbnailCard={thumbnailCard}
-      hasBoards={details.boardCount > 0}
       onRename={startRename}
-      onShuffle={onShuffleBoards}
-      onClearBoards={onClearBoards}
       onDelete={onDelete}
     />
   );

@@ -280,8 +280,6 @@ export const SetView = () => {
           }}
           onInvite={() => setIsInviteOpen(true)}
           onAddPhotos={deck.openFilePicker}
-          onShuffleBoards={() => setBoardsDialog('shuffle')}
-          onClearBoards={() => setShowClearBoardsModal(true)}
           onDelete={() => setShowDeleteDialog(true)}
         />
 
@@ -324,6 +322,7 @@ export const SetView = () => {
               gridSize={gridSize}
               onOpenBoard={setSelectedBoardIndex}
               onShuffle={() => setBoardsDialog('shuffle')}
+              onClear={() => setShowClearBoardsModal(true)}
               onBuild={() => setBoardsDialog('build')}
             />
 
