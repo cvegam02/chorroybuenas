@@ -1,6 +1,6 @@
 # FEAT-64 — Que Mercado Pago apruebe más pagos con tarjeta
 
-**Estado: 🟡 en construcción — definida con Carlos el 2026-11-21, en la rama `feature/pagos-tarjeta`. P1 y P2 construidas; falta P3 y desplegar las funciones en dev.**
+**Estado: 🟡 en construcción — definida con Carlos el 2026-11-21, en la rama `feature/pagos-tarjeta`. P1, P2 y P3 construidas; falta desplegar las funciones en dev.**
 
 **Contexto.** Carlos notó que las compras de tokens con tarjeta («Mercado Pago Standard» en su actividad) salen rechazadas y las que pasan son con Wallet. Al revisar los dos rechazos en la app de Mercado Pago:
 
@@ -20,7 +20,7 @@ Todas las ventas aprobadas que se ven en la actividad de Carlos son con Wallet; 
 
 3. **Aplica a las dos compras: tokens y loterías temáticas** (2026-11-21). _(Descartado: solo tokens por ahora.)_
 
-4. **Se ajusta el aviso de privacidad** (2026-11-21), en español e inglés. La viñeta de Mercado Pago en §5 «Con quién se comparten» queda: «Mercado Pago: procesa los pagos. Para validar tu compra, el sitio le envía tu correo y tu nombre. Los datos de tu tarjeta o de tu medio de pago los capturas directamente con Mercado Pago; el sitio nunca los ve ni los guarda.» _(Descartado: dejarlo como está.)_
+4. **Se ajusta el aviso de privacidad** (2026-11-21). Se habló de español e inglés, pero al construir resultó que el aviso existe solo en español: es texto legal y la versión en español es la única que vale (`privacyNoticeContent.ts`), también en el sitio en inglés. La viñeta de Mercado Pago en §5 «Con quién se comparten» queda: «Mercado Pago: procesa los pagos. Para validar tu compra, el sitio le envía tu correo y tu nombre. Los datos de tu tarjeta o de tu medio de pago los capturas directamente con Mercado Pago; el sitio nunca los ve ni los guarda.» _(Descartado: dejarlo como está.)_
 
 5. **Nombre en el estado de cuenta del comprador: «CHORROYBUENAS»** (2026-11-21). _(Descartados: «LOTERIA CHORRO», que algunos bancos podrían cortar; dejar el nombre por defecto de la cuenta de Mercado Pago.)_
 
@@ -58,13 +58,13 @@ Todas las ventas aprobadas que se ven en la actividad de Carlos son con Wallet; 
   - [x] La lotería temática se comporta igual que los tokens en los casos anteriores. (Prueba automática.)
   - [x] Monto, tokens y metadata no cambian. (Pruebas existentes siguen pasando.)
 
-## US P3 — El aviso de privacidad dice qué datos recibe Mercado Pago   ·   Estado: ⚪ por hacer
+## US P3 — El aviso de privacidad dice qué datos recibe Mercado Pago   ·   Estado: 🟡 construida, por probar en dev
 
 - **Historia** — Como usuario, quiero que el aviso de privacidad diga que mi correo y mi nombre se le envían a Mercado Pago al comprar, para saber qué pasa con mis datos.
-- **Entrega demostrable** — La viñeta de Mercado Pago en «5. Con quién se comparten» dice el texto de la decisión 4, en español e inglés.
-- **Construido** — _(pendiente)_
+- **Entrega demostrable** — La viñeta de Mercado Pago en «5. Con quién se comparten» dice el texto de la decisión 4, y la fecha de última actualización es la del cambio.
+- **Construido** — 2026-11-21, en la rama `feature/pagos-tarjeta`. Texto nuevo en `src/components/PrivacyNotice/privacyNoticeContent.ts` y «Última actualización: 21 de noviembre de 2026» (la §9 del propio aviso dice que cada versión lleva su fecha). No hay versión en inglés que cambiar.
 - **Depende de** — nada; se publica junto con P2.
-- **Cómo se prueba (guion de demo)** — Abre el pie de página → «Aviso de privacidad» → baja a «5. Con quién se comparten» → la viñeta de Mercado Pago debería decir «Para validar tu compra, el sitio le envía tu correo y tu nombre». Cambia el sitio a inglés → debería decir lo mismo en inglés.
+- **Cómo se prueba (guion de demo)** — Abre el pie de página → «Aviso de privacidad» → baja a «5. Con quién se comparten» → la viñeta de Mercado Pago debería decir «Para validar tu compra, el sitio le envía tu correo y tu nombre» → arriba debería decir «Última actualización: 21 de noviembre de 2026».
 - **Escenarios cubiertos**:
-  - [ ] Texto en español. (Revisión.)
-  - [ ] Texto en inglés. (Revisión.)
+  - [x] Texto nuevo en la viñeta de Mercado Pago. (Revisión.)
+  - [x] Fecha de última actualización al día. (Revisión.)
