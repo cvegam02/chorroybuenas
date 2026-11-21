@@ -1,6 +1,6 @@
 # FEAT-64 — Una sola forma de subir fotos: el recuadro «Sube las fotos de tu lotería» (U2 y C1)
 
-**Estado:** construida el 2026-11-16 (US A1 a A3), sin probar en dev. Rama `feature/subir-fotos-u2` (creada el 2026-11-16 desde `dev`). Sin migraciones ni edge functions: todo es del navegador.
+**Estado:** construida el 2026-11-16 (US A1 a A3). Rama `feature/subir-fotos-u2` (creada el 2026-11-16 desde `dev`); llevada a `dev` junto con FEAT-65 con el PR #93 (2026-11-21); falta probar en dev. Sin migraciones ni edge functions: todo es del navegador.
 
 **Contexto.** En la página de una lotería (U2), mientras faltan cartas había hasta cuatro botones que hacían lo mismo (abrir el selector de fotos que lleva a M6): «Agregar fotos» en el encabezado, «Agregar fotos» en el aviso ámbar, «Subir fotos» en «Cartas» y, sin cartas, el recuadro grande; además un espacio punteado por cada carta que falta. En teléfono quedaban apilados uno tras otro, y la casilla «Agregar» de la cuadrícula subía una sola foto (M4) mientras los espacios punteados de al lado suben varias. C1 (sin sesión) tenía lo mismo: «Subir fotos», el recuadro para arrastrar (solo en computadora) y la casilla «Agregar imagen» (solo en teléfono, M4).
 
